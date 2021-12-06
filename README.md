@@ -1,2 +1,2 @@
 # wallet
-open source identity/credential wallet for Cardano
+Open source identity/credential wallet.  Built for grass roots SSI projects.
