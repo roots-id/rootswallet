@@ -1,4 +1,4 @@
-# Grass Roots Identity Wallet
+# Roots Wallet - Your Identity Origin
 Open source identity/credential wallet.  Built for grass roots SSI projects.
 www.rootswallet.com
 
