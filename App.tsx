@@ -1,11 +1,22 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Button, NativeModules } from 'react-native';
+
+const { CalendarModule, PrismModule } = NativeModules;
 
 export default function App() {
+  const onPress = () => {
+    console.log('DID: ' + PrismModule.createDID("passphrase"));
+  };
+
   return (
     <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+      <Text>Roots Wallet</Text>
       <StatusBar style="auto" />
+      <Button
+        title="Click to generate DID"
+        color="#841584"
+        onPress={onPress}
+      />
     </View>
   );
 }
