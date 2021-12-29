@@ -1,5 +1,5 @@
 # Roots Wallet - Your Identity Origin
-Open source identity/credential wallet.  Built for grass roots SSI projects.
+An open source identity/credential wallet built for grass roots SSI projects that matter.
 www.rootswallet.com
 
 ## Links
@@ -10,3 +10,9 @@ www.rootswallet.com
 
 ## Designs
 <img src="https://docs.google.com/drawings/d/e/2PACX-1vRv6rzqAKEkb_U6aNoou9d2dWcumgADqbz23kCCATHiDjTCZumRd38uzN7QALVeahEMPiRLOwfmU-Pc/pub?w=480&amp;h=360">
+
+## Recommendations
+* Conventional Commits: https://www.conventionalcommits.org/en/v1.0.0/
+** Enforced by https://commitlint.js.org/#/
+* Commit discipline: https://docs.symbolplatform.com/handbook/commit-discipline.html#commit-message-content
+* Branching structure: https://docs.symbolplatform.com/handbook/git-branching.html
