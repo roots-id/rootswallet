@@ -13,6 +13,6 @@ www.rootswallet.com
 
 ## Recommendations
 * Conventional Commits: https://www.conventionalcommits.org/en/v1.0.0/
-** Enforced by https://commitlint.js.org/#/
+* Enforce commits with https://commitlint.js.org/#/
 * Commit discipline: https://docs.symbolplatform.com/handbook/commit-discipline.html#commit-message-content
 * Branching structure: https://docs.symbolplatform.com/handbook/git-branching.html
