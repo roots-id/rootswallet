@@ -10,12 +10,15 @@
   },
   "dependencies": {
     "expo": "~44.0.0",
+    "expo-splash-screen": "~0.14.1",
     "expo-status-bar": "~1.2.0",
+    "i18next": "^21.6.4",
     "react": "17.0.1",
     "react-dom": "17.0.1",
+    "react-i18next": "^11.15.3",
     "react-native": "0.64.3",
-    "react-native-web": "0.17.1",
-    "expo-splash-screen": "~0.14.1"
+    "react-native-localize": "^2.1.7",
+    "react-native-web": "0.17.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
