@@ -11,9 +11,6 @@ www.rootswallet.com
 ## Designs
 <img src="https://docs.google.com/drawings/d/e/2PACX-1vRv6rzqAKEkb_U6aNoou9d2dWcumgADqbz23kCCATHiDjTCZumRd38uzN7QALVeahEMPiRLOwfmU-Pc/pub?w=480&amp;h=360">
 
-## Mind Maps
-<img src="https://docs.google.com/drawings/d/e/2PACX-1vRfjXF1rOMhyxwJkcGO0MZFOhdwDgt9j5uK6sOw5WOim9e3qBT3yg9zqxvlseUAwtoKdpJcMAIzEF1G/pub?w=480&h=360">
-
 ## Recommendations
 * Conventional Commits: https://www.conventionalcommits.org/en/v1.0.0/
 * Enforce commits with https://commitlint.js.org/#/
