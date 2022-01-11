@@ -3,7 +3,7 @@ import { StyleSheet, Text, TextInput, View, Button, NativeModules } from 'react-
 import { useTranslation } from 'react-i18next';
 import './localization';
 import { React, useState } from 'react';
-import { SecureStore } from 'expo-secure-store';
+import * as SecureStore from 'expo-secure-store';
 
 
 const { CalendarModule, PrismModule } = NativeModules;
@@ -19,35 +19,36 @@ export default function App() {
     <View style={styles.container}>
       <Text>{t('Home.Title')}</Text>
       {}
-      <TextInput
+      <View style={{ flexDirection: 'row' }}><TextInput
         style={styles.textInput}
         clearTextOnFocus={true}
         multiline={false}
         onChangeText={text => setPassPhrase(text)}
         value={passphrase}
       />
-      {}
       <Button
         title="Generate DID"
         onPress={() => {
           setDID(generateDID(passphrase));
         }}
       />
-      {}
+      </View>
+      <View style={{ flexDirection: 'row' }}>
       <TextInput
         style={styles.textInput}
+        maxLength={40}
         clearTextOnFocus
         multiline={false}
         editable={false}
         value={did}
       />
-      {}
        <Button
           title="Save Passphrase and DID"
           onPress={() => {
             savePassDID(passphrase, did);
            }}
         />
+        </View>
     </View>
   );
 }
@@ -75,11 +76,16 @@ function generateDID(passphrase) {
 }
 
 async function savePassDID(key,did) {
-  //await SecureStore.setItemAsync(key, did);
-  console.log('Saved key: ' + key + ' and DID: ' + did);
+  try {
+    await SecureStore.setItemAsync(key, did);
+    console.log('Saved key: ' + key + ' and DID: ' + did);
+  } catch(e) {
+    console.log(e);
+  }
+
 }
 
-async function retrieveDIDByKey(key) {
+async function retrieveDIDByPassphrase(key) {
     let did = await SecureStore.getItemAsync(key);
     console.log("Here's your DID \n" + did + "\n generated from key " + key);
 }
