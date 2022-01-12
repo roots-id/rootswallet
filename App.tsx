@@ -15,6 +15,8 @@ export default function App() {
 
   const [did, setDID] = useState('Your Generated DID');
 
+  const [securedids, setSecureDIDs] = useState();
+
   return (
     <View style={styles.container}>
       <Text>{t('Home.Title')}</Text>
@@ -36,7 +38,7 @@ export default function App() {
       <View style={{ flexDirection: 'row' }}>
       <TextInput
         style={styles.textInput}
-        maxLength={40}
+        maxLength={41}
         clearTextOnFocus
         multiline={false}
         editable={false}
@@ -49,6 +51,22 @@ export default function App() {
            }}
         />
         </View>
+         <View style={{ flexDirection: 'row' }}>
+         <TextInput
+           style={styles.textInput}
+           maxLength={41}
+           clearTextOnFocus
+           multiline={true}
+           editable={false}
+           value={securedids}
+         />
+          <Button
+             title="Retrieve DIDs"
+             onPress={() => {
+               setSecureDIDs(retrieveDIDsByPassphrase(passphrase));
+              }}
+           />
+           </View>
     </View>
   );
 }
@@ -85,7 +103,13 @@ async function savePassDID(key,did) {
 
 }
 
-async function retrieveDIDByPassphrase(key) {
-    let did = await SecureStore.getItemAsync(key);
-    console.log("Here's your DID \n" + did + "\n generated from key " + key);
+async function retrieveDIDsByPassphrase(key) {
+    let dids = "No DIDs found"
+    try {
+        let dids = await SecureStore.getItemAsync(key);
+        console.log("Here's your DID \n" + dids + "\n generated from key " + key);
+    } catch(e) {
+        console.log(e);
+    }
+    return dids;
 }
