@@ -15,7 +15,7 @@ export default function App() {
 
   const [did, setDID] = useState('Your Generated DID');
 
-  const [securedids, setSecureDIDs] = useState();
+  const [securedids, setSecureDIDs] = useState('DIDs from passphrase');
 
   return (
     <View style={styles.container}>
@@ -51,23 +51,24 @@ export default function App() {
            }}
         />
         </View>
-         <View style={{ flexDirection: 'row' }}>
+                   <Button
+                      title="Retrieve DIDs"
+                      onPress={() => {
+                        retrieveDIDsByPassphrase(passphrase,setSecureDIDs);
+                       }}
+                    />
+         <View style={{ flexDirection: 'row'}}>
          <TextInput
            style={styles.textInput}
-           maxLength={41}
+           maxLength={200}
+           height={200}
            clearTextOnFocus
            multiline={true}
            editable={false}
            value={securedids}
          />
-          <Button
-             title="Retrieve DIDs"
-             onPress={() => {
-               setSecureDIDs(retrieveDIDsByPassphrase(passphrase));
-              }}
-           />
-           </View>
-    </View>
+     </View>
+     </View>
   );
 }
 
@@ -93,6 +94,12 @@ function generateDID(passphrase) {
   return did
 }
 
+function showDIDs(dids) {
+  let output = 'Your DIDs are:\n'+dids
+  console.log(output);
+  return dids
+}
+
 async function savePassDID(key,did) {
   try {
     await SecureStore.setItemAsync(key, did);
@@ -100,14 +107,14 @@ async function savePassDID(key,did) {
   } catch(e) {
     console.log(e);
   }
-
 }
 
-async function retrieveDIDsByPassphrase(key) {
+async function retrieveDIDsByPassphrase(key,setSecureDIDs) {
     let dids = "No DIDs found"
     try {
-        let dids = await SecureStore.getItemAsync(key);
-        console.log("Here's your DID \n" + dids + "\n generated from key " + key);
+        dids = await SecureStore.getItemAsync(key);
+        console.log("Here's your DIDs \n" + dids + "\n generated from key " + key);
+        setSecureDIDs(dids);
     } catch(e) {
         console.log(e);
     }
