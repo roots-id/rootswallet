@@ -1,8 +1,12 @@
 // prettier-ignore
 const translation = {
     "Home": {
-      "Title": "RootsWallet",
-      "GenerateDIDButton": "Click to generate DID"
+      "EnterPassPhrase": "Enter passphrase",
+      "GeneratedDID": "Generated DID",
+      "GenerateDIDButton": "Generate DID",
+      "RetrieveDID": "Retrieve DID",
+      "SavePassDID": "Save Passphrase and DID",
+      "Title": "RootsWallet"
     }
   }
   export default translation

@@ -11,7 +11,7 @@ const { CalendarModule, PrismModule } = NativeModules;
 export default function App() {
   const { t, i18n } = useTranslation()
 
-  const [passphrase, setPassPhrase] = useState('Enter passphrase');
+  const [passphrase, setPassPhrase] = useState();
 
   const [did, setDID] = useState('Your Generated DID');
 
@@ -20,24 +20,27 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>{t('Home.Title')}</Text>
-      {}
-      <View style={{ flexDirection: 'row' }}><TextInput
+      <View style={{ flexDirection: 'row' }}>
+      <Text>{t('Home.EnterPassPhrase')}:  </Text>
+      <TextInput
         style={styles.textInput}
+        placeHolderText={passphrase}
         clearTextOnFocus={true}
         multiline={false}
         onChangeText={text => setPassPhrase(text)}
         value={passphrase}
       />
       <Button
-        title="Generate DID"
+        title={t('Home.GenerateDIDButton')}
         onPress={() => {
           setDID(generateDID(passphrase));
         }}
       />
       </View>
       <View style={{ flexDirection: 'row' }}>
+      <Text>{t('Home.GeneratedDID')}:  </Text>
       <TextInput
-        style={styles.textInput}
+        style={[styles.textInput,{width: 250}]}
         maxLength={41}
         clearTextOnFocus
         multiline={false}
@@ -45,7 +48,7 @@ export default function App() {
         value={did}
       />
        <Button
-          title="Save Passphrase and DID"
+          title={t('Home.SavePassDID')}
           onPress={() => {
             savePassDID(passphrase, did);
            }}
@@ -53,13 +56,13 @@ export default function App() {
         </View>
        <View style={{ flexDirection: 'row' }}>
         <Button
-          title="Retrieve DID"
+          title={t('Home.RetrieveDID')}
           onPress={() => {
             retrieveDIDsByPassphrase(passphrase,setSecureDIDs);
            }}
        />
          <TextInput
-           style={styles.textInput}
+           style={[styles.textInput,{width: 250}]}
            maxLength={60}
            multiline={false}
            editable={false}
@@ -79,6 +82,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
       height: 35,
+      width: 100,
       borderColor: 'gray',
       borderWidth: 0.5,
       padding: 4,
