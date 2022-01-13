@@ -51,23 +51,21 @@ export default function App() {
            }}
         />
         </View>
-                   <Button
-                      title="Retrieve DIDs"
-                      onPress={() => {
-                        retrieveDIDsByPassphrase(passphrase,setSecureDIDs);
-                       }}
-                    />
-         <View style={{ flexDirection: 'row'}}>
+       <View style={{ flexDirection: 'row' }}>
+        <Button
+          title="Retrieve DID"
+          onPress={() => {
+            retrieveDIDsByPassphrase(passphrase,setSecureDIDs);
+           }}
+       />
          <TextInput
            style={styles.textInput}
-           maxLength={200}
-           height={200}
-           clearTextOnFocus
-           multiline={true}
+           maxLength={60}
+           multiline={false}
            editable={false}
            value={securedids}
          />
-     </View>
+       </View>
      </View>
   );
 }
