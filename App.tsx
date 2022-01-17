@@ -47,29 +47,29 @@ export default function App() {
         editable={false}
         value={did}
       />
-       <Button
-          title={t('Home.SavePassDID')}
-          onPress={() => {
-            savePassDID(passphrase, did);
-           }}
-        />
+      <Button
+        title={t('Home.SavePassDID')}
+        onPress={() => {
+          savePassDID(passphrase, did);
+        }}
+      />
+      </View>
+        <View style={{ flexDirection: 'row' }}>
+          <Button
+            title={t('Home.RetrieveDID')}
+            onPress={() => {
+              retrieveDIDsByPassphrase(passphrase,setSecureDIDs);
+            }}
+          />
+          <TextInput
+            style={[styles.textInput,{width: 250}]}
+            maxLength={60}
+            multiline={false}
+            editable={false}
+            value={securedids}
+          />
         </View>
-       <View style={{ flexDirection: 'row' }}>
-        <Button
-          title={t('Home.RetrieveDID')}
-          onPress={() => {
-            retrieveDIDsByPassphrase(passphrase,setSecureDIDs);
-           }}
-       />
-         <TextInput
-           style={[styles.textInput,{width: 250}]}
-           maxLength={60}
-           multiline={false}
-           editable={false}
-           value={securedids}
-         />
-       </View>
-     </View>
+      </View>
   );
 }
 
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
       borderColor: 'gray',
       borderWidth: 0.5,
       padding: 4,
-    },
+  },
 });
 
 function generateDID(passphrase) {
@@ -112,13 +112,13 @@ async function savePassDID(key,did) {
 }
 
 async function retrieveDIDsByPassphrase(key,setSecureDIDs) {
-    let dids = "No DIDs found"
-    try {
-        dids = await SecureStore.getItemAsync(key);
-        console.log("Here's your DIDs \n" + dids + "\n generated from key " + key);
-        setSecureDIDs(dids);
-    } catch(e) {
-        console.log(e);
-    }
-    return dids;
+  let dids = "No DIDs found"
+  try {
+    dids = await SecureStore.getItemAsync(key);
+    console.log("Here's your DIDs \n" + dids + "\n generated from key " + key);
+    setSecureDIDs(dids);
+  } catch(e) {
+    console.log(e);
+  }
+  return dids;
 }
