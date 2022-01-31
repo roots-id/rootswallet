@@ -4,8 +4,9 @@ const translation = {
       "EnterPassPhrase": "Enter passphrase",
       "GeneratedDID": "Generated DID",
       "GenerateDIDButton": "Generate DID",
+      "Refresh": "Refresh",
       "RetrieveDID": "Retrieve DID",
-      "SavePassDID": "Save Passphrase and DID",
+      "SaveDID": "Save DID",
       "Title": "RootsWallet"
     }
   }
