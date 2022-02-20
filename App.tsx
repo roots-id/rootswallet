@@ -1,25 +1,119 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, TextInput, View, SafeAreaView, ScrollView, Button, NativeModules } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, SafeAreaView, ScrollView, Button, NativeModules } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import './localization';
-import { React, useState } from 'react';
+import { React, useState, useEffect } from 'react';
 import * as SecureStore from 'expo-secure-store';
-
+import * as SQLite from 'expo-sqlite';
+import * as FileSystem from 'expo-file-system';
 
 const { CalendarModule, PrismModule } = NativeModules;
 
+// async function openDatabase(pathToDatabaseFile: string): Promise<SQLite.WebSQLDatabase> {
+//   if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+//     await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
+//   }
+//   await FileSystem.downloadAsync(
+//     Asset.fromModule(pathToDatabaseFile).uri,
+//     FileSystem.documentDirectory + 'SQLite/RootsWalletDB.db'
+//   );
+//   console.log('Database in ' + FileSystem.documentDirectory + 'SQLite/RootsWalletDB.db');
+//   return SQLite.openDatabase('RootsWalletDB.db');
+// }
+function openDatabase() {
+  if (Platform.OS === "web") {
+    return {
+      transaction: () => {
+        return {
+          executeSql: () => {},
+        };
+      },
+    };
+  }
+  const dbName = "test.db";
+  const db = SQLite.openDatabase(dbName);
+  console.log('Database at ' + FileSystem.documentDirectory + "SQLite/"+dbName)
+  return db;
+}
+
+const db = openDatabase();
+
+function Items({ done: doneHeading, onPressItem }) {
+  const [items, setItems] = useState(null);
+
+  useEffect(() => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        `select * from items where done = ?;`,
+        [doneHeading ? 1 : 0],
+        (_, { rows: { _array } }) => setItems(_array)
+      );
+    });
+  }, []);
+
+  const heading = doneHeading ? "Completed" : "Todo";
+
+  if (items === null || items.length === 0) {
+    return null;
+  }
+
+  return (
+    <View style={styles.sectionContainer}>
+      <Text style={styles.sectionHeading}>{heading}</Text>
+      {items.map(({ id, done, value }) => (
+        <TouchableOpacity
+          key={id}
+          onPress={() => onPressItem && onPressItem(id)}
+          style={{
+            backgroundColor: done ? "#1c9963" : "#fff",
+            borderColor: "#000",
+            borderWidth: 1,
+            padding: 8,
+          }}
+        >
+          <Text style={{ color: done ? "#fff" : "#000" }}>{value}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+}
+
+
 export default function App() {
   const { t, i18n } = useTranslation()
-
   const [passphrase, setPassPhrase] = useState();
-
   const [did, setDID] = useState('DID');
-
   const [didIndex, setDidIndex] = useState(0);
-
   const [outputArea, setOutputArea] = useState('output area');
-
   const [keys, setKeys] = useState(new Set<int>())
+  const [dbText, setDBText] = useState(null);
+  const [forceUpdate, forceUpdateId] = useForceUpdate();
+
+ useEffect(() => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "create table if not exists items (id integer primary key not null, done int, value text);"
+      );
+    });
+  }, []);
+
+  const add = (text) => {
+    // is text empty?
+    if (text === null || text === "") {
+      return false;
+    }
+
+    db.transaction(
+      (tx) => {
+        tx.executeSql("insert into items (done, value) values (0, ?)", [text]);
+        tx.executeSql("select * from items", [], (_, { rows }) =>
+          console.log(JSON.stringify(rows))
+        );
+      },
+      null,
+      forceUpdate
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -74,9 +168,67 @@ export default function App() {
             </Text>
           </ScrollView>
         </SafeAreaView>
-    </View>
-  );
-}
+
+        <Text style={styles.heading}>SQLite DB</Text>
+
+        {Platform.OS === "web" ? (
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <Text style={styles.heading}>
+              Expo SQlite is not supported on web!
+            </Text>
+          </View>
+        ) : (
+          <>
+            <View style={styles.flexRow}>
+              <TextInput
+                onChangeText={(text) => setDBText(text)}
+                onSubmitEditing={() => {
+                  add(dbText);
+                  setDBText(null);
+                }}
+                placeholder="Your DB text"
+                style={styles.input}
+                value={dbText}
+              />
+            </View>
+            <ScrollView style={styles.listArea}>
+              <Items
+                key={`forceupdate-todo-${forceUpdateId}`}
+                done={false}
+                onPressItem={(id) =>
+                  db.transaction(
+                    (tx) => {
+                      tx.executeSql(`update items set done = 1 where id = ?;`, [
+                        id,
+                      ]);
+                    },
+                    null,
+                    forceUpdate
+                  )
+                }
+              />
+              <Items
+                done
+                key={`forceupdate-done-${forceUpdateId}`}
+                onPressItem={(id) =>
+                  db.transaction(
+                    (tx) => {
+                      tx.executeSql(`delete from items where id = ?;`, [id]);
+                    },
+                    null,
+                    forceUpdate
+                  )
+                }
+              />
+            </ScrollView>
+          </>
+        )}
+      </View>
+    );
+  }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -169,4 +321,10 @@ async function printDIDs(didKeys,setMe) {
   });
   console.log('Setting output to ' + output);
   setMe(output);
+}
+
+
+function useForceUpdate() {
+    const [value, setValue] = useState(0);
+    return [() => setValue(value + 1), value];
 }
