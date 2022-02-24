@@ -3,6 +3,7 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View, SafeAreaView, Scro
 import { useTranslation } from 'react-i18next';
 import './localization';
 import { React, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import * as SQLite from 'expo-sqlite';
 import * as FileSystem from 'expo-file-system';
@@ -87,6 +88,10 @@ export default function App() {
   const [outputArea, setOutputArea] = useState('output area');
   const [keys, setKeys] = useState(new Set<int>())
   const [dbText, setDBText] = useState(null);
+  const [asyncKey, setAsyncKey] = useState();
+  const [asyncValue, setAsyncValue] = useState();
+  const [asyncRetrievalKey, setAsyncRetrievalKey] = useState();
+  const [asyncRetrievalValue, setAsyncRetrievalValue] = useState();
   const [forceUpdate, forceUpdateId] = useForceUpdate();
 
  useEffect(() => {
@@ -225,6 +230,40 @@ export default function App() {
             </ScrollView>
           </>
         )}
+
+      <View style={{ flexDirection: 'row' }}>
+        <Text>Async Storage:  </Text>
+        <TextInput
+          style={styles.textInput}
+          placeHolderText={"Async Key"}
+          clearTextOnFocus={true}
+          multiline={false}
+          secureTextEntry={false}
+          onChangeText={text => setAsyncKey(text)}
+          value={asyncKey}
+        />
+        <TextInput
+          style={styles.textInput}
+          placeHolderText={"Async Value"}
+          clearTextOnFocus={true}
+          multiline={false}
+          secureTextEntry={false}
+          onChangeText={text => setAsyncValue(text)}
+          value={asyncValue}
+        />
+        <Button
+          title={"Save Async"}
+            onPress={() => {
+              storeUnencryptedAsyncData(asyncKey,asyncValue)
+          }}
+        />
+       <Button
+          title={"Retrieve Async"}
+            onPress={() => {
+              getUnencryptedAsyncData(asyncKey,setAsyncValue)
+          }}
+          />
+      </View>
       </View>
     );
   }
@@ -328,3 +367,43 @@ function useForceUpdate() {
     const [value, setValue] = useState(0);
     return [() => setValue(value + 1), value];
 }
+
+const storeUnencryptedAsyncData = async (asyncKey,asyncValue) => {
+  console.log('storing unencrypted async for: ' + asyncKey + ": " + asyncValue);
+  try {
+    await AsyncStorage.setItem(asyncKey, asyncValue)
+  } catch (e) {
+    console.log(e);
+  }
+}
+//Storing object value
+// const storeUnencryptedAsyncJsonData = async (value) => {
+//   console.log('getting unencrypted async for @asyncKey: ' + value);
+//   try {
+//     const jsonValue = JSON.stringify(value)
+//     await AsyncStorage.setItem('@asyncKey', jsonValue)
+//   } catch (e) {
+//     console.log(e);
+//   }
+// }
+
+const getUnencryptedAsyncData = async (key,setMe) => {
+  console.log('getting unencrypted async for '+key)
+  try {
+    let val = await AsyncStorage.getItem(key)
+    console.log('got value ' + val);
+    setMe(val);
+  } catch(e) {
+    console.log(e);
+  }
+}
+
+// const getUnencryptedAsyncJsonData = async (asyncRetrievalKey) => {
+//   console.log('getting unencrypted async json for '+asyncRetrievalKey)
+//   try {
+//     const jsonValue = await AsyncStorage.getItem(asyncRetrievalKey)
+//     return jsonValue != null ? JSON.parse(jsonValue) : null;
+//   } catch(e) {
+//     console.log(e);
+//   }
+// }
