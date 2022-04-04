@@ -7,6 +7,7 @@ import com.facebook.react.bridge.Callback
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.facebook.react.bridge.NativeModule;
 import java.util.*
 import io.iohk.atala.prism.api.*;
 import io.iohk.atala.prism.api.node.*;
