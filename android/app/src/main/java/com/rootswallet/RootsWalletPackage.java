@@ -19,7 +19,7 @@ public class RootsWalletPackage implements ReactPackage {
  
         modules.add(new PrismModule(reactContext));
         modules.add(new PeerDidModule(reactContext));
-//        modules.add(new DIDCommV2Module(reactContext));
+        modules.add(new DIDCommV2Module(reactContext));
  
         return modules;
     }

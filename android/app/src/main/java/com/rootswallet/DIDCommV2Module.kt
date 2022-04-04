@@ -7,12 +7,17 @@ import com.facebook.react.bridge.Callback
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.bridge.NativeModule;
+import com.facebook.react.bridge.ReadableMap
 import java.util.*
-import org.didcommx.peerdid.*
+import org.didcommx.didcomm.DIDComm
+import org.didcommx.didcomm.message.Message
+import org.didcommx.didcomm.model.PackEncryptedParams
+import org.didcommx.didcomm.model.PackEncryptedResult
+import org.didcommx.didcomm.model.UnpackParams
 import org.didcommx.didcomm.secret.*
-import org.didcommx.didcomm.utils.toJson
+import org.didcommx.peerdid.*
 import org.didcommx.didcomm.utils.divideDIDFragment
+import org.didcommx.didcomm.utils.toJson
 import org.didcommx.didcomm.common.VerificationMaterial
 import org.didcommx.didcomm.common.VerificationMaterialFormat
 import org.didcommx.didcomm.common.VerificationMethodType
@@ -26,20 +31,66 @@ import org.didcommx.peerdid.DIDDocPeerDID
 import org.didcommx.peerdid.VerificationMaterialFormatPeerDID
 import org.didcommx.peerdid.resolvePeerDID
 
+class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+    data class UnpackResult(
+        val message: String,
+        val from: String?,
+        val to: String,
+        val res: org.didcommx.didcomm.model.UnpackResult
+    )
 
-class PeerDidModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+    companion object {
+        fun resolvePeerDID(did: String, format: VerificationMaterialFormatPeerDID) =
+            org.didcommx.peerdid.resolvePeerDID(did, format)
+    }
 
     override fun getName(): String {
-        return "PeerDidModule"
+        return "DIDCommV2Module"
     }
+    
+    val secretsResolver = SecretResolverInMemoryMock()
     
     // Beware of the isBlocking. Need to fix with callback or alike
     @ReactMethod(isBlockingSynchronousMethod = true)
-    fun createDID(
+    fun pack(
+        data: String,
+        to: String,
+        from: String? = null
+        // signFrom: String? = null,
+        // protectSender: Boolean = true
+    ): String {
+        val didComm = DIDComm(DIDDocResolverPeerDID(), secretsResolver)
+        val message = Message.builder(
+            id = UUID.randomUUID().toString(),
+            body = mapOf("msg" to data),
+            type = "my-protocol/1.0"
+        ).build()
+        var builder = PackEncryptedParams
+            .builder(message, to)
+            .forward(false)
+            .protectSenderId(true)
+        builder = from?.let { builder.from(it) } ?: builder
+        //builder = signFrom?.let { builder.signFrom(it) } ?: builder
+        val params = builder.build()
+        return didComm.packEncrypted(params).packedMessage
+    }
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun unpack(packedMsg: String): String {
+        val didComm = DIDComm(DIDDocResolverPeerDID(), secretsResolver)
+        val res = didComm.unpack(UnpackParams.Builder(packedMsg).build())
+        val msg = res.message.body["msg"].toString()
+        val eto = res.metadata.encryptedTo?.let { divideDIDFragment(it.first()).first() } ?: ""
+        val efrom = res.metadata.encryptedFrom?.let { divideDIDFragment(it).first() }
+        return msg
+    }
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun createPeerDID(
         authKeysCount: Int = 1,
         agreementKeysCount: Int = 1,
         serviceEndpoint: String? = null,
-        //serviceRoutingKey: List<String>? = null
+        //serviceRoutingKeys: List<String>? = null
     ): String {
         // 1. generate keys in JWK format
         val x25519keyPairs = (1..agreementKeysCount).map { generateX25519Keys() }
@@ -86,50 +137,21 @@ class PeerDidModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 service = service
             )
 
+        // 5. set KIDs as in DID DOC for secrets and store the secret in the secrets resolver
+        val didDoc = DIDDocPeerDID.fromJson(resolvePeerDID(did, VerificationMaterialFormatPeerDID.JWK))
+        didDoc.agreementKids.zip(x25519keyPairs).forEach {
+            val privateKey = it.second.private.toMutableMap()
+            privateKey["kid"] = it.first
+            secretsResolver.addKey(jwkToSecret(privateKey))
+        }
+        didDoc.authenticationKids.zip(ed25519keyPairs).forEach {
+            val privateKey = it.second.private.toMutableMap()
+            privateKey["kid"] = it.first
+            secretsResolver.addKey(jwkToSecret(privateKey))
+        }
+
         return did
     }
 
-    // Beware of the isBlocking. Need to fix with callback or alike
-    // @ReactMethod(isBlockingSynchronousMethod = true)
-    // fun resolve(did: String): Any {
-    //     // request DID Doc in JWK format
-    //     val didDocJson = resolvePeerDID(did, format = VerificationMaterialFormatPeerDID.JWK)
-    //     val didDoc = DIDDocPeerDID.fromJson(didDocJson)
 
-    //     didDoc.keyAgreement
-    //     return org.didcommx.didcomm.diddoc.DIDDoc(
-    //             did = did,
-    //             keyAgreements = didDoc.agreementKids,
-    //             authentications = didDoc.authenticationKids,
-    //             verificationMethods = (didDoc.authentication + didDoc.keyAgreement).map {
-    //                 VerificationMethod(
-    //                     id = it.id,
-    //                     type = VerificationMethodType.JSON_WEB_KEY_2020,
-    //                     controller = it.controller,
-    //                     verificationMaterial = VerificationMaterial(
-    //                         format = VerificationMaterialFormat.JWK,
-    //                         value = toJson(it.verMaterial.value)
-    //                     )
-    //                 )
-    //             },
-    //             didCommServices = didDoc.service
-    //                 ?.map {
-    //                     when (it) {
-    //                         is DIDCommServicePeerDID ->
-    //                             DIDCommService(
-    //                                 id = it.id,
-    //                                 serviceEndpoint = it.serviceEndpoint ?: "",
-    //                                 routingKeys = it.routingKeys ?: emptyList(),
-    //                                 accept = it.accept ?: emptyList()
-    //                             )
-    //                         else -> null
-    //                     }
-    //                 }
-    //                 ?.filterNotNull()
-    //                 ?: emptyList()
-    //         )
-        
-    // }
-
-    
 }
