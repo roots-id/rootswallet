@@ -1,8 +1,9 @@
 // prettier-ignore
 const translation = {
-    "Home": {
-      "Title": "RootsWallet",
-      "GenerateDIDButton": "Tocar para generar DID"
-    }
+  "MyIdentityScreen": {
+    "Title": "RootsWallet",
+    "GenerateDIDPrismButton": "Generar did:prism",
+    "GenerateDIDPeerButton": "Generar did:peer"
   }
+}
   export default translation

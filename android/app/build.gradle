@@ -237,6 +237,14 @@ dependencies {
     }
     // Atala Prism SDK
     implementation("io.iohk.atala:prism-api:1.2.0")
+
+    // SICPA PEER-DID-JVM
+    implementation("org.didcommx:peerdid:0.2.0")
+
+    // SICPA DIDComm V2
+    implementation("org.didcommx:didcomm:0.1.0", {
+        exclude group: 'com.google.protobuf'
+    })
 }
 
 // Run this once to be able to run the application with BUCK
