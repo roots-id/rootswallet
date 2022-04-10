@@ -33,6 +33,7 @@ class PeerDidModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
         return "PeerDidModule"
     }
     
+    
     // Beware of the isBlocking. Need to fix with callback or alike
     @ReactMethod(isBlockingSynchronousMethod = true)
     fun createDID(
