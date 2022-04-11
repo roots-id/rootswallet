@@ -9,6 +9,8 @@
   "dependencies": {
     "@babel/preset-env": "^7.1.6",
     "@react-native-community/masked-view": "0.1.10",
+    "@transmute/did-key-ed25519": "^0.3.0-unstable.8",
+    "buffer": "^6.0.3",
     "expo": "~44.0.0",
     "expo-splash-screen": "~0.14.1",
     "expo-status-bar": "~1.1.0",
@@ -19,6 +21,7 @@
     "react-native": "0.64.3",
     "react-native-gesture-handler": "~2.1.0",
     "react-native-localize": "^2.1.7",
+    "react-native-randombytes": "^3.6.1",
     "react-native-reanimated": "~2.2.0",
     "react-native-safe-area-context": "3.3.2",
     "react-native-screens": "~3.8.0",
