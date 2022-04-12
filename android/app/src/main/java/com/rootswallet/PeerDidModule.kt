@@ -9,6 +9,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableArray;
 import java.util.*
 import org.didcommx.peerdid.*
 import org.didcommx.didcomm.secret.*
@@ -33,17 +34,46 @@ class PeerDidModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
         return "PeerDidModule"
     }
 
-    // Generate PeerDID according to the zero algorithm
-    // https://identity.foundation/peer-did-method-spec/index.html#generation-method
-    // pubKey is ed25519 public key for authetication with a peer. Must be in JWK format
+    // Generate PeerDID acording to second algorithm https://identity.foundation/peer-did-method-spec/index.html#generation-method
+    // authPubKey is ed25519 public key in JWK format
+    // agreemPubKey is x25519 public key in JWK format
+    // service
     @ReactMethod(isBlockingSynchronousMethod = true)
-    fun createDID(pubKey: ReadableMap): String {
+    fun createDID(
+        authPubKey: ReadableMap,
+        agreemPubKey: ReadableMap,
+        serviceEndpoint: String? = null,
+        serviceRoutingKeys: ReadableArray? = null
+        ): String {
         val authPublicKey = VerificationMaterialAuthentication(
                 format = VerificationMaterialFormatPeerDID.JWK,
                 type = VerificationMethodTypeAuthentication.JSON_WEB_KEY_2020,
-                value = pubKey.toHashMap()
+                value = authPubKey.toHashMap()
             )
-        return createPeerDIDNumalgo0(authPublicKey)
+
+        val agreemPublicKey = VerificationMaterialAgreement(
+                format = VerificationMaterialFormatPeerDID.JWK,
+                type = VerificationMethodTypeAgreement.JSON_WEB_KEY_2020,
+                value = agreemPubKey.toHashMap()
+            )
+        
+        val service = serviceEndpoint?.let {
+            toJson(
+                DIDCommServicePeerDID(
+                    id = "new-id",
+                    type = SERVICE_DIDCOMM_MESSAGING,
+                    serviceEndpoint = it,
+                    routingKeys = null,
+                    accept = listOf("didcomm/v2")
+                ).toDict()
+            )
+        }
+        
+        return createPeerDIDNumalgo2(
+                signingKeys = listOf(authPublicKey),
+                encryptionKeys = listOf(agreemPublicKey),
+                service = null
+            )
     }
 
     // Resolve PeerDID

@@ -10,6 +10,7 @@
     "@babel/preset-env": "^7.1.6",
     "@react-native-community/masked-view": "0.1.10",
     "@transmute/did-key-ed25519": "^0.3.0-unstable.8",
+    "@transmute/did-key-x25519": "^0.3.0-unstable.8",
     "buffer": "^6.0.3",
     "expo": "~44.0.0",
     "expo-splash-screen": "~0.14.1",

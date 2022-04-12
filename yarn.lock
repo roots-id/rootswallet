@@ -1635,6 +1635,14 @@
     "@transmute/did-key-common" "^0.3.0-unstable.8"
     "@transmute/ed25519-key-pair" "^0.6.1-unstable.37"
 
+"@transmute/did-key-x25519@^0.3.0-unstable.8":
+  version "0.3.0-unstable.8"
+  resolved "https://registry.yarnpkg.com/@transmute/did-key-x25519/-/did-key-x25519-0.3.0-unstable.8.tgz#b0364b723c8793134d2765a6ba057352430c9d1c"
+  integrity sha512-vv1NF7x8JSGlqqveqQgk7l4koHS60xeKEcSW+9upHPwPZAkkEnFsEW+GLobvSZSvvOjgS3NSyseHsmnmTMZvxQ==
+  dependencies:
+    "@transmute/did-key-common" "^0.3.0-unstable.8"
+    "@transmute/x25519-key-pair" "^0.7.0-unstable.1"
+
 "@transmute/ed25519-key-pair@^0.6.1-unstable.37":
   version "0.6.1-unstable.37"
   resolved "https://registry.yarnpkg.com/@transmute/ed25519-key-pair/-/ed25519-key-pair-0.6.1-unstable.37.tgz#115a3c9ca0495e9b9d1f6059c6241f5dfc16d073"
@@ -1649,6 +1657,11 @@
   resolved "https://registry.yarnpkg.com/@transmute/ld-key-pair/-/ld-key-pair-0.6.1-unstable.37.tgz#ffe8af071b4ea991a49c795724b93999f4e6c8af"
   integrity sha512-DcTpEruAQBfOd2laZkg3uCQ+67Y7dw2hsvo42NAQ5tItCIx5AClP7zccri7T2JUcfDUFaE32z/BLTMEKYt3XZQ==
 
+"@transmute/ld-key-pair@^0.7.0-unstable.58":
+  version "0.7.0-unstable.58"
+  resolved "https://registry.yarnpkg.com/@transmute/ld-key-pair/-/ld-key-pair-0.7.0-unstable.58.tgz#512ef84db5ffc821fc9bf7ee52c170876ed62c49"
+  integrity sha512-pzplUr3OJqek5RTKQ67Ce5GFGs5XPZX+ehHqRe6F68Pn3flY8lNrioD1ZW5RA3vGlmhPrTMXkqUWAOtwFkzPfQ==
+
 "@transmute/security-context@^0.6.1-unstable.36":
   version "0.6.1-unstable.37"
   resolved "https://registry.yarnpkg.com/@transmute/security-context/-/security-context-0.6.1-unstable.37.tgz#532b9238efd80dbaaa3e7dd663107cd925afadcc"
@@ -1661,6 +1674,14 @@
   dependencies:
     "@stablelib/x25519" "^1.0.0"
     "@transmute/ld-key-pair" "^0.6.1-unstable.37"
+
+"@transmute/x25519-key-pair@^0.7.0-unstable.1":
+  version "0.7.0-unstable.58"
+  resolved "https://registry.yarnpkg.com/@transmute/x25519-key-pair/-/x25519-key-pair-0.7.0-unstable.58.tgz#4c5ed0a40e35766d5e250587b063b44d81fd9b60"
+  integrity sha512-owcJ7xeARf0ANLuopae3ZvvSJGSJL4/v416VUM90KmnwRu09Ar0WOAlRI7FJtL7xKQpvZyjF67j9CW/+WIsCfw==
+  dependencies:
+    "@stablelib/x25519" "^1.0.0"
+    "@transmute/ld-key-pair" "^0.7.0-unstable.58"
 
 "@types/graceful-fs@^4.1.2":
   version "4.1.5"
