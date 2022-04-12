@@ -39,20 +39,16 @@ const Communications = (props) => {
         const alicePeerDID = PeerDidModule.createDID(aliceAuthKey.publicJwk, aliceAgreemKey.publicJwk,null,null)
         console.log("Alice generates a new pairwise peer DID for communication with Bob: "+ alicePeerDID)
 
-        //var bobPeerDID2 = DIDCommV2Module.createPeerDID(1,1,null)
-        // var alicePeerDID2 = DIDCommV2Module.createPeerDID(1,1,null)
-
         // 3. Alice sends message to Bob
         var msg = "Hello Bob!"
-        var packedToBobMsg = DIDCommV2Module.pack(msg, to = bobPeerDID, from = alicePeerDID, authKey = aliceAuthKey, agreemKey = aliceAgreemKey)
-        console.log("Alice sends " +  msg + " to Bob." + packedToBobMsg)
+        var packedToBobMsg = DIDCommV2Module.pack(msg, to = bobPeerDID, from = alicePeerDID, agreemKey = aliceAgreemKey, signFrom = null, protectSender = true, messageType = "my-protocol/1.0")
+        console.log("Alice sends " +  msg + " to Bob.")
         console.log("The message is authenticated by Alice's peer DID " + alicePeerDID + " and encrypted to Bob's peer DID " )
         console.log("")
 
         // 4. Bob unpacks the message
-        var unpackResultMsg = DIDCommV2Module.unpack(packedToBobMsg, to = bobPeerDID, from = alicePeerDID, authKey = bobAuthKey, agreemKey = bobAgreemKey)
+        var unpackResultMsg = DIDCommV2Module.unpack(packedToBobMsg, to = bobPeerDID, authKey = bobAuthKey, agreemKey = bobAgreemKey)
         console.log("Bob received " + unpackResultMsg + " from Alice.")
-
         
     };
     return (

@@ -47,19 +47,13 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
         data: String,
         to: String,
         from: String,
-        authKey: ReadableMap,
         agreemKey: ReadableMap,
-        // signFrom: String? = null,
-        // protectSender: Boolean = true
+        signFrom: String? = null,
+        protectSender: Boolean = true,
+        messageType: String = "my-protocol/1.0"
     ): String {
         val secretsResolver = SecretResolverInMemoryMock()
         val didDoc = DIDDocPeerDID.fromJson(resolvePeerDID(from, VerificationMaterialFormatPeerDID.JWK))
-        // didDoc.authenticationKids.zip(listOf(KeyPair(public = authKey.toHashMap()["publicJwk"] as Map<String, Any>, private = authKey.toHashMap()["privateJwk"] as Map<String, Any> ))).forEach {
-        //     val privateKey = it.second.private.toMutableMap()
-        //     privateKey["kid"] = it.first
-        //     secretsResolver.addKey(jwkToSecret(privateKey))
-        //     println(jwkToSecret(privateKey))
-        // }
         didDoc.agreementKids.zip(listOf(KeyPair(public = agreemKey.toHashMap()["publicJwk"] as Map<String, Any>, private = agreemKey.toHashMap()["privateJwk"] as Map<String, Any> ))).forEach {
             val privateKey = it.second.private.toMutableMap()
             privateKey["kid"] = it.first
@@ -71,14 +65,14 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
         val message = Message.builder(
             id = UUID.randomUUID().toString(),
             body = mapOf("msg" to data),
-            type = "my-protocol/1.0"
+            type = messageType
         ).build()
         var builder = PackEncryptedParams
             .builder(message, to)
             .forward(false)
-            .protectSenderId(true)
+            .protectSenderId(protectSender)
         builder = from?.let { builder.from(it) } ?: builder
-        //builder = signFrom?.let { builder.signFrom(it) } ?: builder
+        builder = signFrom?.let { builder.signFrom(it) } ?: builder
         val params = builder.build()
         return didComm.packEncrypted(params).packedMessage
     }
@@ -87,7 +81,6 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
     fun unpack(
             packedMsg: String, 
             to: String,
-            from: String,
             authKey: ReadableMap,
             agreemKey: ReadableMap,
         ): String {
