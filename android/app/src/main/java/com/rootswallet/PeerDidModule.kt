@@ -68,11 +68,11 @@ class PeerDidModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 ).toDict()
             )
         }
-        
+        println(service)
         return createPeerDIDNumalgo2(
                 signingKeys = listOf(authPublicKey),
                 encryptionKeys = listOf(agreemPublicKey),
-                service = null
+                service = service
             )
     }
 

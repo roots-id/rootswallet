@@ -81,16 +81,10 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
     fun unpack(
             packedMsg: String, 
             to: String,
-            authKey: ReadableMap,
             agreemKey: ReadableMap,
         ): String {
         val didDoc = DIDDocPeerDID.fromJson(resolvePeerDID(to, VerificationMaterialFormatPeerDID.JWK))
         val secretsResolver = SecretResolverInMemoryMock()
-        didDoc.authenticationKids.zip(listOf(KeyPair(public = authKey.toHashMap()["publicJwk"] as Map<String, Any>, private = authKey.toHashMap()["privateJwk"] as Map<String, Any> ))).forEach {
-            val privateKey = it.second.private.toMutableMap()
-            privateKey["kid"] = it.first
-            secretsResolver.addKey(jwkToSecret(privateKey))
-        }
         didDoc.agreementKids.zip(listOf(KeyPair(public = agreemKey.toHashMap()["publicJwk"] as Map<String, Any>, private = agreemKey.toHashMap()["privateJwk"] as Map<String, Any> ))).forEach {
             val privateKey = it.second.private.toMutableMap()
             privateKey["kid"] = it.first

@@ -47,7 +47,7 @@ const Communications = (props) => {
         console.log("")
 
         // 4. Bob unpacks the message
-        var unpackResultMsg = DIDCommV2Module.unpack(packedToBobMsg, to = bobPeerDID, authKey = bobAuthKey, agreemKey = bobAgreemKey)
+        var unpackResultMsg = DIDCommV2Module.unpack(packedToBobMsg, to = bobPeerDID, agreemKey = bobAgreemKey)
         console.log("Bob received " + unpackResultMsg + " from Alice.")
         
     };
