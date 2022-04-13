@@ -8,6 +8,8 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.NativeModule;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableArray;
 import java.util.*
 import org.didcommx.peerdid.*
 import org.didcommx.didcomm.secret.*
@@ -26,42 +28,35 @@ import org.didcommx.peerdid.DIDDocPeerDID
 import org.didcommx.peerdid.VerificationMaterialFormatPeerDID
 import org.didcommx.peerdid.resolvePeerDID
 
-
 class PeerDidModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
     override fun getName(): String {
         return "PeerDidModule"
     }
-    
-    // Beware of the isBlocking. Need to fix with callback or alike
+
+    // Generate PeerDID acording to second algorithm https://identity.foundation/peer-did-method-spec/index.html#generation-method
+    // authPubKey is ed25519 public key in JWK format
+    // agreemPubKey is x25519 public key in JWK format
+    // service
     @ReactMethod(isBlockingSynchronousMethod = true)
     fun createDID(
-        authKeysCount: Int = 1,
-        agreementKeysCount: Int = 1,
+        authPubKey: ReadableMap,
+        agreemPubKey: ReadableMap,
         serviceEndpoint: String? = null,
-        //serviceRoutingKey: List<String>? = null
-    ): String {
-        // 1. generate keys in JWK format
-        val x25519keyPairs = (1..agreementKeysCount).map { generateX25519Keys() }
-        val ed25519keyPairs = (1..authKeysCount).map { generateEd25519Keys() }
-
-        // 2. prepare the keys for peer DID lib
-        val authPublicKeys = ed25519keyPairs.map {
-            VerificationMaterialAuthentication(
+        serviceRoutingKeys: ReadableArray? = null
+        ): String {
+        val authPublicKey = VerificationMaterialAuthentication(
                 format = VerificationMaterialFormatPeerDID.JWK,
                 type = VerificationMethodTypeAuthentication.JSON_WEB_KEY_2020,
-                value = it.public
+                value = authPubKey.toHashMap()
             )
-        }
-        val agreemPublicKeys = x25519keyPairs.map {
-            VerificationMaterialAgreement(
+
+        val agreemPublicKey = VerificationMaterialAgreement(
                 format = VerificationMaterialFormatPeerDID.JWK,
                 type = VerificationMethodTypeAgreement.JSON_WEB_KEY_2020,
-                value = it.public
+                value = agreemPubKey.toHashMap()
             )
-        }
-
-        // 3. generate service
+        
         val service = serviceEndpoint?.let {
             toJson(
                 DIDCommServicePeerDID(
@@ -73,63 +68,19 @@ class PeerDidModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 ).toDict()
             )
         }
-
-        // 4. call peer DID lib
-        // if we have just one key (auth), then use numalg0 algorithm
-        // otherwise use numalg2 algorithm
-        val did = if (authPublicKeys.size == 1 && agreemPublicKeys.isEmpty() && service.isNullOrEmpty())
-            createPeerDIDNumalgo0(authPublicKeys[0])
-        else
-            createPeerDIDNumalgo2(
-                signingKeys = authPublicKeys,
-                encryptionKeys = agreemPublicKeys,
+        println(service)
+        return createPeerDIDNumalgo2(
+                signingKeys = listOf(authPublicKey),
+                encryptionKeys = listOf(agreemPublicKey),
                 service = service
             )
-
-        return did
     }
 
-    // Beware of the isBlocking. Need to fix with callback or alike
-    // @ReactMethod(isBlockingSynchronousMethod = true)
-    // fun resolve(did: String): Any {
-    //     // request DID Doc in JWK format
-    //     val didDocJson = resolvePeerDID(did, format = VerificationMaterialFormatPeerDID.JWK)
-    //     val didDoc = DIDDocPeerDID.fromJson(didDocJson)
-
-    //     didDoc.keyAgreement
-    //     return org.didcommx.didcomm.diddoc.DIDDoc(
-    //             did = did,
-    //             keyAgreements = didDoc.agreementKids,
-    //             authentications = didDoc.authenticationKids,
-    //             verificationMethods = (didDoc.authentication + didDoc.keyAgreement).map {
-    //                 VerificationMethod(
-    //                     id = it.id,
-    //                     type = VerificationMethodType.JSON_WEB_KEY_2020,
-    //                     controller = it.controller,
-    //                     verificationMaterial = VerificationMaterial(
-    //                         format = VerificationMaterialFormat.JWK,
-    //                         value = toJson(it.verMaterial.value)
-    //                     )
-    //                 )
-    //             },
-    //             didCommServices = didDoc.service
-    //                 ?.map {
-    //                     when (it) {
-    //                         is DIDCommServicePeerDID ->
-    //                             DIDCommService(
-    //                                 id = it.id,
-    //                                 serviceEndpoint = it.serviceEndpoint ?: "",
-    //                                 routingKeys = it.routingKeys ?: emptyList(),
-    //                                 accept = it.accept ?: emptyList()
-    //                             )
-    //                         else -> null
-    //                     }
-    //                 }
-    //                 ?.filterNotNull()
-    //                 ?: emptyList()
-    //         )
-        
-    // }
-
-    
+    // Resolve PeerDID
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun resolveDID(did: String): String {
+        // request DID Doc in JWK format
+        val didDocJson = resolvePeerDID(did, format = VerificationMaterialFormatPeerDID.JWK)
+        return didDocJson  
+    }
 }

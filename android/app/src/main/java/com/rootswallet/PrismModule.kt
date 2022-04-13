@@ -8,6 +8,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.NativeModule;
+import com.facebook.react.bridge.ReadableMap;
 import java.util.*
 import io.iohk.atala.prism.api.*;
 import io.iohk.atala.prism.api.node.*;
@@ -16,6 +17,8 @@ import io.iohk.atala.prism.crypto.derivation.MnemonicCode;
 import io.iohk.atala.prism.crypto.keys.ECKeyPair;
 import io.iohk.atala.prism.identity.*;
 import io.iohk.atala.prism.protos.*;
+import org.didcommx.didcomm.utils.toJson
+
 
 class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -23,9 +26,9 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
         return "PrismModule"
     }
     
-    // Beware of the isBlocking. Need to fix with callback or alike
+    // TODO Beware of the isBlocking. Need to fix with callback when sending to ledger
     @ReactMethod(isBlockingSynchronousMethod = true)
-    fun createDID(pass: String): String {
+    fun createDID(pass: String, publicKey: ReadableMap): String {
         val issuerKeys = prepareKeysFromMnemonic(KeyDerivation.randomMnemonicCode(), pass)
         val issuerUnpublishedDid = PrismDid.buildLongFormFromMasterPublicKey(issuerKeys[PrismDid.DEFAULT_MASTER_KEY_ID]?.publicKey!!)
         return issuerUnpublishedDid.toString()
