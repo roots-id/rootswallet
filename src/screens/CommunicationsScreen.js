@@ -35,6 +35,11 @@ const Communications = (props) => {
                 color='#841584'
                 onPress={onPressHelloWorld}
             />
+            <Button
+                title='Start transport'
+                color='#841584'
+                onPress={onPressHelloWorld}
+            />
         </View>
     );
 };
