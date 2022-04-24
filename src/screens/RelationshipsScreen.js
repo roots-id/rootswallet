@@ -1,15 +1,13 @@
 import React, {useState} from 'react';
-import {withNavigation} from "react-navigation";
 import {FlatList, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import {getRelationships} from '../utils/relationshipsManager'
 import {getCredentials} from '../utils/credentialsRetriever'
 import Relationship from '../models/relationship'
 import styles from "../styles/styles";
 
-const RelationshipsScreen = ({navigation}) => {
+const RelationshipsScreen = ({route,navigation}) => {
     console.log(`> RelationshipsScreen()`)
-    const walletName = navigation.getParam('walletName')
-    console.log(`navigation: ${JSON.stringify(navigation)}`)
+    const {walletName} = route.params
     console.log(`walletName: ${walletName}`)
 
     const relationships = getRelationships(walletName)
@@ -46,13 +44,11 @@ const RelationshipsScreen = ({navigation}) => {
                 <FlatList
                     data={relationships}
                     renderItem={({item}) => touchable(item.key)}
-
-                    // renderItem={({item}) => <Text>{item.key}</Text>}
                 />
             </View>
         </View>
     )
 };
 
-export default withNavigation(RelationshipsScreen)
+export default RelationshipsScreen
 

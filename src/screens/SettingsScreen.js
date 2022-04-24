@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {withNavigation} from "react-navigation";
+// import {withNavigation} from "react-navigation";
 import {TouchableOpacity, TextInput, View, Text} from 'react-native';
 import {HOME_SCREEN, RELATIONSHIPS_SCREEN} from "../constants/navigationConstants";
 import styles from '../styles/styles'
@@ -79,4 +79,5 @@ const Settings = ({navigation}) => {
     );
 };
 
-export default withNavigation(Settings)
+// export default withNavigation(Settings)
+export default Settings
