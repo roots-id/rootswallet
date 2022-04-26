@@ -11,12 +11,14 @@ import {
     CREDENTIALS_SCREEN,
     CREDENTIALDETAILS_SCREEN,
 } from "../constants/navigationConstants";
-import HomeScreen from "../screens/HomeScreen"
-import SettingsScreen from "../screens/SettingsScreen";
-import RelationshipsScreen from "../screens/RelationshipsScreen";
-import CredentialsScreen from "../screens/CredentialsScreen";
+import CommunicationsScreen from '../screens/CommunicationsScreen';
 import CredentialDetailsScreen from "../screens/CredentialDetailsScreen";
+import CredentialsScreen from "../screens/CredentialsScreen";
 import HelpScreen from '../screens/HelpScreen';
+import HomeScreen from "../screens/HomeScreen"
+import MyIdentityScreen from '../screens/MyIdentityScreen';
+import RelationshipsScreen from "../screens/RelationshipsScreen";
+import SettingsScreen from "../screens/SettingsScreen";
 
 import AuthContext from '../context/AuthenticationContext';
 
@@ -111,6 +113,7 @@ export default function AuthStack() {
             <Tab.Navigator>
                 <Tab.Screen name="relationships" component={RelationshipsStack}/>
                 <Tab.Screen name="chats" component={ChatsStack}/>
+                <Tab.Screen name="integration" component={IntegrationStack}/>
             </Tab.Navigator>
         )
     }
@@ -173,6 +176,24 @@ export default function AuthStack() {
         )
     }
 
+    const IntegrationStack = () => {
+        return (
+        <Stack.Navigator>
+            <Stack.Group>
+                <Stack.Screen name="Home" component={HomeScreen}/>
+                <Stack.Screen name="MyIdentity"
+                              component={RelationshipsScreen}
+                              initialParams={{walletName: walletName}}
+                />
+                <Stack.Screen name="Credentials" component={CredentialsScreen}/>
+                <Stack.Screen name="Communications" component={CommunicationsScreen}/>
+                <Stack.Screen name="Help" component={HelpScreen}/>
+                <Stack.Screen name="Settings" component={SettingsScreen}/>
+            </Stack.Group>
+        </Stack.Navigator>
+        )
+    }
+
  //TODO refactor hasWallet call where we capture walletName
   return (
     <AuthContext.Provider value={authContext}>
@@ -208,7 +229,6 @@ export default function AuthStack() {
               <>
                 <Stack.Group>
                     <Stack.Screen name="relationshipStack" component={Main}/>
-                    <Stack.Screen name="Home" component={HomeScreen}/>
                 </Stack.Group>
                 <Stack.Group screenOptions={{ presentation: 'modal' }}>
                     <Stack.Screen name="Help" component={HelpScreen}/>
