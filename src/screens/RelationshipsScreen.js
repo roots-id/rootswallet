@@ -6,7 +6,7 @@ import Relationship from '../models/relationship'
 import styles from "../styles/styles";
 
 const RelationshipsScreen = ({route,navigation}) => {
-    console.log(`> RelationshipsScreen()`)
+    console.log(`> RelationshipsScreen()`,route)
     const {walletName} = route.params
     console.log(`walletName: ${walletName}`)
 
