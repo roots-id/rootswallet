@@ -116,6 +116,7 @@ export default function AuthStack() {
     }
     const RelationshipsStack = () => {
         return (
+        <Stack.Navigator>
             <Stack.Group>
                 <Stack.Screen name="Relationships"
                               component={RelationshipsScreen}
@@ -124,33 +125,51 @@ export default function AuthStack() {
                 <Stack.Screen name="Credentials" component={CredentialsScreen}/>
                 <Stack.Screen name="CredentialDetails" component={CredentialDetailsScreen}/>
             </Stack.Group>
+        </Stack.Navigator>
         )
     }
     const ChatsStack = () => {
         return (
+            <Stack.Navigator
+                                screenOptions={{
+                                  headerStyle: {
+                                    backgroundColor: '#150510',
+                                  },
+                                  headerTintColor: '#eeeeee',
+                                  headerTitleStyle: {
+                                    fontSize: 22,
+                                  },
+                                  gestureEnabled: true,
+                                  gestureDirection: "horizontal",
+                                  cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
+                                  animationEnabled: true,
+                                }}
+
+                            >
             <Stack.Group>
                 <Stack.Screen
-                            name="Chats"
-                            component={ChatListScreen}
-                            options={ ({ navigation, route }) => ({
-                                headerTitle: (props) => <LogoTitle {...props} title="Secure Chats:"/>,
-                                headerRight: () =>
-                                  <IconButton
-                                      icon="plus"
-                                      size={28}
-                                      color="#e69138"
-                                      onPress={() => navigation.navigate('Create Secure Chat')}
-                                  />,
-                            })}
-                        />
+                    name="Chats"
+                    component={ChatListScreen}
+                    options={ ({ navigation, route }) => ({
+                        headerTitle: (props) => <LogoTitle {...props} title="Secure Chats:"/>,
+                        headerRight: () =>
+                          <IconButton
+                              icon="plus"
+                              size={28}
+                              color="#e69138"
+                              onPress={() => navigation.navigate('Create Secure Chat')}
+                          />,
+                    })}
+                />
                 <Stack.Screen
-                            name="Chat"
-                            component={ChatScreen}
-                            options={({ route }) => ({
-                                headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>
-                            })}
-                        />
+                    name="Chat"
+                    component={ChatScreen}
+                    options={({ route }) => ({
+                        headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>
+                    })}
+                />
             </Stack.Group>
+            </Stack.Navigator>
         )
     }
 
@@ -158,21 +177,21 @@ export default function AuthStack() {
   return (
     <AuthContext.Provider value={authContext}>
         <Stack.Navigator
-            screenOptions={{
-              headerStyle: {
-                backgroundColor: '#150510',
-              },
-              headerTintColor: '#eeeeee',
-              headerTitleStyle: {
-                fontSize: 22,
-              },
-              gestureEnabled: true,
-              gestureDirection: "horizontal",
-              cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
-              animationEnabled: true,
-            }}
+                    screenOptions={{
+                      headerStyle: {
+                        backgroundColor: '#150510',
+                      },
+                      headerTintColor: '#eeeeee',
+                      headerTitleStyle: {
+                        fontSize: 22,
+                      },
+                      gestureEnabled: true,
+                      gestureDirection: "horizontal",
+                      cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
+                      animationEnabled: true,
+                    }}
 
-        >
+                >
             {!state.userToken || state.userToken == null ? (
               <>
                 {walletFound ? (
