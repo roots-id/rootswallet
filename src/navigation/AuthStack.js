@@ -119,11 +119,28 @@ export default function AuthStack() {
     }
     const RelationshipsStack = () => {
         return (
-        <Stack.Navigator>
+        <Stack.Navigator
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: '#150510',
+              },
+              headerTintColor: '#eeeeee',
+              headerTitleStyle: {
+                fontSize: 22,
+              },
+              gestureEnabled: true,
+              gestureDirection: "horizontal",
+              cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
+              animationEnabled: true,
+              }}
+        >
             <Stack.Group>
                 <Stack.Screen name="Relationships"
                               component={RelationshipsScreen}
                               initialParams={{walletName: walletName}}
+                              options={ ({ navigation, route }) => ({
+                                  headerTitle: (props) => <LogoTitle {...props} title="Relationships:"/>,
+                              })}
                 />
                 <Stack.Screen name="Credentials" component={CredentialsScreen}/>
                 <Stack.Screen name="CredentialDetails" component={CredentialDetailsScreen}/>
@@ -134,21 +151,21 @@ export default function AuthStack() {
     const ChatsStack = () => {
         return (
             <Stack.Navigator
-                                screenOptions={{
-                                  headerStyle: {
-                                    backgroundColor: '#150510',
-                                  },
-                                  headerTintColor: '#eeeeee',
-                                  headerTitleStyle: {
-                                    fontSize: 22,
-                                  },
-                                  gestureEnabled: true,
-                                  gestureDirection: "horizontal",
-                                  cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
-                                  animationEnabled: true,
-                                }}
+                screenOptions={{
+                  headerStyle: {
+                    backgroundColor: '#150510',
+                  },
+                  headerTintColor: '#eeeeee',
+                  headerTitleStyle: {
+                    fontSize: 22,
+                  },
+                  gestureEnabled: true,
+                  gestureDirection: "horizontal",
+                  cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
+                  animationEnabled: true,
+                }}
 
-                            >
+            >
             <Stack.Group>
                 <Stack.Screen
                     name="Chats"

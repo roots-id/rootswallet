@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
-import {FlatList, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {FlatList, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import { Divider, List } from 'react-native-paper';
 import {getRelationships} from '../utils/relationshipsManager'
 import {getCredentials} from '../utils/credentialsRetriever'
 import Relationship from '../models/relationship'
@@ -12,7 +13,7 @@ const RelationshipsScreen = ({route,navigation}) => {
 
     const relationships = getRelationships(walletName)
 
-    const onPress = (key) => {
+    const goToRel = (key) => {
         console.log(`> RelationshipsScr.pressHandler( ${key})`)
         console.log(`executing navigation.navigate() now...`)
         const creds = getCredentials(key)
@@ -38,17 +39,25 @@ const RelationshipsScreen = ({route,navigation}) => {
 
     return (
         <View style={styles.container}>
-            <View style={{flex: 1}}>
-                <Text style={styles.header}>Wallet <Text style={{color: 'blue'}}>{walletName}</Text></Text>
-                <Text style={styles.leftheader}>Relationships: </Text>
+            <SafeAreaView style={styles.container}>
                 <FlatList
                     data={relationships}
-                    renderItem={({item}) => touchable(item.key)}
+                    keyExtractor={(item) => item.key}
+                    ItemSeparatorComponent={() => <Divider />}
+                    renderItem={({ item }) => (
+                    <List.Item
+                      title={item.key}
+                      titleNumberOfLines={1}
+                      titleStyle={styles.listTitle}
+                      descriptionStyle={styles.listDescription}
+                      descriptionNumberOfLines={1}
+                      onPress={() => goToRel(item)}
+                    />
+                    )}
                 />
-            </View>
+            </SafeAreaView>
         </View>
     )
 };
 
 export default RelationshipsScreen
-

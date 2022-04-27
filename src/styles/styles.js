@@ -45,6 +45,7 @@ const styles = StyleSheet.create({
 
     },
     header: {
+            color: '#999999',
         fontSize: 20,
         fontWeight: 'bold',
         marginHorizontal: 15,
@@ -52,6 +53,7 @@ const styles = StyleSheet.create({
 
     },
     leftheader: {
+        color: '#999999',
         fontSize: 20,
         fontWeight: 'bold',
         marginHorizontal: 15,
@@ -60,15 +62,32 @@ const styles = StyleSheet.create({
 
     },
     container: {
+        backgroundColor: '#251520',
         flex: 1,
-        flexDirection: 'row',
+
     },
     text: {
         fontSize: 30,
     },
     listItem: {
-        fontSize: 18
+        fontSize: 18,
+        color: '#eeeeee',
+
     },
+      listTitle: {
+        fontSize: 22,
+        color: '#dddddd',
+      },
+      listDescription: {
+        fontSize: 16,
+        color: '#dddddd',
+      },
+      item: {
+          backgroundColor: '#20190e',
+          padding: 20,
+          marginVertical: 8,
+          marginHorizontal: 16,
+        },
     highlightedItem: {
         fontSize: 18,
         fontWeight: "bold"

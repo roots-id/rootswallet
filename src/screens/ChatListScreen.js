@@ -7,6 +7,8 @@ import FormButton from '../components/FormButton';
 import { getAllChats } from '../roots';
 import Loading from '../components/Loading';
 
+import styles from "../styles/styles";
+
 export default function ChatListScreen({navigation}) {
     const [chats, setChats] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -53,27 +55,3 @@ export default function ChatListScreen({navigation}) {
     );
     }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#251520',
-    flex: 1,
-  },
-  listTitle: {
-    fontSize: 22,
-    color: '#dddddd',
-  },
-  listDescription: {
-    fontSize: 16,
-    color: '#dddddd',
-  },
-  item: {
-      backgroundColor: '#20190e',
-      padding: 20,
-      marginVertical: 8,
-      marginHorizontal: 16,
-    },
-    title: {
-      fontSize: 32,
-    },
-});
