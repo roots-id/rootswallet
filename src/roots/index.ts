@@ -4,7 +4,6 @@ import PrismModule from '../prism'
 import { Reply } from 'react-native-gifted-chat';
 import * as store from '../store'
 import * as walletSchema from '../schemas/WalletSchema'
-//import QRCode from 'qrcode'
 
 import rwLogo from '../assets/LogoOnly1024.png'
 import perLogo from '../assets/smallBWPerson.png'
@@ -23,12 +22,14 @@ export const PENDING_STATUS_MESSAGE = "rootsPendingStatus";
 export const PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE = "rootsAcceptCredential"
 export const PROMPT_PUBLISH_MSG_TYPE = "promptPublish";
 export const PRISM_LINK_MSG_TYPE = "prismLink"
+export const QR_CODE_MSG_TYPE = "rootsQRCodeMsgType"
 export const STATUS_MSG_TYPE = "status";
 export const TEXT_MSG_TYPE = "text"
 
 //meaningful literals
 export const ACHIEVEMENT_MSG_PREFIX = "You have a new achievement: ";
 export const PUBLISHED_TO_PRISM = "published to Prism"
+export const SHOW_QR_CODE = "Show QR code"
 
 //state literals
 export const CRED_ACCEPTED = "credAccepted"
@@ -576,14 +577,16 @@ async function processPublishResponse(chat: Object, reply: Reply) {
     logger("roots - Quick reply, started publsih chat",chat.id)
     const pubChat = await publishChat(chat);
     if(pubChat) {
-        const linkMsg = await sendMessage(pubChat,pubChat.id+" "+PUBLISHED_TO_PRISM+"\nhttps://explorer.cardano-testnet.iohkdev.io/en/transaction?id=0ce00bc602ef54dfc52b4106bebcafb72c2447bdf666cd609d50fd3a7e9d2474",
+        const linkMsg = await sendMessage(pubChat,pubChat.id+" "+PUBLISHED_TO_PRISM+"\n"+SHOW_QR_CODE+"\nhttps://explorer.cardano-testnet.iohkdev.io/en/transaction?id=0ce00bc602ef54dfc52b4106bebcafb72c2447bdf666cd609d50fd3a7e9d2474",
                 TEXT_MSG_TYPE,getUserItem(PRISM_BOT))
+
         if(linkMsg) {
             const didMsg = await sendMessage(chat,JSON.stringify(getDid(chat.id)),DID_JSON_MSG_TYPE,getUserItem(PRISM_BOT),true);
             if(demo && didMsg) {
                 const confirmPubMsg = await sendMessage(chat,
                     "You published your chat to Prism!",
                     STATUS_MSG_TYPE,getUserItem(ROOTS_BOT))
+                await sendMessage(chat,"Show QR code",QR_CODE_MSG_TYPE,getUserItem(ROOTS_BOT))
                 if(confirmPubMsg && demo) {
                     await sendMessage(chat,
                         "To celebrate your publishing achievement, can we send you a verifiable credential?",

@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { KeyboardAvoidingView, NativeModules, StyleSheet, Text, View } from 'react-native';
 import { Actions, ActionsProps, Bubble, ChatInput,
     Composer, GiftedChat, InputToolbar, Message, SendButton } from 'react-native-gifted-chat';
+
 //import { Video, VideoPlayer } from 'react-native-video'
 //import { useInterval } from 'usehooks-ts'
 //import { BarCodeScanner } from 'expo-barcode-scanner';
@@ -17,7 +18,7 @@ import Loading from '../components/Loading';
 
 const { PrismModule } = NativeModules;
 
-export default function ChatScreen({ route }) {
+export default function ChatScreen({ route, navigation }) {
     console.log("ChatScreen - route params",route.params)
 //  const [ user, setUser ] = useState(user);
     const [chat, setChat] = useState(getChatItem(route.params.chatId));
@@ -245,6 +246,22 @@ export default function ChatScreen({ route }) {
 //      return <></>;
 //    };
 
+//    function renderActions(props: Readonly<ActionsProps>) {
+//        return (
+//          <Actions
+//            {...props}
+//            options={{
+//              ['Send Image']: handlePickImage,
+//            }}
+//            icon={() => (
+//              <Icon name={'attachment'} size={28} color={AppTheme.colors.primary} />
+//            )}
+//            onSend={args => console.log(args)}
+//          />
+//        )
+//    }
+
+
     function renderInputToolbar(props) {
       //console.log("renderInputToolbar", props)
       return (
@@ -335,10 +352,16 @@ export default function ChatScreen({ route }) {
                       style: styles.prism,
                       onPress: (tag) => setShowSystem(!showSystem),
                   },
+                  {
+                      pattern: /Show QR code/,
+                      style: styles.qr,
+                      onPress: (tag) => showQRModal(tag),
+                  }
                   //{type: 'url', style: styles.url, onPress: onUrlPress},
                 ]}
 
           renderInputToolbar={props => renderInputToolbar(props)}
+          //renderActions={renderActions}
           renderAllAvatars={true}
           renderAvatarOnTop={true}
           renderBubble={renderBubble}
@@ -395,6 +418,11 @@ export default function ChatScreen({ route }) {
       avatar: user.displayPictureUrl,
     };
   }
+
+  function showQRModal(tag) {
+    console.log("ChatScreen - Showing QR modal",tag)
+    navigation.navigate('Show QR Code')
+  }
 }
 
 const styles = StyleSheet.create({
@@ -411,6 +439,9 @@ const styles = StyleSheet.create({
     },
     prism: {
       color: 'red',
+    },
+    qr: {
+      color: 'orange',
     },
     url: {
       color: 'red',
