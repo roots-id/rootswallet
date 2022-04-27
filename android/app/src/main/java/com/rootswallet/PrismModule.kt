@@ -1,49 +1,92 @@
 package com.rootswallet
-import android.content.Context
-import android.os.Build
+
+import android.annotation.SuppressLint
 import android.util.Log
-import android.widget.Toast
-import com.facebook.react.bridge.Callback
+import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.bridge.NativeModule;
-import com.facebook.react.bridge.ReadableMap;
+import com.rootsid.wal.library.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
 import java.util.*
-import io.iohk.atala.prism.api.*;
-import io.iohk.atala.prism.api.node.*;
-import io.iohk.atala.prism.crypto.derivation.KeyDerivation;
-import io.iohk.atala.prism.crypto.derivation.MnemonicCode;
-import io.iohk.atala.prism.crypto.keys.ECKeyPair;
-import io.iohk.atala.prism.identity.*;
-import io.iohk.atala.prism.protos.*;
-import org.didcommx.didcomm.utils.toJson
-
+import kotlin.concurrent.thread
 
 class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+
+    //var wal:Wallet = newWallet("wallet1","","passphrase")
 
     override fun getName(): String {
         return "PrismModule"
     }
-    
-    // TODO Beware of the isBlocking. Need to fix with callback when sending to ledger
+
     @ReactMethod(isBlockingSynchronousMethod = true)
-    fun createDID(pass: String, publicKey: ReadableMap): String {
-        val issuerKeys = prepareKeysFromMnemonic(KeyDerivation.randomMnemonicCode(), pass)
-        val issuerUnpublishedDid = PrismDid.buildLongFormFromMasterPublicKey(issuerKeys[PrismDid.DEFAULT_MASTER_KEY_ID]?.publicKey!!)
-        return issuerUnpublishedDid.toString()
+    fun test() {Log.d("test","test")}
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun testNode() {
+        val wal = newWallet("walletname1", "", "password1")
+        val didAlias1 = "didAlias1"
+        val walAfterDid = newDid(wal, didAlias1, true)
+        Log.d("LANCETAG", "Testing node publish....")
+        val output = publishDid(walAfterDid, didAlias1).toString()
     }
 
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun newDID(walJson: String, didAlias: String): String {
+        var cliWal = Json.decodeFromString<Wallet>(walJson);
+        cliWal = newDid(cliWal, didAlias, true);
+        return Json.encodeToString(cliWal)
+    }
 
-    fun prepareKeysFromMnemonic(mnemonic: MnemonicCode, pass: String): Map<String, ECKeyPair> {
-       val seed = KeyDerivation.binarySeed(mnemonic, pass)
-       val issuerMasterKeyPair = KeyGenerator.deriveKeyFromFullPath(seed, 0, PrismKeyType.MASTER_KEY, 0)
-       val issuerIssuingKeyPair = KeyGenerator.deriveKeyFromFullPath(seed, 0, PrismKeyType.ISSUING_KEY, 0)
-       val issuerRevocationKeyPair = KeyGenerator.deriveKeyFromFullPath(seed, 0, PrismKeyType.REVOCATION_KEY, 0)
-       return mapOf(
-           Pair(PrismDid.DEFAULT_MASTER_KEY_ID, issuerMasterKeyPair),
-           Pair(PrismDid.DEFAULT_ISSUING_KEY_ID, issuerIssuingKeyPair),
-           Pair(PrismDid.DEFAULT_REVOCATION_KEY_ID, issuerRevocationKeyPair))
-   }
-    
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun newWal(name: String, mnemonic: String, passphrase: String): String {
+        val cliWal = newWallet(name,mnemonic,passphrase);
+        return Json.encodeToString<Wallet>(cliWal);
+    }
+
+    @ReactMethod
+    fun publishDid(walJson: String, didAlias: String, promise: Promise) {
+        Log.d("PRISM_TAG","Publishing "+didAlias+" from wallet "+walJson);
+        thread(start = true) {
+            try {
+                //                Thread.sleep(10000);
+
+                var cliWal = Json.decodeFromString<Wallet>(walJson);
+                cliWal = publishDid(cliWal, didAlias);
+                var newWalJson = Json.encodeToString(cliWal)
+                Log.d("PRISM_TAG","Published "+didAlias+" from wallet "+newWalJson)
+                promise.resolve(newWalJson);
+            } catch (e: Exception) {
+                promise.reject("Publish Error", e);
+            }
+        }
+    }
+
+    @ReactMethod
+    fun issueCred(walJson: String, didAlias: String, credJson: String, promise: Promise) {
+        Log.d("PRISM_TAG","Issuing credential for "+didAlias+" from wallet "+walJson);
+        thread(start = true) {
+            try {
+                var cliWal = Json.decodeFromString<Wallet>(walJson);
+                val cliCred = Json.decodeFromString<IssuedCredential>(credJson);
+                cliWal = issueCredential(cliWal, didAlias, cliCred)
+                var newWalJson = Json.encodeToString(cliWal)
+                Log.d("PRISM_TAG","Credential "+cliCred.verifiedCredential+" for did "+didAlias+" from wallet "+newWalJson)
+                promise.resolve(newWalJson);
+            } catch (e: Exception) {
+                promise.reject("Publish Error", e);
+            }
+        }
+    }
+
+//    @ReactMethod
+//    public void fetch(final String path, final Promise promise) {
+//        new Thread(new Runnable() {
+//            public void run() {
+//                root.child(path)...
+//            }
+//        }).start();
+//    }
 }
