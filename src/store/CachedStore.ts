@@ -53,7 +53,7 @@ export function hasWallet(walName: string) {
     return hasWal;
 }
 
-export async function status() {
+export function status() {
     logger("CachedStore - wallets:",Object.keys(cachedWallets))
     logger("CachedStore - items:",Object.keys(cachedItems))
 }

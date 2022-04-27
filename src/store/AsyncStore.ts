@@ -82,12 +82,18 @@ export async function status() {
   logger("AsyncStore - keys:",keys)
 }
 
-export async function storeItem(alias: string, item: string) {
+export async function storeItem(alias: string, item: string, saveHistory: boolean=false) {
     try {
         logger('AsyncStore - start storing item',alias)
-        const oldItem = await AsyncStorage.setItem(alias, item)
+        const oldItem = await AsyncStorage.getItem(alias)
+        await AsyncStorage.setItem(alias, item)
         if(oldItem && oldItem !== null) {
-          logger("AsyncStore - Replace previous item",alias,oldItem)
+            logger("AsyncStore - Replaced previous item",alias,oldItem)
+            if(saveHistory) {
+                const historicalKey = getHistoricalKey(alias)
+                logger("AsyncStore - saving historical item",historicalKey,oldItem)
+                await AsyncStorage.setItem(historicalKey, item)
+            }
         }
         return true;
     } catch(error) {
@@ -97,17 +103,6 @@ export async function storeItem(alias: string, item: string) {
     return false;
 }
 
-export async function storeWallet(walName: string,walJson: string) {
-    try {
-        logger('AsyncStore - start storing wallet',walName)
-        const oldWallet = await AsyncStorage.setItem(walName, walJson)
-        if(oldWallet && oldWallet !== null) {
-          logger("AsyncStore - Replace previous wallet",oldWallet)
-        }
-        return true;
-    } catch(error) {
-        console.error("AsyncStore - Could not store async wallet,",error)
-        return false;
-    }
-    return false;
+function getHistoricalKey(key: string) {
+    return key+Date.now();
 }

@@ -96,8 +96,10 @@ async function storeWallet(walName: string, walPass: string, walJson: string) {
     if(walJson) {
         try {
             logger('store - secure storing wallet',walName,"w/ pass",walPass)
+            //TODO make wallet pass and storage actually secure
             await SecureStore.setItemAsync(walPass,walName);
-            if(await AsyncStore.storeWallet(walName,walJson)) {
+            const asyncStored = await AsyncStore.storeItem(walName,walJson,true)
+            if(asyncStored) {
                 CachedStore.storeWallet(walName,walJson)
                 logger('store - secure stored wallet')
                 return true

@@ -110,7 +110,7 @@ export default function AuthStack() {
 
     const Main = () => {
         return (
-            <Tab.Navigator>
+            <Tab.Navigator screenOptions={{headerShown:false}}>
                 <Tab.Screen name="relationships" component={RelationshipsStack}/>
                 <Tab.Screen name="chats" component={ChatsStack}/>
                 <Tab.Screen name="integration" component={IntegrationStack}/>
@@ -211,22 +211,20 @@ export default function AuthStack() {
         )
     }
 
+    const WalletHistoryStack = () => {
+        <Stack.Navigator>
+            <Stack.Group>
+                <Stack.Screen name="WalletHistory" component={WalletHistoryScreen}/>
+            </Stack.Group>
+        </Stack.Navigator>
+    }
+
  //TODO refactor hasWallet call where we capture walletName
   return (
     <AuthContext.Provider value={authContext}>
         <Stack.Navigator
                     screenOptions={{
-                      headerStyle: {
-                        backgroundColor: '#150510',
-                      },
-                      headerTintColor: '#eeeeee',
-                      headerTitleStyle: {
-                        fontSize: 22,
-                      },
-                      gestureEnabled: true,
-                      gestureDirection: "horizontal",
-                      cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
-                      animationEnabled: true,
+                        headerShown: false
                     }}
 
                 >
@@ -258,7 +256,7 @@ export default function AuthStack() {
   );
 
 }
-
+//TODO pull into it's own component
 function LogoTitle(...props) {
   return (
     <React.Fragment>
