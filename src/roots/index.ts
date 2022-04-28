@@ -4,13 +4,10 @@ import PrismModule from '../prism'
 import { Reply } from 'react-native-gifted-chat';
 import * as store from '../store'
 import * as walletSchema from '../schemas/WalletSchema'
-//import QRCode from 'qrcode'
 
 import rwLogo from '../assets/LogoOnly1024.png'
 import perLogo from '../assets/smallBWPerson.png'
 import apLogo from '../assets/ATALAPRISM.png'
-//https://lh5.googleusercontent.com/bOG9vTJDA73jNwAtwm1ioc__Nr1Ch199Xo-4R9xFgJW_hsMsNwef2WQCwm-8_c9d3B8zF7vSEF5E-nLIMOOaZJlPz_dKAo-j_s102ddaNla0iiywfT2fAljxrsdrkxDllg=w1280
-//https://lh5.googleusercontent.com/iob7iL2ixIzrP24PvQVJjpnmt3M2HvJIS7E3mIg2qWRMIJIlnIo27qjAS4XL9tC3ZwhZ78sbpwygbK2hDjx-8z2u_WaunTLxpEFgHJngBljvF8VvJ3QoAiyVfjEmthEEWQ=w1280
 export const rootsLogo = rwLogo;
 export const personLogo = perLogo;
 export const prismLogo = apLogo;
@@ -23,12 +20,15 @@ export const PENDING_STATUS_MESSAGE = "rootsPendingStatus";
 export const PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE = "rootsAcceptCredential"
 export const PROMPT_PUBLISH_MSG_TYPE = "promptPublish";
 export const PRISM_LINK_MSG_TYPE = "prismLink"
+export const QR_CODE_MSG_TYPE = "rootsQRCodeMsgType"
 export const STATUS_MSG_TYPE = "status";
 export const TEXT_MSG_TYPE = "text"
 
 //meaningful literals
 export const ACHIEVEMENT_MSG_PREFIX = "You have a new achievement: ";
-export const PUBLISHED_TO_PRISM = "published to Prism"
+export const PUBLISHED_TO_PRISM = "Published to Prism"
+export const SHOW_CRED_QR_CODES = "Show Cred QR codes"
+export const SHOW_DID_QR_CODE = "Show Chat QR code"
 
 //state literals
 export const CRED_ACCEPTED = "credAccepted"
@@ -37,11 +37,11 @@ export const CRED_SENT = "credSent"
 
 const ID_SEPARATOR = "_"
 
-const allChatsRegex = new RegExp('^'+getStorageKey("",models.MODEL_TYPE_CHAT)+'*')
-//const allCredsRegex = new RegExp('^'+getStorageKey("",models.MODEL_TYPE_CREDENTIAL)+'*')
-const allCredReqsRegex = new RegExp('^'+getStorageKey("",models.MODEL_TYPE_CRED_REQUEST)+'*')
-const allMsgsRegex = new RegExp('^'+getStorageKey("",models.MODEL_TYPE_MESSAGE)+'*')
-const allUsersRegex = new RegExp('^'+getStorageKey("",models.MODEL_TYPE_USER)+'*')
+const allChatsRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_CHAT)+'*')
+//const allCredsRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_CREDENTIAL)+'*')
+const allCredReqsRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_CRED_REQUEST)+'*')
+const allMsgsRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_MESSAGE)+'*')
+const allUsersRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_USER)+'*')
 
 const ROOTS_BOT = "RootsWalletBot1"
 const PRISM_BOT = "PrismBot1"
@@ -99,15 +99,19 @@ async function createUserItem(alias: string, name: string, pic: string) {
 
 export function getUserItem(userId) {
     logger("roots - Getting user",userId)
-    const userItemJson = store.getItem(getStorageKey(userId,models.MODEL_TYPE_USER));
-    logger("roots - Got user json",userItemJson)
-    if(userItemJson) {
-        const userItem = JSON.parse(userItemJson)
-        logger("roots - user w/keys",Object.keys(userItem))
-        return userItem
+    if(userId) {
+        const userItemJson = store.getItem(getStorageKey(userId,models.MODEL_TYPE_USER));
+        logger("roots - Got user json",userItemJson)
+        if(userItemJson) {
+            const userItem = JSON.parse(userItemJson)
+            logger("roots - user w/keys",Object.keys(userItem))
+            return userItem
+        } else {
+            logger("roots - user not found",userId)
+            return userItemJson
+        }
     } else {
-        logger("roots - user not found",userId)
-        return userItemJson
+        logger("roots - can't get user for undefined userId",userId)
     }
 }
 
@@ -222,14 +226,14 @@ async function createDid(didAlias: string) {
     }
 }
 
-function getDid(didAlias) {
+export function getDid(didAlias) {
     logger("roots - getDid by alias",didAlias)
     const dids = currentWal[walletSchema.WALLET_DIDS];
     if(dids) {
-        logger("roots - current dids",dids)
+        logger("roots - # of current dids",dids.length)
         const findDid = dids.find(did => (did[walletSchema.DID_ALIAS] === didAlias));
         if(findDid) {
-            logger("roots -  found did alias",didAlias,"w/keys:",findDid)
+            logger("roots -  found did alias",didAlias,"w/keys:",Object.keys(findDid))
             return findDid
         } else {
             logger("roots - Couldn't find DID",didAlias)
@@ -502,11 +506,11 @@ export async function sendMessages(chat,msgs,msgType,userDisplay) {
 }
 
 //TODO unify aliases and storageKeys?
-export async function sendMessage(chat,msgText,msgType,userDisplay,system=false) {
+export async function sendMessage(chat,msgText,msgType,userDisplay,system=false,cred=undefined) {
     const msgTime = Date.now()
     logger("roots - user",userDisplay.id,"sending",msgText,"to chat",chat.id);
     const msgId = createMessageId(chat.id,userDisplay.id,msgTime);
-    let msg = models.createMessage(msgId, msgText, msgType, msgTime, userDisplay.id, system);
+    let msg = models.createMessage(msgId, msgText, msgType, msgTime, userDisplay.id, system, cred);
     msg = addMessageExtensions(msg);
     try {
         const result = await store.saveItem(msg.id,JSON.stringify(msg))
@@ -576,19 +580,17 @@ async function processPublishResponse(chat: Object, reply: Reply) {
     logger("roots - Quick reply, started publsih chat",chat.id)
     const pubChat = await publishChat(chat);
     if(pubChat) {
-        const linkMsg = await sendMessage(pubChat,pubChat.id+" "+PUBLISHED_TO_PRISM+"\nhttps://explorer.cardano-testnet.iohkdev.io/en/transaction?id=0ce00bc602ef54dfc52b4106bebcafb72c2447bdf666cd609d50fd3a7e9d2474",
+        const linkMsg = await sendMessage(pubChat,"Your chat \""+pubChat.id+"\" has been"
+                +"\t\t"+PUBLISHED_TO_PRISM+"\t\t"+SHOW_DID_QR_CODE
+                +"\nhttps://explorer.cardano-testnet.iohkdev.io/en/transaction?id=0ce00bc602ef54dfc52b4106bebcafb72c2447bdf666cd609d50fd3a7e9d2474",
                 TEXT_MSG_TYPE,getUserItem(PRISM_BOT))
+
         if(linkMsg) {
             const didMsg = await sendMessage(chat,JSON.stringify(getDid(chat.id)),DID_JSON_MSG_TYPE,getUserItem(PRISM_BOT),true);
             if(demo && didMsg) {
-                const confirmPubMsg = await sendMessage(chat,
-                    "You published your chat to Prism!",
-                    STATUS_MSG_TYPE,getUserItem(ROOTS_BOT))
-                if(confirmPubMsg && demo) {
-                    await sendMessage(chat,
-                        "To celebrate your publishing achievement, can we send you a verifiable credential?",
-                        PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE,getUserItem(ROOTS_BOT))
-                }
+                await sendMessage(chat,
+                    "To celebrate your publishing achievement, can we send you a verifiable credential?",
+                    PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE,getUserItem(ROOTS_BOT))
             }
         }
         return pubChat
@@ -640,13 +642,14 @@ async function createCredential(chat: Object,credAlias: string,cred: Object) {
     if(newWalJson) {
         const savedWal = await updateWallet(currentWal._id,currentWal.passphrase,newWalJson)
         if(savedWal) {
+            const newCred = getCredential(cred.alias)
             //const saveCred = await saveCred(cred.alias)
-            const credIssuedMsg = await sendMessage(chat,"Your new credential has been " + PUBLISHED_TO_PRISM+"\nhttps://explorer.cardano-testnet.iohkdev.io/en/transaction?id=0ce00bc602ef54dfc52b4106bebcafb72c2447bdf666cd609d50fd3a7e9d2474",
+            const credIssuedMsg = await sendMessage(chat,"Here is your new credential that we\t\t" + PUBLISHED_TO_PRISM+"\t\t"+SHOW_CRED_QR_CODES+"\nhttps://explorer.cardano-testnet.iohkdev.io/en/transaction?id=0ce00bc602ef54dfc52b4106bebcafb72c2447bdf666cd609d50fd3a7e9d2474",
                   STATUS_MSG_TYPE,
-                  getUserItem(ROOTS_BOT))
+                  getUserItem(ROOTS_BOT),false,newCred)
             //const code = await QRCode.toDataURL()
             if(credIssuedMsg) {
-                const credJsonMsg = await sendMessage(chat,JSON.stringify(getCredential(cred.alias)),
+                const credJsonMsg = await sendMessage(chat,JSON.stringify(newCred),
                     CREDENTIAL_JSON_MSG_TYPE,
                     getUserItem(PRISM_BOT),true)
                 isProcessing(false)
@@ -668,11 +671,34 @@ async function createCredential(chat: Object,credAlias: string,cred: Object) {
     }
 }
 
-function getCredential(credAlias) {
+export function getCredentials(chatAlias: string) {
+    logger("roots - Getting credentials",chatAlias)
+    const longDid = getDid(chatAlias).uriLongForm
+    if(currentWal["issuedCredentials"]) {
+        const creds = currentWal["issuedCredentials"].filter(cred => {
+            if(cred.claim.subjectDid === longDid) {
+                logger("roots - Found alias",cred["alias"])
+                return true
+            }
+            else {
+                logger("roots - Alias",cred.claim.subjectDid,"is not",longDid)
+                return false
+            }
+        })
+        if(creds && creds.length > 0) {
+            return creds
+        }
+    } else {
+        logger("roots - No issued credentials for",chatAlias)
+    }
+    return;
+}
+
+export function getCredential(credAlias) {
     logger("roots - Getting credential",credAlias)
 
     if(currentWal["issuedCredentials"]) {
-        creds = currentWal["issuedCredentials"].filter(cred => {
+        const creds = currentWal["issuedCredentials"].filter(cred => {
             if(cred["alias"] === credAlias) {
                 logger("roots - Found alias",cred["alias"])
                 return true
@@ -692,16 +718,21 @@ function getCredential(credAlias) {
 }
 
 function getCredentialAlias(msgId) {
-    return getStorageKey(msgId,models.MODEL_TYPE_CREDENTIAL)
+    return msgId.replace(models.MODEL_TYPE_MESSAGE,models.MODEL_TYPE_CREDENTIAL)
+}
+
+export function getCredentialByMsgId(msgId) {
+    return getCredential(getCredentialAlias(msgId))
 }
 
 function getCredRequestAlias(msgId) {
-    return getStorageKey(msgId,models.MODEL_TYPE_CRED_REQUEST)
+    return msgId.replace(models.MODEL_TYPE_MESSAGE,models.MODEL_TYPE_CRED_REQUEST)
 }
+
 //---------------- Keys -----------------------
 
 function getStorageKey(alias: string,type: string) {
-    return type+ID_SEPARATOR+alias
+    return alias+ID_SEPARATOR+type
 }
 
 function getStorageKeys(aliases: string[], type: string) {
