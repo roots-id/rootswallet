@@ -246,7 +246,7 @@ export default function AuthStack() {
                 <Stack.Group>
                     <Stack.Screen name="relationshipStack" component={Main}/>
                 </Stack.Group>
-                <Stack.Group screenOptions={{ presentation: 'modal' }}>
+                <Stack.Group screenOptions={{ presentation: 'transparentModal' }}>
                     <Stack.Screen name="Help" component={HelpScreen}/>
                     <Stack.Screen name="Create Secure Chat" component={StartChatScreen} />
                     <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen} />

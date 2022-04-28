@@ -9,9 +9,9 @@ import { Actions, ActionsProps, Bubble, ChatInput,
 //import emojiUtils from 'emoji-utils';
 
 import { BLOCKCHAIN_URI_MSG_TYPE, createDemoCredential, getMessages,
-    getChatItem, getFakePromise,
+    getChatItem, getCredentials, getDid, getFakePromise,
     getFakePromiseAsync, getQuickReplyResultMessage, getUserItem, isDemo, isProcessing,
-    processQuickReply,
+    processQuickReply, PUBLISHED_TO_PRISM,
     sendMessage, sendMessages, startChatSession,
     TEXT_MSG_TYPE } from '../roots';
 import Loading from '../components/Loading';
@@ -154,6 +154,9 @@ export default function ChatScreen({ route, navigation }) {
 //            }
 //        }, madeCredential ? null : 5000,);
 //    }
+    function bubblePressed(context,message) {
+        console.log("context",context,"message",message)
+    }
 
     async function handleSend(pendingMsgs) {
         console.log("ChatScreen - handle send",pendingMsgs)
@@ -191,6 +194,7 @@ export default function ChatScreen({ route, navigation }) {
 
 //#fad58b
   function renderBubble(props) {
+    console.log("render bubble with props",props.currentMessage)
     return (
         <Bubble
             {...props}
@@ -344,22 +348,28 @@ export default function ChatScreen({ route, navigation }) {
       <GiftedChat
           isTyping={processing}
           messages={messages.sort((a, b) => b.createdAt - a.createdAt)}
+          onPress={ (context, message) => console.log("bubble pressed")}
           onQuickReply={reply => handleQuickReply(reply)}
           onSend={messages => handleSend(messages)}
           parsePatterns={(linkStyle) => [
                   {
-                      pattern: /published to Prism/,
+                      pattern: /Published to Prism/,
                       style: styles.prism,
                       onPress: (tag) => setShowSystem(!showSystem),
                   },
                   {
-                      pattern: /Show QR code/,
+                      pattern: /Show Chat QR code/,
                       style: styles.qr,
-                      onPress: (tag) => showQRModal(tag),
+                      onPress: (tag) => showQR([getDid(chat.id).uriLongForm]),
+                  },
+                  {
+                      pattern: /Show Cred QR codes/,
+                      style: styles.qr,
+                      onPress: (tag) => {showQR(getCredentials(chat.id).map(cred => cred.verifiedCredential))},
                   }
                   //{type: 'url', style: styles.url, onPress: onUrlPress},
                 ]}
-
+          //placeholder={"Type your message"}
           renderInputToolbar={props => renderInputToolbar(props)}
           //renderActions={renderActions}
           renderAllAvatars={true}
@@ -397,6 +407,9 @@ export default function ChatScreen({ route, navigation }) {
             mappedMsg["text"] = "more details available"
         }
       }
+      if(message["cred"]) {
+        mappedMsg["cred"] = message["cred"]
+      }
       //image: 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_light_color_272x92dp.png',
       // You can also add a video prop:
       //video: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
@@ -419,9 +432,9 @@ export default function ChatScreen({ route, navigation }) {
     };
   }
 
-  function showQRModal(tag) {
-    console.log("ChatScreen - Showing QR modal",tag)
-    navigation.navigate('Show QR Code')
+  function showQR(data: string[]) {
+    console.log("ChatScreen - Showing QR data",data)
+    navigation.navigate('Show QR Code', {qrdata: data})
   }
 }
 
