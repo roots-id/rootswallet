@@ -10,6 +10,8 @@ import * as SecureStore from 'expo-secure-store';
 import AuthContext from '../context/AuthenticationContext';
 import { createWallet, storageStatus, TEST_WALLET_NAME } from '../roots'
 
+import styles from "../styles/styles";
+
 //async function save(key, value) {
 //  await SecureStore.setItemAsync(key, value);
 //}
@@ -64,7 +66,7 @@ export default function CreateWalletScreen({ navigation }) {
   const { signIn } = React.useContext(AuthContext);
 
   return (
-      <View style={styles.container}>
+      <View style={styles.modalContainer}>
         <Title style={styles.titleText}>Creating new wallet with password:</Title>
         <FormInput
             labelName="Wallet Name"
@@ -98,32 +100,6 @@ export default function CreateWalletScreen({ navigation }) {
       </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#251520',
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  titleText: {
-    fontSize: 24,
-    marginBottom: 10,
-    color: '#eeeeee',
-  },
-  loginButtonLabel: {
-    fontSize: 22,
-  },
-  navButtonText: {
-    fontSize: 16,
-  },
-  none: {
-      display: 'none'
-  },
-  problem: {
-    color: 'red',
-  },
-});
 
 function displayProblem(problemDisabled) {
     if(problemDisabled){
