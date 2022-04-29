@@ -194,7 +194,7 @@ export default function ChatScreen({ route, navigation }) {
 
 //#fad58b
   function renderBubble(props) {
-    console.log("render bubble with props",props.currentMessage)
+    //console.log("render bubble with props",props.currentMessage)
     return (
         <Bubble
             {...props}
@@ -348,7 +348,7 @@ export default function ChatScreen({ route, navigation }) {
       <GiftedChat
           isTyping={processing}
           messages={messages.sort((a, b) => b.createdAt - a.createdAt)}
-          onPress={ (context, message) => console.log("bubble pressed")}
+          onPress={ (context, message) => console.log("bubble pressed",context,message)}
           onQuickReply={reply => handleQuickReply(reply)}
           onSend={messages => handleSend(messages)}
           parsePatterns={(linkStyle) => [
