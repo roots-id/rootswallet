@@ -818,7 +818,7 @@ export async function createDemoCredential(chat: Object,reply: Object) {
 //                      getUserDisplay(ROOTS_BOT))
 //
 //
-//        sendMessage(chat,"Credential imported",
+//        sendMessage(chat,"Credential imported"
 //                    STATUS_MSG_TYPE,
 //                    getUserDisplay(ROOTS_BOT))
 //        sendMessage(chat,"Valid credential.",
