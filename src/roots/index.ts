@@ -811,7 +811,7 @@ export async function createDemoCredential(chat: Object,reply: Object) {
         return await createCredential(chat, credAlias, cred)
     } else {
         logger("roots - Couldn't create demo credential, is the chat published",chat["published"],"was the credential already found",getCredential(credAlias))
-        return false;
+        return false
     }
 //        sendMessage(chat,"Valid credential",
 //                      STATUS_MSG_TYPE,
