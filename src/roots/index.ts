@@ -34,13 +34,15 @@ export const SHOW_DID_QR_CODE = "Show Chat QR code"
 export const CRED_ACCEPTED = "credAccepted"
 export const CRED_REJECTED = "credRejected"
 export const CRED_SENT = "credSent"
+export const CRED_VERIFY = "credVerify"
+export const CRED_VIEW = "credView"
 export const PUBLISH_DID = "publishDID"
 export const DO_NOT_PUBLISH_DID = "doNotPublishDID"
 
 const ID_SEPARATOR = "_"
 
 const allChatsRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_CHAT)+'*')
-//const allCredsRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_CREDENTIAL)+'*')
+const allCredsRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_CREDENTIAL)+'*')
 const allCredReqsRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_CRED_REQUEST)+'*')
 const allMsgsRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_MESSAGE)+'*')
 const allUsersRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_USER)+'*')
@@ -64,7 +66,7 @@ export async function loadAll(walName: string,walPass: string) {
         const users = await loadItems(allUsersRegex);
         const messages = await loadItems(allMsgsRegex);
         const credRequests = await loadItems(allCredReqsRegex);
-        //const creds = await loadItems(allCredsRegex);
+        const creds = await loadItems(allCredsRegex);
         if(wallet && chats && users && messages && credRequests) {
             return wallet
         } else {
@@ -556,14 +558,25 @@ function addQuickReply(msg) {
                 title: 'Reject Credential',
                 value: PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE+CRED_REJECTED,
                 messageId: msg.id,
-            }],
+            },
+            {
+                title: 'Verify Credential',
+                value: PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE+CRED_VERIFY,
+                messageId: msg.id,
+            },
+            {
+                title: 'View Credential',
+                value: PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE+CRED_VIEW,
+                messageId: msg.id,
+            }
+            ],
         }
     }
     return msg
 }
 
 async function processCredentialResponse(chat: Object, reply: Object) {
-    logger("roots - Quick reply credential",chat.id,reply)
+    logger("roots - quick reply credential",chat.id,reply)
     const credReqAlias = getCredRequestAlias(reply.messageId)
     const replyJson = JSON.stringify(reply)
     //TODO should we allow updates to previous credRequest response?
@@ -583,7 +596,11 @@ async function processCredentialResponse(chat: Object, reply: Object) {
             logger("roots - quick reply verify credential",credReqAlias)
             const verify = await verifyCredential(chat, reply)
             return verify;
-        } else {
+        } else if (reply.value.endsWith(CRED_VIEW)) {
+            logger("roots - quick reply view credential",credReqAlias)
+            const credJson = await getCredentialByMsgId(reply.messageId)
+            return credJson;
+        }else {
             logger("roots - unknown credential prompt reply",credReqAlias,replyJson)
             return false
         }
@@ -602,22 +619,22 @@ async function processPublishResponse(chat: Object, reply: Reply) {
         if(linkMsg) {
             const didMsg = await sendMessage(chat,JSON.stringify(getDid(chat.id)),DID_JSON_MSG_TYPE,getUserItem(PRISM_BOT),true);
             if(demo && didMsg) {
-                logger("roots - Quick reply, demo celebrating with credential",chat.id)
+                logger("roots - quick reply demo celebrating with credential",chat.id)
                 await sendMessage(chat,
                     "To celebrate your publishing achievement a verifiable credential is being created for you.",
                     TEXT_MSG_TYPE,getUserItem(ROOTS_BOT))
                 const cred = await issueDemoCredential(chat, reply)
-                logger("roots - Quick reply, demo credential issued",cred)
+                logger("roots - quick reply demo credential issued",cred)
                 const credReqMsg = await sendMessage(chat,
-                    "A verifiable credential is waiting for you",
+                    "Here is your verifiable credential",
                     PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE,getUserItem(ROOTS_BOT))
                 if(credReqMsg) {
-                    const credReqAlias = getCredRequestAlias(credReqMsg.id)
+                    const credAlias = getCredentialAlias(credReqMsg.id)
                     const credJson = JSON.stringify(cred)
-                    logger("roots - cred request prepared",credReqAlias,credJson)
-                    const savedCredReq = await store.saveItem(credReqAlias, credJson);
+                    logger("roots - cred request prepared",credAlias,credJson)
+                    const savedCredReq = await store.saveItem(credAlias, credJson);
                     if(savedCredReq) {
-                        logger("Successfully submitted demo cred req",credReqAlias,)
+                        logger("Successfully submitted demo cred req",credAlias,credJson)
                     }
                 }
             }
@@ -663,9 +680,9 @@ export async function processQuickReply(chat: Object,replies: Object[]) {
 
 async function acceptCredential(chat: Object, reply: Object) {
     isProcessing(true)
-    const credReqAlias = getCredRequestAlias(reply.messageId);
-    const credReqJson = await store.getItem(credReqAlias);
-    const cred = JSON.parse(credReqJson)
+    const credAlias = getCredentialAlias(reply.messageId);
+    const credJson = await store.getItem(credAlias);
+    const cred = JSON.parse(credJson)
     if (!getCredByHash(cred.proof.hash)) {
         const newWalJson = await PrismModule.importCred(store.getWallet(currentWal._id), credReqAlias, credReqJson);
         if(newWalJson) {
@@ -695,7 +712,7 @@ export function getCredByHash(credHash: string) {
     logger("roots - Getting imported credential",credHash)
 
     if(currentWal["importedCredentials"]) {
-        const cred = currentWal["importedCredentials"].first(cred => {
+        const cred = currentWal["importedCredentials"].find(cred => {
             if(cred.proof.hash === credHash) {
                 logger("roots - Found cred hash",cred.proof.hash)
                 return true
@@ -727,10 +744,10 @@ function getCredRequestAlias(msgId) {
 }
 
 export function getIssuedCredential(credAlias) {
-    logger("roots - Getting issued credential",credAlias)
+    logger("roots - getting issued credential",credAlias)
 
     if(currentWal["issuedCredentials"]) {
-        const cred = currentWal["issuedCredentials"].first(cred => {
+        const cred = currentWal["issuedCredentials"].find(cred => {
             if(cred["alias"] === credAlias) {
                 logger("roots - Found alias",cred["alias"])
                 return true
@@ -783,15 +800,16 @@ async function issueCredential(chat: Object,credAlias: string,cred: Object) {
         if(savedWal) {
             const newCred = getIssuedCredential(cred.alias)
             logger("roots - Issued credential",newCred.alias)
+            return newCred
         } else {
             console.error("roots - Could not issue credential, unable to save wallet")
             isProcessing(false)
-            return false
+            return;
         }
     } else {
         console.error("roots - Could not issue credential")
         isProcessing(false)
-        return false
+        return;
     }
 }
 
@@ -880,7 +898,9 @@ export async function issueDemoCredential(chat: Object,reply: Object) {
             operationHash: "",
             revoked: false,
         }
-        return await issueCredential(chat, credAlias, cred)
+        logger("roots - issuing demo credential",cred)
+        const issuedCred = await issueCredential(chat, credAlias, cred)
+        return issuedCred;
     } else {
         logger("roots - Couldn't issue demo credential, is the chat published",chat["published"],"was the credential already found",getIssuedCredential(credAlias))
         return false
