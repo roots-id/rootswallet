@@ -19,8 +19,9 @@ export const CREDENTIAL_JSON_MSG_TYPE = "jsonCredential";
 export const DID_JSON_MSG_TYPE = "jsonDid";
 export const PENDING_STATUS_MESSAGE = "rootsPendingStatus";
 export const PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE = "rootsAcceptCredential"
-export const PROMPT_PUBLISH_MSG_TYPE = "promptPublish";
-export const PRISM_LINK_MSG_TYPE = "prismLink"
+export const PROMPT_OWN_CREDENTIAL_MSG_TYPE = "rootsOwnCredential"
+export const PROMPT_PUBLISH_MSG_TYPE = "rootsPromptPublish";
+export const PRISM_LINK_MSG_TYPE = "rootsPrismLink"
 export const QR_CODE_MSG_TYPE = "rootsQRCodeMsgType"
 export const STATUS_MSG_TYPE = "status";
 export const TEXT_MSG_TYPE = "text"
@@ -28,7 +29,7 @@ export const TEXT_MSG_TYPE = "text"
 //meaningful literals
 export const ACHIEVEMENT_MSG_PREFIX = "You have a new achievement: ";
 export const PUBLISHED_TO_PRISM = "Published to Prism"
-export const SHOW_CRED_QR_CODES = "Show Cred QR codes"
+export const SHOW_CRED_QR_CODE = "Show Cred QR code"
 export const SHOW_DID_QR_CODE = "Show Chat QR code"
 
 //state literals
@@ -447,10 +448,12 @@ export async function sendMessage(chat,msgText,msgType,relDisplay,system=false,c
     let msg = models.createMessage(msgId, msgText, msgType, msgTime, relDisplay.id, system, cred);
     msg = addMessageExtensions(msg);
     try {
-        const result = await store.saveItem(msg.id,JSON.stringify(msg))
+        const msgJson = JSON.stringify(msg)
+        const result = await store.saveItem(msg.id,msgJson)
         if(handlers["onReceivedMessage"]) {
             handlers["onReceivedMessage"](msg)
         }
+        logger("Sent/Stored message",msgJson)
         return msg
     } catch(error) {
         console.error("Could not save message for rel",relDisplay.id,"w/msg",msgText,"to chat",chat.id,error,error.stack)
@@ -463,12 +466,12 @@ function addQuickReply(msg) {
         msg["quickReplies"] = {type: 'checkbox',keepIt: true,
             values: [
             {
-                title: 'Add chat to Prism',
+                title: 'Add to Prism',
                 value: PROMPT_PUBLISH_MSG_TYPE+PUBLISH_DID,
                 messageId: msg.id,
             },
             {
-                title: 'Keep chat private',
+                title: 'Keep private',
                 value: PROMPT_PUBLISH_MSG_TYPE+DO_NOT_PUBLISH_DID,
                 messageId: msg.id,
             }
@@ -480,32 +483,38 @@ function addQuickReply(msg) {
             type: 'checkbox',
             keepIt: true,
             values: [{
-                title: 'Accept Credential',
+                title: 'Accept',
                 value: PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE+CRED_ACCEPTED,
                 messageId: msg.id,
             },
             {
-                title: 'Reject Credential',
+                title: 'Reject',
                 value: PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE+CRED_REJECTED,
-                messageId: msg.id,
-            },
-            {
-                title: 'Verify Credential',
-                value: PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE+CRED_VERIFY,
-                messageId: msg.id,
-            },
-            {
-                title: 'View Credential',
-                value: PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE+CRED_VIEW,
                 messageId: msg.id,
             }
             ],
         }
     }
+    if(msg.type === PROMPT_OWN_CREDENTIAL_MSG_TYPE) {
+        msg["quickReplies"] = {
+            type: 'checkbox',
+            keepIt: true,
+            values: [{
+                title: 'Verify',
+                value: PROMPT_OWN_CREDENTIAL_MSG_TYPE+CRED_VERIFY,
+                messageId: msg.id,
+            },
+            {
+                title: 'View',
+                value: PROMPT_OWN_CREDENTIAL_MSG_TYPE+CRED_VIEW,
+                messageId: msg.id,
+            }]
+        }
+    }
     return msg
 }
 
-async function processCredentialResponse(chat: Object, reply: Object) {
+export async function processCredentialResponse(chat: Object, reply: Object) {
     logger("roots - quick reply credential",chat.id,reply)
     const credReqAlias = getCredRequestAlias(reply.messageId)
     const replyJson = JSON.stringify(reply)
@@ -519,27 +528,23 @@ async function processCredentialResponse(chat: Object, reply: Object) {
             logger("roots - quick reply credential accepted",credReqAlias)
             isProcessing(true)
             const accepted = await acceptCredential(chat, reply)
+            if(accepted) {
+                const credOwnMsg = await sendMessage(chat,"Credential accepted.",PROMPT_OWN_CREDENTIAL_MSG_TYPE,rel.getRelItem(ROOTS_BOT))
+                store.saveItem(getCredentialAlias(credOwnMsg.id),await getCredentialByMsgId(reply.messageId))
+            }
             isProcessing(false)
             return accepted;
         } else if (reply.value.endsWith(CRED_REJECTED)) {
             logger("roots - quick reply credential rejected",credReqAlias)
             return true
-        } else if (reply.value.endsWith(CRED_VERIFY)) {
-            logger("roots - quick reply verify credential",credReqAlias)
-            const verify = await verifyCredential(chat, reply)
-            return verify;
-        } else if (reply.value.endsWith(CRED_VIEW)) {
-            logger("roots - quick reply view credential",credReqAlias)
-            const credJson = await getCredentialByMsgId(reply.messageId)
-            return credJson;
-        }else {
+        } else {
             logger("roots - unknown credential prompt reply",credReqAlias,replyJson)
             return false
         }
     }
 }
 
-async function processPublishResponse(chat: Object, reply: Reply) {
+export async function processPublishResponse(chat: Object, reply: Reply) {
     logger("roots - Quick reply, started publsih chat",chat.id)
     isProcessing(true)
     const pubChat = await publishChat(chat);
@@ -560,7 +565,7 @@ async function processPublishResponse(chat: Object, reply: Reply) {
                 const cred = await issueDemoCredential(chat, reply)
                 logger("roots - quick reply demo credential issued",cred)
                 const credReqMsg = await sendMessage(chat,
-                    "Here is your verifiable credential",
+                    "Do you want to accept this verifiable credential",
                     PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE,rel.getRelItem(ROOTS_BOT))
                 if(credReqMsg) {
                     const credAlias = getCredentialAlias(credReqMsg.id)
@@ -596,10 +601,9 @@ export async function processQuickReply(chat: Object,replies: Object[]) {
                     return;
                 }
             } else if(reply.value.startsWith(PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE)) {
-                logger("roots - process quick reply for credential")
+                logger("roots - process quick reply for accepting credential")
                 return await processCredentialResponse(chat,reply)
-            }
-             else {
+            } else {
                 logger("roots - reply value not recognized, was",chat.id,reply.value)
                 return;
             }
@@ -623,7 +627,7 @@ async function acceptCredential(chat: Object, reply: Object) {
         if(newWalJson) {
             const savedWal = await updateWallet(currentWal._id,currentWal.passphrase,newWalJson)
             if(savedWal) {
-                const newCred = getCredentialByMsgId(reply.messageId)
+                const newCred = await getCredentialByMsgId(reply.messageId)
                 logger("Accepted credential",newCred.alias)
                 return true
             } else {
@@ -635,7 +639,7 @@ async function acceptCredential(chat: Object, reply: Object) {
             return false
         }
     } else {
-        console.error("Credential alias already in use",credReqAlias,cred.proof.hash)
+        console.error("Credential alias already in use",credAlias,credHash)
         return false
     }
 }
@@ -645,12 +649,13 @@ export function getCredByHash(credHash: string) {
 
     if(currentWal["importedCredentials"]) {
         const cred = currentWal["importedCredentials"].find(cred => {
-            if(cred.proof.hash === credHash) {
-                logger("roots - Found cred hash",cred.proof.hash)
+            const curCredHash = cred.verifiedCredential.proof.hash
+            if(curCredHash === credHash) {
+                logger("roots - Found cred hash",curCredHash)
                 return true
             }
             else {
-                logger("roots - cred hash",cred.proof.hash,"does not match",credHash)
+                logger("roots - cred hash",curCredHash,"does not match",credHash)
                 return false
             }
         })
