@@ -7,10 +7,10 @@ import { Actions, ActionsProps, Bubble, ChatInput,
 //import { useInterval } from 'usehooks-ts'
 //import { BarCodeScanner } from 'expo-barcode-scanner';
 //import emojiUtils from 'emoji-utils';
-
+import {getRelItem} from '../relationships'
 import { BLOCKCHAIN_URI_MSG_TYPE, createDemoCredential, getMessages,
     getChatItem, getCredentials, getDid, getFakePromise,
-    getFakePromiseAsync, getQuickReplyResultMessage, getUserItem, isDemo, isProcessing,
+    getFakePromiseAsync, getQuickReplyResultMessage, isDemo, isProcessing,
     processQuickReply, PUBLISHED_TO_PRISM,
     sendMessage, sendMessages, startChatSession,
     TEXT_MSG_TYPE } from '../roots';
@@ -160,7 +160,7 @@ export default function ChatScreen({ route, navigation }) {
 
     async function handleSend(pendingMsgs) {
         console.log("ChatScreen - handle send",pendingMsgs)
-        const result = await sendMessages(chat, pendingMsgs, TEXT_MSG_TYPE, getUserItem(chat.id));
+        const result = await sendMessages(chat, pendingMsgs, TEXT_MSG_TYPE, getRelItem(chat.id));
 //        await setMessages((prevMessages) => GiftedChat.append(prevMessages, pendingMsgs));
     }
 
@@ -377,7 +377,7 @@ export default function ChatScreen({ route, navigation }) {
           renderBubble={renderBubble}
           renderUsernameOnMessage={true}
           showAvatarForEveryMessage={true}
-          user={mapUser(getUserItem(chat.id))}
+          user={mapUser(getRelItem(chat.id))}
       />
     </View>
   );
@@ -393,7 +393,7 @@ export default function ChatScreen({ route, navigation }) {
       mappedMsg["_id"] = message.id
       mappedMsg["text"] = message.body
       mappedMsg["createdAt"] = new Date(message.createdTime)
-      mappedMsg["user"] = mapUser(getUserItem(message.user))
+      mappedMsg["user"] = mapUser(getRelItem(message.rel))
       if(message["image"]) {
         mappedMsg["image"] = message["image"]
       }
@@ -423,12 +423,12 @@ export default function ChatScreen({ route, navigation }) {
     return mappedMsg;
   }
 
-  function mapUser(user) {
-    console.log("ChatScreen - Map User for gifted",user);
+  function mapUser(rel) {
+    console.log("ChatScreen - Map User for gifted",rel);
     return {
-      _id: user.id,
-      name: user.displayName,
-      avatar: user.displayPictureUrl,
+      _id: rel.id,
+      name: rel.displayName,
+      avatar: rel.displayPictureUrl,
     };
   }
 
