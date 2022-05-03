@@ -2,6 +2,8 @@ import * as models from '../models'
 import { logger } from '../logging'
 import * as store from '../store'
 
+export const allRelsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_REL)+'*')
+
 //TODO unify aliases and storageKeys?
 export async function createRelItem(alias: string, name: string, pic: string) {
     try {
@@ -21,6 +23,14 @@ export async function createRelItem(alias: string, name: string, pic: string) {
         console.error("Failed to create rel",alias,error,error.stack)
         return false
     }
+}
+
+export function getRelationships() {
+    logger("rels - getting rel items")
+    const relItemJsonArray = store.getItems(allRelsRegex)
+    logger("rels - got rel items",String(relItemJsonArray))
+    const rels = relItemJsonArray.map(relItemJson => JSON.parse(relItemJson))
+    return rels;
 }
 
 export function getRelItem(relId) {

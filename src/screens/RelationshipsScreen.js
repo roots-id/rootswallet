@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {FlatList, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import {getRelationships} from '../utils/relationshipsManager'
+import {getRelationships} from '../relationships'
 import {getCredentials} from '../utils/credentialsRetriever'
 import Relationship from '../models/relationship'
 import styles from "../styles/styles";

@@ -45,7 +45,6 @@ const allChatsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CHAT)
 const allCredsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CREDENTIAL)+'*')
 const allCredReqsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CRED_REQUEST)+'*')
 const allMsgsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_MESSAGE)+'*')
-const allRelsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_REL)+'*')
 
 const ROOTS_BOT = "RootsWalletBot1"
 const PRISM_BOT = "PrismBot1"
@@ -63,7 +62,7 @@ export async function loadAll(walName: string,walPass: string) {
     const wallet = await loadWallet(walName, walPass);
     if(wallet) {
         const chats = await loadItems(allChatsRegex)
-        const rels = await loadItems(allRelsRegex);
+        const rels = await loadItems(rel.allRelsRegex);
         const messages = await loadItems(allMsgsRegex);
         const credRequests = await loadItems(allCredReqsRegex);
         const creds = await loadItems(allCredsRegex);
