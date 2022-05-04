@@ -27,6 +27,7 @@ import CreateWalletScreen from '../screens/CreateWalletScreen';
 import ChatListScreen from '../screens/ChatListScreen';
 import LoadingScreen from '../screens/LoadingScreen';
 import LoginScreen from '../screens/LoginScreen';
+import ScanQRCodeScreen from '../screens/ScanQRCodeScreen'
 import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
 import StartChatScreen from '../screens/StartChatScreen';
 
@@ -185,8 +186,15 @@ export default function AuthStack() {
                 <Stack.Screen
                     name="Chat"
                     component={ChatScreen}
-                    options={({ route }) => ({
-                        headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>
+                    options={ ({ navigation, route }) => ({
+                        headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>,
+                        headerRight: () =>
+                          <IconButton
+                              icon="plus"
+                              size={28}
+                              color="#e69138"
+                              onPress={() => navigation.navigate('Scan QR Code')}
+                          />,
                     })}
                 />
             </Stack.Group>
@@ -250,6 +258,7 @@ export default function AuthStack() {
                     <Stack.Screen name="Help" component={HelpScreen}/>
                     <Stack.Screen name="Create Secure Chat" component={StartChatScreen} />
                     <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen} />
+                    <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen} />
                 </Stack.Group>
               </>
             )}

@@ -7,13 +7,8 @@ import { Actions, ActionsProps, Bubble, ChatInput,
 //import { useInterval } from 'usehooks-ts'
 //import { BarCodeScanner } from 'expo-barcode-scanner';
 //import emojiUtils from 'emoji-utils';
-
-import { BLOCKCHAIN_URI_MSG_TYPE, createDemoCredential, getMessages,
-    getChatItem, getCredentials, getDid, getFakePromise,
-    getFakePromiseAsync, getQuickReplyResultMessage, getUserItem, isDemo, isProcessing,
-    processQuickReply, PUBLISHED_TO_PRISM,
-    sendMessage, sendMessages, startChatSession,
-    TEXT_MSG_TYPE } from '../roots';
+import {getRelItem} from '../relationships'
+import * as roots from '../roots';
 import Loading from '../components/Loading';
 
 const { PrismModule } = NativeModules;
@@ -21,7 +16,7 @@ const { PrismModule } = NativeModules;
 export default function ChatScreen({ route, navigation }) {
     console.log("ChatScreen - route params",route.params)
 //  const [ user, setUser ] = useState(user);
-    const [chat, setChat] = useState(getChatItem(route.params.chatId));
+    const [chat, setChat] = useState(roots.getChatItem(route.params.chatId));
     console.log("ChatScreen - got chatItem ",chat)
 //    const [hasPermission, setHasPermission] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -34,7 +29,7 @@ export default function ChatScreen({ route, navigation }) {
     useEffect(() => {
         let isCancelled = false;
         console.log("ChatScreen - useEffect",chat)
-        const chatSession = startChatSession({
+        const chatSession = roots.startChatSession({
             chat: chat,
             onReceivedMessage: (message) => {
                 if (!isCancelled) {
@@ -105,7 +100,7 @@ export default function ChatScreen({ route, navigation }) {
 
     useEffect(() => {
         console.log("ChatScreen - getting all messages")
-        const msgs = getMessages(chat.id)
+        const msgs = roots.getMessages(chat.id)
         console.log("ChatScreen - got",msgs.length,"msgs")
         msgs.forEach(msg => console.log("ChatScreen - got msg w/keys",Object.keys(msg)))
         //const msgs = {paginator: {items: }}
@@ -160,21 +155,53 @@ export default function ChatScreen({ route, navigation }) {
 
     async function handleSend(pendingMsgs) {
         console.log("ChatScreen - handle send",pendingMsgs)
-        const result = await sendMessages(chat, pendingMsgs, TEXT_MSG_TYPE, getUserItem(chat.id));
+        const result = await roots.sendMessages(chat, pendingMsgs, roots.TEXT_MSG_TYPE, getRelItem(chat.id));
 //        await setMessages((prevMessages) => GiftedChat.append(prevMessages, pendingMsgs));
     }
 
     //getFakePromiseAsync(10000);
 //processQuickReply(chat,reply)
-    async function handleQuickReply(reply) {
-        console.log("ChatScreen - handle quick reply",reply)
-        const pubChat = await processQuickReply(chat,reply)
-        if(pubChat) {
-            setChat(pubChat)
-            console.log("ChatScreen - Quick Reply processing complete", pubChat)
+    async function handleQuickReply(replies) {
+        console.log("ChatScreen - Processing Quick Reply w/ chat",chat.id,"w/ replies",replies.length)
+        if(replies) {
+            replies.forEach(async (reply) =>
+            {
+                console.log("ChatScreen - processing quick reply",chat.id,reply)
+                if(reply.value.startsWith(roots.PROMPT_PUBLISH_MSG_TYPE)) {
+                    console.log("ChatScreen - process quick reply to publish DID")
+                    if(reply.value.endsWith(roots.PUBLISH_DID)) {
+                        console.log("ChatScreen - publishing DID")
+                        const pubChat = await roots.processPublishResponse(chat,reply)
+                        setChat(pubChat)
+                    } else {
+                        console.log("ChatScreen - not publishing DID")
+                    }
+                } else if(reply.value.startsWith(roots.PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE)) {
+                    console.log("ChatScreen - process quick reply for accepting credential")
+                    const res = await roots.processCredentialResponse(chat,reply)
+                    console.log("ChatScreen - credential accepted?",res)
+                } else if(reply.value.startsWith(roots.PROMPT_OWN_CREDENTIAL_MSG_TYPE)) {
+                    console.log("ChatScreen - process quick reply for owned credential")
+                    if (reply.value.endsWith(roots.CRED_VERIFY)) {
+                        console.log("ChatScreen - quick reply verify credential",)
+                        const verify = await roots.verifyCredential(chat, reply)
+                        console.log("ChatScreen - credential verification result",verify)
+                    } else if (reply.value.endsWith(roots.CRED_VIEW)) {
+                        console.log("ChatScreen - quick reply view credential")
+                        const cred = await roots.getCredentialByMsgId(reply.messageId)
+                        const credJson = JSON.stringify(cred)
+                        console.log("View credential",credJson);
+                        showQR(JSON.stringify(credJson))
+                    }
+                } else {
+                    console.log("ChatScreen - reply value not recognized, was",chat.id,reply.value)
+                    return;
+                }
+            });
+        } else {
+            console.log("ChatScreen - reply",replies,"or chat",chat,"were undefined")
+            return;
         }
-//        await setMessages((prevMessages) =>
-//                GiftedChat.append(prevMessages,resultMessages.map((resultMessage) => mapMessage(resultMessage))));
     }
 
 //function renderActions(props: Readonly<ActionsProps>) {
@@ -194,7 +221,7 @@ export default function ChatScreen({ route, navigation }) {
 
 //#fad58b
   function renderBubble(props) {
-    console.log("render bubble with props",props.currentMessage)
+    //console.log("render bubble with props",props.currentMessage)
     return (
         <Bubble
             {...props}
@@ -348,7 +375,7 @@ export default function ChatScreen({ route, navigation }) {
       <GiftedChat
           isTyping={processing}
           messages={messages.sort((a, b) => b.createdAt - a.createdAt)}
-          onPress={ (context, message) => console.log("bubble pressed")}
+          onPress={ (context, message) => console.log("bubble pressed",context,message)}
           onQuickReply={reply => handleQuickReply(reply)}
           onSend={messages => handleSend(messages)}
           parsePatterns={(linkStyle) => [
@@ -360,13 +387,8 @@ export default function ChatScreen({ route, navigation }) {
                   {
                       pattern: /Show Chat QR code/,
                       style: styles.qr,
-                      onPress: (tag) => showQR([getDid(chat.id).uriLongForm]),
+                      onPress: (tag) => showQR(roots.getDid(chat.id).uriLongForm),
                   },
-                  {
-                      pattern: /Show Cred QR codes/,
-                      style: styles.qr,
-                      onPress: (tag) => {showQR(getCredentials(chat.id).map(cred => cred.verifiedCredential))},
-                  }
                   //{type: 'url', style: styles.url, onPress: onUrlPress},
                 ]}
           //placeholder={"Type your message"}
@@ -377,7 +399,7 @@ export default function ChatScreen({ route, navigation }) {
           renderBubble={renderBubble}
           renderUsernameOnMessage={true}
           showAvatarForEveryMessage={true}
-          user={mapUser(getUserItem(chat.id))}
+          user={mapUser(getRelItem(chat.id))}
       />
     </View>
   );
@@ -393,7 +415,7 @@ export default function ChatScreen({ route, navigation }) {
       mappedMsg["_id"] = message.id
       mappedMsg["text"] = message.body
       mappedMsg["createdAt"] = new Date(message.createdTime)
-      mappedMsg["user"] = mapUser(getUserItem(message.user))
+      mappedMsg["user"] = mapUser(getRelItem(message.rel))
       if(message["image"]) {
         mappedMsg["image"] = message["image"]
       }
@@ -423,12 +445,12 @@ export default function ChatScreen({ route, navigation }) {
     return mappedMsg;
   }
 
-  function mapUser(user) {
-    console.log("ChatScreen - Map User for gifted",user);
+  function mapUser(rel) {
+    console.log("ChatScreen - Map User for gifted",rel);
     return {
-      _id: user.id,
-      name: user.displayName,
-      avatar: user.displayPictureUrl,
+      _id: rel.id,
+      name: rel.displayName,
+      avatar: rel.displayPictureUrl,
     };
   }
 
