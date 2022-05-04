@@ -17,9 +17,9 @@ export const rootsLogo = rwLogo;
 export const personLogo = perLogo;
 export const prismLogo = apLogo;
 
-const ROOTS_BOT = "did:prism:rootsbot1";
-const PRISM_BOT = "did:prism:prismbot1";
-const LIBRARY_BOT = "did:prism:librarybot1";
+export const ROOTS_BOT = "did:prism:rootsbot1";
+export const PRISM_BOT = "did:prism:prismbot1";
+export const LIBRARY_BOT = "did:prism:librarybot1";
 const IOG_TECH = "did:prism:iogtech1";
 const ROOTSID = "did:prism:rootsid";
 const LANCE = "did:prism:lance";
@@ -34,6 +34,7 @@ export const allRelsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE
 //TODO unify aliases and storageKeys?
 export async function createRelItem(alias: string, name: string, pic: string) {
     try {
+        logger("create rel item",alias,name,pic);
         if(getRelItem(alias)) {
             logger("rels - rel already exists",alias)
             return true;

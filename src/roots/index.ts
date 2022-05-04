@@ -488,11 +488,7 @@ function addQuickReply(msg) {
         msg["quickReplies"] = {
             type: 'checkbox',
             keepIt: true,
-            values: [{
-                title: 'Verify',
-                value: PROMPT_OWN_CREDENTIAL_MSG_TYPE+CRED_VERIFY,
-                messageId: msg.id,
-            },
+            values: [
             {
                 title: 'View',
                 value: PROMPT_OWN_CREDENTIAL_MSG_TYPE+CRED_VIEW,
@@ -737,9 +733,10 @@ async function issueCredential(chat: Object,credAlias: string,cred: Object) {
 }
 
 function verifyCredential(credAlias: string) {
-    logger("Verifying credential",credAlias)
-    const errorArray = JSON.parse(PrismModule.verifyCred(credAlias))
-    logger("Credential verification result",credAlias,errorArray)
+    //TODO fix gradle build problems so that we can verify.
+    logger("Verifying credential not implemented yet",credAlias)
+    //const errorArray = JSON.parse(PrismModule.verifyCred(credAlias))
+//     logger("Credential verification not implemented yet",credAlias,errorArray)
 }
 
 // ------------------ Session ---------------

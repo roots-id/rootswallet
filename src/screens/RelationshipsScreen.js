@@ -47,17 +47,17 @@ const RelationshipsScreen = ({route,navigation}) => {
                     renderItem={({ item }) => (
                     <React.Fragment>
                         <View style={{flex: 1,flexDirection:'row',}}>
-                                    <SafeAreaView>
+                            <SafeAreaView>
                             <Image source={item.displayPictureUrl}
-                                                            style={{
-                                                              width:65,
-                                                              height:75,
-                                                              resizeMode:'contain',
-                                                              margin:8
-                                                            }}
-                                                        />
-                                                        </SafeAreaView>
-                                                                    <SafeAreaView style={styles.container}>
+                                style={{
+                                  width:65,
+                                  height:75,
+                                  resizeMode:'contain',
+                                  margin:8
+                                }}
+                            />
+                            </SafeAreaView>
+                            <SafeAreaView style={styles.container}>
                             <List.Item
                               title={item.displayName}
                               titleNumberOfLines={1}

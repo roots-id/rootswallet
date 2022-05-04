@@ -7,6 +7,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.rootsid.wal.library.*
+//import io.iohk.atala.prism.api.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
@@ -100,6 +101,7 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
         }
     }
 
+    //TODO deal with build errors regarding iog.api
 //    @ReactMethod
 //    fun verifyCred(walJson: String, credAlias: String, promise: Promise) {
 //        Log.d("PRISM_TAG","Verifying credential for "+credAlias+" from wallet "+walJson);
@@ -107,7 +109,7 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
 //            try {
 //                var cliWal = Json.decodeFromString<Wallet>(walJson);
 //                var verResult = Json.encodeToString(verifyIssuedCredential(cliWal, credAlias))
-//                Log.d("PRISM_TAG","Credential "+credAlias+" is " + varResult)
+//                Log.d("PRISM_TAG","Credential "+credAlias+" is " + verResult)
 //                promise.resolve(verResult);
 //            } catch (e: Exception) {
 //                promise.reject("Publish Error", e);
