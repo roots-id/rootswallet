@@ -6,13 +6,6 @@ import * as store from '../store'
 import * as rel from '../relationships'
 import * as walletSchema from '../schemas/WalletSchema'
 
-import rwLogo from '../assets/LogoOnly1024.png'
-import perLogo from '../assets/smallBWPerson.png'
-import apLogo from '../assets/ATALAPRISM.png'
-export const rootsLogo = rwLogo;
-export const personLogo = perLogo;
-export const prismLogo = apLogo;
-
 //msg types
 export const BLOCKCHAIN_URI_MSG_TYPE = "blockchainUri";
 export const CREDENTIAL_JSON_MSG_TYPE = "jsonCredential";
@@ -45,10 +38,6 @@ const allChatsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CHAT)
 const allCredsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CREDENTIAL)+'*')
 const allCredReqsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CRED_REQUEST)+'*')
 const allMsgsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_MESSAGE)+'*')
-
-const ROOTS_BOT = "RootsWalletBot1"
-const PRISM_BOT = "PrismBot1"
-const LIBRARY_BOT = "LibraryBot1"
 
 export const TEST_WALLET_NAME = "testWalletName"
 const demo = true;
@@ -84,6 +73,10 @@ export async function createWallet(walName,mnemonic,walPass) {
     const result = await updateWallet(walName,walPass,prismWal)
     if(result) {
         logger('Wallet created',store.getWallet(currentWal._id))
+        if(demo) {
+            logger("roots - initializing demo")
+            await initDemo()
+        }
         return result;
     } else {
         logger('Could not create wallet',walName,walPass)
@@ -205,15 +198,15 @@ export async function createChat (chatAlias, titlePrefix) {
     const chatItem = getChatItem(chatDidAlias)
     logger("roots - chat item",chatItem)
     //TODO what should the rel defaults be?
-    const chatRelCreated = await rel.createRelItem(chatDidAlias,"You",personLogo)
+    const chatRelCreated = await rel.createRelItem(chatDidAlias,"You",rel.personLogo)
     logger("roots - chat rel created/existed?",chatRelCreated)
     const chatRel = rel.getRelItem(chatDidAlias)
 
     if(chatDidCreated && chatItemCreated && chatRelCreated) {
-        const sentWelcome = await sendMessage(chatItem,"Welcome to *"+chatAlias+"*",TEXT_MSG_TYPE,rel.getRelItem(ROOTS_BOT))
+        const sentWelcome = await sendMessage(chatItem,"Welcome to *"+chatAlias+"*",TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
         if(sentWelcome) {
             await sendMessage(chatItem,"Would you like to publish this chat to Prism?",
-                PROMPT_PUBLISH_MSG_TYPE,rel.getRelItem(PRISM_BOT))
+                PROMPT_PUBLISH_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
             logger("Created chat and added welcome to chat",chatAlias,"with chatDid",chatDidAlias)
         }
         return true;
@@ -245,10 +238,7 @@ async function createChatItem(chatAlias: string, titlePrefix: string) {
 //TODO iterate to verify DID connections if cache is expired
 export async function getAllChats () {
     const allChats = getChatItems();
-    if(allChats.length == 0 && demo) {
-        logger("roots - adding demo to chats")
-        await initDemo()
-    }
+
     const result = {paginator: {items: allChats}};
     result.paginator.items.forEach(function (item, index) {
         logger("roots - getting chats",index+".",item.id);
@@ -528,7 +518,7 @@ export async function processCredentialResponse(chat: Object, reply: Object) {
             isProcessing(true)
             const accepted = await acceptCredential(chat, reply)
             if(accepted) {
-                const credOwnMsg = await sendMessage(chat,"Credential accepted.",PROMPT_OWN_CREDENTIAL_MSG_TYPE,rel.getRelItem(ROOTS_BOT))
+                const credOwnMsg = await sendMessage(chat,"Credential accepted.",PROMPT_OWN_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
                 store.saveItem(getCredentialAlias(credOwnMsg.id),await getCredentialByMsgId(reply.messageId))
             }
             isProcessing(false)
@@ -552,20 +542,20 @@ export async function processPublishResponse(chat: Object, reply: Reply) {
         const linkMsg = await sendMessage(pubChat,"Your chat \""+pubChat.id+"\" has been"
                 +"\t\t"+PUBLISHED_TO_PRISM+"\t\t"+SHOW_DID_QR_CODE
                 +"\nhttps://explorer.cardano-testnet.iohkdev.io/en/transaction?id=0ce00bc602ef54dfc52b4106bebcafb72c2447bdf666cd609d50fd3a7e9d2474",
-                TEXT_MSG_TYPE,rel.getRelItem(PRISM_BOT))
+                TEXT_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
 
         if(linkMsg) {
-            const didMsg = await sendMessage(chat,JSON.stringify(getDid(chat.id)),DID_JSON_MSG_TYPE,rel.getRelItem(PRISM_BOT),true);
+            const didMsg = await sendMessage(chat,JSON.stringify(getDid(chat.id)),DID_JSON_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),true);
             if(demo && didMsg) {
                 logger("roots - quick reply demo celebrating with credential",chat.id)
                 await sendMessage(chat,
                     "To celebrate your publishing achievement a verifiable credential is being created for you.",
-                    TEXT_MSG_TYPE,rel.getRelItem(ROOTS_BOT))
+                    TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
                 const cred = await issueDemoCredential(chat, reply)
                 logger("roots - quick reply demo credential issued",cred)
                 const credReqMsg = await sendMessage(chat,
                     "Do you want to accept this verifiable credential",
-                    PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE,rel.getRelItem(ROOTS_BOT))
+                    PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
                 if(credReqMsg) {
                     const credAlias = getCredentialAlias(credReqMsg.id)
                     const credJson = JSON.stringify(cred.verifiedCredential)
@@ -832,28 +822,28 @@ export async function issueDemoCredential(chat: Object,reply: Object) {
     }
 //        sendMessage(chat,"Valid credential",
 //                      STATUS_MSG_TYPE,
-//                      rel.getRelDisplay(ROOTS_BOT))
+//                      rel.getRelDisplay(rel.ROOTS_BOT))
 //
 //
 //        sendMessage(chat,"Credential imported"
 //                    STATUS_MSG_TYPE,
-//                    rel.getRelDisplay(ROOTS_BOT))
+//                    rel.getRelDisplay(rel.ROOTS_BOT))
 //        sendMessage(chat,"Valid credential.",
 //                      STATUS_MSG_TYPE,
-//                      rel.getRelDisplay(ROOTS_BOT))
+//                      rel.getRelDisplay(rel.ROOTS_BOT))
     //    sendMessage(chat,"https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=0ce00bc602ef54dfc52b4106bebcafb72c2447bdf666cd609d50fd3a7e9d2474",
     //                 BLOCKCHAIN_URI_MSG_TYPE,
-    //                 rel.getRelDisplay(PRISM_BOT))
+    //                 rel.getRelDisplay(rel.PRISM_BOT))
 //        sendMessage(chat,"Credential revoked",
 //                      STATUS_MSG_TYPE,
-//                      rel.getRelDisplay(ROOTS_BOT))
+//                      rel.getRelDisplay(rel.ROOTS_BOT))
 //        sendMessage(chat,"Invalid credential.",
 //                    STATUS_MSG_TYPE,
-//                    rel.getRelDisplay(ROOTS_BOT))
+//                    rel.getRelDisplay(rel.ROOTS_BOT))
 }
 
 async function initDemo() {
-    const rels = await initDemoRelDisplays()
+    const rels = await rel.initDemoRels()
     const intro = await initDemoIntro()
 //    const achievements = await initDemoAchievements()
 //    const library = await initDemoLibrary()
@@ -867,16 +857,16 @@ async function initDemoAchievements() {
 
     await sendMessage(achieveCh,ACHIEVEMENT_MSG_PREFIX+"Opened RootsWallet!",
       STATUS_MSG_TYPE,
-      rel.getRelItem(ROOTS_BOT))
+      rel.getRelItem(rel.ROOTS_BOT))
     await sendMessage(achieveCh,"{subject: you,issuer: RootsWallet,credential: Opened RootsWallet}",
       CREDENTIAL_JSON_MSG_TYPE,
-      rel.getRelItem(ROOTS_BOT))
+      rel.getRelItem(rel.ROOTS_BOT))
     await sendMessage(achieveCh,ACHIEVEMENT_MSG_PREFIX+"Clicked Example!",
       STATUS_MSG_TYPE,
-      rel.getRelItem(ROOTS_BOT))
+      rel.getRelItem(rel.ROOTS_BOT))
     await sendMessage(achieveCh,"{subject: you,issuer: RootsWallet,credential: Clicked Example}",
       CREDENTIAL_JSON_MSG_TYPE,
-      rel.getRelItem(ROOTS_BOT))
+      rel.getRelItem(rel.ROOTS_BOT))
 }
 
 async function initDemoIntro() {
@@ -890,19 +880,6 @@ async function initDemoLibrary() {
 
 async function initDemoResume() {
     const resumeCh = await createChat("Resume/CV Chat","Coming Soon - ")
-}
-
-async function initDemoRelDisplays() {
-    await rel.createRelItem(ROOTS_BOT,
-                  "RootsWallet",
-                  rootsLogo)
-    await rel.createRelItem(PRISM_BOT,
-                  "Atala Prism",
-                  prismLogo)
-    await rel.createRelItem(
-                  LIBRARY_BOT,
-                  "Library",
-                  personLogo)
 }
 
 export function isDemo() {
