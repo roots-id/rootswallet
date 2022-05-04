@@ -8,12 +8,9 @@ import {
     HOME_SCREEN,
     SETUP_SCREEN,
     RELATIONSHIPS_SCREEN,
-    CREDENTIALS_SCREEN,
-    CREDENTIALDETAILS_SCREEN,
 } from "../constants/navigationConstants";
 import CommunicationsScreen from '../screens/CommunicationsScreen';
-import CredentialDetailsScreen from "../screens/CredentialDetailsScreen";
-import CredentialsScreen from "../screens/CredentialsScreen";
+import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
 import HelpScreen from '../screens/HelpScreen';
 import HomeScreen from "../screens/HomeScreen"
 import MyIdentityScreen from '../screens/MyIdentityScreen';
@@ -144,8 +141,6 @@ export default function AuthStack() {
                                   headerTitle: (props) => <LogoTitle {...props} title="Relationships:"/>,
                               })}
                 />
-                <Stack.Screen name="Credentials" component={CredentialsScreen}/>
-                <Stack.Screen name="CredentialDetails" component={CredentialDetailsScreen}/>
             </Stack.Group>
         </Stack.Navigator>
         )
@@ -190,7 +185,7 @@ export default function AuthStack() {
                         headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>,
                         headerRight: () =>
                           <IconButton
-                              icon="plus"
+                              icon="qrcode-scan"
                               size={28}
                               color="#e69138"
                               onPress={() => navigation.navigate('Scan QR Code')}
@@ -259,6 +254,7 @@ export default function AuthStack() {
                     <Stack.Screen name="Create Secure Chat" component={StartChatScreen} />
                     <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen} />
                     <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen} />
+                    <Stack.Screen name="Relationship Details" component={RelationshipDetailScreen}/>
                 </Stack.Group>
               </>
             )}

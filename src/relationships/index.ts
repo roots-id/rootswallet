@@ -32,7 +32,7 @@ const RODO = "did:prism:rodolfo";
 export const allRelsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_REL)+'*')
 
 //TODO unify aliases and storageKeys?
-export async function createRelItem(alias: string, name: string, pic: string) {
+export async function createRelItem(alias: string, name: string, pic: string, did?: string) {
     try {
         logger("create rel item",alias,name,pic);
         if(getRelItem(alias)) {
@@ -40,7 +40,7 @@ export async function createRelItem(alias: string, name: string, pic: string) {
             return true;
         } else {
             logger("rels - rel did not exist",alias)
-            const relItem = models.createRel(alias, name, pic)
+            const relItem = models.createRel(alias, name, pic,did)
             const relItemJson = JSON.stringify(relItem)
             logger("rels - generated rel",relItemJson)
             const result = await store.saveItem(models.getStorageKey(alias, models.MODEL_TYPE_REL), relItemJson)
@@ -81,15 +81,15 @@ export function getRelItem(relId) {
 
 export async function initDemoRels() {
     logger("rels - init demo rels")
-    await createRelItem(ROOTS_BOT,"RootsWallet",rootsLogo)
-    await createRelItem(PRISM_BOT,"Atala Prism",prismLogo)
-    await createRelItem(LIBRARY_BOT,"Library",personLogo)
-    await createRelItem(IOG_TECH, "IOG Tech Community",iogLogo);
-    await createRelItem(ROOTSID, "RootsID",rootsLogo);
-    await createRelItem(LANCE, "MeGrimLance",lanceLogo);
-    await createRelItem(TONY,"Tony.Rose",tonyLogo)
-    await createRelItem(DARRELL,"Darrell O'Donnell",darrellLogo)
-    await createRelItem(BUTCH,"Butch Clark",butchLogo)
-    await createRelItem(ESTEBAN,"Esteban Garcia",estebanLogo)
-    await createRelItem(RODO,"Rodolfo Miranda",rodoLogo)
+    await createRelItem(ROOTS_BOT,"RootsWallet",rootsLogo,ROOTS_BOT)
+    await createRelItem(PRISM_BOT,"Atala Prism",prismLogo,PRISM_BOT)
+    await createRelItem(LIBRARY_BOT,"Library",personLogo,LIBRARY_BOT)
+    await createRelItem(IOG_TECH, "IOG Tech Community",iogLogo,IOG_TECH);
+    await createRelItem(ROOTSID, "RootsID",rootsLogo,ROOTSID);
+    await createRelItem(LANCE, "MeGrimLance",lanceLogo,LANCE);
+    await createRelItem(TONY,"Tony.Rose",tonyLogo,TONY)
+    await createRelItem(DARRELL,"Darrell O'Donnell",darrellLogo,DARRELL)
+    await createRelItem(BUTCH,"Butch Clark",butchLogo,BUTCH)
+    await createRelItem(ESTEBAN,"Esteban Garcia",estebanLogo,ESTEBAN)
+    await createRelItem(RODO,"Rodolfo Miranda",rodoLogo,RODO)
 }
