@@ -67,6 +67,23 @@ export async function loadAll(walName: string,walPass: string) {
     }
 }
 
+async function loadItems(regex: RegExp) {
+    try {
+        const result = await store.restoreByRegex(regex)
+        if(result) {
+            logger("roots - successfully loaded items w/regex",regex)
+            return true;
+        }
+        else {
+            console.error("roots - Failed to load items w/regex",regex)
+            return false;
+        }
+    } catch(error) {
+        console.error("roots - Failed to load items w/regex",regex,error,error.stack)
+        return false;
+    }
+}
+
 //----------------- Wallet ---------------------
 export async function createWallet(walName,mnemonic,walPass) {
     const prismWal = PrismModule.newWal(walName,mnemonic,walPass)
@@ -198,7 +215,7 @@ export async function createChat (chatAlias, titlePrefix) {
     const chatItem = getChatItem(chatDidAlias)
     logger("roots - chat item",chatItem)
     //TODO what should the rel defaults be?
-    const chatRelCreated = await rel.createRelItem(chatDidAlias,"You",rel.personLogo)
+    const chatRelCreated = await rel.createRelItem(chatDidAlias,"You",rel.personLogo,chatDid.uriCanonical)
     logger("roots - chat rel created/existed?",chatRelCreated)
     const chatRel = rel.getRelItem(chatDidAlias)
 
@@ -408,21 +425,19 @@ export function getMessageItems(chatAlias: string) {
     return chatMsgs;
 }
 
-async function loadItems(regex: RegExp) {
-    try {
-        const result = await store.restoreByRegex(regex)
-        if(result) {
-            logger("roots - successfully loaded items w/regex",regex)
-            return true;
+export function getMessagesByUser(userId: string) {
+    logger("roots - getting message items by user",userId)
+    const msgRegex = new RegExp(models.MODEL_TYPE_MESSAGE+'*'+userId+'*')
+    const msgItemJsonArray = store.getItems(msgRegex)
+    logger("roots - got user msg items",msgItemJsonArray.length)
+    const chatMsgs = msgItemJsonArray.map(
+        (msgItemJson) => {
+            logger("parsing msg json",msgItemJson)
+            return JSON.parse(msgItemJson);
         }
-        else {
-            console.error("roots - Failed to load items w/regex",regex)
-            return false;
-        }
-    } catch(error) {
-        console.error("roots - Failed to load items w/regex",regex,error,error.stack)
-        return false;
-    }
+    )
+    chatMsgs.sort((a,b) => (a.createdTime < b.createdTime))
+    return chatMsgs;
 }
 
 export async function sendMessages(chat,msgs,msgType,relDisplay) {
@@ -458,15 +473,15 @@ function addQuickReply(msg) {
                 title: 'Add to Prism',
                 value: PROMPT_PUBLISH_MSG_TYPE+PUBLISH_DID,
                 messageId: msg.id,
-            },
-            {
-                title: 'Keep private',
-                value: PROMPT_PUBLISH_MSG_TYPE+DO_NOT_PUBLISH_DID,
-                messageId: msg.id,
             }
             ],
         }
     }
+// {
+//                 title: 'Keep private',
+//                 value: PROMPT_PUBLISH_MSG_TYPE+DO_NOT_PUBLISH_DID,
+//                 messageId: msg.id,
+//             }
     if(msg.type === PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE) {
         msg["quickReplies"] = {
             type: 'checkbox',
@@ -476,14 +491,14 @@ function addQuickReply(msg) {
                 value: PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE+CRED_ACCEPTED,
                 messageId: msg.id,
             },
-            {
-                title: 'Reject',
-                value: PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE+CRED_REJECTED,
-                messageId: msg.id,
-            }
             ],
         }
     }
+// {
+//                 title: 'Reject',
+//                 value: PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE+CRED_REJECTED,
+//                 messageId: msg.id,
+//             }
     if(msg.type === PROMPT_OWN_CREDENTIAL_MSG_TYPE) {
         msg["quickReplies"] = {
             type: 'checkbox',

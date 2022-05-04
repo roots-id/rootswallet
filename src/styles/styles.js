@@ -52,6 +52,14 @@ const styles = StyleSheet.create({
         marginBottom: 20
 
     },
+    headingText: {
+        fontSize: 18,
+        marginBottom: 10,
+        color: '#ff9138',
+        fontWeight: 'normal',
+        alignSelf: "flex-start",
+        justifyContent: "flex-start"
+    },
     leftheader: {
         color: '#999999',
         fontSize: 20,
@@ -69,14 +77,14 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 30,
     },
-  titleText: {
-    fontSize: 24,
-    marginBottom: 10,
-    color: '#eeeeee',
-    fontWeight: 'normal',
-    textAlignVertical: "center",
-    textAlign: "center",
-  },
+    titleText: {
+        fontSize: 24,
+        marginBottom: 10,
+        color: '#eeeeee',
+        fontWeight: 'normal',
+        textAlignVertical: "center",
+        textAlign: "center",
+    },
     listItem: {
         fontSize: 18,
         color: '#eeeeee',
@@ -110,6 +118,20 @@ const styles = StyleSheet.create({
     },
     navButtonText: {
       fontSize: 16,
+    },
+  none: {
+      display: 'none'
+  },
+  problem: {
+      color: 'red',
+  },
+    subText: {
+      fontSize: 16,
+      marginBottom: 10,
+      color: '#111111',
+      fontWeight: 'normal',
+      alignSelf: "flex-start",
+      justifyContent: "flex-start"
     },
 })
 
