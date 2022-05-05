@@ -1,4 +1,5 @@
 import { logger } from '../logging';
+import { replaceSpecial } from '../utils';
 
 const ID_SEPARATOR = "_"
 
@@ -52,7 +53,8 @@ export function createRel(relAlias: string, relName: string, relPicUrl: string, 
 
 //---------------- Keys -----------------------
 export function getStorageKey(alias: string,type: string) {
-    return alias+ID_SEPARATOR+type
+//TODO this replacement happens in storage too.... unify
+    return replaceSpecial(alias)+ID_SEPARATOR+type
 }
 
 export function getStorageKeys(aliases: string[], type: string) {

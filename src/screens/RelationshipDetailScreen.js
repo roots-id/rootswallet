@@ -6,6 +6,7 @@ import {
   Image,
   Text,
   Pressable,
+  SafeAreaView,
   StyleSheet,
   View,
 } from 'react-native';
@@ -16,16 +17,16 @@ import {logger} from '../logging';
 import { Divider, List, Title,ToggleButton } from 'react-native-paper';
 import styles from "../styles/styles";
 
-import getMessagesByUser from "../roots";
+import { getMessagesByRel } from '../roots'
 
 export default function RelationshipDetailScreen({ route, navigation }) {
-    const [user, setUser] = useState(route.params.user);
+    const [rel, setRel] = useState(route.params.rel);
     const { colors } = useTheme();
     const { current } = useCardAnimation();
 
     useEffect(() => {
-        console.log("user changed",user)
-    }, [user]);
+        console.log("rel changed",rel)
+    }, [rel]);
 
   return (
     <View
@@ -46,7 +47,7 @@ export default function RelationshipDetailScreen({ route, navigation }) {
         style={{
           padding: 16,
           width: '90%',
-          maxWidth: 400,
+          maxWidth: 500,
           borderRadius: 3,
           backgroundColor: colors.card,
           alignItems: 'center',
@@ -62,7 +63,7 @@ export default function RelationshipDetailScreen({ route, navigation }) {
           ],
         }}
       >
-        <Image source={user.displayPictureUrl}
+        <Image source={rel.displayPictureUrl}
             style={{
               width:130,
               height:150,
@@ -71,23 +72,27 @@ export default function RelationshipDetailScreen({ route, navigation }) {
               justifyContent:'flex-start',
             }}
         />
-        <Text style={styles.subText}>{user.displayName}</Text>
+        <Text style={styles.subText}>{rel.displayName}</Text>
         <Divider/>
-        <Text style={styles.subText}>{user.did}</Text>
+        <Text style={styles.subText}>{rel.did}</Text>
         <Title style={styles.headingText}>Recent Activity:</Title>
         <FlatList
-          data={getMessagesByUser(user.id)}
-          keyExtractor={(item) => item.id.toString()}
+          data={getMessagesByRel(rel.id)}
+          keyExtractor={(item) => item.id}
           ItemSeparatorComponent={() => <Divider />}
           renderItem={({ item }) => (
-              <List.Item
-                  title={item.title}
-                  titleNumberOfLines={1}
-                  titleStyle={styles.listTitle}
-                  descriptionStyle={styles.listDescription}
-                  descriptionNumberOfLines={1}
-                  onPress={() => navigation.navigate('Chat', { chatId: item.id })}
-              />
+<React.Fragment>
+                            <SafeAreaView style={{width:200,justifyContent:'flex-start'}}>
+                            <List.Item
+                              title={item.displayName}
+                              titleNumberOfLines={1}
+                              titleStyle={styles.listTitle}
+                              descriptionStyle={styles.listDescription}
+                              descriptionNumberOfLines={1}
+                              onPress={() => console.log("pressed")}
+                            />
+                            </SafeAreaView>
+                    </React.Fragment>
           )}
         />
         <Title style={styles.headingText}>Chats:</Title>

@@ -3,6 +3,7 @@ import * as CachedStore from './CachedStore'
 //TODO move this into AsyncStore so they can work together?
 import * as SecureStore from 'expo-secure-store';
 import { logger } from '../logging'
+import { replaceSpecial } from '../utils'
 
 const quickReplyResults = {}
 
@@ -119,6 +120,7 @@ async function storeWallet(walName: string, walPass: string, walJson: string) {
 }
 
 export async function hasItem(alias: string) {
+    alias = replaceSpecial(alias)
     if(!CachedStore.hasItem(alias)) {
         const persisted = await AsyncStore.hasItem(alias)
         if(persisted) {
@@ -136,6 +138,7 @@ export async function hasItem(alias: string) {
 }
 
 export function getItem(alias: string) {
+    alias = replaceSpecial(alias)
     const itemJson = CachedStore.getItem(alias);
     if (!itemJson || itemJson == null) {
         logger('store - item not found in cache',alias)
@@ -178,6 +181,7 @@ export async function restoreItems(aliases: string[]) {
         try {
             const allRestored = await aliases.reduce(async (previousStatus,alias) => {
                 logger("store - restoring",alias)
+                alias = replaceSpecial(alias)
                 const itemJson = await AsyncStore.getItem(alias)
                 if(!itemJson || itemJson == null) {
                     logger("store - No item found",alias)
@@ -201,6 +205,7 @@ export async function restoreItems(aliases: string[]) {
 
 
 export async function saveItem(alias: string, itemJson: string) {
+    alias = replaceSpecial(alias)
     if(await hasItem(alias)) {
         logger("store - item already exists.  Not adding",alias)
         return false
@@ -210,6 +215,7 @@ export async function saveItem(alias: string, itemJson: string) {
 }
 
 async function storeItem(alias: string, itemJson: string) {
+    alias = replaceSpecial(alias)
     if(itemJson) {
         try {
             if(await AsyncStore.storeItem(alias, itemJson)) {
@@ -231,6 +237,7 @@ async function storeItem(alias: string, itemJson: string) {
 }
 
 export async function updateItem(alias: string, itemJson: string) {
+    alias = replaceSpecial(alias)
     try {
         await storeItem(alias, itemJson);
         logger("store - item added/updated",alias,"json:",itemJson)

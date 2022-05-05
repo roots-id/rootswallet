@@ -4,6 +4,7 @@ import PrismModule from '../prism'
 import { Reply } from 'react-native-gifted-chat';
 import * as store from '../store'
 import * as rel from '../relationships'
+import { replaceSpecial } from '../utils'
 import * as walletSchema from '../schemas/WalletSchema'
 
 //msg types
@@ -263,6 +264,10 @@ export async function getAllChats () {
     return result;
 }
 
+export async function getChatByRel(relId: string) {
+
+}
+
 export function getChatItem(chatAlias: string) {
     logger("roots - getting chat item",chatAlias)
     const chatJson = store.getItem(models.getStorageKey(chatAlias,models.MODEL_TYPE_CHAT))
@@ -384,7 +389,7 @@ function addMessageExtensions(msg) {
 }
 
 export function getMessages(chatAlias: string, startFromMsgId?: string) {
-    const chMsgs = getMessageItems(chatAlias)
+    const chMsgs = getMessagesByChat(chatAlias)
     logger("roots - Getting chat",chatAlias,chMsgs.length,"messages")
     chMsgs.forEach(msg => logger("roots - got message",msg))
     if(!startFromMsgId) {
@@ -410,7 +415,7 @@ export function getMessages(chatAlias: string, startFromMsgId?: string) {
     }
 }
 
-export function getMessageItems(chatAlias: string) {
+export function getMessagesByChat(chatAlias: string) {
     logger("roots - getting message items for chat",chatAlias)
     const msgRegex = new RegExp('^'+models.getStorageKey(chatAlias,models.MODEL_TYPE_MESSAGE)+'*')
     const msgItemJsonArray = store.getItems(msgRegex)
@@ -425,9 +430,11 @@ export function getMessageItems(chatAlias: string) {
     return chatMsgs;
 }
 
-export function getMessagesByUser(userId: string) {
-    logger("roots - getting message items by user",userId)
-    const msgRegex = new RegExp(models.MODEL_TYPE_MESSAGE+'*'+userId+'*')
+export function getMessagesByRel(relId: string) {
+    logger("roots - getting message items by user",relId)
+//     /rootsMsgType*did:prism:rootsbot1*/
+//     "testing_rootsMsgType_did:prism:prismbot1_1651751636532",
+    const msgRegex = new RegExp(models.MODEL_TYPE_MESSAGE+'_'+replaceSpecial(relId)+'*')
     const msgItemJsonArray = store.getItems(msgRegex)
     logger("roots - got user msg items",msgItemJsonArray.length)
     const chatMsgs = msgItemJsonArray.map(

@@ -10,6 +10,7 @@ import {
     RELATIONSHIPS_SCREEN,
 } from "../constants/navigationConstants";
 import CommunicationsScreen from '../screens/CommunicationsScreen';
+import CredentialsScreen from '../screens/CredentialsScreen';
 import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
 import HelpScreen from '../screens/HelpScreen';
 import HomeScreen from "../screens/HomeScreen"

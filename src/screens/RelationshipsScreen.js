@@ -12,13 +12,13 @@ const RelationshipsScreen = ({route,navigation}) => {
 
     const relationships = getRelationships(walletName).filter(rel => rel.displayName !== 'You')
 
-    const goToRel = (user) => {
-        console.log(`> RelationshipsScr.pressHandler( ${user})`)
+    const goToRel = (rel) => {
+        console.log(`> RelationshipsScr.pressHandler( ${rel})`)
         console.log(`executing navigation.navigate() now...`)
         navigation.navigate(
             'Relationship Details',
             {
-                user: user
+                rel: rel
             }
         )
     }
