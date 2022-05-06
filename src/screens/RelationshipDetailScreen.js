@@ -14,10 +14,12 @@ import { useTheme } from '@react-navigation/native';
 import { useCardAnimation } from '@react-navigation/stack';
 
 import {logger} from '../logging';
-import { Divider, List, Title,ToggleButton } from 'react-native-paper';
+import { Divider, IconButton, List, Title,ToggleButton } from 'react-native-paper';
 import styles from "../styles/styles";
 
 import { getChatsByRel } from '../roots'
+
+import IconActions from '../components/IconActions';
 
 export default function RelationshipDetailScreen({ route, navigation }) {
     const [rel, setRel] = useState(route.params.rel);
@@ -84,6 +86,7 @@ export default function RelationshipDetailScreen({ route, navigation }) {
         <Text style={styles.subText}>{rel.displayName}</Text>
         <Divider/>
         <Text style={styles.subText}>{rel.did}</Text>
+        <IconActions nav={navigation} add="Create Secure Chat" scan='Scan QR Code'/>
         <Title style={styles.headingText}>Chats:</Title>
         <FlatList
           data={getChatsByRel(rel.id)}

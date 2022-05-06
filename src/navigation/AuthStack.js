@@ -10,6 +10,9 @@ import {
     RELATIONSHIPS_SCREEN,
 } from "../constants/navigationConstants";
 import CommunicationsScreen from '../screens/CommunicationsScreen';
+import IconActions from '../components/IconActions';
+import LogoTitle from '../components/LogoTitle';
+import CreateRelScreen from '../screens/CreateRelScreen';
 import CredentialsScreen from '../screens/CredentialsScreen';
 import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
 import HelpScreen from '../screens/HelpScreen';
@@ -136,26 +139,21 @@ export default function AuthStack() {
         >
             <Stack.Group>
                 <Stack.Screen name="Relationships"
-                              component={RelationshipsScreen}
-                              initialParams={{walletName: walletName}}
-                              options={ ({ navigation, route }) => ({
-                                  headerTitle: (props) => <LogoTitle {...props} title="Relationships:"/>,
-                              })}
+                      component={RelationshipsScreen}
+                      initialParams={{walletName: walletName}}
+                      options={ ({ navigation, route }) => ({
+                          headerTitle: (props) => <LogoTitle {...props} title="Relationships:"/>,
+                          headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" scan='Scan QR Code'/>,
+                      })}
                 />
-                                <Stack.Screen
-                                    name="Chat"
-                                    component={ChatScreen}
-                                    options={ ({ navigation, route }) => ({
-                                        headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>,
-                                        headerRight: () =>
-                                          <IconButton
-                                              icon="qrcode-scan"
-                                              size={28}
-                                              color="#e69138"
-                                              onPress={() => navigation.navigate('Scan QR Code')}
-                                          />,
-                                    })}
-                                />
+                <Stack.Screen
+                    name="Chat"
+                    component={ChatScreen}
+                    options={ ({ navigation, route }) => ({
+                        headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>,
+                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code'/>,
+                    })}
+                />
             </Stack.Group>
         </Stack.Navigator>
         )
@@ -184,13 +182,7 @@ export default function AuthStack() {
                     component={ChatListScreen}
                     options={ ({ navigation, route }) => ({
                         headerTitle: (props) => <LogoTitle {...props} title="Secure Chats:"/>,
-                        headerRight: () =>
-                          <IconButton
-                              icon="plus"
-                              size={28}
-                              color="#e69138"
-                              onPress={() => navigation.navigate('Create Secure Chat')}
-                          />,
+                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Secure Chat" scan='Scan QR Code'/>,
                     })}
                 />
                 <Stack.Screen
@@ -198,13 +190,7 @@ export default function AuthStack() {
                     component={ChatScreen}
                     options={ ({ navigation, route }) => ({
                         headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>,
-                        headerRight: () =>
-                          <IconButton
-                              icon="qrcode-scan"
-                              size={28}
-                              color="#e69138"
-                              onPress={() => navigation.navigate('Scan QR Code')}
-                          />,
+                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code'/>,
                     })}
                 />
             </Stack.Group>
@@ -266,6 +252,7 @@ export default function AuthStack() {
                 </Stack.Group>
                 <Stack.Group screenOptions={{ presentation: 'transparentModal' }}>
                     <Stack.Screen name="Help" component={HelpScreen}/>
+                    <Stack.Screen name="Create Rel" component={CreateRelScreen}/>
                     <Stack.Screen name="Create Secure Chat" component={StartChatScreen} />
                     <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen} />
                     <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen} />
@@ -277,20 +264,4 @@ export default function AuthStack() {
     </AuthContext.Provider>
   );
 
-}
-//TODO pull into it's own component
-function LogoTitle(...props) {
-  return (
-    <React.Fragment>
-        <View style={{flexDirection:'row',}}>
-            <Image
-              style={{ width: 50, height: 50 }}
-              source={require('../assets/LogoOnly1024.png')}
-            />
-            <Text style={{ color: '#ff9138',fontSize: 22,fontWeight: 'normal',textAlignVertical: "center",textAlign: "center", }}>
-                {props[0]["title"]}
-            </Text>
-        </View>
-    </React.Fragment>
-  );
 }
