@@ -17,7 +17,7 @@ import {logger} from '../logging';
 import { Divider, List, Title,ToggleButton } from 'react-native-paper';
 import styles from "../styles/styles";
 
-import { getMessagesByRel } from '../roots'
+import { getChatsByRel } from '../roots'
 
 export default function RelationshipDetailScreen({ route, navigation }) {
     const [rel, setRel] = useState(route.params.rel);
@@ -27,7 +27,16 @@ export default function RelationshipDetailScreen({ route, navigation }) {
     useEffect(() => {
         console.log("rel changed",rel)
     }, [rel]);
-
+//<List.Icon {...props} icon="folder" />
+//          keyExtractor={(item) => item}
+//            ItemSeparatorComponent={() => <Divider />}
+//            renderItem={({ item }) => (
+//              <List.Item
+//                title="{item}"
+//                titleNumberOfLines={1}
+//                left={props => <Text>lance</Text>}
+//                onPress={() => goToRel(item)}
+//              />
   return (
     <View
       style={{
@@ -75,27 +84,23 @@ export default function RelationshipDetailScreen({ route, navigation }) {
         <Text style={styles.subText}>{rel.displayName}</Text>
         <Divider/>
         <Text style={styles.subText}>{rel.did}</Text>
-        <Title style={styles.headingText}>Recent Activity:</Title>
+        <Title style={styles.headingText}>Chats:</Title>
         <FlatList
-          data={getMessagesByRel(rel.id)}
-          keyExtractor={(item) => item.id}
+          data={getChatsByRel(rel.id)}
+          keyExtractor={(item) => item.id.toString()}
           ItemSeparatorComponent={() => <Divider />}
           renderItem={({ item }) => (
-<React.Fragment>
-                            <SafeAreaView style={{width:200,justifyContent:'flex-start'}}>
-                            <List.Item
-                              title={item.displayName}
-                              titleNumberOfLines={1}
-                              titleStyle={styles.listTitle}
-                              descriptionStyle={styles.listDescription}
-                              descriptionNumberOfLines={1}
-                              onPress={() => console.log("pressed")}
-                            />
-                            </SafeAreaView>
-                    </React.Fragment>
+              <List.Item
+                  title={item.title}
+                  titleNumberOfLines={1}
+                  titleStyle={styles.listTitle}
+                  descriptionStyle={styles.listDescription}
+                  descriptionNumberOfLines={1}
+                  left={props => <Text style={styles.prism}>{item.title}</Text>}
+                  onPress={() => navigation.navigate('Chat', { chatId: item.id })}
+              />
           )}
         />
-        <Title style={styles.headingText}>Chats:</Title>
       </Animated.View>
     </View>
   );

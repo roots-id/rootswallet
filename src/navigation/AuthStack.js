@@ -142,6 +142,20 @@ export default function AuthStack() {
                                   headerTitle: (props) => <LogoTitle {...props} title="Relationships:"/>,
                               })}
                 />
+                                <Stack.Screen
+                                    name="Chat"
+                                    component={ChatScreen}
+                                    options={ ({ navigation, route }) => ({
+                                        headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>,
+                                        headerRight: () =>
+                                          <IconButton
+                                              icon="qrcode-scan"
+                                              size={28}
+                                              color="#e69138"
+                                              onPress={() => navigation.navigate('Scan QR Code')}
+                                          />,
+                                    })}
+                                />
             </Stack.Group>
         </Stack.Navigator>
         )

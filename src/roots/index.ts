@@ -290,6 +290,17 @@ function getChatItems() {
     return chats;
 }
 
+export function getChatsByRel(relId: string) {
+    logger("roots - getting chats for",relId);
+    const dedupedChats = [...new Set(
+        getMessagesByRel(relId).map(msg =>
+            msg.id.split("_"+models.MODEL_TYPE_MESSAGE)[0]
+        ))]
+    logger("roots - deduped chats for id",relId,dedupedChats)
+    const chats = dedupedChats.map(ch => getChatItem(ch))
+    return chats
+}
+
 function getAllDidAliases(wallet) {
     const dids = wallet[walletSchema.WALLET_DIDS];
     if(!dids || dids == null || dids.length <= 0) {

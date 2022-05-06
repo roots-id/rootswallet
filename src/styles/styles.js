@@ -126,6 +126,9 @@ const styles = StyleSheet.create({
   none: {
       display: 'none'
   },
+  prism: {
+    color: 'red',
+  },
   problem: {
       color: 'red',
   },
