@@ -115,7 +115,6 @@ export default function AuthStack() {
         return (
             <Tab.Navigator screenOptions={{headerShown:false}}>
                 <Tab.Screen name="relationships" component={RelationshipsStack}/>
-                <Tab.Screen name="chats" component={ChatsStack}/>
                 <Tab.Screen name="integration" component={IntegrationStack}/>
             </Tab.Navigator>
         )

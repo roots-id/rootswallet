@@ -48,6 +48,20 @@ let currentWal;
 const handlers = {};
 const allProcessing = [];
 
+export async function initRootsWallet() {
+    logger("roots - initializing RootsWallet")
+    logger("roots - initializing your Did")
+    const createdDid = await createDid(rel.YOU_ALIAS)
+    logger("roots - initializing your root")
+    logger("roots - initializing your achievements root")
+    const achievements = await initRoot("achievementRoot", "Achievements", rel.starLogo,rootsDid("achievement"))
+    const prism = await initRoot("prismRoot", "Prism", rel.prismLogo,rootsDid("prism"))
+    if(demo) {
+        logger("roots - initializing your demos")
+        initDemos()
+    }
+}
+
 export async function loadAll(walName: string,walPass: string) {
     const wallet = await loadWallet(walName, walPass);
     if(wallet) {
@@ -93,7 +107,7 @@ export async function createWallet(walName,mnemonic,walPass) {
         logger('Wallet created',store.getWallet(currentWal._id))
         if(demo) {
             logger("roots - initializing demo")
-            await initDemo()
+            await initDemos()
         }
         return result;
     } else {
@@ -203,33 +217,20 @@ export function getDid(didAlias) {
 }
 
 //------------------ Chats  --------------
-export async function createChat (chatAlias, titlePrefix) {
-    logger("roots - Creating chat",chatAlias,"w/ titlePrefix",titlePrefix)
-    const chatDidCreated = await createDid(chatAlias)
-    logger("roots - chat DID created/existed?",chatDidCreated)
-    const chatDid = getDid(chatAlias)
-    logger("roots - chat DID",chatDid)
-    //should be the same as chat alias, eating our own dog food
-    const chatDidAlias = chatDid[walletSchema.DID_ALIAS]
-    const chatItemCreated = await createChatItem(chatDidAlias, titlePrefix)
+export async function createChat(theirDid: string, myDidAlias: string, myRel: Object, titlePrefix="") {
+    logger("roots - Creating chat for theirDid",theirDid,"and myDidAlias",myDidAlias,"w/ titlePrefix",titlePrefix)
+    const chatAlias = createChatAlias(theirDid,myDidAlias);
+    const chatItemCreated = await createChatItem(chatAlias, titlePrefix)
     logger("roots - chat item created/existed?",chatItemCreated)
-    const chatItem = getChatItem(chatDidAlias)
+    const chatItem = getChatItem(chatAlias)
     logger("roots - chat item",chatItem)
-    //TODO what should the rel defaults be?
-    const chatRelCreated = await rel.createRelItem(chatDidAlias,"You",rel.personLogo,chatDid.uriCanonical)
-    logger("roots - chat rel created/existed?",chatRelCreated)
-    const chatRel = rel.getRelItem(chatDidAlias)
 
-    if(chatDidCreated && chatItemCreated && chatRelCreated) {
-        const sentWelcome = await sendMessage(chatItem,"Welcome to *"+chatAlias+"*",TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-        if(sentWelcome) {
-            await sendMessage(chatItem,"Would you like to publish this chat to Prism?",
-                PROMPT_PUBLISH_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
-            logger("Created chat and added welcome to chat",chatAlias,"with chatDid",chatDidAlias)
-        }
+    if(chatItemCreated && chatItem) {
+        const sentWelcome = await sendMessage(chatItem,"Welcome to *"+chatItem.title+"*",TEXT_MSG_TYPE,myRel)
+        logger("Created chat and added welcome to chat",chatItem.title,"with chatDid",myDidAlias)
         return true;
     } else {
-        console.error("Could not create chat",chatAlias);
+        console.error("Could not create chat",myDidAlias);
         return false
     }
 }
@@ -264,9 +265,13 @@ export async function getAllChats () {
     return result;
 }
 
-export async function getChatByRel(relId: string) {
-
+function createChatAlias(theirDid: string, myDidAlias: string) {
+    return replaceSpecial(theirDid)+"_"+replaceSpecial(myDidAlias)
 }
+
+// export async function getChatByRel(relId: string) {
+//
+// }
 
 export function getChatItem(chatAlias: string) {
     logger("roots - getting chat item",chatAlias)
@@ -872,18 +877,14 @@ export async function issueDemoCredential(chat: Object,reply: Object) {
 //                    rel.getRelDisplay(rel.ROOTS_BOT))
 }
 
-async function initDemo() {
-    const rels = await rel.initDemoRels()
-    const intro = await initDemoIntro()
-//    const achievements = await initDemoAchievements()
-//    const library = await initDemoLibrary()
-//    const resume = await initDemoResume()
-    const result = (rels && intro)
-    return result;
+async function initDemos() {
+    const libraryRoot = await initRoot("libraryRoot", "Library")
+    const rentalRoot = await initRoot("rentalRoot", "Vacation Rental")
+    return libraryRoot && rentalRoot;
 }
 
-async function initDemoAchievements() {
-    const achieveCh = await createChat("Achievement Chat","Under Construction - ")
+async function initDemoAchievements(chat: Object) {
+
 
     await sendMessage(achieveCh,ACHIEVEMENT_MSG_PREFIX+"Opened RootsWallet!",
       STATUS_MSG_TYPE,
@@ -899,17 +900,23 @@ async function initDemoAchievements() {
       rel.getRelItem(rel.ROOTS_BOT))
 }
 
-async function initDemoIntro() {
-    logger("roots - Init demo intro");
-    const chat = await createChat("Introduction Chat","Under Construction - ")
-}
-
-async function initDemoLibrary() {
-    const libraryCh = await createChat("Library Chat","Coming Soon - ")
+async function initRoot(alias: string, display=alias, avatar=rel.personLogo,did=rootsDid(alias)) {
+    logger("roots - creating root",alias,display,avatar,did)
+    try {
+        const relCreated = await rel.createRelItem(alias,display, avatar, did);
+        logger("roots - rel created/existed?",relCreated)
+        const relationship = rel.getRelItem(alias)
+        logger("roots - creating chat for rel",relationship.id)
+        //theirDid: string, myDidAlias: string, myRel: Object, titlePrefix: string
+        const chat = await createChat(did,alias,relationship)
+        return true;
+    } catch(error) {
+        console.error("Failed to initRoot",error,error.stack)
+        return false;
+    }
 }
 
 async function initDemoResume() {
-    const resumeCh = await createChat("Resume/CV Chat","Coming Soon - ")
 }
 
 export function isDemo() {
@@ -938,3 +945,7 @@ export const walCliCommands=[
 //  result[index]["id"]="walCli"+index
 //  return result;
 //}, []);
+
+function rootsDid(alias: string) {
+    return "did:root:"+replaceSpecial(alias);
+}

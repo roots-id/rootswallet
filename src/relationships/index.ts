@@ -4,6 +4,7 @@ import * as store from '../store'
 
 import apLogo from '../assets/ATALAPRISM.png';
 import butchLogo from '../assets/butch.png'
+import catalystPng from '../assets/catalyst.png'
 import darrellLogo from '../assets/darrell.png'
 import estebanLogo from '../assets/esteban.png'
 import iogLogo from '../assets/iog.png'
@@ -11,11 +12,16 @@ import lanceLogo from '../assets/lance.png'
 import perLogo from '../assets/smallBWPerson.png';
 import rodoLogo from '../assets/rodo.png'
 import rwLogo from '../assets/LogoOnly1024.png';
-import tonyLogo from '../assets/tony.png'
+import starPng from '../assets/star.png';
+import tonyLogo from '../assets/tony.png';
 
-export const rootsLogo = rwLogo;
-export const personLogo = perLogo;
 export const prismLogo = apLogo;
+export const catalystLogo = catalystPng;
+export const personLogo = perLogo;
+export const rootsLogo = rwLogo;
+export const starLogo = starPng;
+
+export const YOU_ALIAS = "You"
 
 export const ROOTS_BOT = "did:prism:rootsbot1";
 export const PRISM_BOT = "did:prism:prismbot1";
@@ -32,7 +38,7 @@ const RODO = "did:prism:rodolfo";
 export const allRelsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_REL)+'*')
 
 //TODO unify aliases and storageKeys?
-export async function createRelItem(alias: string, name: string, pic: string, did?: string) {
+export async function createRelItem(alias: string, name: string, pic=personLogo, did?: string) {
     try {
         logger("create rel item",alias,name,pic);
         if(getRelItem(alias)) {
