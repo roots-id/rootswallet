@@ -10,11 +10,15 @@ export const MODEL_TYPE_CREDENTIAL = "rootsCredentialType"
 export const MODEL_TYPE_CRED_REQUEST = "rootsCredRequestType"
 export const MODEL_TYPE_REL = "rootsRelType"
 
-export function createChat(chatAlias: string, titlePrefix?: string) {
+//TODO refactor away this general file to specific files, like 'chat'
+
+export function createChat(chatAlias: string, fromId: string, toIds: string[], title=chatAlias) {
     const chat = {
          id: chatAlias,
+         from: fromId,
+         to: toIds,
          published: false,
-         title: titlePrefix+chatAlias,
+         title: title,
     }
     logger("models - created chat model w/keys",Object.keys(chat))
     return chat;

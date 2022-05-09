@@ -3,7 +3,7 @@ import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity}
 import { Divider, List } from 'react-native-paper';
 import {getRelationships} from '../relationships'
 import Relationship from '../models/relationship'
-import { getChatsByRel } from '../roots'
+import { getChatItem } from '../roots'
 import styles from "../styles/styles";
 
 const RelationshipsScreen = ({route,navigation}) => {
@@ -53,7 +53,7 @@ const RelationshipsScreen = ({route,navigation}) => {
                               titleStyle={styles.listTitle}
                               descriptionStyle={styles.listDescription}
                               descriptionNumberOfLines={1}
-                              onPress={() => navigation.navigate('Chat', { chatId: getChatsByRel(item.id)[0] })}
+                              onPress={() => navigation.navigate('Chat', { chatId: getChatItem(item.id).id })}
                             />
                             </SafeAreaView>
                         </View>

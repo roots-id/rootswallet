@@ -1,4 +1,5 @@
 export const DID_ALIAS = "alias";
+export const DID_URI_CANONICAL_FORM = "uriCanonical"
 export const DID_URI_LONG_FORM = "uriLongForm"
 export const WALLET_DIDS = "dids";
 

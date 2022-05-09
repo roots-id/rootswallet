@@ -54,11 +54,11 @@ export async function initRootsWallet() {
     const createdDid = await createDid(rel.YOU_ALIAS)
     logger("roots - initializing your root")
     logger("roots - initializing your achievements root")
-    const achievements = await initRoot("achievementRoot", "Achievements", rel.starLogo,rootsDid("achievement"))
-    const prism = await initRoot("prismRoot", "Prism", rel.prismLogo,rootsDid("prism"))
+    const achievements = await initRoot("achievementsRoot", createdDid[walletSchema.DID_URI_CANONICAL_FORM], rootsDid("achievements"), "Achievements", rel.starLogo)
+    const prism = await initRoot("prismRoot", createdDid[walletSchema.DID_URI_CANONICAL_FORM], rootsDid("prism"), "Prism", rel.prismLogo)
     if(demo) {
         logger("roots - initializing your demos")
-        initDemos()
+        initDemos(createdDid[walletSchema.DID_URI_CANONICAL_FORM])
     }
 }
 
@@ -105,10 +105,6 @@ export async function createWallet(walName,mnemonic,walPass) {
     const result = await updateWallet(walName,walPass,prismWal)
     if(result) {
         logger('Wallet created',store.getWallet(currentWal._id))
-        if(demo) {
-            logger("roots - initializing demo")
-            await initDemos()
-        }
         return result;
     } else {
         logger('Could not create wallet',walName,walPass)
@@ -178,21 +174,24 @@ export async function updateWallet(walName, walPass, walJson) {
 //------------------ DIDs ----------------
 async function createDid(didAlias: string) {
     try {
-        if(getDid(didAlias)) {
+        const existingDid = getDid(didAlias)
+        if(existingDid) {
             logger("roots - Chat/DID already exists",didAlias)
-            return true;
+            return existingDid;
         } else {
-            logger("roots - DID does not exist, creating",didAlias)
+            logger("roots - DID does not exist, creating",didAlias,"DID")
             const walletJson = store.getWallet(currentWal._id)
             logger("roots - requesting chat/did from prism, w/wallet",walletJson)
             const prismWalletJson = PrismModule.newDID(walletJson,didAlias)
             logger("roots - Chat/prismDid added to wallet", prismWalletJson)
             const saveResult = await updateWallet(currentWal._id,currentWal.passphrase,prismWalletJson)
-            return saveResult;
+            const newDid = getDid(didAlias)
+            logger("roots - did added to wallet",newDid)
+            return newDid;
         }
     } catch(error) {
         console.error("Failed to create chat DID",error,error.stack)
-        return false
+        return;
     }
 }
 
@@ -217,32 +216,30 @@ export function getDid(didAlias) {
 }
 
 //------------------ Chats  --------------
-export async function createChat(theirDid: string, myDidAlias: string, myRel: Object, titlePrefix="") {
-    logger("roots - Creating chat for theirDid",theirDid,"and myDidAlias",myDidAlias,"w/ titlePrefix",titlePrefix)
-    const chatAlias = createChatAlias(theirDid,myDidAlias);
-    const chatItemCreated = await createChatItem(chatAlias, titlePrefix)
+export async function createChat(alias: string, fromDid: string, toDid: string, title="Untitled") {
+    logger("roots - Creating chat",alias,"for toDid",toDid,"and fromDid",fromDid,"w/ title",title)
+    const chatItemCreated = await createChatItem(alias, fromDid, [toDid], title)
     logger("roots - chat item created/existed?",chatItemCreated)
-    const chatItem = getChatItem(chatAlias)
+    const chatItem = getChatItem(alias)
     logger("roots - chat item",chatItem)
 
     if(chatItemCreated && chatItem) {
-        const sentWelcome = await sendMessage(chatItem,"Welcome to *"+chatItem.title+"*",TEXT_MSG_TYPE,myRel)
-        logger("Created chat and added welcome to chat",chatItem.title,"with chatDid",myDidAlias)
+        logger("Created chat and added welcome to chat",chatItem.title)
         return true;
     } else {
-        console.error("Could not create chat",myDidAlias);
+        console.error("Could not create chat",fromDid, toDid,title);
         return false
     }
 }
 
 //TODO unify aliases and storageKeys?
-async function createChatItem(chatAlias: string, titlePrefix: string) {
+async function createChatItem(chatAlias: string, fromDid: string, toDid: string, title=chatAlias) {
     logger('roots - Creating a new chat item',chatAlias)
     if(getChatItem(chatAlias)) {
         logger('roots - chat item already exists',chatAlias)
         return true
     } else {
-        const chatItem = models.createChat(chatAlias, [], titlePrefix)
+        const chatItem = models.createChat(chatAlias, fromDid, [toDid], title)
         const savedChat = await store.saveItem(models.getStorageKey(chatAlias, models.MODEL_TYPE_CHAT), JSON.stringify(chatItem))
         if(savedChat) {
             logger('roots - new chat saved',chatAlias)
@@ -263,10 +260,6 @@ export async function getAllChats () {
         logger("roots - getting chats",index+".",item.id);
     });
     return result;
-}
-
-function createChatAlias(theirDid: string, myDidAlias: string) {
-    return replaceSpecial(theirDid)+"_"+replaceSpecial(myDidAlias)
 }
 
 // export async function getChatByRel(relId: string) {
@@ -295,16 +288,17 @@ function getChatItems() {
     return chats;
 }
 
-export function getChatsByRel(relId: string) {
-    logger("roots - getting chats for",relId);
-    const dedupedChats = [...new Set(
-        getMessagesByRel(relId).map(msg =>
-            msg.id.split("_"+models.MODEL_TYPE_MESSAGE)[0]
-        ))]
-    logger("roots - deduped chats for id",relId,dedupedChats)
-    const chats = dedupedChats.map(ch => getChatItem(ch))
-    return chats
-}
+// export function getChatsByRel(relId: string) {
+//     logger("roots - getting chats for",relId);
+//     const dedupedChats = [...new Set(
+//         getMessagesByRel(relId).map(msg =>
+//             msg.id.split("_"+models.MODEL_TYPE_MESSAGE)[0]
+//         ))]
+//     logger("roots - deduped chats for id",relId,dedupedChats)
+//     const chats = dedupedChats.map(ch => getChatItem(ch))
+//
+//     return chats
+// }
 
 function getAllDidAliases(wallet) {
     const dids = wallet[walletSchema.WALLET_DIDS];
@@ -877,9 +871,9 @@ export async function issueDemoCredential(chat: Object,reply: Object) {
 //                    rel.getRelDisplay(rel.ROOTS_BOT))
 }
 
-async function initDemos() {
-    const libraryRoot = await initRoot("libraryRoot", "Library")
-    const rentalRoot = await initRoot("rentalRoot", "Vacation Rental")
+async function initDemos(fromDid) {
+    const libraryRoot = await initRoot("libraryRoot", fromDid, rootsDid("library"), "Library")
+    const rentalRoot = await initRoot("rentalRoot", fromDid, rootsDid("vacationRental"), "Vacation Rental")
     return libraryRoot && rentalRoot;
 }
 
@@ -900,15 +894,15 @@ async function initDemoAchievements(chat: Object) {
       rel.getRelItem(rel.ROOTS_BOT))
 }
 
-async function initRoot(alias: string, display=alias, avatar=rel.personLogo,did=rootsDid(alias)) {
-    logger("roots - creating root",alias,display,avatar,did)
+async function initRoot(alias: string, fromDid: string, toDid: string, display=alias, avatar=rel.personLogo) {
+    logger("roots - creating root",alias,fromDid,toDid,display,avatar)
     try {
-        const relCreated = await rel.createRelItem(alias,display, avatar, did);
+        const relCreated = await rel.createRelItem(alias,display, avatar, toDid);
         logger("roots - rel created/existed?",relCreated)
         const relationship = rel.getRelItem(alias)
         logger("roots - creating chat for rel",relationship.id)
-        //theirDid: string, myDidAlias: string, myRel: Object, titlePrefix: string
-        const chat = await createChat(did,alias,relationship)
+        //toDid: string, fromDidAlias: string, myRel: Object, title: string
+        const chat = await createChat(alias,fromDid,toDid,display)
         return true;
     } catch(error) {
         console.error("Failed to initRoot",error,error.stack)

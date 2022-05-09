@@ -149,7 +149,7 @@ export default function AuthStack() {
                     name="Chat"
                     component={ChatScreen}
                     options={ ({ navigation, route }) => ({
-                        headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId.id).title}/>,
+                        headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>,
                         headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code'/>,
                     })}
                 />
@@ -188,7 +188,7 @@ export default function AuthStack() {
                     name="Chat"
                     component={ChatScreen}
                     options={ ({ navigation, route }) => ({
-                        headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId.id).title}/>,
+                        headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>,
                         headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code'/>,
                     })}
                 />

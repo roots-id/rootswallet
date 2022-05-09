@@ -7,7 +7,7 @@ import { Actions, ActionsProps, Bubble, ChatInput,
 //import { useInterval } from 'usehooks-ts'
 //import { BarCodeScanner } from 'expo-barcode-scanner';
 //import emojiUtils from 'emoji-utils';
-import {getRelItem} from '../relationships'
+import {getRelItem,YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
 
@@ -16,7 +16,7 @@ const { PrismModule } = NativeModules;
 export default function ChatScreen({ route, navigation }) {
     console.log("ChatScreen - route params",route.params)
 //  const [ user, setUser ] = useState(user);
-    const [chat, setChat] = useState(roots.getChatItem(route.params.chatId.id));
+    const [chat, setChat] = useState(roots.getChatItem(route.params.chatId));
     console.log("ChatScreen - got chatItem ",chat)
 //    const [hasPermission, setHasPermission] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -155,7 +155,7 @@ export default function ChatScreen({ route, navigation }) {
 
     async function handleSend(pendingMsgs) {
         console.log("ChatScreen - handle send",pendingMsgs)
-        const result = await roots.sendMessages(chat, pendingMsgs, roots.TEXT_MSG_TYPE, getRelItem(chat.id));
+        const result = await roots.sendMessages(chat, pendingMsgs, roots.TEXT_MSG_TYPE, getRelItem(YOU_ALIAS));
 //        await setMessages((prevMessages) => GiftedChat.append(prevMessages, pendingMsgs));
     }
 
