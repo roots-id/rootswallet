@@ -3,7 +3,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { IconButton } from 'react-native-paper';
 
 export default function IconActions(...props) {
-  console.log("IconActions - props",props)
+//  console.log("IconActions - props",props)
   const navigation = props[0]["nav"]
   const add = props[0]["add"]
   const scan = props[0]["scan"]

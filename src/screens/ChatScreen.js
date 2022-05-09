@@ -16,7 +16,7 @@ const { PrismModule } = NativeModules;
 export default function ChatScreen({ route, navigation }) {
     console.log("ChatScreen - route params",route.params)
 //  const [ user, setUser ] = useState(user);
-    const [chat, setChat] = useState(roots.getChatItem(route.params.chatId));
+    const [chat, setChat] = useState(roots.getChatItem(route.params.chatId.id));
     console.log("ChatScreen - got chatItem ",chat)
 //    const [hasPermission, setHasPermission] = useState(null);
     const [loading, setLoading] = useState(true);
