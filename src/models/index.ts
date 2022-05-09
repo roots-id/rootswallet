@@ -12,10 +12,10 @@ export const MODEL_TYPE_REL = "rootsRelType"
 
 //TODO refactor away this general file to specific files, like 'chat'
 
-export function createChat(chatAlias: string, fromId: string, toIds: string[], title=chatAlias) {
+export function createChat(chatAlias: string, fromDidAlias: string, toIds: string[], title=chatAlias) {
     const chat = {
          id: chatAlias,
-         from: fromId,
+         fromAlias: fromDidAlias,
          to: toIds,
          published: false,
          title: title,

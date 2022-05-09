@@ -170,7 +170,7 @@ export default function ChatScreen({ route, navigation }) {
                 if(reply.value.startsWith(roots.PROMPT_PUBLISH_MSG_TYPE)) {
                     console.log("ChatScreen - process quick reply to publish DID")
                     if(reply.value.endsWith(roots.PUBLISH_DID)) {
-                        console.log("ChatScreen - publishing DID")
+                        console.log("ChatScreen - publishing DID w/alias",chat.fromAlias)
                         const pubChat = await roots.processPublishResponse(chat,reply)
                         setChat(pubChat)
                     } else {
