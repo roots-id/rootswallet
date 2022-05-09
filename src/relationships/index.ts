@@ -23,8 +23,8 @@ export const starLogo = starPng;
 
 export const YOU_ALIAS = "You"
 
-export const ROOTS_BOT = "did:prism:rootsbot1";
-export const PRISM_BOT = "did:prism:prismbot1";
+export const ROOTS_BOT = "rootsbot1";
+export const PRISM_BOT = "prismbot1";
 export const LIBRARY_BOT = "did:prism:librarybot1";
 const IOG_TECH = "did:prism:iogtech1";
 const ROOTSID = "did:prism:rootsid";

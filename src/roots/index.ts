@@ -52,10 +52,28 @@ export async function initRootsWallet() {
     logger("roots - initializing RootsWallet")
     logger("roots - initializing your Did")
     const createdDid = await createDid(rel.YOU_ALIAS)
-    logger("roots - initializing your root")
+    const relCreated = await rel.createRelItem(rel.YOU_ALIAS,rel.YOU_ALIAS, rel.catalystLogo, createdDid);
+    logger("roots - initialized your rel?",relCreated)
+    const myRel = rel.getRelItem(rel.YOU_ALIAS)
+
+    logger("roots - initializing your narrator bots roots")
+    const prism = await initRoot(rel.PRISM_BOT, createdDid[walletSchema.DID_URI_CANONICAL_FORM], rootsDid(rel.PRISM_BOT), "Prism", rel.prismLogo)
+    const rw = await initRoot(rel.ROOTS_BOT, createdDid[walletSchema.DID_URI_CANONICAL_FORM], rootsDid(rel.ROOTS_BOT), "RootsWallet", rel.rootsLogo)
+
     logger("roots - initializing your achievements root")
-    const achievements = await initRoot("achievementsRoot", createdDid[walletSchema.DID_URI_CANONICAL_FORM], rootsDid("achievements"), "Achievements", rel.starLogo)
-    const prism = await initRoot("prismRoot", createdDid[walletSchema.DID_URI_CANONICAL_FORM], rootsDid("prism"), "Prism", rel.prismLogo)
+    const achRootAlias = "achievementsRoot"
+    const achievements = await initRoot(achRootAlias, createdDid[walletSchema.DID_URI_CANONICAL_FORM], rootsDid("achievements"), "Achievements", rel.starLogo)
+
+    logger("roots - posting your initialization achievement messages")
+    const welcomeAchMsg = await sendMessage(getChatItem(achRootAlias),
+        "Welcome to your RootsWallet achievements! We'll post new achievements as you complete core RootsWallet operations for the first time.",
+        TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
+    const createdWalletMsg = await sendMessage(getChatItem(achRootAlias),
+        "You created your wallet: "+currentWal._id,TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
+    const createdDidMsg = await sendMessage(getChatItem(achRootAlias),
+        "You created your first DID w/alias \""+getDid(rel.YOU_ALIAS).alias+"\" = "+createdDid[walletSchema.DID_URI_CANONICAL_FORM],
+        TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
+
     if(demo) {
         logger("roots - initializing your demos")
         initDemos(createdDid[walletSchema.DID_URI_CANONICAL_FORM])
