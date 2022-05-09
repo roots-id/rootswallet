@@ -394,7 +394,7 @@ export async function publishChatDid(chat: Object) {
         }
     } else {
         logger("roots - ",did.alias,"is already",PUBLISHED_TO_PRISM)
-        return;
+        return chat;
     }
 }
 

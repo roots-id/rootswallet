@@ -389,6 +389,11 @@ export default function ChatScreen({ route, navigation }) {
                       style: styles.qr,
                       onPress: (tag) => showQR(roots.getDid(chat.id).uriLongForm),
                   },
+                 {
+                     pattern: /did:prism:*/,
+                     style: styles.prism,
+                     onPress: (tag) => showQR(tag),
+                 },
                   //{type: 'url', style: styles.url, onPress: onUrlPress},
                 ]}
           //placeholder={"Type your message"}
