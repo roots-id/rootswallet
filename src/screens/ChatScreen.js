@@ -387,7 +387,7 @@ export default function ChatScreen({ route, navigation }) {
                   {
                       pattern: /Show Chat QR code/,
                       style: styles.qr,
-                      onPress: (tag) => showQR(roots.getDid(chat.id).uriLongForm),
+                      onPress: (tag) => showQR(roots.getDid(chat.fromAlias).uriLongForm),
                   },
                  {
                      pattern: /did:prism:*/,

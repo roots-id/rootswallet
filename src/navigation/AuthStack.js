@@ -20,6 +20,7 @@ import HomeScreen from "../screens/HomeScreen"
 import MyIdentityScreen from '../screens/MyIdentityScreen';
 import RelationshipsScreen from "../screens/RelationshipsScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import WalletScreen from "../screens/WalletScreen";
 
 import AuthContext from '../context/AuthenticationContext';
 
@@ -210,6 +211,7 @@ export default function AuthStack() {
                 <Stack.Screen name="Communications" component={CommunicationsScreen}/>
                 <Stack.Screen name="Help" component={HelpScreen}/>
                 <Stack.Screen name="Settings" component={SettingsScreen}/>
+                <Stack.Screen name="Wallet" component={WalletScreen}/>
             </Stack.Group>
         </Stack.Navigator>
         )

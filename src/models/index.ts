@@ -14,11 +14,11 @@ export const MODEL_TYPE_REL = "rootsRelType"
 
 export function createChat(chatAlias: string, fromDidAlias: string, toIds: string[], title=chatAlias) {
     const chat = {
-         id: chatAlias,
-         fromAlias: fromDidAlias,
-         to: toIds,
-         published: false,
-         title: title,
+        id: chatAlias,
+        toDids: toIds,
+        fromAlias: fromDidAlias,
+        title: title,
+        published: "false"
     }
     logger("models - created chat model w/keys",Object.keys(chat))
     return chat;

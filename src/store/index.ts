@@ -7,6 +7,16 @@ import { replaceSpecial } from '../utils'
 
 const quickReplyResults = {}
 
+export async function clearStorage() {
+    logger("store - Clearing storage")
+    try {
+        CachedStore.clear()
+        await AsyncStore.clear()
+    } catch(error) {
+        console.error("Failed to clear storage",error,error.stack)
+    }
+}
+
 export async function status() {
     logger("store - Prompting for status messages")
     await AsyncStore.status();

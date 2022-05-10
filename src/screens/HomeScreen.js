@@ -1,6 +1,7 @@
 import React from 'react';
 import {Button, StyleSheet, View, Text} from 'react-native';
 // const { PrismModule } = NativeModules;
+import * as store from '../store'
 
 const HomeScreen = (props) => {
     const imageUrl = '../assets/splash.png';
@@ -27,8 +28,14 @@ const HomeScreen = (props) => {
                 title={"Settings"}
                 onPress={() => props.navigation.navigate("Settings")}
             />
-
-
+            <Button
+                title={"Clear Storage"}
+                onPress={() => store.clearStorage()}
+            />
+            <Button
+                title={"Show Wallet"}
+                onPress={() => props.navigation.navigate("Wallet")}
+            />
         </View>
     )
 };
