@@ -2,27 +2,26 @@ import React, { useState } from 'react';
 import { NativeModules, StyleSheet, Text, View } from 'react-native';
 import { IconButton, Title } from 'react-native-paper';
 import { v4 as uuidv4 } from 'uuid';
-import * as rel from '../relationships'
-import { createChat, getDid } from '../roots';
+
+import { createRel } from '../roots';
 import FormButton from '../components/FormButton';
 import FormInput from '../components/FormInput';
 
 const { PrismModule } = NativeModules;
 
-export default function CreateChatScreen({ navigation }) {
-  const [chatName, setChatName] = useState('');
-  const [theirDid, setTheirDid] = useState();
+export default function CreateRelScreen({ navigation }) {
+  const [relName, setRelName] = useState('');
   const [problemDisabled, setProblemDisabled] = useState(true)
 
   async function handleButtonPress() {
-    if (chatName?.length > 0 && theirDid?.length > 0) {
-      const chat = await createChat(chatName,getDid(rel.YOU_ALIAS),theirDid)
-      if(chat) {
-          console.log("Created chat",chat)
+    if (relName.length > 0) {
+      const rel = await createRel(relName)
+      if(rel) {
+          console.log("Created rel",rel)
           setProblemDisabled(true)
-          navigation.navigate('Chats')
+          navigation.navigate('Relationships')
       } else {
-          console.log("Could not create chat")
+          console.log("Could not create relationship")
           setProblemDisabled(false)
       }
     }
@@ -39,20 +38,20 @@ export default function CreateChatScreen({ navigation }) {
           />
         </View>
         <View style={styles.innerContainer}>
-          <Title style={styles.title}>Create a new chat</Title>
+          <Title style={styles.title}>Create a new relationship</Title>
           <FormInput
-              labelName="Enter Chat Name"
-              value={chatName}
-              onChangeText={(text) => setChatName(text)}
+              labelName="Enter Relationship Name"
+              value={relName}
+              onChangeText={(text) => setRelName(text)}
               clearButtonMode="while-editing"
           />
-          <Text disable={problemDisabled} style={displayProblem(problemDisabled)}>Could not create chat</Text>
+          <Text disable={problemDisabled} style={displayProblem(problemDisabled)}>Could not create relationship</Text>
           <FormButton
-              title="Create"
+              title="Create Relationship"
               modeValue="contained"
               labelStyle={styles.buttonLabel}
               onPress={async () => handleButtonPress()}
-              disabled={chatName.length <= 0}
+              disabled={relName.length <= 0}
           />
         </View>
       </View>

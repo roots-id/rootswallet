@@ -1,4 +1,5 @@
 import { logger } from '../logging';
+import { replaceSpecial } from '../utils';
 
 const ID_SEPARATOR = "_"
 
@@ -9,11 +10,15 @@ export const MODEL_TYPE_CREDENTIAL = "rootsCredentialType"
 export const MODEL_TYPE_CRED_REQUEST = "rootsCredRequestType"
 export const MODEL_TYPE_REL = "rootsRelType"
 
-export function createChat(chatAlias: string, titlePrefix?: string) {
+//TODO refactor away this general file to specific files, like 'chat'
+
+export function createChat(chatAlias: string, fromDidAlias: string, toIds: string[], title=chatAlias) {
     const chat = {
-         id: chatAlias,
-         published: false,
-         title: titlePrefix+chatAlias,
+        id: chatAlias,
+        toDids: toIds,
+        fromAlias: fromDidAlias,
+        title: title,
+        published: "false"
     }
     logger("models - created chat model w/keys",Object.keys(chat))
     return chat;
@@ -52,7 +57,8 @@ export function createRel(relAlias: string, relName: string, relPicUrl: string, 
 
 //---------------- Keys -----------------------
 export function getStorageKey(alias: string,type: string) {
-    return alias+ID_SEPARATOR+type
+//TODO this replacement happens in storage too.... unify
+    return replaceSpecial(alias)+ID_SEPARATOR+type
 }
 
 export function getStorageKeys(aliases: string[], type: string) {

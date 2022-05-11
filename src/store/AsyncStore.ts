@@ -1,6 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logger } from '../logging'
 
+export async function clear() {
+    logger("AsyncStorage - cleaning")
+    const keys = await AsyncStorage.getAllKeys()
+    keys.forEach(async (key) => await removeItem(key))
+    logger("AsyncStorage - cleaned")
+}
+
 export async function getItem(key: string) {
   try {
     const item = await AsyncStorage.getItem(key)
@@ -68,6 +75,19 @@ export async function hasWallet(walName: string) {
     } else {
         logger("AsyncStore - no wallet found")
         return false;
+    }
+}
+
+export async function removeItem(key: string) {
+    logger("AsyncStore - removing key",key)
+    try {
+        if(await AsyncStorage.removeItem(key)) {
+            logger("AsyncStore - removed",key)
+        } else {
+            console.error("AsyncStore - couldn't remove key",key)
+        }
+    } catch(e) {
+        console.error("Failed to remove value",key,error,error.stack)
     }
 }
 
