@@ -7,7 +7,7 @@ import { Actions, ActionsProps, Bubble, ChatInput,
 //import { useInterval } from 'usehooks-ts'
 //import { BarCodeScanner } from 'expo-barcode-scanner';
 //import emojiUtils from 'emoji-utils';
-import {getRelItem} from '../relationships'
+import {getRelItem,YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
 
@@ -155,7 +155,7 @@ export default function ChatScreen({ route, navigation }) {
 
     async function handleSend(pendingMsgs) {
         console.log("ChatScreen - handle send",pendingMsgs)
-        const result = await roots.sendMessages(chat, pendingMsgs, roots.TEXT_MSG_TYPE, getRelItem(chat.id));
+        const result = await roots.sendMessages(chat, pendingMsgs, roots.TEXT_MSG_TYPE, getRelItem(YOU_ALIAS));
 //        await setMessages((prevMessages) => GiftedChat.append(prevMessages, pendingMsgs));
     }
 
@@ -170,7 +170,7 @@ export default function ChatScreen({ route, navigation }) {
                 if(reply.value.startsWith(roots.PROMPT_PUBLISH_MSG_TYPE)) {
                     console.log("ChatScreen - process quick reply to publish DID")
                     if(reply.value.endsWith(roots.PUBLISH_DID)) {
-                        console.log("ChatScreen - publishing DID")
+                        console.log("ChatScreen - publishing DID w/alias",chat.fromAlias)
                         const pubChat = await roots.processPublishResponse(chat,reply)
                         setChat(pubChat)
                     } else {
@@ -387,8 +387,13 @@ export default function ChatScreen({ route, navigation }) {
                   {
                       pattern: /Show Chat QR code/,
                       style: styles.qr,
-                      onPress: (tag) => showQR(roots.getDid(chat.id).uriLongForm),
+                      onPress: (tag) => showQR(roots.getDid(chat.fromAlias).uriLongForm),
                   },
+                 {
+                     pattern: /did:prism:*/,
+                     style: styles.prism,
+                     onPress: (tag) => showQR(tag),
+                 },
                   //{type: 'url', style: styles.url, onPress: onUrlPress},
                 ]}
           //placeholder={"Type your message"}
