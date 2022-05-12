@@ -219,6 +219,17 @@ export default function ChatScreen({ route, navigation }) {
 //    )
 //  }
 
+    function processBubbleClick(context,message) {
+        console.log("bubble pressed",context,message)
+        switch(message.type) {
+            case roots.BLOCKCHAIN_URL_MSG_TYPE:
+                console.log("Clicked blockchain url msg",message.data)
+                break;
+            default:
+                console.log("Clicked non-active message type",message.type)
+        }
+    }
+
 //#fad58b
   function renderBubble(props) {
     //console.log("render bubble with props",props.currentMessage)
@@ -375,7 +386,7 @@ export default function ChatScreen({ route, navigation }) {
       <GiftedChat
           isTyping={processing}
           messages={messages.sort((a, b) => b.createdAt - a.createdAt)}
-          onPress={ (context, message) => console.log("bubble pressed",context,message)}
+          onPress={ (context, message) => processBubbleClick(context,message)}
           onQuickReply={reply => handleQuickReply(reply)}
           onSend={messages => handleSend(messages)}
           parsePatterns={(linkStyle) => [
@@ -399,6 +410,10 @@ export default function ChatScreen({ route, navigation }) {
                     style: styles.url,
                     onPress: (tag) => Linking.openURL(tag),
                 },
+                {
+                    pattern: /Click to see the blockchain details/,
+                    style: styles.prism,
+                }
           ]}
           //quickReplyStyle={{backgroundColor: '#e69138',borderColor: '#e69138',elevation: 3}}
           //placeholder={"Type your message"}

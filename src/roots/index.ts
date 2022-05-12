@@ -8,23 +8,24 @@ import { replaceSpecial } from '../utils'
 import * as walletSchema from '../schemas/WalletSchema'
 
 //msg types
-export const BLOCKCHAIN_URI_MSG_TYPE = "blockchainUri";
+export const BLOCKCHAIN_URL_MSG_TYPE = "blockchainUrlMsgType";
 export const CREDENTIAL_JSON_MSG_TYPE = "jsonCredential";
 export const DID_JSON_MSG_TYPE = "jsonDid";
 export const PENDING_STATUS_MESSAGE = "rootsPendingStatus";
-export const PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE = "rootsAcceptCredential"
-export const PROMPT_OWN_CREDENTIAL_MSG_TYPE = "rootsOwnCredential"
-export const PROMPT_PUBLISH_MSG_TYPE = "rootsPromptPublish";
-export const PRISM_LINK_MSG_TYPE = "rootsPrismLink"
+export const PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE = "rootsAcceptCredentialMsgType"
+export const PROMPT_OWN_CREDENTIAL_MSG_TYPE = "rootsOwnCredentialMsgType"
+export const PROMPT_PUBLISH_MSG_TYPE = "rootsPromptPublishMsgType";
 export const QR_CODE_MSG_TYPE = "rootsQRCodeMsgType"
-export const STATUS_MSG_TYPE = "status";
-export const TEXT_MSG_TYPE = "text"
+export const STATUS_MSG_TYPE = "statusMsgType";
+export const TEXT_MSG_TYPE = "textMsgType"
+export const LINK_MSG_TYPE = "linkMsgType"
 
 //meaningful literals
 export const ACHIEVEMENT_MSG_PREFIX = "You have a new achievement: ";
-export const PUBLISHED_TO_PRISM = "Added to Prism"
-export const SHOW_CRED_QR_CODE = "Show Cred QR code"
-export const SHOW_DID_QR_CODE = "Show Chat QR code"
+export const BLOCKCHAIN_URL_MSG = "Click to see the blockchain details";
+export const PUBLISHED_TO_PRISM = "Added to Prism";
+export const SHOW_CRED_QR_CODE = "Show Cred QR code";
+export const SHOW_DID_QR_CODE = "Show Chat QR code";
 
 //state literals
 export const CRED_ACCEPTED = "credAccepted"
@@ -74,7 +75,7 @@ export async function initRootsWallet() {
     const createdDidMsg = await sendMessage(achChat,
         "You created your first decentralized ID! This DID is in your wallet under the alias \""+getDid(rel.YOU_ALIAS).alias+"\" with a value of "+createdDid[walletSchema.DID_URI_CANONICAL_FORM],
         TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    await sendMessage(achChat,"Lets add your DID to PRISM so that you can receive verifiable credentials (called VCs) from places like the library, your school, rental companies, etc.",
+    await sendMessage(achChat,"Lets add your DID to PRISM so that you can receive verifiable credentials (called VCs) from other users and places like the library, your school, rental companies, etc.",
         PROMPT_PUBLISH_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
 
     if(demo) {
@@ -520,11 +521,11 @@ export async function sendMessages(chat,msgs,msgType,relDisplay) {
 }
 
 //TODO unify aliases and storageKeys?
-export async function sendMessage(chat,msgText,msgType,relDisplay,system=false,cred=undefined) {
+export async function sendMessage(chat,msgText,msgType,relDisplay,system=false,data=undefined) {
     const msgTime = Date.now()
     logger("roots - rel",relDisplay.id,"sending\"",msgText,"\"to chat:",chat.id);
     const msgId = models.createMessageId(chat.id,relDisplay.id,msgTime);
-    let msg = models.createMessage(msgId, msgText, msgType, msgTime, relDisplay.id, system, cred);
+    let msg = models.createMessage(msgId, msgText, msgType, msgTime, relDisplay.id, system, data);
     msg = addMessageExtensions(msg);
     try {
         const msgJson = JSON.stringify(msg)
@@ -631,9 +632,8 @@ export async function processPublishResponse(chat: Object, reply: Reply) {
                 +PUBLISHED_TO_PRISM
                 +"\n"+pubDid[walletSchema.DID_URI_LONG_FORM],
                 TEXT_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
-        const didLinkMsg = await sendMessage(pubChat,"Here is the blockchain link"
-                +"\n"+didPubTx.url,
-                TEXT_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
+        const didLinkMsg = await sendMessage(pubChat,BLOCKCHAIN_URL_MSG,
+                BLOCKCHAIN_URL_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,didPubTx.url)
         if(didLinkMsg) {
             const didMsg = await sendMessage(chat,JSON.stringify(pubDid),DID_JSON_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),true);
             if(demo && didMsg) {
@@ -644,9 +644,10 @@ export async function processPublishResponse(chat: Object, reply: Reply) {
                 const credIssueAlias = await issueDemoCredential(chat, reply)
                 if(credIssueAlias) {
                     const credPubTx = getCredPubTx(pubDid[walletSchema.DID_ALIAS],credIssueAlias)
-                    const credLinkMsg = await sendMessage(pubChat,"You have issued yourself a verifiable credential."
-                                    +"\n"+credPubTx.url,
-                                    TEXT_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
+                    const credSuccess = await sendMessage(pubChat,"You have issued yourself a verifiable credential!",
+                                     TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
+                    const credLinkMsg = await sendMessage(pubChat,BLOCKCHAIN_URL_MSG,
+                                    BLOCKCHAIN_URL_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,credPubTx.url)
 
                     if(credLinkMsg) {
                         logger("roots - quick reply demo credential issued",credIssueAlias)

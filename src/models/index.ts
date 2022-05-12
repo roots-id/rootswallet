@@ -24,7 +24,7 @@ export function createChat(chatAlias: string, fromDidAlias: string, toIds: strin
     return chat;
 }
 
-export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,relId: string,system?: boolean=false,cred?: Object=undefined) {
+export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,relId: string,system?: boolean=false,data?: Object=undefined) {
     const msg = {
         id: idText,
         body: bodyText,
@@ -32,7 +32,7 @@ export function createMessage(idText: string,bodyText: string,statusText: string
         createdTime: timeInMillis,
         rel: relId,
         system: system,
-        cred: cred,
+        data: data,
     }
     logger("models - created msg model w/keys",Object.keys(msg))
     return msg;
