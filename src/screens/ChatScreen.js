@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { KeyboardAvoidingView, NativeModules, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Linking, NativeModules, StyleSheet, Text, View } from 'react-native';
 import { Actions, ActionsProps, Bubble, ChatInput,
     Composer, GiftedChat, InputToolbar, Message, SendButton } from 'react-native-gifted-chat';
 
@@ -390,18 +390,24 @@ export default function ChatScreen({ route, navigation }) {
                       onPress: (tag) => showQR(roots.getDid(chat.fromAlias).uriLongForm),
                   },
                  {
-                     pattern: /did:prism:*/,
+                     pattern: /did:prism:[\S]*/,
                      style: styles.prism,
                      onPress: (tag) => showQR(tag),
                  },
-                  //{type: 'url', style: styles.url, onPress: onUrlPress},
-                ]}
+                 {
+                    type: 'url',
+                    style: styles.url,
+                    onPress: (tag) => Linking.openURL(tag),
+                },
+          ]}
+          //quickReplyStyle={{backgroundColor: '#e69138',borderColor: '#e69138',elevation: 3}}
           //placeholder={"Type your message"}
           renderInputToolbar={props => renderInputToolbar(props)}
           //renderActions={renderActions}
           renderAllAvatars={true}
           renderAvatarOnTop={true}
           renderBubble={renderBubble}
+          renderQuickReplySend={() => <Text style={{color: '#e69138',fontSize: 18}}>Confirm</Text>}
           renderUsernameOnMessage={true}
           showAvatarForEveryMessage={true}
           user={mapUser(getRelItem(chat.id))}
@@ -409,7 +415,7 @@ export default function ChatScreen({ route, navigation }) {
     </View>
   );
   //      {
-    //        Platform.OS === 'android' && <KeyboardAvoidingView behavior="padding" />
+    //        Platform.OS === 'android' && <KeyboardAoidingView behavior="padding" />
     //      }
 
   //,      ...(message.type === BLOCKCHAIN_URI_MSG_TYPE) && {system: true}

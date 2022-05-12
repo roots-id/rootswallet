@@ -50,7 +50,7 @@ const RelationshipsScreen = ({route,navigation}) => {
                             <List.Item
                               title={item.displayName}
                               titleNumberOfLines={1}
-                              titleStyle={styles.listTitle}
+                              titleStyle={styles.clickableListTitle}
                               descriptionStyle={styles.listDescription}
                               descriptionNumberOfLines={1}
                               onPress={() => navigation.navigate('Chat', { chatId: getChatItem(item.id).id })}

@@ -627,11 +627,13 @@ export async function processPublishResponse(chat: Object, reply: Reply) {
     if(pubChat) {
         const pubDid = getDid(chat.fromAlias)
         const didPubTx = getDidPubTx(pubDid[walletSchema.DID_ALIAS])
-        const didLinkMsg = await sendMessage(pubChat,"Your chat DID has been"
-                +"\t\t"+PUBLISHED_TO_PRISM+"\t\t"+SHOW_DID_QR_CODE
+        const didPubMsg = await sendMessage(pubChat,"Your chat DID has been"
+                +PUBLISHED_TO_PRISM
+                +"\n"+pubDid[walletSchema.DID_URI_LONG_FORM],
+                TEXT_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
+        const didLinkMsg = await sendMessage(pubChat,"Here is the blockchain link"
                 +"\n"+didPubTx.url,
                 TEXT_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
-
         if(didLinkMsg) {
             const didMsg = await sendMessage(chat,JSON.stringify(pubDid),DID_JSON_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),true);
             if(demo && didMsg) {

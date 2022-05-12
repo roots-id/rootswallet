@@ -47,6 +47,7 @@ export default function RelationshipDetailScreen({ route, navigation }) {
         justifyContent: 'center',
       }}
     >
+
       <Pressable
         style={[
           StyleSheet.absoluteFill,
@@ -74,6 +75,12 @@ export default function RelationshipDetailScreen({ route, navigation }) {
           ],
         }}
       >
+          <IconButton
+              icon="close-circle"
+              size={36}
+              color="#5b3a70"
+              onPress={() => navigation.goBack()}
+          />
         <Image source={rel.displayPictureUrl}
             style={{
               width:130,
@@ -86,24 +93,6 @@ export default function RelationshipDetailScreen({ route, navigation }) {
         <Text style={styles.subText}>{rel.displayName}</Text>
         <Divider/>
         <Text style={styles.subText}>{rel.did}</Text>
-        <IconActions nav={navigation} add="Create Secure Chat" scan='Scan QR Code'/>
-        <Title style={styles.headingText}>Chats:</Title>
-        <FlatList
-          data={getChatsByRel(rel.id)}
-          keyExtractor={(item) => item.id.toString()}
-          ItemSeparatorComponent={() => <Divider />}
-          renderItem={({ item }) => (
-              <List.Item
-                  title={item.title}
-                  titleNumberOfLines={1}
-                  titleStyle={styles.listTitle}
-                  descriptionStyle={styles.listDescription}
-                  descriptionNumberOfLines={1}
-                  left={props => <Text style={styles.prism}>{item.title}</Text>}
-                  onPress={() => navigation.navigate('Chat', { chatId: item.id })}
-              />
-          )}
-        />
       </Animated.View>
     </View>
   );

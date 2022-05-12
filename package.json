@@ -37,6 +37,7 @@
     "react-native": "0.64.3",
     "react-native-gesture-handler": "~2.1.0",
     "react-native-gifted-chat": "1.0.0-beta-3",
+    "react-native-hyperlink": "^0.0.19",
     "react-native-localize": "^2.1.7",
     "react-native-paper": "^4.12.1",
     "react-native-qrcode-svg": "^6.1.2",
@@ -58,5 +59,5 @@
   },
   "private": true,
   "name": "rootswallet",
-  "version": "1.0.0"
+  "version": "0.0.1-alpha"
 }
