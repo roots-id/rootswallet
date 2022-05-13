@@ -238,7 +238,7 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-    implementation("com.rootsid.wal:wal-library:1.0.2-LANCE") {
+    implementation("com.rootsid.wal:wal-library:1.0.1-SNAPSHOT") {
         exclude group: 'io.github.vincenzopalazzo', module: 'material-ui-swing'
         exclude group: 'javax.annotation', module: 'jsr250-api'
         exclude group: 'org.didcommx', module: 'didcomm'

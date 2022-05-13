@@ -143,7 +143,7 @@ export default function AuthStack() {
                       initialParams={{walletName: walletName}}
                       options={ ({ navigation, route }) => ({
                           headerTitle: (props) => <LogoTitle {...props} title="Relationships:"/>,
-                          headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" scan='Scan QR Code'/>,
+                          headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" scan='Scan QR Code' settings='Settings'/>,
                       })}
                 />
                 <Stack.Screen
@@ -151,7 +151,7 @@ export default function AuthStack() {
                     component={ChatScreen}
                     options={ ({ navigation, route }) => ({
                         headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>,
-                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code'/>,
+                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code' settings='Settings'/>,
                     })}
                 />
             </Stack.Group>
@@ -255,6 +255,7 @@ export default function AuthStack() {
                     <Stack.Screen name="Help" component={HelpScreen}/>
                     <Stack.Screen name="Create Rel" component={CreateRelScreen}/>
                     <Stack.Screen name="Create Secure Chat" component={StartChatScreen} />
+                    <Stack.Screen name="Settings" component={SettingsScreen}/>
                     <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen} />
                     <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen} />
                     <Stack.Screen name="Relationship Details" component={RelationshipDetailScreen}/>

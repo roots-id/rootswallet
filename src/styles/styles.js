@@ -132,10 +132,15 @@ const styles = StyleSheet.create({
   },
   prism: {
     color: '#940000',
+    textDecorationLine: 'underline',
   },
   problem: {
       color: 'red',
   },
+    row: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+    },
   subText: {
       fontSize: 16,
       marginBottom: 10,

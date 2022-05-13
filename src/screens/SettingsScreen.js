@@ -1,83 +1,89 @@
-import React, {useState} from 'react';
-// import {withNavigation} from "react-navigation";
-import {TouchableOpacity, TextInput, View, Text} from 'react-native';
-import {HOME_SCREEN, RELATIONSHIPS_SCREEN} from "../constants/navigationConstants";
-import styles from '../styles/styles'
-import {SimpleLineIcons} from '@expo/vector-icons'
-// const { PrismModule } = NativeModules;
+import React, { useEffect, useState } from 'react';
+import {
+  Animated,
+  Button,
+  FlatList,
+  Image,
+  Text,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { useTheme } from '@react-navigation/native';
+import {Picker} from '@react-native-picker/picker';
+import { useCardAnimation } from '@react-navigation/stack';
 
-const Settings = ({navigation}) => {
-    console.log(`> Settings screen`);
-    const [tmpName, setTmpName] = useState('')
-    const [walletName, setWalletName] = useState('')
-    const [tmpPwd, setTmpPwd] = useState('')
-    const [walletPwd, setWalletPwd] = useState('')
+import {logger} from '../logging';
+import { Divider, IconButton, List, Title,ToggleButton } from 'react-native-paper';
+import styles from "../styles/styles";
 
-    const endEditing = () =>{
-        console.log('> endEditing()')
-        setWalletName(tmpName)
-        setWalletPwd(tmpPwd)
-        navigation.navigate(
-            RELATIONSHIPS_SCREEN,
-            {walletName: tmpName}
-            )
-    }
+import * as roots from '../roots'
 
-    return (
-        <View>
+import IconActions from '../components/IconActions';
 
-            <Text style={styles.header}>Enter Wallet Name: {tmpName}</Text>
-            <View style={styles.walletInputStyle}>
-                <SimpleLineIcons
-                    name="wallet"
-                    style={styles.walletIconStyle}
-                />
-                <TextInput
-                    style={styles.inputStyle}
-                    onChangeText={(val) => setTmpName(val)}
-                    onEndEditing={endEditing}
-                    placeholder='Wallet Name'
-                />
-            </View>
+export default function RelationshipDetailScreen({ route, navigation }) {
+    const [host, setHost] = useState('ppp.atalaprism.io');
+    const { colors } = useTheme();
+    const { current } = useCardAnimation();
 
+    useEffect(() => {
+        roots.setPrismHost(host)
+    }, [host]);
 
-
-            <Text style={styles.header}>Enter Password</Text>
-            <View style={styles.walletInputStyle}>
-                <TextInput
-                    style={styles.inputStyle}
-                    onChangeText={(val) => setTmpPwd(val)}
-                    onEndEditing={endEditing}
-                    placeholder='Wallet Password'
-                />
-            </View>
-            <View style={styles.button}>
-                <TouchableOpacity
-                    color='gold'
-                    style={styles.button}
-                    onPress={()=>{
-                        console.log('in onPress handler...')
-                        setWalletName(tmpName)
-                        setWalletPwd(tmpPwd)
-                        navigation.navigate(
-                            RELATIONSHIPS_SCREEN,
-                            {walletName: tmpName})
-                    }
-                    }
-                >
-                    <Text style={styles.buttonText}>Create Wallet</Text>
-                </TouchableOpacity>
-            </View>
-
-
-
-            <Text>Final Name: {walletName}</Text>
+  return (
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+    <Pressable
+        style={[
+          StyleSheet.absoluteFill,
+          { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+        ]}
+        onPress={navigation.goBack}
+    />
+    <Animated.View
+    style={{
+      padding: 16,
+      width: '90%',
+      borderRadius: 3,
+      backgroundColor: "#bfafba",
+      justifyContent: 'center',
+      transform: [
+        {
+          scale: current.progress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.9, 1],
+            extrapolate: 'clamp',
+          }),
+        },
+      ],
+    }}
+    >
+        <IconButton
+          icon="close-circle"
+          size={36}
+          color="#5b3a70"
+          onPress={() => navigation.goBack()}
+        />
+        <Text style={{fontSize: 18}}>Select Prism Node:</Text>
+        <View style={{backgroundColor: '#251520',width: "20%"}}>
+        <Picker
+          style={styles.clickableListTitle}
+          mode="dropdown"
+          dropdownIconColor="#e69138"
+          numberOfLines={5}
+          selectedValue={host}
+          onValueChange={(itemValue) => setHost(itemValue)}>
+          <Picker.Item label="Prism Test Net" value="ppp.atalaprism.io"/>
+          <Picker.Item label="Local Dev" value="ppp-node-test.atalaprism.io"/>
+        </Picker>
         </View>
-
-
-
-    );
-};
-
-// export default withNavigation(Settings)
-export default Settings
+      </Animated.View>
+    </View>
+  );
+}

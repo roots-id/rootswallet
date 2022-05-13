@@ -26,7 +26,7 @@ export default function IconActions(...props) {
               icon="cog-outline"
               size={28}
               color="#e69138"
-              onPress={() => navigation.navigate(add)}
+              onPress={() => navigation.navigate(settings)}
           />
     </View>
   )

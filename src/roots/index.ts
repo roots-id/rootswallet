@@ -11,6 +11,7 @@ import * as walletSchema from '../schemas/WalletSchema'
 export const BLOCKCHAIN_URL_MSG_TYPE = "blockchainUrlMsgType";
 export const CREDENTIAL_JSON_MSG_TYPE = "jsonCredential";
 export const DID_JSON_MSG_TYPE = "jsonDid";
+export const DID_MSG_TYPE = "didMsgType";
 export const PENDING_STATUS_MESSAGE = "rootsPendingStatus";
 export const PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE = "rootsAcceptCredentialMsgType"
 export const PROMPT_OWN_CREDENTIAL_MSG_TYPE = "rootsOwnCredentialMsgType"
@@ -22,8 +23,8 @@ export const LINK_MSG_TYPE = "linkMsgType"
 
 //meaningful literals
 export const ACHIEVEMENT_MSG_PREFIX = "You have a new achievement: ";
-export const BLOCKCHAIN_URL_MSG = "Click to see the blockchain details";
-export const PUBLISHED_TO_PRISM = "Added to Prism";
+export const BLOCKCHAIN_URL_MSG = "*Click to see the blockchain details*";
+export const PUBLISHED_TO_PRISM = "*Your DID was added to Prism*";
 export const SHOW_CRED_QR_CODE = "Show Cred QR code";
 export const SHOW_DID_QR_CODE = "Show Chat QR code";
 
@@ -51,6 +52,8 @@ const allProcessing = [];
 
 export async function initRootsWallet() {
     logger("roots - initializing RootsWallet")
+    setPrismHost();
+
     logger("roots - initializing your Did")
     const createdDid = await createDid(rel.YOU_ALIAS)
     const relCreated = await rel.createRelItem(rel.YOU_ALIAS,rel.YOU_ALIAS, rel.catalystLogo, createdDid);
@@ -58,8 +61,8 @@ export async function initRootsWallet() {
     const myRel = rel.getRelItem(rel.YOU_ALIAS)
 
     logger("roots - initializing your narrator bots roots")
-    const prism = await initRoot(rel.PRISM_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.PRISM_BOT), "Prism", rel.prismLogo)
-    const rw = await initRoot(rel.ROOTS_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.ROOTS_BOT), "RootsWallet", rel.rootsLogo)
+    const prism = await initRoot(rel.PRISM_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.PRISM_BOT), "Prism Bot", rel.prismLogo)
+    const rw = await initRoot(rel.ROOTS_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.ROOTS_BOT), "RootsWallet Bot", rel.rootsLogo)
 
     logger("roots - initializing your achievements root")
     const achRootAlias = "achievementsRoot"
@@ -73,9 +76,9 @@ export async function initRootsWallet() {
     const createdWalletMsg = await sendMessage(achChat,
         "You created your wallet: "+currentWal._id,TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
     const createdDidMsg = await sendMessage(achChat,
-        "You created your first decentralized ID! This DID is in your wallet under the alias \""+getDid(rel.YOU_ALIAS).alias+"\" with a value of "+createdDid[walletSchema.DID_URI_CANONICAL_FORM],
+        "You created your first decentralized ID!",
         TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    await sendMessage(achChat,"Lets add your DID to PRISM so that you can receive verifiable credentials (called VCs) from other users and places like the library, your school, rental companies, etc.",
+    await sendMessage(achChat,"Add your DID to PRISM so that you can receive verifiable credentials (called VCs) from other users and organizations like the library, your school, rental companies, etc.",
         PROMPT_PUBLISH_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
 
     if(demo) {
@@ -119,6 +122,12 @@ async function loadItems(regex: RegExp) {
         console.error("roots - Failed to load items w/regex",regex,error,error.stack)
         return false;
     }
+}
+
+//----------------- Prism ----------------------
+export function setPrismHost(host="ppp.atalaprism.io", port="50053") {
+    logger("roots - setting Prism host and port",host,port)
+    PrismModule.setNetwork(host,port)
 }
 
 //----------------- Wallet ---------------------
@@ -417,7 +426,7 @@ export async function publishChatDid(chat: Object) {
             console.error("roots - Error publishing chat DID",longFormDid,"w/DID alias",chat.fromAlias,error,error.stack)
         }
     } else {
-        logger("roots - ",did.alias,"is already",PUBLISHED_TO_PRISM)
+        logger("roots - ",PUBLISHED_TO_PRISM,did.alias)
         return chat;
     }
 }
@@ -628,10 +637,8 @@ export async function processPublishResponse(chat: Object, reply: Reply) {
     if(pubChat) {
         const pubDid = getDid(chat.fromAlias)
         const didPubTx = getDidPubTx(pubDid[walletSchema.DID_ALIAS])
-        const didPubMsg = await sendMessage(pubChat,"Your chat DID has been"
-                +PUBLISHED_TO_PRISM
-                +"\n"+pubDid[walletSchema.DID_URI_LONG_FORM],
-                TEXT_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
+        const didPubMsg = await sendMessage(pubChat,PUBLISHED_TO_PRISM,
+                DID_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,pubDid[walletSchema.DID_URI_LONG_FORM])
         const didLinkMsg = await sendMessage(pubChat,BLOCKCHAIN_URL_MSG,
                 BLOCKCHAIN_URL_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,didPubTx.url)
         if(didLinkMsg) {
@@ -973,9 +980,10 @@ export async function issueDemoCredential(chat: Object,reply: Object) {
 }
 
 async function initDemos(fromDidAlias) {
-    const libraryRoot = await initRoot("libraryRoot", fromDidAlias, rootsDid("library"), "Library")
-    const rentalRoot = await initRoot("rentalRoot", fromDidAlias, rootsDid("vacationRental"), "Vacation Rental")
-    return libraryRoot && rentalRoot;
+    //const libraryRoot = await initRoot("libraryRoot", fromDidAlias, rootsDid("library"), "Library")
+    //const rentalRoot = await initRoot("rentalRoot", fromDidAlias, rootsDid("vacationRental"), "Vacation Rental")
+    //return libraryRoot && rentalRoot;
+    return true;
 }
 
 async function initDemoAchievements(chat: Object) {

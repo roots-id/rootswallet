@@ -224,7 +224,11 @@ export default function ChatScreen({ route, navigation }) {
         switch(message.type) {
             case roots.BLOCKCHAIN_URL_MSG_TYPE:
                 console.log("Clicked blockchain url msg",message.data)
+                Linking.openURL(message.data)
                 break;
+            case roots.DID_MSG_TYPE:
+                console.log("Clickable did msg",message.data)
+                showQR(message.data)
             default:
                 console.log("Clicked non-active message type",message.type)
         }
@@ -391,7 +395,7 @@ export default function ChatScreen({ route, navigation }) {
           onSend={messages => handleSend(messages)}
           parsePatterns={(linkStyle) => [
                   {
-                      pattern: /Published to Prism/,
+                      pattern: /Your DID was added to Prism/,
                       style: styles.prism,
                       onPress: (tag) => setShowSystem(!showSystem),
                   },
@@ -407,7 +411,7 @@ export default function ChatScreen({ route, navigation }) {
                  },
                  {
                     type: 'url',
-                    style: styles.url,
+                    style: styles.clickableListTitle,
                     onPress: (tag) => Linking.openURL(tag),
                 },
                 {
@@ -455,8 +459,8 @@ export default function ChatScreen({ route, navigation }) {
             mappedMsg["text"] = "more details available"
         }
       }
-      if(message["cred"]) {
-        mappedMsg["cred"] = message["cred"]
+      if(message["data"]) {
+        mappedMsg["data"] = message["data"]
       }
       //image: 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_light_color_272x92dp.png',
       // You can also add a video prop:

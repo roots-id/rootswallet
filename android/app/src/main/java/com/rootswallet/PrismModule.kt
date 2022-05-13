@@ -23,16 +23,23 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
-    fun test() {Log.d("test","test")}
-
-    @ReactMethod(isBlockingSynchronousMethod = true)
-    fun testNode() {
-        val wal = newWallet("walletname1", "", "password1")
-        val didAlias1 = "didAlias1"
-        val walAfterDid = newDid(wal, didAlias1, true)
-        Log.d("LANCETAG", "Testing node publish....")
-        val output = publishDid(walAfterDid, didAlias1).toString()
+    fun setNetwork(host: String = "ppp.atalaprism.io", port: String = "50053") {
+        Log.d("PRISM_TAG","Setting GrpcConfig host "+host+" w/port "+port);
+        GrpcConfig.host = host
+        GrpcConfig.port = port
     }
+
+//    @ReactMethod(isBlockingSynchronousMethod = true)
+//    fun test() {Log.d("test","test")}
+//
+//    @ReactMethod(isBlockingSynchronousMethod = true)
+//    fun testNode() {
+//        val wal = newWallet("walletname1", "", "password1")
+//        val didAlias1 = "didAlias1"
+//        val walAfterDid = newDid(wal, didAlias1, true)
+//        Log.d("LANCETAG", "Testing node publish....")
+//        val output = publishDid(walAfterDid, didAlias1).toString()
+//    }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
     fun newDID(walJson: String, didAlias: String): String {
