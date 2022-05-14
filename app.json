@@ -13,7 +13,7 @@
     "splash": {
       "image": "./src/assets/WhiteTextExtraGlow.png",
       "resizeMode": "contain",
-      "backgroundColor": "#111111"
+      "backgroundColor": "#000000"
     },
     "updates": {
       "enabled": true,
@@ -26,7 +26,7 @@
       "adaptiveIcon": {
 
         "foregroundImage": "./src/assets/LogoOnly1024.png",
-        "backgroundColor": "#111111"
+        "backgroundColor": "#000000"
       },
       "package": "com.rootswallet"
     },

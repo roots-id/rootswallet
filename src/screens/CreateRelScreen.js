@@ -3,19 +3,21 @@ import { NativeModules, StyleSheet, Text, View } from 'react-native';
 import { IconButton, Title } from 'react-native-paper';
 import { v4 as uuidv4 } from 'uuid';
 
-import { createRel } from '../roots';
+import { YOU_ALIAS } from '../relationships';
+import { initRoot } from '../roots';
 import FormButton from '../components/FormButton';
 import FormInput from '../components/FormInput';
 
 const { PrismModule } = NativeModules;
 
 export default function CreateRelScreen({ navigation }) {
+  const [relDid, setRelDid] = useState('did:prism:'+Date.now());
   const [relName, setRelName] = useState('');
   const [problemDisabled, setProblemDisabled] = useState(true)
 
   async function handleButtonPress() {
     if (relName.length > 0) {
-      const rel = await createRel(relName)
+      const rel = await initRoot(relName,YOU_ALIAS,relDid)
       if(rel) {
           console.log("Created rel",rel)
           setProblemDisabled(true)
