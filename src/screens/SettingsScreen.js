@@ -23,7 +23,7 @@ import * as roots from '../roots'
 import IconActions from '../components/IconActions';
 
 export default function RelationshipDetailScreen({ route, navigation }) {
-    const [host, setHost] = useState('ppp.atalaprism.io');
+    const [host, setHost] = useState(roots.getPrismHost());
     const { colors } = useTheme();
     const { current } = useCardAnimation();
 
@@ -48,6 +48,7 @@ export default function RelationshipDetailScreen({ route, navigation }) {
     />
     <Animated.View
     style={{
+      alignItems: 'center',
       padding: 16,
       width: '90%',
       borderRadius: 3,

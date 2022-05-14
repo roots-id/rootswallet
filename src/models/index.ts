@@ -5,10 +5,11 @@ const ID_SEPARATOR = "_"
 
 //these types must be unique enough to use in regex without conflict
 export const MODEL_TYPE_CHAT = "rootsChatType"
-export const MODEL_TYPE_MESSAGE = "rootsMsgType"
 export const MODEL_TYPE_CREDENTIAL = "rootsCredentialType"
 export const MODEL_TYPE_CRED_REQUEST = "rootsCredRequestType"
+export const MODEL_TYPE_MESSAGE = "rootsMsgType"
 export const MODEL_TYPE_REL = "rootsRelType"
+export const MODEL_TYPE_SETTING = "rootsSettingType"
 
 //TODO refactor away this general file to specific files, like 'chat'
 

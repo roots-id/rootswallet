@@ -33,7 +33,8 @@ import ScanQRCodeScreen from '../screens/ScanQRCodeScreen'
 import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
 import StartChatScreen from '../screens/StartChatScreen';
 
-import { getChatItem, getRootsWallet, storageStatus, hasWallet, TEST_WALLET_NAME } from '../roots'
+import { getChatItem, getRootsWallet, storageStatus,
+    hasWallet, loadSettings, TEST_WALLET_NAME } from '../roots'
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator()
@@ -75,16 +76,19 @@ export default function AuthStack() {
         try {
           console.log("AuthStack - getting RootsWallet")
           await storageStatus()
-          //TODO ditch test wallet name
-          const walFound = await hasWallet(walletName)
-          console.log("AuthStack - wallet found?",walFound)
-          setWalletFound(walFound)
-          if(walFound) {
-            //TODO ditch test wallet name
-            console.log("AuthStack - since wallet found, getting rootsWallet")
-            userToken = getRootsWallet(walletName)
-          } else {
-            console.log("AuthStack - since wallet NOT found, auth token not set")
+          const settingsLoaded = await loadSettings()
+          if(settingsLoaded) {
+              //TODO ditch test wallet name
+              const walFound = await hasWallet(walletName)
+              console.log("AuthStack - wallet found?",walFound)
+              setWalletFound(walFound)
+              if(walFound) {
+                //TODO ditch test wallet name
+                console.log("AuthStack - since wallet found, getting rootsWallet")
+                userToken = getRootsWallet(walletName)
+              } else {
+                console.log("AuthStack - since wallet NOT found, auth token not set")
+              }
           }
         } catch (e) {
           // Restoring token failed

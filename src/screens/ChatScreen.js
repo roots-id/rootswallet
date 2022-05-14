@@ -420,7 +420,7 @@ export default function ChatScreen({ route, navigation }) {
                 }
           ]}
           //quickReplyStyle={{backgroundColor: '#e69138',borderColor: '#e69138',elevation: 3}}
-          //placeholder={"Type your message"}
+          placeholder={"Make a note..."}
           renderInputToolbar={props => renderInputToolbar(props)}
           //renderActions={renderActions}
           renderAllAvatars={true}

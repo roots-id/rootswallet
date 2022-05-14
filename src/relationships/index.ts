@@ -22,9 +22,9 @@ export const rootsLogo = rwLogo;
 export const starLogo = starPng;
 
 export const YOU_ALIAS = "You"
+export const ROOTS_BOT = "RootsWallet Bot";
+export const PRISM_BOT = "Prism Bot";
 
-export const ROOTS_BOT = "rootsbot1";
-export const PRISM_BOT = "prismbot1";
 export const LIBRARY_BOT = "did:prism:librarybot1";
 const IOG_TECH = "did:prism:iogtech1";
 const ROOTSID = "did:prism:rootsid";
@@ -85,17 +85,17 @@ export function getRelItem(relId) {
     }
 }
 
-export async function initDemoRels() {
-    logger("rels - init demo rels")
-    await createRelItem(ROOTS_BOT,"RootsWallet",rootsLogo,ROOTS_BOT)
-    await createRelItem(PRISM_BOT,"Atala Prism",prismLogo,PRISM_BOT)
-    await createRelItem(LIBRARY_BOT,"Library",personLogo,LIBRARY_BOT)
-    await createRelItem(IOG_TECH, "IOG Tech Community",iogLogo,IOG_TECH);
-    await createRelItem(ROOTSID, "RootsID",rootsLogo,ROOTSID);
-    await createRelItem(LANCE, "MeGrimLance",lanceLogo,LANCE);
-    await createRelItem(TONY,"Tony.Rose",tonyLogo,TONY)
-    await createRelItem(DARRELL,"Darrell O'Donnell",darrellLogo,DARRELL)
-    await createRelItem(BUTCH,"Butch Clark",butchLogo,BUTCH)
-    await createRelItem(ESTEBAN,"Esteban Garcia",estebanLogo,ESTEBAN)
-    await createRelItem(RODO,"Rodolfo Miranda",rodoLogo,RODO)
-}
+// export async function initDemoRels() {
+//     logger("rels - init demo rels")
+//     await createRelItem(ROOTS_BOT,"RootsWallet",rootsLogo,ROOTS_BOT)
+//     await createRelItem(PRISM_BOT,"Atala Prism",prismLogo,PRISM_BOT)
+//     await createRelItem(LIBRARY_BOT,"Library",personLogo,LIBRARY_BOT)
+//     await createRelItem(IOG_TECH, "IOG Tech Community",iogLogo,IOG_TECH);
+//     await createRelItem(ROOTSID, "RootsID",rootsLogo,ROOTSID);
+//     await createRelItem(LANCE, "MeGrimLance",lanceLogo,LANCE);
+//     await createRelItem(TONY,"Tony.Rose",tonyLogo,TONY)
+//     await createRelItem(DARRELL,"Darrell O'Donnell",darrellLogo,DARRELL)
+//     await createRelItem(BUTCH,"Butch Clark",butchLogo,BUTCH)
+//     await createRelItem(ESTEBAN,"Esteban Garcia",estebanLogo,ESTEBAN)
+//     await createRelItem(RODO,"Rodolfo Miranda",rodoLogo,RODO)
+// }

@@ -41,6 +41,7 @@ const allChatsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CHAT)
 const allCredsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CREDENTIAL)+'*')
 const allCredReqsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CRED_REQUEST)+'*')
 const allMsgsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_MESSAGE)+'*')
+const allSettingsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_SETTING)+'*')
 
 export const TEST_WALLET_NAME = "testWalletName"
 const demo = true;
@@ -52,7 +53,6 @@ const allProcessing = [];
 
 export async function initRootsWallet() {
     logger("roots - initializing RootsWallet")
-    setPrismHost();
 
     logger("roots - initializing your Did")
     const createdDid = await createDid(rel.YOU_ALIAS)
@@ -61,8 +61,8 @@ export async function initRootsWallet() {
     const myRel = rel.getRelItem(rel.YOU_ALIAS)
 
     logger("roots - initializing your narrator bots roots")
-    const prism = await initRoot(rel.PRISM_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.PRISM_BOT), "Prism Bot", rel.prismLogo)
-    const rw = await initRoot(rel.ROOTS_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.ROOTS_BOT), "RootsWallet Bot", rel.rootsLogo)
+    const prism = await initRoot(rel.PRISM_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.PRISM_BOT), rel.PRISM_BOT, rel.prismLogo)
+    const rw = await initRoot(rel.ROOTS_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.ROOTS_BOT), rel.ROOTS_BOT, rel.rootsLogo)
 
     logger("roots - initializing your achievements root")
     const achRootAlias = "achievementsRoot"
@@ -128,6 +128,28 @@ async function loadItems(regex: RegExp) {
 export function setPrismHost(host="ppp.atalaprism.io", port="50053") {
     logger("roots - setting Prism host and port",host,port)
     PrismModule.setNetwork(host,port)
+    store.updateItem(getSettingAlias("prismNodePort"),port)
+    store.updateItem(getSettingAlias("prismNodeHost"),host)
+}
+
+export function getPrismHost() {
+    const host = store.getItem(getSettingAlias("prismNodeHost"))
+    return (host) ? host :  "ppp.atalaprism.io";
+}
+
+//---------------- Settings -----------------------
+function applyAppSettings() {
+    setPrismHost(store.getItem(getSettingAlias("prismNodeHost")),
+        store.getItem(getSettingAlias("prismNodePort")));
+}
+
+function getSettingAlias(key) {
+    return models.getStorageKey(key,models.MODEL_TYPE_SETTING)
+}
+
+export async function loadSettings() {
+    const settings = await loadItems(allSettingsRegex)
+    return settings;
 }
 
 //----------------- Wallet ---------------------
@@ -1003,7 +1025,7 @@ async function initDemoAchievements(chat: Object) {
       rel.getRelItem(rel.ROOTS_BOT))
 }
 
-async function initRoot(alias: string, fromDidAlias: string, toDid: string, display=alias, avatar=rel.personLogo) {
+export async function initRoot(alias: string, fromDidAlias: string, toDid: string, display=alias, avatar=rel.personLogo) {
     logger("roots - creating root",alias,fromDidAlias,toDid,display,avatar)
     try {
         const relCreated = await rel.createRelItem(alias,display, avatar, toDid);

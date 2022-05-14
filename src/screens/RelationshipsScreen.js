@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import {getRelationships} from '../relationships'
+import {getRelationships, YOU_ALIAS, PRISM_BOT, ROOTS_BOT} from '../relationships'
 import Relationship from '../models/relationship'
 import { getChatItem } from '../roots'
 import styles from "../styles/styles";
@@ -11,7 +11,10 @@ const RelationshipsScreen = ({route,navigation}) => {
     const {walletName} = route.params
     console.log(`walletName: ${walletName}`)
 
-    const relationships = getRelationships(walletName).filter(rel => rel.displayName !== 'You')
+    const relationships = getRelationships(walletName).filter(
+        rel => rel.displayName !== YOU_ALIAS &&
+         rel.displayName !== PRISM_BOT &&
+         rel.displayName !== ROOTS_BOT)
 
     const showRel = (rel) => {
         console.log(`> RelationshipsScr.pressHandler( ${rel})`)
