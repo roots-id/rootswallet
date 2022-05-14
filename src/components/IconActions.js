@@ -7,6 +7,7 @@ export default function IconActions(...props) {
   const navigation = props[0]["nav"]
   const add = props[0]["add"]
   const scan = props[0]["scan"]
+  const settings = props[0]["settings"]
   return (
     <View style={{flexDirection:'row',}}>
         <IconButton
@@ -21,6 +22,12 @@ export default function IconActions(...props) {
             color="#e69138"
             onPress={() => navigation.navigate(scan)}
         />
+        <IconButton
+              icon="cog-outline"
+              size={28}
+              color="#e69138"
+              onPress={() => navigation.navigate(settings)}
+          />
     </View>
   )
 }

@@ -44,6 +44,15 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
 
     },
+    clickableListTitle: {
+      fontSize: 22,
+      color: '#e69138',
+    },
+    container: {
+        backgroundColor: '#251520',
+        flex: 1,
+        justifyContent: 'center',
+    },
     detailTitle: {
         fontSize: 20,
         color: '#111111',
@@ -72,11 +81,6 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start",
         justifyContent: "flex-start"
 
-    },
-    container: {
-        backgroundColor: '#251520',
-        flex: 1,
-        justifyContent: 'center',
     },
     text: {
         fontSize: 30,
@@ -127,19 +131,24 @@ const styles = StyleSheet.create({
       display: 'none'
   },
   prism: {
-    color: 'red',
+    color: '#940000',
+    textDecorationLine: 'underline',
   },
   problem: {
       color: 'red',
   },
-    subText: {
+    row: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+    },
+  subText: {
       fontSize: 16,
       marginBottom: 10,
       color: '#111111',
       fontWeight: 'normal',
       alignSelf: "flex-start",
       justifyContent: "flex-start"
-    },
+  },
 })
 
 export default styles

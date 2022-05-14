@@ -11,7 +11,7 @@ import { useTheme } from '@react-navigation/native';
 import { useCardAnimation } from '@react-navigation/stack';
 
 import {logger} from '../logging';
-import { ToggleButton } from 'react-native-paper';
+import { IconButton, ToggleButton } from 'react-native-paper';
 import QRCode from 'react-native-qrcode-svg';
 import { prismLogo } from '../roots'
 import styles from "../styles/styles";
@@ -88,6 +88,12 @@ export default function ShowQRCodeScreen({ route, navigation }) {
           ],
         }}
       >
+      <IconButton
+          icon="close-circle"
+          size={36}
+          color="#5b3a70"
+          onPress={() => navigation.goBack()}
+      />
       <ToggleButton
             icon={viewIcon}
             value="toggle view switch"
