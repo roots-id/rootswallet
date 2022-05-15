@@ -15,6 +15,7 @@ export const DID_MSG_TYPE = "didMsgType";
 export const PENDING_STATUS_MESSAGE = "rootsPendingStatus";
 export const PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE = "rootsAcceptCredentialMsgType"
 export const PROMPT_OWN_CREDENTIAL_MSG_TYPE = "rootsOwnCredentialMsgType"
+export const PROMPT_OWN_DID_MSG_TYPE = "rootsOwnDidMsgType"
 export const PROMPT_PUBLISH_MSG_TYPE = "rootsPromptPublishMsgType";
 export const QR_CODE_MSG_TYPE = "rootsQRCodeMsgType"
 export const STATUS_MSG_TYPE = "statusMsgType";
@@ -530,6 +531,13 @@ export function getMessagesByChat(chatAlias: string) {
     return chatMsgs;
 }
 
+export function getMessageById(msgId: string) {
+    logger("roots - getting message by id",msgId)
+    const msgJson = store.getItem(msg.id)
+    const msg = JSON.parse(msgJson)
+    return msg
+}
+
 export function getMessagesByRel(relId: string) {
     logger("roots - getting message items by user",relId)
 //     /rootsMsgType*did:prism:rootsbot1*/
@@ -584,11 +592,18 @@ function addQuickReply(msg) {
             ],
         }
     }
-// {
-//                 title: 'Keep private',
-//                 value: PROMPT_PUBLISH_MSG_TYPE+DO_NOT_PUBLISH_DID,
-//                 messageId: msg.id,
-//             }
+    if(msg.type === PROMPT_OWN_DID_MSG_TYPE) {
+        msg["quickReplies"] = {
+            type: 'checkbox',
+            keepIt: true,
+            values: [
+            {
+                title: 'Show QR code',
+                value: PROMPT_OWN_DID_MSG_TYPE,
+                messageId: msg.id,
+            }]
+        }
+    }
     if(msg.type === PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE) {
         msg["quickReplies"] = {
             type: 'checkbox',
@@ -601,11 +616,6 @@ function addQuickReply(msg) {
             ],
         }
     }
-// {
-//                 title: 'Reject',
-//                 value: PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE+CRED_REJECTED,
-//                 messageId: msg.id,
-//             }
     if(msg.type === PROMPT_OWN_CREDENTIAL_MSG_TYPE) {
         msg["quickReplies"] = {
             type: 'checkbox',
@@ -660,7 +670,7 @@ export async function processPublishResponse(chat: Object, reply: Reply) {
         const pubDid = getDid(chat.fromAlias)
         const didPubTx = getDidPubTx(pubDid[walletSchema.DID_ALIAS])
         const didPubMsg = await sendMessage(pubChat,PUBLISHED_TO_PRISM,
-                DID_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,pubDid[walletSchema.DID_URI_LONG_FORM])
+                PROMPT_OWN_DID_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,pubDid[walletSchema.DID_URI_LONG_FORM])
         const didLinkMsg = await sendMessage(pubChat,BLOCKCHAIN_URL_MSG,
                 BLOCKCHAIN_URL_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,didPubTx.url)
         if(didLinkMsg) {

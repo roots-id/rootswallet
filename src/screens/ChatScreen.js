@@ -176,6 +176,11 @@ export default function ChatScreen({ route, navigation }) {
                     } else {
                         console.log("ChatScreen - not publishing DID")
                     }
+                } else if(reply.value.startsWith(roots.PROMPT_OWN_DID_MSG_TYPE)) {
+                    console.log("ChatScreen - quick reply view did")
+                    const longDid = roots.getMessageById(reply.messageId).data
+                    console.log("View did",longDid);
+                    showQR(longDid)
                 } else if(reply.value.startsWith(roots.PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE)) {
                     console.log("ChatScreen - process quick reply for accepting credential")
                     const res = await roots.processCredentialResponse(chat,reply)
@@ -393,12 +398,13 @@ export default function ChatScreen({ route, navigation }) {
           onPress={ (context, message) => processBubbleClick(context,message)}
           onQuickReply={reply => handleQuickReply(reply)}
           onSend={messages => handleSend(messages)}
+//          onPress: (tag) => setShowSystem(!showSystem),
+//          {
+//              pattern: /Your DID was added to Prism/,
+//              style: styles.prism,
+//              onPress: (tag) => setShowSystem(!showSystem),
+//          },
           parsePatterns={(linkStyle) => [
-                  {
-                      pattern: /Your DID was added to Prism/,
-                      style: styles.prism,
-                      onPress: (tag) => setShowSystem(!showSystem),
-                  },
                   {
                       pattern: /Show Chat QR code/,
                       style: styles.qr,
