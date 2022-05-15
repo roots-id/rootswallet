@@ -1,35 +1,6 @@
 import {StyleSheet} from "react-native";
 
 const styles = StyleSheet.create({
-    walletIconStyle: {
-        fontSize: 24,
-        color: 'blue',
-        alignSelf: 'center',
-        marginHorizontal: 5,
-        marginVertical: 20
-    },
-    walletInputStyle: {
-        flex: 1,
-        flexDirection: 'row',
-        marginHorizontal: 15,
-        height: 50,
-        backgroundColor: '#F0EEEE'
-    },
-    inputStyle: {
-        flex: 1,
-        // autoCorrect: false,
-        // autoComplete: 'off',
-        // autoCapitalize: 'none',
-        padding: 10,
-        borderWidth: 1,
-        borderColor: 'black',
-        marginHorizontal: 15,
-        marginVertical: 20,
-        borderRadius: 5,
-        backgroundColor: 'pink',
-        alignSelf: 'center'
-
-    },
     button:{
         width: 150,
         borderRadius: 10,
@@ -43,6 +14,9 @@ const styles = StyleSheet.create({
         flex: 1,
         alignSelf: 'center'
 
+    },
+    cardano: {
+        color: '#1c04ba'
     },
     clickableListTitle: {
       fontSize: 22,
@@ -73,6 +47,30 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start",
         justifyContent: "flex-start"
     },
+    highlightedItem: {
+        fontSize: 18,
+        fontWeight: "bold"
+    },
+    inputStyle: {
+        flex: 1,
+        // autoCorrect: false,
+        // autoComplete: 'off',
+        // autoCapitalize: 'none',
+        padding: 10,
+        borderWidth: 1,
+        borderColor: 'black',
+        marginHorizontal: 15,
+        marginVertical: 20,
+        borderRadius: 5,
+        backgroundColor: 'pink',
+        alignSelf: 'center'
+    },
+    item: {
+      backgroundColor: '#20190e',
+      padding: 20,
+      marginVertical: 8,
+      marginHorizontal: 16,
+    },
     leftheader: {
         color: '#999999',
         fontSize: 20,
@@ -81,17 +79,6 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start",
         justifyContent: "flex-start"
 
-    },
-    text: {
-        fontSize: 30,
-    },
-    titleText: {
-        fontSize: 24,
-        marginBottom: 10,
-        color: '#eeeeee',
-        fontWeight: 'normal',
-        textAlignVertical: "center",
-        textAlign: "center",
     },
     listItem: {
         fontSize: 18,
@@ -105,15 +92,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#dddddd',
       },
-      item: {
-          backgroundColor: '#20190e',
-          padding: 20,
-          marginVertical: 8,
-          marginHorizontal: 16,
-        },
-    highlightedItem: {
-        fontSize: 18,
-        fontWeight: "bold"
+    loginButtonLabel: {
+      fontSize: 22,
     },
     modalContainer: {
         backgroundColor: '#251520',
@@ -121,9 +101,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
       },
-    loginButtonLabel: {
-      fontSize: 22,
-    },
     navButtonText: {
       fontSize: 16,
     },
@@ -137,7 +114,10 @@ const styles = StyleSheet.create({
   problem: {
       color: 'red',
   },
-    row: {
+  rootsWallet: {
+    color: '#e69138'
+  },
+  row: {
       flexDirection: "row",
       flexWrap: "wrap",
     },
@@ -149,6 +129,31 @@ const styles = StyleSheet.create({
       alignSelf: "flex-start",
       justifyContent: "flex-start"
   },
+    text: {
+        fontSize: 30,
+    },
+    titleText: {
+        fontSize: 24,
+        marginBottom: 10,
+        color: '#eeeeee',
+        fontWeight: 'normal',
+        textAlignVertical: "center",
+        textAlign: "center",
+    },
+    walletIconStyle: {
+        fontSize: 24,
+        color: 'blue',
+        alignSelf: 'center',
+        marginHorizontal: 5,
+        marginVertical: 20
+    },
+    walletInputStyle: {
+        flex: 1,
+        flexDirection: 'row',
+        marginHorizontal: 15,
+        height: 50,
+        backgroundColor: '#F0EEEE'
+    },
 })
 
 export default styles

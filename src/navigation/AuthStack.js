@@ -20,6 +20,7 @@ import HomeScreen from "../screens/HomeScreen"
 import MyIdentityScreen from '../screens/MyIdentityScreen';
 import RelationshipsScreen from "../screens/RelationshipsScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import SimpleTitle from '../components/SimpleTitle';
 import WalletScreen from "../screens/WalletScreen";
 
 import AuthContext from '../context/AuthenticationContext';
@@ -154,7 +155,7 @@ export default function AuthStack() {
                     name="Chat"
                     component={ChatScreen}
                     options={ ({ navigation, route }) => ({
-                        headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>,
+                        headerTitle: (props) => <SimpleTitle {...props} title={getChatItem(route.params.chatId).title}/>,
                         headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code' settings='Settings'/>,
                     })}
                 />
@@ -193,7 +194,7 @@ export default function AuthStack() {
                     name="Chat"
                     component={ChatScreen}
                     options={ ({ navigation, route }) => ({
-                        headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>,
+                        headerTitle: (props) => <SimpleTitle {...props} title={getChatItem(route.params.chatId).title}/>,
                         headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code'/>,
                     })}
                 />
