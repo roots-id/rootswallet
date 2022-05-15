@@ -79,7 +79,7 @@ export async function initRootsWallet() {
     const createdDidMsg = await sendMessage(achChat,
         "You created your first decentralized ID!",
         TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    await sendMessage(achChat,"Add your DID to PRISM so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
+    await sendMessage(achChat,"Add your DID to Prism so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
         PROMPT_PUBLISH_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
 
     if(demo) {
@@ -714,7 +714,7 @@ export async function processPublishResponse(chat: Object, reply: Reply) {
     } else {
         logger("roots - Could not process quick reply to publish chat",chat.id)
         const credReqMsg = await sendMessage(chat,
-                            "DID was already added to PRISM",
+                            "DID was already added to Prism",
                             TEXT_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
         return chat;
     }
