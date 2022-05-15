@@ -405,6 +405,21 @@ export default function ChatScreen({ route, navigation }) {
 //              onPress: (tag) => setShowSystem(!showSystem),
 //          },
           parsePatterns={(linkStyle) => [
+                {
+                      pattern: /RootsWallet/,
+                      style: styles.rootswallet,
+                      onPress: (tag) => console.log("Pressed RootsWallet"),
+                  },
+                {
+                      pattern: /Cardano/,
+                      style: styles.cardano,
+                      onPress: (tag) => console.log("Pressed Cardano"),
+                  },
+                  {
+                        pattern: /Prism/,
+                        style: styles.prism,
+                        onPress: (tag) => console.log("Pressed Prism"),
+                    },
                   {
                       pattern: /Your DID was added to Prism/,
                       style: styles.prism,
