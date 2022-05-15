@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   rootsWallet: {
     color: '#e69138'
   },
-    row: {
+  row: {
       flexDirection: "row",
       flexWrap: "wrap",
     },
