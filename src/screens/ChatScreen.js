@@ -406,6 +406,11 @@ export default function ChatScreen({ route, navigation }) {
 //          },
           parsePatterns={(linkStyle) => [
                   {
+                      pattern: /Your DID was added to Prism/,
+                      style: styles.prism,
+                      onPress: (tag) => console.log("Pressed DID added message"),
+                  },
+                  {
                       pattern: /Show Chat QR code/,
                       style: styles.qr,
                       onPress: (tag) => showQR(roots.getDid(chat.fromAlias).uriLongForm),

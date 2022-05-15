@@ -79,7 +79,7 @@ export async function initRootsWallet() {
     const createdDidMsg = await sendMessage(achChat,
         "You created your first decentralized ID!",
         TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    await sendMessage(achChat,"Add your DID to PRISM so that you can receive verifiable credentials (called VCs) from other users and organizations like the library, your school, rental companies, etc.",
+    await sendMessage(achChat,"Add your DID to PRISM so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
         PROMPT_PUBLISH_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
 
     if(demo) {
@@ -150,6 +150,7 @@ function getSettingAlias(key) {
 
 export async function loadSettings() {
     const settings = await loadItems(allSettingsRegex)
+    applyAppSettings();
     return settings;
 }
 
@@ -533,7 +534,7 @@ export function getMessagesByChat(chatAlias: string) {
 
 export function getMessageById(msgId: string) {
     logger("roots - getting message by id",msgId)
-    const msgJson = store.getItem(msg.id)
+    const msgJson = store.getItem(msgId)
     const msg = JSON.parse(msgJson)
     return msg
 }
