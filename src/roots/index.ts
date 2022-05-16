@@ -66,20 +66,23 @@ export async function initRootsWallet() {
     const rw = await initRoot(rel.ROOTS_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.ROOTS_BOT), rel.ROOTS_BOT, rel.rootsLogo)
 
     logger("roots - initializing your achievements root")
-    const achRootAlias = "achievementsRoot"
-    const achievements = await initRoot(achRootAlias, createdDid[walletSchema.DID_ALIAS], rootsDid("achievements"), "Achievements", rel.starLogo)
+    const historyRootAlias = rel.HISTORY_ALIAS
+    const history = await initRoot(historyRootAlias, createdDid[walletSchema.DID_ALIAS], rootsDid("history"), "History", rel.starLogo)
 
     logger("roots - posting your initialization achievement messages")
-    const achChat = getChatItem(achRootAlias)
-    const welcomeAchMsg = await sendMessage(achChat,
-        "Welcome to your RootsWallet achievements! We'll post new achievements as you complete core RootsWallet operations for the first time.",
+    const historyChat = getChatItem(historyRootAlias)
+    const welcomeAchMsg = await sendMessage(historyChat,
+        "Welcome to your RootsWallet history!",
         TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    const createdWalletMsg = await sendMessage(achChat,
+    const achMsg = await sendMessage(historyChat,
+        "We'll post new achievements as you complete core RootsWallet operations for the first time.",
+        TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
+    const createdWalletMsg = await sendMessage(historyChat,
         "You created your wallet: "+currentWal._id,TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    const createdDidMsg = await sendMessage(achChat,
+    const createdDidMsg = await sendMessage(historyChat,
         "You created your first decentralized ID!",
         TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    await sendMessage(achChat,"Add your DID to Prism so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
+    await sendMessage(historyChat,"Add your DID to Prism so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
         PROMPT_PUBLISH_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
 
     if(demo) {

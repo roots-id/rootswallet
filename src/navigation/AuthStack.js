@@ -34,8 +34,11 @@ import ScanQRCodeScreen from '../screens/ScanQRCodeScreen'
 import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
 import StartChatScreen from '../screens/StartChatScreen';
 
-import { getChatItem, getRootsWallet, storageStatus,
-    hasWallet, loadSettings, TEST_WALLET_NAME } from '../roots'
+import { getChatItem, getRootsWallet,
+    hasWallet, loadSettings, storageStatus,
+    TEST_WALLET_NAME } from '../roots'
+
+import {HISTORY_ALIAS} from '../relationships'
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator()
@@ -120,8 +123,9 @@ export default function AuthStack() {
     const Main = () => {
         return (
             <Tab.Navigator screenOptions={{headerShown:false}}>
-                <Tab.Screen name="relationships" component={RelationshipsStack}/>
-                <Tab.Screen name="integration" component={IntegrationStack}/>
+                <Tab.Screen name="Contacts" component={RelationshipsStack}/>
+                <Tab.Screen name="History" component={HistoryStack}/>
+                <Tab.Screen name="Integration" component={IntegrationStack}/>
             </Tab.Navigator>
         )
     }
@@ -147,7 +151,7 @@ export default function AuthStack() {
                       component={RelationshipsScreen}
                       initialParams={{walletName: walletName}}
                       options={ ({ navigation, route }) => ({
-                          headerTitle: (props) => <LogoTitle {...props} title="Relationships:"/>,
+                          headerTitle: (props) => <LogoTitle {...props} title="Contacts"/>,
                           headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" scan='Scan QR Code' settings='Settings'/>,
                       })}
                 />
@@ -163,7 +167,7 @@ export default function AuthStack() {
         </Stack.Navigator>
         )
     }
-    const ChatsStack = () => {
+    const HistoryStack = () => {
         return (
             <Stack.Navigator
                 screenOptions={{
@@ -183,18 +187,11 @@ export default function AuthStack() {
             >
             <Stack.Group>
                 <Stack.Screen
-                    name="Chats"
-                    component={ChatListScreen}
-                    options={ ({ navigation, route }) => ({
-                        headerTitle: (props) => <LogoTitle {...props} title="Secure Chats:"/>,
-                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Secure Chat" scan='Scan QR Code'/>,
-                    })}
-                />
-                <Stack.Screen
                     name="Chat"
                     component={ChatScreen}
+                    initialParams={{chatId: HISTORY_ALIAS}}
                     options={ ({ navigation, route }) => ({
-                        headerTitle: (props) => <SimpleTitle {...props} title={getChatItem(route.params.chatId).title}/>,
+                        headerTitle: (props) => <SimpleTitle {...props} title={"History"}/>,
                         headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code'/>,
                     })}
                 />
@@ -254,7 +251,7 @@ export default function AuthStack() {
             ) : (
               <>
                 <Stack.Group>
-                    <Stack.Screen name="relationshipStack" component={Main}/>
+                    <Stack.Screen name="mainTabs" component={Main}/>
                 </Stack.Group>
                 <Stack.Group screenOptions={{ presentation: 'transparentModal' }}>
                     <Stack.Screen name="Help" component={HelpScreen}/>

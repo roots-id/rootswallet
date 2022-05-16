@@ -22,6 +22,7 @@ export const rootsLogo = rwLogo;
 export const starLogo = starPng;
 
 export const YOU_ALIAS = "You"
+export const HISTORY_ALIAS = "History"
 export const ROOTS_BOT = "RootsWallet Bot";
 export const PRISM_BOT = "Prism Bot";
 
