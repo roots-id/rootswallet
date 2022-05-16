@@ -22,21 +22,18 @@ export default function ChatScreen({ route, navigation }) {
     const [loading, setLoading] = useState(true);
     const [madeCredential, setMadeCredential] = useState(false)
     const [messages, setMessages] = useState([]);
-    const [processing, setProcessing] = useState(false)
+    const [processing, setProcessing] = useState(roots.isProcessing(chat.id))
 //    const [scanned, setScanned] = useState(false);
     const [showSystem, setShowSystem] = useState(false)
 
     useEffect(() => {
-        let isCancelled = false;
         console.log("ChatScreen - useEffect",chat)
         const chatSession = roots.startChatSession({
             chat: chat,
             onReceivedMessage: (message) => {
-                if (!isCancelled) {
-                    setMessages((currentMessages) =>
-                        GiftedChat.append(currentMessages, [mapMessage(message)])
-                    );
-                }
+                setMessages((currentMessages) =>
+                    GiftedChat.append(currentMessages, [mapMessage(message)])
+                );
             },
             onReceivedKeystrokes: (keystrokes) => {
              // handle received typing keystrokes
@@ -66,9 +63,7 @@ export default function ChatScreen({ route, navigation }) {
              // handle chat changes
             },
             onProcessing: (processing) => {
-                if (!isCancelled) {
-                    setProcessing(processing)
-                }
+                setProcessing(processing)
             },
         });
         if (chatSession.succeeded) {
@@ -95,7 +90,7 @@ export default function ChatScreen({ route, navigation }) {
     }, [messages]);
 
     useEffect(() => {
-        console.log("ChatScreen - Checked Processing")
+        console.log("ChatScreen - Checked Processing",processing)
     }, [processing]);
 
     useEffect(() => {

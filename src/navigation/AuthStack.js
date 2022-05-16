@@ -191,8 +191,9 @@ export default function AuthStack() {
                     component={ChatScreen}
                     initialParams={{chatId: HISTORY_ALIAS}}
                     options={ ({ navigation, route }) => ({
-                        headerTitle: (props) => <SimpleTitle {...props} title={"History"}/>,
-                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code'/>,
+                        headerTitle: (props) => <LogoTitle {...props} title={"History"}/>,
+                        headerRight: (props) => <IconActions {...props} nav={navigation}
+                            add="Add Rel" scan='Scan QR Code' settings='Settings'/>,
                     })}
                 />
             </Stack.Group>
