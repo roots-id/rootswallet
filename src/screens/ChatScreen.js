@@ -22,7 +22,7 @@ export default function ChatScreen({ route, navigation }) {
     const [loading, setLoading] = useState(true);
     const [madeCredential, setMadeCredential] = useState(false)
     const [messages, setMessages] = useState([]);
-    const [processing, setProcessing] = useState(roots.isProcessing(chat.id))
+    const [processing, setProcessing] = useState(false)
 //    const [scanned, setScanned] = useState(false);
     const [showSystem, setShowSystem] = useState(false)
 
@@ -34,6 +34,7 @@ export default function ChatScreen({ route, navigation }) {
                 setMessages((currentMessages) =>
                     GiftedChat.append(currentMessages, [mapMessage(message)])
                 );
+                roots.isProcessing(chat.id)
             },
             onReceivedKeystrokes: (keystrokes) => {
              // handle received typing keystrokes
@@ -61,6 +62,7 @@ export default function ChatScreen({ route, navigation }) {
             },
             onChatUpdated: (chat) => {
              // handle chat changes
+             roots.isProcessing(chat.id)
             },
             onProcessing: (processing) => {
                 setProcessing(processing)
@@ -81,17 +83,16 @@ export default function ChatScreen({ route, navigation }) {
 //                setLoading(false);
 //            });
         return () =>
-            {chatSession.end
-            isCanceled = true;}
+            {chatSession.end}
     }, [chat]);
 
     useEffect(() => {
         //console.log("ChatScreen - Front-end messages updated")
     }, [messages]);
 
-    useEffect(() => {
-        console.log("ChatScreen - Checked Processing",processing)
-    }, [processing]);
+//    useEffect(() => {
+//        console.log("ChatScreen - Checked Processing",processing)
+//    }, [processing]);
 
     useEffect(() => {
         console.log("ChatScreen - getting all messages")
@@ -158,6 +159,7 @@ export default function ChatScreen({ route, navigation }) {
 //processQuickReply(chat,reply)
     async function handleQuickReply(replies) {
         console.log("ChatScreen - Processing Quick Reply w/ chat",chat.id,"w/ replies",replies.length)
+        roots.isProcessing(chat.id)
         if(replies) {
             replies.forEach(async (reply) =>
             {

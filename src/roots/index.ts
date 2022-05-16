@@ -25,7 +25,7 @@ export const LINK_MSG_TYPE = "linkMsgType"
 //meaningful literals
 export const ACHIEVEMENT_MSG_PREFIX = "You have a new achievement: ";
 export const BLOCKCHAIN_URL_MSG = "*Click to see the blockchain details*";
-export const PUBLISHED_TO_PRISM = "*Your DID was added to Prism*";
+export const PUBLISHED_TO_PRISM = "Your DID was added to Prism";
 export const SHOW_CRED_QR_CODE = "Show Cred QR code";
 export const SHOW_DID_QR_CODE = "Show Chat QR code";
 
@@ -322,7 +322,7 @@ export async function publishPrismDid(didAlias: string) {
             const result = await updateWallet(currentWal._id,currentWal.passphrase,newWalJson)
             return isDidPublished(getDid(didAlias))
         } catch(error) {
-            console.error("roots - Error publishing DID",longFormDid,"w/DID alias",chat.fromAlias,error,error.stack)
+            console.error("roots - Error publishing DID",longFormDid,"w/DID alias",didAlias,error,error.stack)
         }
     } else {
         logger("roots - already",PUBLISHED_TO_PRISM,did.alias)
@@ -660,8 +660,8 @@ export async function processCredentialResponse(chat: Object, reply: Object) {
             if(accepted) {
                 const credOwnMsg = await sendMessage(chat,"Credential accepted.",PROMPT_OWN_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
                 store.saveItem(getCredentialAlias(credOwnMsg.id),await getCredentialByMsgId(reply.messageId))
-                endProcessing(chat.id,reply.messageId)
             }
+            endProcessing(chat.id,reply.messageId)
             return accepted;
         } else if (reply.value.endsWith(CRED_REJECTED)) {
             logger("roots - quick reply credential rejected",credReqAlias)
@@ -888,6 +888,9 @@ export function getIssuedCredentials(didAlias: string) {
 async function issueCredential(didAlias: string,credAlias: string,cred: Object) {
     const credJson = JSON.stringify(cred)
     console.log("roots - issuing credential", credJson)
+    startProcessing(chat.id,credAlias)
+    let result;
+
     try {
         const newWalJson = await PrismModule.issueCred(store.getWallet(currentWal._id), didAlias, credJson);
         logger("roots - wallet after issuing credential",newWalJson)
@@ -897,18 +900,19 @@ async function issueCredential(didAlias: string,credAlias: string,cred: Object) 
                 logger("roots - wallet saved after issuing credential",savedWal)
                 const newCred = getIssuedCredential(cred.alias)
                 logger("roots - Issued credential",newCred.alias)
-                return newCred
+                result = newCred
             } else {
                 console.error("roots - Could not issue credential, unable to save wallet")
-                return;
             }
         } else {
             console.error("roots - Could not issue credential")
-            return;
         }
     } catch(error) {
         console.error("Could not issue credential to",didAlias,credAlias,cred,error,error.stack)
     }
+
+    endProcessing(chat.id,credAlias)
+    return result
 }
 
 function verifyCredential(credAlias: string) {
@@ -953,9 +957,7 @@ export function startProcessing(processGroup, processAlias) {
     }
     allProcessing[processGroup][processAlias] = {startDate: Date.now()}
     logger("started processing",processGroup,processAlias,allProcessing[processGroup][processAlias])
-    if(handlers["onProcessing"]) {
-        handlers["onProcessing"](isProcessing(processGroup))
-    }
+    isProcessing(processGroup)
 }
 
 export function endProcessing(processGroup, processAlias) {
@@ -965,12 +967,10 @@ export function endProcessing(processGroup, processAlias) {
     } else if(!allProcessing[processGroup][processAlias]) {
         console.error("Cannot end processing of id that does not exist",processAlias)
     } else {
-        logger("Ending processing",processGroup,processAlias)
+        logger("processing ended",processGroup,processAlias)
         allProcessing[processGroup][processAlias]={endDate: Date.now()}
     }
-    if(handlers["onProcessing"]) {
-        handlers["onProcessing"](isProcessing(processGroup))
-    }
+    isProcessing(processGroup)
 }
 
 function isActiveProcess(processGroup: string,processAlias: string) {
@@ -982,11 +982,11 @@ function isActiveProcess(processGroup: string,processAlias: string) {
 
 function getActiveProcesses(processGroup: string) {
     const allActive = []
-//     if(!processGroup) {
-//         logger("getting all active processing groups")
-//         const allGroups = Object.keys(allProcessing)
-//         allGroups.forEach(group => {allActive.concat(getActiveProcesses(group))})
-//     } else {
+    if(!processGroup) {
+        logger("getting all active processing groups")
+        const allGroups = Object.keys(allProcessing)
+        allGroups.forEach(group => {allActive.concat(getActiveProcesses(group))})
+    } else {
         logger("getting active processing for group",processGroup)
         if(allProcessing[processGroup]) {
             const allGroupProcesses = Object.keys(allProcessing[processGroup])
@@ -998,20 +998,26 @@ function getActiveProcesses(processGroup: string) {
             );
             allActive.push(active)
         }
-//     }
+    }
     return allActive
 }
 
 export function isProcessing(processGroup) {
     logger("determining if is processing",processGroup)
     const active = getActiveProcesses(processGroup)
+    let processing = false
     if(active && active.length > 0){
-        logger("is processing",active.length)
-        return true;
+        active.forEach(act => logger("currently processing",act))
+        processing = true;
     } else {
         logger("signaling not processing")
-        return false;
+        processing = false;
     }
+
+    if(handlers["onProcessing"]) {
+        handlers["onProcessing"](processing)
+    }
+    return processing;
 }
 
 //----------- DEMO --------------------
@@ -1048,10 +1054,8 @@ export async function issueDemoCredential(chat: Object,msgId: string) {
             revoked: false,
         }
         logger("roots - issuing demo credential",cred)
-        startProcessing(chat.id,credAlias)
         const issuedCred = await issueCredential(chat.fromAlias, credAlias, cred)
         if(issuedCred) {
-            endProcessing(chat.id,credAlias)
             logger("Prism issued credential",issuedCred)
             return credAlias;
         } else {
