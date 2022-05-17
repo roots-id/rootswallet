@@ -11,7 +11,7 @@ import iogLogo from '../assets/iog.png'
 import lanceLogo from '../assets/lance.png'
 import perLogo from '../assets/smallBWPerson.png';
 import rodoLogo from '../assets/rodo.png'
-import rwLogo from '../assets/LogoOnly1024.png';
+import rwLogo from '../assets/LogoCropped.png';
 import starPng from '../assets/star.png';
 import tonyLogo from '../assets/tony.png';
 
@@ -84,6 +84,22 @@ export function getRelItem(relId) {
     } else {
         logger("rels - can't get rel for undefined relId",relId)
     }
+}
+
+export function getShareableRelByAlias(alias: string) {
+    logger("roots - getting shareable rel by alias",alias)
+    const rel = getRelItem(alias)
+    const shareable = {
+        displayName: rel.displayName,
+        displayPictureUrl: rel.displayPictureUrl,
+        did: rel.did.uriLongForm,
+    }
+    return shareable
+}
+
+export function showRel(navigation,rel) {
+    console.log("rel - show rel",rel)
+    navigation.navigate('Relationship Details',{rel: getShareableRelByAlias(rel)})
 }
 
 // export async function initDemoRels() {

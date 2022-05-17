@@ -7,6 +7,7 @@ import { Actions, ActionsProps, Bubble, ChatInput,
 //import { useInterval } from 'usehooks-ts'
 //import { BarCodeScanner } from 'expo-barcode-scanner';
 //import emojiUtils from 'emoji-utils';
+import { showQR } from '../qrcode'
 import {getRelItem,YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
@@ -34,7 +35,6 @@ export default function ChatScreen({ route, navigation }) {
                 setMessages((currentMessages) =>
                     GiftedChat.append(currentMessages, [mapMessage(message)])
                 );
-                roots.isProcessing(chat.id)
             },
             onReceivedKeystrokes: (keystrokes) => {
              // handle received typing keystrokes
@@ -62,10 +62,10 @@ export default function ChatScreen({ route, navigation }) {
             },
             onChatUpdated: (chat) => {
              // handle chat changes
-             roots.isProcessing(chat.id)
             },
             onProcessing: (processing) => {
                 setProcessing(processing)
+                console.log("updated processing indicator",processing)
             },
         });
         if (chatSession.succeeded) {
@@ -87,7 +87,6 @@ export default function ChatScreen({ route, navigation }) {
     }, [chat]);
 
     useEffect(() => {
-        //console.log("ChatScreen - Front-end messages updated")
     }, [messages]);
 
 //    useEffect(() => {
@@ -176,8 +175,8 @@ export default function ChatScreen({ route, navigation }) {
                 } else if(reply.value.startsWith(roots.PROMPT_OWN_DID_MSG_TYPE)) {
                     console.log("ChatScreen - quick reply view did")
                     const longDid = roots.getMessageById(reply.messageId).data
-                    console.log("View did",longDid);
-                    showQR(longDid)
+                    console.log("View rel",longDid);
+                    showQR(navigation,longDid)
                 } else if(reply.value.startsWith(roots.PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE)) {
                     console.log("ChatScreen - process quick reply for accepting credential")
                     const res = await roots.processCredentialResponse(chat,reply)
@@ -191,11 +190,19 @@ export default function ChatScreen({ route, navigation }) {
                     } else if (reply.value.endsWith(roots.CRED_VIEW)) {
                         console.log("ChatScreen - quick reply view credential")
                         const cred = await roots.getCredentialByMsgId(reply.messageId)
-                        const credJson = JSON.stringify(cred)
-                        console.log("View credential",credJson);
-                        showQR(JSON.stringify(credJson))
+                        showQR(navigation,cred)
                     }
-                } else {
+                } else if(reply.value.startsWith(roots.PROMPT_SHAREABLE_REL_MSG_TYPE)) {
+                  console.log("ChatScreen - quick reply shareable rel")
+                  const rel = roots.getMessageById(reply.messageId).data
+                  if(rel) {
+                      const relJson = JSON.stringify(rel)
+                      console.log("View shareable",relJson);
+                      showQR(navigation,relJson)
+                  }else {
+                    console.log("Could not show undefined shareable",rel)
+                  }
+                }else {
                     console.log("ChatScreen - reply value not recognized, was",chat.id,reply.value)
                     return;
                 }
@@ -230,7 +237,7 @@ export default function ChatScreen({ route, navigation }) {
                 break;
             case roots.DID_MSG_TYPE:
                 console.log("Clickable did msg",message.data)
-                showQR(message.data)
+                showQR(navigation,message.data)
             default:
                 console.log("Clicked non-active message type",message.type)
         }
@@ -425,12 +432,12 @@ export default function ChatScreen({ route, navigation }) {
                   {
                       pattern: /Show Chat QR code/,
                       style: styles.qr,
-                      onPress: (tag) => showQR(roots.getDid(chat.fromAlias).uriLongForm),
+                      onPress: (tag) => showQR(navigation,roots.getDid(chat.fromAlias).uriLongForm),
                   },
                  {
                      pattern: /did:prism:[\S]*/,
                      style: styles.prism,
-                     onPress: (tag) => showQR(tag),
+                     onPress: (tag) => showQR(navigation,tag),
                  },
                  {
                     type: 'url',
@@ -505,11 +512,6 @@ export default function ChatScreen({ route, navigation }) {
       name: rel.displayName,
       avatar: rel.displayPictureUrl,
     };
-  }
-
-  function showQR(data: string[]) {
-    console.log("ChatScreen - Showing QR data",data)
-    navigation.navigate('Show QR Code', {qrdata: data})
   }
 }
 

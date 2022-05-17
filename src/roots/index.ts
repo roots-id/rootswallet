@@ -45,12 +45,16 @@ const allMsgsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_MESSAG
 const allSettingsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_SETTING)+'*')
 
 export const TEST_WALLET_NAME = "testWalletName"
+
+export const POLL_TIME = 1000
+
 const demo = true;
 
 let currentWal;
 
-const handlers = {};
 const allProcessing = {};
+const handlers = {};
+const polling = {};
 
 export async function initRootsWallet() {
     logger("roots - initializing RootsWallet")
@@ -130,8 +134,23 @@ async function loadItems(regex: RegExp) {
     }
 }
 
+export async function handleNewData(jsonData: string) {
+    const obj = JSON.parse(jsonData)
+    if(obj.dataType === 'credential') {
+        console.log("handling new cred",jsonData)
+        return "Credentials"
+    } else if(obj.dataType === 'rel') {
+        console.log("scanned rel",jsonData)
+        initRoot(obj.displayName, rel.YOU_ALIAS, obj.did, rel.displayName, rel.displayPictureUrl)
+        return "Relationships"
+    } else {
+        console.error("Did not recognize scanned data",jsonData)
+        return "Relationships"
+    }
+}
+
 //----------------- Prism ----------------------
-export function setPrismHost(host="ppp.atalaprism.io", port="50053") {
+export function setPrismHost(host="ppp-node-test.atalaprism.io", port="50053") {
     logger("roots - setting Prism host and port",host,port)
     PrismModule.setNetwork(host,port)
     store.updateItem(getSettingAlias("prismNodePort"),port)
@@ -140,7 +159,25 @@ export function setPrismHost(host="ppp.atalaprism.io", port="50053") {
 
 export function getPrismHost() {
     const host = store.getItem(getSettingAlias("prismNodeHost"))
-    return (host) ? host :  "ppp.atalaprism.io";
+    return (host) ? host :  "ppp-node-test.atalaprism.io";
+}
+
+//--------------- Roots ----------------------
+
+export async function initRoot(alias: string, fromDidAlias: string, toDid: string, display=alias, avatar=rel.personLogo) {
+    logger("roots - creating root",alias,fromDidAlias,toDid,display,avatar)
+    try {
+        const relCreated = await rel.createRelItem(alias,display, avatar, toDid);
+        logger("roots - rel created/existed?",relCreated)
+        const relationship = rel.getRelItem(alias)
+        logger("roots - creating chat for rel",relationship.id)
+        //toDid: string, fromDidAliasAlias: string, myRel: Object, title: string
+        const chat = await createChat(alias,fromDidAlias,toDid,display)
+        return true;
+    } catch(error) {
+        console.error("Failed to initRoot",error,error.stack)
+        return false;
+    }
 }
 
 //---------------- Settings -----------------------
@@ -682,9 +719,11 @@ export async function processPublishResponse(chat: Object) {
         const pubDid = getDid(chat.fromAlias)
         const didPubTx = getDidPubTx(pubDid[walletSchema.DID_ALIAS])
         const didPubMsg = await sendMessage(chat,PUBLISHED_TO_PRISM,
-                PROMPT_OWN_DID_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,pubDid[walletSchema.DID_URI_LONG_FORM])
+                PROMPT_OWN_DID_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),
+                false,pubDid[walletSchema.DID_URI_LONG_FORM])
         const didLinkMsg = await sendMessage(chat,BLOCKCHAIN_URL_MSG,
-                BLOCKCHAIN_URL_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,didPubTx.url)
+                BLOCKCHAIN_URL_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),
+                false,didPubTx.url)
         if(didLinkMsg) {
             //const didMsg = await sendMessage(chat,JSON.stringify(pubDid),DID_JSON_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),true);
             if(demo) {
@@ -888,7 +927,6 @@ export function getIssuedCredentials(didAlias: string) {
 async function issueCredential(didAlias: string,credAlias: string,cred: Object) {
     const credJson = JSON.stringify(cred)
     console.log("roots - issuing credential", credJson)
-    startProcessing(chat.id,credAlias)
     let result;
 
     try {
@@ -911,7 +949,6 @@ async function issueCredential(didAlias: string,credAlias: string,cred: Object) 
         console.error("Could not issue credential to",didAlias,credAlias,cred,error,error.stack)
     }
 
-    endProcessing(chat.id,credAlias)
     return result
 }
 
@@ -955,9 +992,14 @@ export function startProcessing(processGroup, processAlias) {
     if(!allProcessing[processGroup]) {
         allProcessing[processGroup] = {}
     }
-    allProcessing[processGroup][processAlias] = {startDate: Date.now()}
+    allProcessing[processGroup][processAlias] = {
+        startDate: Date.now(),
+        polling: setInterval(async function () {
+             const processing = isProcessing(processGroup)
+             updateProcessIndicator(processGroup, processing)
+        }, POLL_TIME),
+    }
     logger("started processing",processGroup,processAlias,allProcessing[processGroup][processAlias])
-    isProcessing(processGroup)
 }
 
 export function endProcessing(processGroup, processAlias) {
@@ -968,14 +1010,17 @@ export function endProcessing(processGroup, processAlias) {
         console.error("Cannot end processing of id that does not exist",processAlias)
     } else {
         logger("processing ended",processGroup,processAlias)
-        allProcessing[processGroup][processAlias]={endDate: Date.now()}
+        allProcessing[processGroup][processAlias]={
+            endDate: Date.now(),
+            polling: clearInterval(allProcessing[processGroup][processAlias].polling),
+        }
+        updateProcessIndicator(processGroup,isProcessing(processGroup))
     }
-    isProcessing(processGroup)
 }
 
 function isActiveProcess(processGroup: string,processAlias: string) {
     const endDate = allProcessing[processGroup][processAlias]["endDate"]
-    const isActive = (!endDate || endDate.length <= 0)
+    const isActive = (!endDate)
     logger("is process active?",processGroup,processAlias,isActive)
     return isActive
 }
@@ -989,35 +1034,40 @@ function getActiveProcesses(processGroup: string) {
     } else {
         logger("getting active processing for group",processGroup)
         if(allProcessing[processGroup]) {
-            const allGroupProcesses = Object.keys(allProcessing[processGroup])
-            active = allGroupProcesses.map(processAlias => {
-                    if(isActiveProcess(processGroup,processAlias)) {
-                        return allProcessing[processGroup][processAlias]
-                    }
-                }
-            );
-            allActive.push(active)
+            const allProcAliases = Object.keys(allProcessing[processGroup])
+            const activeProcAliases = allProcAliases.filter(procAlias => isActiveProcess(processGroup,procAlias))
+            if(activeProcAliases && activeProcAliases.length > 0) {
+                const active = activeProcAliases.map(procAlias => allProcessing[processGroup][procAlias]);
+                logger("found active processing",JSON.stringify(active))
+                allActive.push(active)
+            }
         }
     }
+    logger("roots - all active processes:",allActive.length)
     return allActive
 }
 
 export function isProcessing(processGroup) {
-    logger("determining if is processing",processGroup)
-    const active = getActiveProcesses(processGroup)
+    logger("roots - determining if is processing",processGroup)
+    const activeProcs = getActiveProcesses(processGroup)
     let processing = false
-    if(active && active.length > 0){
-        active.forEach(act => logger("currently processing",act))
+    if(activeProcs && activeProcs.length > 0){
+        logger("roots - active processes:",JSON.stringify(activeProcs))
         processing = true;
     } else {
-        logger("signaling not processing")
+        logger("roots - signaling not processing")
         processing = false;
     }
 
-    if(handlers["onProcessing"]) {
-        handlers["onProcessing"](processing)
-    }
     return processing;
+}
+
+//TODO set processing per group
+export function updateProcessIndicator(processGroup,processing) {
+    logger("roots - updating processing indicator",processGroup,processing)
+    if(handlers["onProcessing"]) {
+         handlers["onProcessing"](processing)
+    }
 }
 
 //----------- DEMO --------------------
@@ -1054,7 +1104,9 @@ export async function issueDemoCredential(chat: Object,msgId: string) {
             revoked: false,
         }
         logger("roots - issuing demo credential",cred)
+        startProcessing(chat.id,credAlias)
         const issuedCred = await issueCredential(chat.fromAlias, credAlias, cred)
+        endProcessing(chat.id,credAlias)
         if(issuedCred) {
             logger("Prism issued credential",issuedCred)
             return credAlias;
@@ -1111,22 +1163,6 @@ async function initDemoAchievements(chat: Object) {
     await sendMessage(achieveCh,"{subject: you,issuer: RootsWallet,credential: Clicked Example}",
       CREDENTIAL_JSON_MSG_TYPE,
       rel.getRelItem(rel.ROOTS_BOT))
-}
-
-export async function initRoot(alias: string, fromDidAlias: string, toDid: string, display=alias, avatar=rel.personLogo) {
-    logger("roots - creating root",alias,fromDidAlias,toDid,display,avatar)
-    try {
-        const relCreated = await rel.createRelItem(alias,display, avatar, toDid);
-        logger("roots - rel created/existed?",relCreated)
-        const relationship = rel.getRelItem(alias)
-        logger("roots - creating chat for rel",relationship.id)
-        //toDid: string, fromDidAliasAlias: string, myRel: Object, title: string
-        const chat = await createChat(alias,fromDidAlias,toDid,display)
-        return true;
-    } catch(error) {
-        console.error("Failed to initRoot",error,error.stack)
-        return false;
-    }
 }
 
 async function initDemoResume() {

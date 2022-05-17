@@ -17,12 +17,15 @@ import {logger} from '../logging';
 import { Divider, IconButton, List, Title,ToggleButton } from 'react-native-paper';
 import styles from "../styles/styles";
 
+import { showQR } from '../qrcode'
+import { getShareableRelByAlias,YOU_ALIAS } from '../relationships'
 import { getChatsByRel } from '../roots'
 
 import IconActions from '../components/IconActions';
 
 export default function RelationshipDetailScreen({ route, navigation }) {
-    const [rel, setRel] = useState(route.params.rel);
+    logger("route params are",JSON.stringify(route.params))
+    const [rel, setRel] = useState(route.params);
     const { colors } = useTheme();
     const { current } = useCardAnimation();
 
@@ -75,12 +78,20 @@ export default function RelationshipDetailScreen({ route, navigation }) {
           ],
         }}
       >
+      <View style={{flexDirection:'row',}}>
+          <IconButton
+            icon="qrcode"
+            size={36}
+            color="#e69138"
+            onPress={() => showQR(navigation,getShareableRelByAlias(YOU_ALIAS))}
+          />
           <IconButton
               icon="close-circle"
               size={36}
-              color="#5b3a70"
+              color="#e69138"
               onPress={() => navigation.goBack()}
           />
+        </View>
         <Image source={rel.displayPictureUrl}
             style={{
               width:130,

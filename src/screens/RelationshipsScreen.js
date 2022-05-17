@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import {getRelationships, YOU_ALIAS,
+import {getRelationships, showRel, YOU_ALIAS,
     PRISM_BOT, ROOTS_BOT, HISTORY_ALIAS} from '../relationships'
 import Relationship from '../models/relationship'
 import { getChatItem } from '../roots'
@@ -17,17 +17,6 @@ const RelationshipsScreen = ({route,navigation}) => {
          rel.displayName !== PRISM_BOT &&
          rel.displayName !== ROOTS_BOT &&
          rel.displayName !== HISTORY_ALIAS)
-
-    const showRel = (rel) => {
-        console.log(`> RelationshipsScr.pressHandler( ${rel})`)
-        console.log(`executing navigation.navigate() now...`)
-        navigation.navigate(
-            'Relationship Details',
-            {
-                rel: rel
-            }
-        )
-    }
 
     return (
         <View style={styles.container}>

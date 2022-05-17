@@ -13,15 +13,52 @@ import { useCardAnimation } from '@react-navigation/stack';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 
 import {logger} from '../logging';
-import { prismLogo } from '../roots'
+import {personLogo, prismLogo} from '../relationships';
+import { isDemo, handleNewData } from '../roots'
+
 //import styles from "../styles/styles";
 
 export default function ScanQRCodeScreen({ route, navigation }) {
-  logger("scan qr code - ")
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const { colors } = useTheme();
   const { current } = useCardAnimation();
+
+    const demoRel = {
+      dataType: "rel",
+      displayPictureUrl: personLogo,
+      displayName: "fakePerson",
+      did: "did:roots:fakedid",
+    }
+
+    const demoData = demoRel
+
+  const handleDemo = () => {
+
+      if(isDemo()) {
+        clearInterval(interval)
+        handleBarCodeScanned({
+          type:"demo",
+          data: JSON.stringify(demoData)
+        })
+      }
+  }
+
+  const interval = setInterval(handleDemo, 5000);
+
+  const handleBarCodeScanned = ({ type, data }) => {
+    setScanned(true);
+    if(navigation.canGoBack()) {
+        if(isDemo()) {
+            console.log("scan qr - clearing demo interval")
+            clearInterval(interval)
+        }
+        handleNewData(data)
+
+        navigation.goBack()
+    }
+    //alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+  };
 
   useEffect(() => {
     (async () => {
@@ -29,12 +66,6 @@ export default function ScanQRCodeScreen({ route, navigation }) {
       setHasPermission(status === 'granted');
     })();
   }, []);
-
-  const handleBarCodeScanned = ({ type, data }) => {
-    setScanned(true);
-    navigation.navigate('Create Rel', { did: data })
-    //alert(`Bar code with type ${type} and data ${data} has been scanned!`);
-  };
 
   if (hasPermission === null) {
     return <Text>Requesting camera permission</Text>;
@@ -81,8 +112,8 @@ export default function ScanQRCodeScreen({ route, navigation }) {
         <IconButton
             icon="close-circle"
             size={36}
-            color="#5b3a70"
-            onPress={() => navigation.goBack()}
+            color="#e69138"
+            onPress={navigation.goBack}
         />
         <View style={{
 

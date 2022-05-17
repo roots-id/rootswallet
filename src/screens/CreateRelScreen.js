@@ -11,15 +11,17 @@ import FormInput from '../components/FormInput';
 const { PrismModule } = NativeModules;
 
 export default function CreateRelScreen({ route, navigation }) {
-  const [relDid, setRelDid] = useState(route.params.did);
-  const [relName, setRelName] = useState('');
+  const [rel, setRel] = useState(route.params.rel);
+  const [relName, setRelName] = useState(rel.displayName);
+  const [relAvatar, setRelAvatar] = useState(rel.displayPictureUrl);
+  const [relDid, setRelDid] = useState(rel.did);
   const [problemDisabled, setProblemDisabled] = useState(true)
 
   async function handleButtonPress() {
     if (relName.length > 0) {
-      const rel = await initRoot(relName,YOU_ALIAS,relDid)
-      if(rel) {
-          console.log("Created rel",rel)
+      const root = await initRoot(relName,YOU_ALIAS,relDid,relName,relAvatar)
+      if(root) {
+          console.log("Created rel",root)
           setProblemDisabled(true)
           navigation.navigate('Relationships')
       } else {
@@ -35,16 +37,28 @@ export default function CreateRelScreen({ route, navigation }) {
           <IconButton
               icon="close-circle"
               size={36}
-              color="#5b3a70"
+              color="#e69138"
               onPress={() => navigation.goBack()}
           />
         </View>
         <View style={styles.innerContainer}>
           <Title style={styles.title}>Create a new relationship</Title>
           <FormInput
-              labelName="Enter Relationship Name"
+              labelName="Relationship Name"
               value={relName}
               onChangeText={(text) => setRelName(text)}
+              clearButtonMode="while-editing"
+          />
+          <FormInput
+              labelName="Avatar"
+              value={relAvatar}
+              onChangeText={(text) => setRelAvatar(text)}
+              clearButtonMode="while-editing"
+          />
+          <FormInput
+              labelName="Decentralized ID"
+              value={relDid}
+              onChangeText={(text) => setRelDid(text)}
               clearButtonMode="while-editing"
           />
           <Text disable={problemDisabled} style={displayProblem(problemDisabled)}>Could not create relationship</Text>
@@ -53,7 +67,7 @@ export default function CreateRelScreen({ route, navigation }) {
               modeValue="contained"
               labelStyle={styles.buttonLabel}
               onPress={async () => handleButtonPress()}
-              disabled={relName.length <= 0}
+              disabled={relName.length <= 0 || relDid.length <=0}
           />
         </View>
       </View>
