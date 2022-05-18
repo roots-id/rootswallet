@@ -13,7 +13,7 @@ import { useCardAnimation } from '@react-navigation/stack';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 
 import {logger} from '../logging';
-import {personLogo, prismLogo} from '../relationships';
+import { getDemoRel, personLogo, prismLogo} from '../relationships';
 import { isDemo, handleNewData } from '../roots'
 
 //import styles from "../styles/styles";
@@ -23,48 +23,42 @@ export default function ScanQRCodeScreen({ route, navigation }) {
   const [scanned, setScanned] = useState(false);
   const { colors } = useTheme();
   const { current } = useCardAnimation();
+  let currentDemoRel = getDemoRel()
+  let interval;
 
-    function createDemoRel() {
-        return {  dataType: "rel",
-          displayPictureUrl: personLogo,
-          displayName: "fakePerson"+Date.now(),
-          did: "did:roots:fakedid"+Date.now(),
-        }
-    }
-
-  const handleDemo = () => {
-
+    const handleDemo = () => {
       if(isDemo()) {
         clearInterval(interval)
         handleBarCodeScanned({
           type:"demo",
-          data: JSON.stringify(createDemoRel())
+          data: JSON.stringify(currentDemoRel)
         })
+        currentDemoRel = getDemoRel()
       }
-  }
-
-  const interval = setInterval(handleDemo, 5000);
-
-  const handleBarCodeScanned = ({ type, data }) => {
-    setScanned(true);
-    if(navigation.canGoBack()) {
-        if(isDemo()) {
-            console.log("scan qr - clearing demo interval")
-            clearInterval(interval)
-        }
-        handleNewData(data)
-
-        navigation.goBack()
     }
-    //alert(`Bar code with type ${type} and data ${data} has been scanned!`);
-  };
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
+    useEffect(async () => {
+        const { status } = await BarCodeScanner.requestPermissionsAsync();
+        setHasPermission(status === 'granted');
+        if(status && isDemo()) {
+            interval = setInterval(handleDemo, 5000);
+        }
+    },[])
+
+
+    const handleBarCodeScanned = ({ type, data }) => {
+        setScanned(true);
+        if(navigation.canGoBack()) {
+            if(isDemo()) {
+                console.log("scan qr - clearing demo interval")
+                clearInterval(interval)
+            }
+            handleNewData(data)
+
+            navigation.goBack()
+        }
+        //alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+    };
 
   if (hasPermission === null) {
     return <Text>Requesting camera permission</Text>;

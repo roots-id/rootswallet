@@ -22,7 +22,6 @@ export const rootsLogo = rwLogo;
 export const starLogo = starPng;
 
 export const YOU_ALIAS = "You"
-export const HISTORY_ALIAS = "History"
 export const ROOTS_BOT = "RootsWallet Helper";
 export const PRISM_BOT = "Prism Helper";
 
@@ -39,6 +38,19 @@ const RODO = "did:prism:rodolfo";
 export const allRelsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_REL)+'*')
 
 export const refreshTriggers = []
+
+let currentDemoRel = -1
+const demoRelOrder = [ESTEBAN,RODO,LANCE,BUTCH,DARRELL,TONY,ROOTSID,IOG_TECH,LIBRARY_BOT]
+const demoRels = {}
+demoRels[LIBRARY_BOT] = [LIBRARY_BOT,"Library",personLogo,LIBRARY_BOT]
+demoRels[IOG_TECH] = [IOG_TECH, "IOG Tech Community",iogLogo,IOG_TECH]
+demoRels[ROOTSID] = [ROOTSID, "RootsID",rootsLogo,ROOTSID]
+demoRels[LANCE] = [LANCE, "MeGrimLance",lanceLogo,LANCE]
+demoRels[TONY] = [TONY,"Tony.Rose",tonyLogo,TONY]
+demoRels[DARRELL] = [DARRELL,"Darrell O'Donnell",darrellLogo,DARRELL]
+demoRels[BUTCH] = [BUTCH,"Butch Clark",butchLogo,BUTCH]
+demoRels[ESTEBAN] = [ESTEBAN,"Esteban Garcia",estebanLogo,ESTEBAN]
+demoRels[RODO] = [RODO,"Rodolfo Miranda",rodoLogo,RODO]
 
 export function addRefreshTrigger(trigger) {
     logger("rels - adding refresh trigger")
@@ -117,8 +129,6 @@ export function showRel(navigation,rel) {
 
 // export async function initDemoRels() {
 //     logger("rels - init demo rels")
-//     await createRelItem(ROOTS_BOT,"RootsWallet",rootsLogo,ROOTS_BOT)
-//     await createRelItem(PRISM_BOT,"Atala Prism",prismLogo,PRISM_BOT)
 //     await createRelItem(LIBRARY_BOT,"Library",personLogo,LIBRARY_BOT)
 //     await createRelItem(IOG_TECH, "IOG Tech Community",iogLogo,IOG_TECH);
 //     await createRelItem(ROOTSID, "RootsID",rootsLogo,ROOTSID);
@@ -129,3 +139,20 @@ export function showRel(navigation,rel) {
 //     await createRelItem(ESTEBAN,"Esteban Garcia",estebanLogo,ESTEBAN)
 //     await createRelItem(RODO,"Rodolfo Miranda",rodoLogo,RODO)
 // }
+
+export async function getDemoRel() {
+    if(currentDemoRel >= (demoRelOrder.length-1)) {
+        return getFakeRelItem()
+    } else {
+        currentDemoRel++
+        return await createRelItem(...demoRels[demoRelOrder[currentDemoRel]])
+    }
+}
+
+function getFakeRelItem() {
+   return {  dataType: "rel",
+        displayPictureUrl: personLogo,
+        displayName: "fakePerson"+Date.now(),
+        did: "did:roots:fakedid"+Date.now(),
+    }
+}

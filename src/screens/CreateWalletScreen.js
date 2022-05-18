@@ -26,28 +26,6 @@ export default function CreateWalletScreen({ navigation }) {
 
   const { signIn } = React.useContext(AuthContext);
 
-//  if (loading) {
-//    return <Loading />;
-//  }
-
-//  useEffect(async () => {
-//    try {
-//
-//    } catch(error) {
-//        console.error("CreateWalletScreen - Could not initialize roots",error,error.stack)
-//        return(
-//            <View style={styles.modalContainer}>
-//                <Title style={styles.problem}>Could not initialize RootsWallet</Title>))
-//                <FormButton
-//                    title="Retry"
-//                    modeValue="contained"
-//                    labelStyle={styles.loginButtonLabel}
-//                    onPress={() => setLoading(true)}
-//                />
-//            </View>
-//        )
-//    }
-//  },[]);
   while(!initialized) {
       return (
           <View style={styles.modalContainer}>

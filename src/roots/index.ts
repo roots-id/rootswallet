@@ -1,3 +1,4 @@
+import * as cred from '../credentials'
 import * as models from '../models'
 import { logger } from '../logging'
 import PrismModule from '../prism'
@@ -62,38 +63,35 @@ export async function initRootsWallet() {
     logger("roots - initializing your Did")
     const createdDid = await createDid(rel.YOU_ALIAS)
     const relCreated = await initRoot(rel.YOU_ALIAS,createdDid[walletSchema.DID_ALIAS], createdDid[walletSchema.DID_URI_LONG_FORM], rel.YOU_ALIAS, rel.catalystLogo);
-    logger("roots - initialized your rel?",relCreated)
-    const myRel = rel.getRelItem(rel.YOU_ALIAS)
+    logger("roots - initialized your root",relCreated)
+     const myRel = rel.getRelItem(rel.YOU_ALIAS)
 
     logger("roots - initializing your narrator bots roots")
     const prism = await initRoot(rel.PRISM_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.PRISM_BOT), rel.PRISM_BOT, rel.prismLogo)
     const rw = await initRoot(rel.ROOTS_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.ROOTS_BOT), rel.ROOTS_BOT, rel.rootsLogo)
 
-    logger("roots - initializing your history root")
-    const historyRootAlias = rel.HISTORY_ALIAS
-    const history = await initRoot(historyRootAlias, createdDid[walletSchema.DID_ALIAS], rootsDid("history"), "History", rel.starLogo)
-
-    logger("roots - posting your initialization history messages")
-    const historyChat = getChatItem(historyRootAlias)
-    const welcomeAchMsg = await sendMessage(historyChat,
-        "Welcome to your RootsWallet history!",
+    logger("roots - posting your personal initialization messages")
+    const myChat = getChatItem(rel.YOU_ALIAS)
+    const welcomeAchMsg = await sendMessage(myChat,
+        "Welcome to your personal RootsWallet history!",
         TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    const achMsg = await sendMessage(historyChat,
+    const achMsg = await sendMessage(myChat,
         "We'll post new events here.",
         TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    const createdWalletMsg = await sendMessage(historyChat,
+    const createdWalletMsg = await sendMessage(myChat,
         "You created your wallet: "+currentWal._id,TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    const createdDidMsg = await sendMessage(historyChat,
+    const createdDidMsg = await sendMessage(myChat,
         "You created your first decentralized ID!",
         TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    await sendMessage(historyChat,"Your new DID is being added to Prism so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
+    await sendMessage(myChat,"Your new DID is being added to Prism so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
         TEXT_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
     //intentionally not awaiting
-    processPublishResponse(historyChat)
+    processPublishResponse(myChat)
 
     if(demo) {
         logger("roots - initializing your demos")
         await initDemos(createdDid[walletSchema.DID_ALIAS])
+//         await rel.initDemoRels();
     }
 }
 
@@ -138,7 +136,7 @@ export async function handleNewData(jsonData: string) {
     const obj = JSON.parse(jsonData)
     if(obj.dataType === 'credential') {
         console.log("handling new cred",jsonData)
-        return "Credentials"
+        return "VCs"
     } else if(obj.dataType === 'rel') {
         console.log("scanned rel",jsonData)
         initRoot(obj.displayName, rel.YOU_ALIAS, obj.did, rel.displayName, rel.displayPictureUrl)
@@ -693,13 +691,15 @@ export async function processCredentialResponse(chat: Object, reply: Object) {
         if(reply.value.endsWith(CRED_ACCEPTED)) {
             logger("roots - quick reply credential accepted",credReqAlias)
             startProcessing(chat.id,reply.messageId)
-            const accepted = await acceptCredential(chat, reply.messageId)
-            if(accepted) {
+            const credHash = await acceptCredential(chat, reply.messageId)
+            if(credHash) {
                 const credOwnMsg = await sendMessage(chat,"Credential accepted.",PROMPT_OWN_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-                store.saveItem(getCredentialAlias(credOwnMsg.id),await getCredentialByMsgId(reply.messageId))
+                const hashStr = JSON.stringify(credHash)
+                store.saveItem(hashStr,await getCredByHash(hashStr))
             }
+            cred.hasNewCreds()
             endProcessing(chat.id,reply.messageId)
-            return accepted;
+            return credHash;
         } else if (reply.value.endsWith(CRED_REJECTED)) {
             logger("roots - quick reply credential rejected",credReqAlias)
             return true
@@ -770,35 +770,6 @@ export async function processPublishResponse(chat: Object) {
     }
 }
 
-// export async function processQuickReply(chat: Object,replies: Object[]) {
-//     logger("roots - Processing Quick Reply w/ chat",chat.id,"w/ replies",replies.length)
-//     if(replies && chat) {
-//         replies.forEach(async (reply) =>
-//         {
-//             logger("roots - processing quick reply",chat.id,reply)
-//             if(reply.value.startsWith(PROMPT_PUBLISH_MSG_TYPE)) {
-//                 logger("roots - process quick reply to publish DID")
-//                 if(reply.value.endsWith(PUBLISH_DID)) {
-//                     logger("roots - publishing DID")
-//                     return await processPublishResponse(chat,reply)
-//                 } else {
-//                     logger("roots - not publishing DID")
-//                     return;
-//                 }
-//             } else if(reply.value.startsWith(PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE)) {
-//                 logger("roots - process quick reply for accepting credential")
-//                 return await processCredentialResponse(chat,reply)
-//             } else {
-//                 logger("roots - reply value not recognized, was",chat.id,reply.value)
-//                 return;
-//             }
-//         });
-//     } else {
-//         logger("roots - reply",replies,"or chat",chat,"were undefined")
-//         return;
-//     }
-// }
-
 // ------------------ Credentials ----------
 
 async function acceptCredential(chat: Object, msgId: string) {
@@ -812,20 +783,19 @@ async function acceptCredential(chat: Object, msgId: string) {
         if(newWalJson) {
             const savedWal = await updateWallet(currentWal._id,currentWal.passphrase,newWalJson)
             if(savedWal) {
-                const newCred = await getCredentialByMsgId(msgId)
-                logger("Accepted credential",newCred.alias)
-                return true
+                logger("roots - Accepted credential",credAlias)
+                return credHash
             } else {
                 console.error("Could not accept credential, unable to save wallet",credAlias,credHash)
-                return false
+                return
             }
         } else {
             console.error("Could not import accepted credential",credAlias,credHash)
-            return false
+            return
         }
     } else {
         console.error("Credential alias already in use",credAlias,credHash)
-        return false
+        return
     }
 }
 
@@ -899,6 +869,24 @@ export function getIssuedCredential(credAlias) {
         logger("roots - No issued credential for",credAlias)
         return;
     }
+}
+
+export function getImportedCredentials() {
+    logger("roots - Getting imported credentials")
+    let creds = []
+    logger("roots - current wal has keys",Object.keys(currentWal))
+    if(currentWal["importedCredentials"]) {
+        const creds = currentWal["importedCredentials"];
+        if(creds && creds.length > 0) {
+            logger("roots - getting imported creds",creds.length)
+            creds.forEach(cred => logger("roots - imported cred",JSON.stringify(cred)))
+        } else {
+            logger("roots - no imported creds found")
+        }
+    } else {
+        logger("roots - No imported credentials")
+    }
+    return creds;
 }
 
 export function getIssuedCredentials(didAlias: string) {

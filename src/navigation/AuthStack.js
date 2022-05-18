@@ -14,11 +14,12 @@ import IconActions from '../components/IconActions';
 import LogoTitle from '../components/LogoTitle';
 import CreateRelScreen from '../screens/CreateRelScreen';
 import CredentialsScreen from '../screens/CredentialsScreen';
-import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
+import CredentialDetailScreen from "../screens/CredentialDetailScreen";
 import HelpScreen from '../screens/HelpScreen';
 import HomeScreen from "../screens/HomeScreen"
 import MyIdentityScreen from '../screens/MyIdentityScreen';
 import RelationshipsScreen from "../screens/RelationshipsScreen";
+import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import SimpleTitle from '../components/SimpleTitle';
 import WalletScreen from "../screens/WalletScreen";
@@ -38,7 +39,7 @@ import { getChatItem, getRootsWallet,
     hasWallet, loadSettings, storageStatus,
     TEST_WALLET_NAME } from '../roots'
 
-import {HISTORY_ALIAS,YOU_ALIAS} from '../relationships'
+import {YOU_ALIAS} from '../relationships'
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator()
@@ -136,8 +137,7 @@ export default function AuthStack() {
                  tabBarLabelStyle: {fontSize: 22},
                  }}>
                 <Tab.Screen name="Contacts" component={RelationshipsStack}/>
-                <Tab.Screen name="You" component={HistoryStack}/>
-                <Tab.Screen name="Credentials" component={CredentialsScreen}/>
+                <Tab.Screen name="Credentials" component={CredentialsStack}/>
                 <Tab.Screen name="Integration" component={IntegrationStack}/>
             </Tab.Navigator>
         )
@@ -180,7 +180,7 @@ export default function AuthStack() {
         </Stack.Navigator>
         )
     }
-    const HistoryStack = () => {
+    const YouStack = () => {
         return (
             <Stack.Navigator
                 screenOptions={{
@@ -202,7 +202,7 @@ export default function AuthStack() {
                 <Stack.Screen
                     name="Chat"
                     component={ChatScreen}
-                    initialParams={{chatId: HISTORY_ALIAS}}
+                    initialParams={{chatId: YOU_ALIAS}}
                     options={ ({ navigation, route }) => ({
                         headerTitle: (props) => <LogoTitle {...props} title={"You"}/>,
                         headerRight: (props) => <IconActions {...props} nav={navigation}
@@ -213,7 +213,44 @@ export default function AuthStack() {
             </Stack.Navigator>
         )
     }
-
+    const CredentialsStack = () => {
+        return (
+        <Stack.Navigator
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: '#150510',
+              },
+              headerTintColor: '#eeeeee',
+              headerTitleStyle: {
+                fontSize: 22,
+              },
+              gestureEnabled: true,
+              gestureDirection: "horizontal",
+              cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
+              animationEnabled: true,
+              }}
+        >
+            <Stack.Group>
+                <Stack.Screen name="VCs"
+                      component={CredentialsScreen}
+                      initialParams={{walletName: walletName}}
+                      options={ ({ navigation, route }) => ({
+                          headerTitle: (props) => <LogoTitle {...props} title="Credentials"/>,
+                          headerRight: (props) => <IconActions {...props} nav={navigation} person={YOU_ALIAS} scan="Scan QR Code" settings="Settings"/>,
+                      })}
+                />
+                <Stack.Screen
+                    name="Credential"
+                    component={CredentialDetailScreen}
+                    options={ ({ navigation, route }) => ({
+                        headerTitle: (props) => <SimpleTitle {...props} title={getCredentialItem(route.params.credId).title}/>,
+                        headerRight: (props) => <IconActions {...props} nav={navigation} person={YOU_ALIAS} scan='Scan QR Code' settings='Settings'/>,
+                    })}
+                />
+            </Stack.Group>
+        </Stack.Navigator>
+        )
+    }
     const IntegrationStack = () => {
         return (
         <Stack.Navigator>
@@ -267,13 +304,14 @@ export default function AuthStack() {
                     <Stack.Screen name="mainTabs" component={Main}/>
                 </Stack.Group>
                 <Stack.Group screenOptions={{ presentation: 'transparentModal' }}>
-                    <Stack.Screen name="Help" component={HelpScreen}/>
+                    <Stack.Screen name="Certificate Details" component={RelationshipDetailScreen}/>
                     <Stack.Screen name="Create Rel" component={CreateRelScreen}/>
                     <Stack.Screen name="Create Secure Chat" component={StartChatScreen} />
+                    <Stack.Screen name="Help" component={HelpScreen}/>
+                    <Stack.Screen name="Relationship Details" component={RelationshipDetailScreen}/>
+                    <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen} />
                     <Stack.Screen name="Settings" component={SettingsScreen}/>
                     <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen} />
-                    <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen} />
-                    <Stack.Screen name="Relationship Details" component={RelationshipDetailScreen}/>
                 </Stack.Group>
               </>
             )}

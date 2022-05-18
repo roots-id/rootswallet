@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
 import {getRelationships, addRefreshTrigger, showRel, YOU_ALIAS,
-    PRISM_BOT, ROOTS_BOT, HISTORY_ALIAS} from '../relationships'
+    PRISM_BOT, ROOTS_BOT} from '../relationships'
 import Relationship from '../models/relationship'
 import { getChatItem } from '../roots'
 import styles from "../styles/styles";
@@ -12,24 +12,16 @@ const RelationshipsScreen = ({route,navigation}) => {
     const {walletName} = route.params
     const [refresh,setRefresh] = useState(true)
     const [rels,setRels] = useState([])
-//.filter(
-//                  rel => rel.displayName !== YOU_ALIAS &&
-//                  rel.displayName !== PRISM_BOT &&
-//                  rel.displayName !== ROOTS_BOT &&
-//                  rel.displayName !== HISTORY_ALIAS)
+
     useEffect(() => {
         setRels(
-            getRelationships(walletName)
+            getRelationships(walletName).filter(rel => rel.displayName !== PRISM_BOT && rel.displayName !== ROOTS_BOT)
         )
         addRefreshTrigger(()=>{
             console.log("toggling refresh")
             setRefresh(!refresh)
             setRels(
-                getRelationships(walletName).filter(
-                    rel => rel.displayName !== YOU_ALIAS &&
-                    rel.displayName !== PRISM_BOT &&
-                    rel.displayName !== ROOTS_BOT &&
-                    rel.displayName !== HISTORY_ALIAS)
+                getRelationships(walletName).filter(rel => rel.displayName !== PRISM_BOT && rel.displayName !== ROOTS_BOT)
             )
         })
     },[])
