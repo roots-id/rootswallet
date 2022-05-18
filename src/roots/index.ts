@@ -134,12 +134,12 @@ async function loadItems(regex: RegExp) {
 
 export async function handleNewData(jsonData: string) {
     const obj = JSON.parse(jsonData)
-    if(obj.dataType === 'credential') {
-        console.log("handling new cred",jsonData)
+    if(obj.dataType === models.MODEL_TYPE_CREDENTIAL) {
+        console.log("handling scanned cred",jsonData)
         return "VCs"
-    } else if(obj.dataType === 'rel') {
-        console.log("scanned rel",jsonData)
-        initRoot(obj.displayName, rel.YOU_ALIAS, obj.did, rel.displayName, rel.displayPictureUrl)
+    } else if(obj.dataType === models.MODEL_TYPE_REL) {
+        console.log("handling scanned rel",jsonData)
+        initRoot(obj.displayName, rel.YOU_ALIAS, obj.did, obj.displayName, obj.displayPictureUrl)
         return "Relationships"
     } else {
         console.error("Did not recognize scanned data",jsonData)

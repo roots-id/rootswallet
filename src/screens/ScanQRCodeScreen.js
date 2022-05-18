@@ -23,17 +23,21 @@ export default function ScanQRCodeScreen({ route, navigation }) {
   const [scanned, setScanned] = useState(false);
   const { colors } = useTheme();
   const { current } = useCardAnimation();
-  let currentDemoRel = getDemoRel()
   let interval;
 
     const handleDemo = () => {
       if(isDemo()) {
+        console.log("scan qr - pretending to scan with demo data")
         clearInterval(interval)
-        handleBarCodeScanned({
-          type:"demo",
-          data: JSON.stringify(currentDemoRel)
-        })
-        currentDemoRel = getDemoRel()
+        setScanned(true)
+        const demoData = getDemoRel()
+        console.log("scan qr - pretend object has keys",Object.keys(demoData))
+        const jsonData = JSON.stringify(demoData)
+        console.log("scan qr - pretend data is",jsonData)
+        handleNewData(jsonData)
+        if(navigation.canGoBack()) {
+            navigation.goBack()
+        }
       }
     }
 
@@ -48,16 +52,11 @@ export default function ScanQRCodeScreen({ route, navigation }) {
 
     const handleBarCodeScanned = ({ type, data }) => {
         setScanned(true);
+        clearInterval(interval)
+        handleNewData(data)
         if(navigation.canGoBack()) {
-            if(isDemo()) {
-                console.log("scan qr - clearing demo interval")
-                clearInterval(interval)
-            }
-            handleNewData(data)
-
             navigation.goBack()
         }
-        //alert(`Bar code with type ${type} and data ${data} has been scanned!`);
     };
 
   if (hasPermission === null) {

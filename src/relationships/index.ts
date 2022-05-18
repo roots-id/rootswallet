@@ -140,12 +140,18 @@ export function showRel(navigation,rel) {
 //     await createRelItem(RODO,"Rodolfo Miranda",rodoLogo,RODO)
 // }
 
-export async function getDemoRel() {
+export function getDemoRel() {
     if(currentDemoRel >= (demoRelOrder.length-1)) {
         return getFakeRelItem()
     } else {
         currentDemoRel++
-        return await createRelItem(...demoRels[demoRelOrder[currentDemoRel]])
+        const dRel = demoRelOrder[currentDemoRel]
+        console.log("rels - get demo rel data for",dRel)
+        const demoRel = demoRels[dRel]
+        console.log("rels - got demo rel args",demoRel)
+        const result = models.createRel(...demoRel)
+        console.log("rels - got demo rel",result)
+        return result
     }
 }
 
