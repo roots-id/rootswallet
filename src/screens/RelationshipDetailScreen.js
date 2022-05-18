@@ -24,24 +24,19 @@ import { getChatsByRel } from '../roots'
 import IconActions from '../components/IconActions';
 
 export default function RelationshipDetailScreen({ route, navigation }) {
-    logger("route params are",JSON.stringify(route.params))
-    const [rel, setRel] = useState(route.params);
+    console.log("route params are",JSON.stringify(route.params))
+    const [rel, setRel] = useState({});
     const { colors } = useTheme();
     const { current } = useCardAnimation();
 
     useEffect(() => {
+        setRel(route.params.rel)
+    }, []);
+
+    useEffect(() => {
         console.log("rel changed",rel)
     }, [rel]);
-//<List.Icon {...props} icon="folder" />
-//          keyExtractor={(item) => item}
-//            ItemSeparatorComponent={() => <Divider />}
-//            renderItem={({ item }) => (
-//              <List.Item
-//                title="{item}"
-//                titleNumberOfLines={1}
-//                left={props => <Text>lance</Text>}
-//                onPress={() => goToRel(item)}
-//              />
+
   return (
     <View
       style={{
@@ -94,8 +89,8 @@ export default function RelationshipDetailScreen({ route, navigation }) {
         </View>
         <Image source={rel.displayPictureUrl}
             style={{
-              width:130,
-              height:150,
+              width: '30%',
+              height: '30%',
               resizeMode:'contain',
               margin:8,
               justifyContent:'flex-start',

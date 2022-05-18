@@ -24,14 +24,13 @@ export default function ScanQRCodeScreen({ route, navigation }) {
   const { colors } = useTheme();
   const { current } = useCardAnimation();
 
-    const demoRel = {
-      dataType: "rel",
-      displayPictureUrl: personLogo,
-      displayName: "fakePerson",
-      did: "did:roots:fakedid",
+    function createDemoRel() {
+        return {  dataType: "rel",
+          displayPictureUrl: personLogo,
+          displayName: "fakePerson"+Date.now(),
+          did: "did:roots:fakedid"+Date.now(),
+        }
     }
-
-    const demoData = demoRel
 
   const handleDemo = () => {
 
@@ -39,7 +38,7 @@ export default function ScanQRCodeScreen({ route, navigation }) {
         clearInterval(interval)
         handleBarCodeScanned({
           type:"demo",
-          data: JSON.stringify(demoData)
+          data: JSON.stringify(createDemoRel())
         })
       }
   }

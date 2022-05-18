@@ -23,8 +23,8 @@ export const starLogo = starPng;
 
 export const YOU_ALIAS = "You"
 export const HISTORY_ALIAS = "History"
-export const ROOTS_BOT = "RootsWallet Bot";
-export const PRISM_BOT = "Prism Bot";
+export const ROOTS_BOT = "RootsWallet Helper";
+export const PRISM_BOT = "Prism Helper";
 
 export const LIBRARY_BOT = "did:prism:librarybot1";
 const IOG_TECH = "did:prism:iogtech1";
@@ -37,6 +37,13 @@ const ESTEBAN = "did:prism:esteban";
 const RODO = "did:prism:rodolfo";
 
 export const allRelsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_REL)+'*')
+
+export const refreshTriggers = []
+
+export function addRefreshTrigger(trigger) {
+    logger("rels - adding refresh trigger")
+    refreshTriggers.push(trigger)
+}
 
 //TODO unify aliases and storageKeys?
 export async function createRelItem(alias: string, name: string, pic=personLogo, did?: string) {
@@ -52,12 +59,18 @@ export async function createRelItem(alias: string, name: string, pic=personLogo,
             logger("rels - generated rel",relItemJson)
             const result = await store.saveItem(models.getStorageKey(alias, models.MODEL_TYPE_REL), relItemJson)
             logger("rels - created rel",alias,"?",result)
+            hasNewRels()
             return result;
         }
     } catch(error) {
         console.error("Failed to create rel",alias,error,error.stack)
         return false
     }
+}
+
+export function hasNewRels() {
+    logger("rels - triggering rel refresh",refreshTriggers.length)
+   refreshTriggers.forEach(trigger=>trigger())
 }
 
 export function getRelationships() {
@@ -92,7 +105,7 @@ export function getShareableRelByAlias(alias: string) {
     const shareable = {
         displayName: rel.displayName,
         displayPictureUrl: rel.displayPictureUrl,
-        did: rel.did.uriLongForm,
+        did: rel.did,
     }
     return shareable
 }

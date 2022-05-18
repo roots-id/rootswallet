@@ -127,13 +127,13 @@ export default function AuthStack() {
                  tabBarIcon: ({ focused, color, size }) => {
                      const iconName = focused ? 'check-bold' : 'checkbox-blank-circle-outline';
                      // You can return any component that you like here!
-                     return <Avatar.Icon size={16} icon={iconName} />
+                     return <Avatar.Icon size={20} icon={iconName} />
                  },
                  tabBarActiveBackgroundColor: '#362631',
                  tabBarInactiveBackgroundColor: '#150510',
                  tabBarActiveTintColor: 'orange',
                  tabBarInactiveTintColor: 'grey',
-                 tabBarLabelStyle: {fontSize: 18,fontWeight: 'bold'},
+                 tabBarLabelStyle: {fontSize: 22},
                  }}>
                 <Tab.Screen name="Contacts" component={RelationshipsStack}/>
                 <Tab.Screen name="You" component={HistoryStack}/>

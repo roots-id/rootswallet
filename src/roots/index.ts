@@ -24,7 +24,7 @@ export const LINK_MSG_TYPE = "linkMsgType"
 
 //meaningful literals
 export const ACHIEVEMENT_MSG_PREFIX = "You have a new achievement: ";
-export const BLOCKCHAIN_URL_MSG = "*Click to see the blockchain details*";
+export const BLOCKCHAIN_URL_MSG = "*Click to see the Cardano blockchain details*";
 export const PUBLISHED_TO_PRISM = "Your DID was added to Prism";
 export const SHOW_CRED_QR_CODE = "Show Cred QR code";
 export const SHOW_DID_QR_CODE = "Show Chat QR code";
@@ -61,7 +61,7 @@ export async function initRootsWallet() {
 
     logger("roots - initializing your Did")
     const createdDid = await createDid(rel.YOU_ALIAS)
-    const relCreated = await rel.createRelItem(rel.YOU_ALIAS,rel.YOU_ALIAS, rel.catalystLogo, createdDid);
+    const relCreated = await initRoot(rel.YOU_ALIAS,createdDid[walletSchema.DID_ALIAS], createdDid[walletSchema.DID_URI_LONG_FORM], rel.YOU_ALIAS, rel.catalystLogo);
     logger("roots - initialized your rel?",relCreated)
     const myRel = rel.getRelItem(rel.YOU_ALIAS)
 
