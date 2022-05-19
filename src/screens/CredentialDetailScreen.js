@@ -1,39 +1,105 @@
-import React from 'react';
-import {Button, StyleSheet, View, Text, TouchableOpacity} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Animated,
+  Button,
+  FlatList,
+  Image,
+  Text,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { useTheme } from '@react-navigation/native';
+import { useCardAnimation } from '@react-navigation/stack';
+
+import {logger} from '../logging';
+import { Divider, IconButton, List, Title,ToggleButton } from 'react-native-paper';
 import styles from "../styles/styles";
-// const { PrismModule } = NativeModules;
 
+import { showQR } from '../qrcode'
+import { credLogo, getShareableCred,isShareable } from '../credentials'
+import { getImportedCredByHash } from '../roots'
 
-const touchable = (key) => {
-    // return < Text > {key} < /Text>
-    return (
-        <TouchableOpacity
-            onPress={() => onPress(key)}
-        >
-            <Text style={styles.listItem}>{key}</Text>
-        </TouchableOpacity>
-    )
-}
+import IconActions from '../components/IconActions';
 
-const CredentialDetailsScreen = ({navigation}) => {
-    console.log(`>CredDetailsScreen:  navigation: ${navigation}`)
+export default function CredentialDetailScreen({ route, navigation }) {
+    console.log("route params are",JSON.stringify(route.params))
+    const [cred, setCred] = useState({});
+    const { colors } = useTheme();
+    const { current } = useCardAnimation();
 
-    console.log(`navigation: ${JSON.stringify(navigation)}`)
+    useEffect(() => {
+        setCred(route.params.cred)
+    }, []);
 
-    const {params} = navigation.state
-    console.log(`> CredDetailScr(): ${JSON.stringify(params)} `)
+    useEffect(() => {
+        console.log("cred changed",cred)
+    }, [cred]);
 
-    const pressHandler = () => {
-	    navigation.goBack()
-    }
-    return (
-        <View>
-            <Text style={styles.header}>Credential:  <Text style={styles.highlightedItem}>{params.key}</Text></Text>
-            <Text >{params.credential.key} : {params.credential.value}</Text>
-	    {/*<Button title="Return" onPress={pressHandler} />*/}
+  return (
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+
+      <Pressable
+        style={[
+          StyleSheet.absoluteFill,
+          { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+        ]}
+        onPress={navigation.goBack}
+      />
+      <Animated.View
+        style={{
+          padding: 16,
+          width: '90%',
+          maxWidth: 500,
+          borderRadius: 3,
+          backgroundColor: colors.card,
+          alignItems: 'center',
+                  justifyContent: 'flex-start',
+          transform: [
+            {
+              scale: current.progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.9, 1],
+                extrapolate: 'clamp',
+              }),
+            },
+          ],
+        }}
+      >
+      <View style={{flexDirection:'row',}}>
+          <IconButton
+            icon="qrcode"
+            size={36}
+            color="#e69138"
+            onPress={() => showQR(navigation,cred)}
+          />
+          <IconButton
+              icon="close-circle"
+              size={36}
+              color="#e69138"
+              onPress={() => navigation.goBack()}
+          />
         </View>
-    )
-};
-
-export default CredentialDetailsScreen;
-
+        <Image source={credLogo}
+            style={{
+              width: '30%',
+              height: '30%',
+              resizeMode:'contain',
+              margin:8,
+              justifyContent:'flex-start',
+            }}
+        />
+        <Text style={styles.subText}>{cred.verifiedCredential.encodedSignedCredential}</Text>
+        <Divider/>
+        <Text style={styles.subText}>{cred.verifiedCredential.proof.hash}</Text>
+      </Animated.View>
+    </View>
+  );
+}

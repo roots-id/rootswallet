@@ -2,61 +2,60 @@ import * as models from '../models'
 import { logger } from '../logging'
 import * as store from '../store'
 
-import certificateLogo from '../assets/ATALAPRISM.png';
-export const certLogo = certificateLogo;
+import credentialLogo from '../assets/vc.png';
+export const credLogo = credentialLogo;
 
-export const allCertsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CERT)+'*')
+export const allCredsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CRED)+'*')
 
 export const refreshTriggers = []
 
 export function addRefreshTrigger(trigger) {
-    logger("certs - adding refresh trigger")
+    logger("creds - adding refresh trigger")
     refreshTriggers.push(trigger)
 }
 
 export function hasNewCreds() {
-    logger("certs - triggering cert refresh",refreshTriggers.length)
-   refreshTriggers.forEach(trigger=>trigger())
+    logger("creds - triggering cred refresh",refreshTriggers.length)
+    refreshTriggers.forEach(trigger=>trigger())
 }
 
 export function getCredentials() {
-    logger("certs - getting cert items")
-    const certItemJsonArray = store.getItems(allCertsRegex)
-    logger("certs - got cert items",String(certItemJsonArray))
-    const certs = certItemJsonArray.map(certItemJson => JSON.parse(certItemJson))
-    return certs;
+    logger("creds - getting cred items")
+    const credItemJsonArray = store.getItems(allCredsRegex)
+    logger("creds - got cred items",String(credItemJsonArray))
+    const creds = credItemJsonArray.map(credItemJson => JSON.parse(credItemJson))
+    return creds;
 }
 
-export function getCertItem(certId) {
-    logger("certs - Getting cert",certId)
-    if(certId) {
-        const certItemJson = store.getItem(models.getStorageKey(certId,models.MODEL_TYPE_CERT));
-        logger("certs - Got cert json",certItemJson)
-        if(certItemJson) {
-            const certItem = JSON.parse(certItemJson)
-            logger("certs - cert w/keys",Object.keys(certItem))
-            return certItem
+export function getCredItem(credHash: string) {
+    logger("creds - Getting cred",credHash)
+    if(credHash) {
+        const credItemJson = store.getItem(models.getStorageKey(credHash,models.MODEL_TYPE_CRED));
+        logger("creds - Got cred json",credItemJson)
+        if(credItemJson) {
+            const credItem = JSON.parse(credItemJson)
+            logger("creds - cred w/keys",Object.keys(credItem))
+            return credItem
         } else {
-            logger("certs - cert not found",certId)
-            return certItemJson
+            logger("creds - cred not found",credHash)
+            return;
         }
     } else {
-        logger("certs - can't get cert for undefined certId",certId)
+        logger("creds - can't get cred for undefined credHash",credHash)
     }
 }
 
-export function getShareableCertByAlias(alias: string) {
-    logger("roots - getting shareable cert by alias",alias)
-    const cert = getCertItem(alias)
+export function getShareableCred(hash: string) {
+    logger("roots - getting shareable cred by alias",hash)
+    const cred = getCredItem(hash)
     const shareable = {
-        displayName: cert.displayName,
-        displayPictureUrl: cert.displayPictureUrl,
-        did: cert.did,
+        encodedSignedCredential: cred.encodedSignedCredential,
+        proof: cred.proof,
     }
     return shareable
 }
 
-export function showCert(navigation,cert) {
-    console.log("cert - show cert",cert)
-    navigation.navigate('Certificate Details',{cert: getShareableCertByAlias(cert)})
+export function showCred(navigation,cred) {
+    console.log("cred - show cred",cred)
+    navigation.navigate('Credential Details',{cred: getShareableCred(cred)})
 }

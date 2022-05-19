@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import { certLogo, getCredentials, addRefreshTrigger, showCred} from '../credentials'
+import { credLogo, getCredentials, addRefreshTrigger, showCred} from '../credentials'
 import { getImportedCredentials, getChatItem } from '../roots'
 import styles from "../styles/styles";
 
@@ -30,14 +30,14 @@ const CredentialsScreen = ({route,navigation}) => {
                 <FlatList
                     data={creds}
                     extraData={refresh}
-                    keyExtractor={(item) => item.alias}
+                    keyExtractor={(item) => item.verifiedCredential.proof.hash}
                     ItemSeparatorComponent={() => <Divider />}
                     renderItem={({ item }) => (
                     <React.Fragment>
                         <View style={{flex: 1,flexDirection:'row',}}>
                             <SafeAreaView>
-                            <TouchableOpacity onPress={() => showCred(navigation,item.alias)}>
-                                <Image source={certLogo}
+                            <TouchableOpacity onPress={() => showCred(navigation,{cred: item})}>
+                                <Image source={credLogo}
                                     style={{
                                       width:65,
                                       height:75,
@@ -48,7 +48,14 @@ const CredentialsScreen = ({route,navigation}) => {
                             </TouchableOpacity>
                             </SafeAreaView>
                             <SafeAreaView style={styles.container}>
-    <Text>Cred1</Text>
+                            <List.Item
+                              title={item.verifiedCredential.proof.hash}
+                              titleNumberOfLines={1}
+                              titleStyle={styles.clickableListTitle}
+                              descriptionStyle={styles.listDescription}
+                              descriptionNumberOfLines={1}
+                              onPress={() => navigation.navigate('Credential Details', { cred: item })}
+                            />
                             </SafeAreaView>
                         </View>
                     </React.Fragment>

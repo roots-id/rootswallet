@@ -239,14 +239,6 @@ export default function AuthStack() {
                           headerRight: (props) => <IconActions {...props} nav={navigation} person={YOU_ALIAS} scan="Scan QR Code" settings="Settings"/>,
                       })}
                 />
-                <Stack.Screen
-                    name="Credential"
-                    component={CredentialDetailScreen}
-                    options={ ({ navigation, route }) => ({
-                        headerTitle: (props) => <SimpleTitle {...props} title={getCredentialItem(route.params.credId).title}/>,
-                        headerRight: (props) => <IconActions {...props} nav={navigation} person={YOU_ALIAS} scan='Scan QR Code' settings='Settings'/>,
-                    })}
-                />
             </Stack.Group>
         </Stack.Navigator>
         )
@@ -304,7 +296,7 @@ export default function AuthStack() {
                     <Stack.Screen name="mainTabs" component={Main}/>
                 </Stack.Group>
                 <Stack.Group screenOptions={{ presentation: 'transparentModal' }}>
-                    <Stack.Screen name="Certificate Details" component={RelationshipDetailScreen}/>
+                    <Stack.Screen name="Credential Details" component={CredentialDetailScreen}/>
                     <Stack.Screen name="Create Rel" component={CreateRelScreen}/>
                     <Stack.Screen name="Create Secure Chat" component={StartChatScreen} />
                     <Stack.Screen name="Help" component={HelpScreen}/>
