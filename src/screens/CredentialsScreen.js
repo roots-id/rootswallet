@@ -17,9 +17,9 @@ const CredentialsScreen = ({route,navigation}) => {
         addRefreshTrigger(()=>{
             console.log("creds screen - toggling refresh")
             setRefresh(!refresh)
-            setCreds(
-                getImportedCredentials()
-            )
+            const importedCreds = getImportedCredentials()
+            console.log("creds screen - got imported creds size",importedCreds.length)
+            setCreds(importedCreds)
             console.log("creds screen - Creds size",creds.length)
         })
     },[])

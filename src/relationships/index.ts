@@ -111,6 +111,15 @@ export function getRelItem(relId) {
     }
 }
 
+export function isShareable(rel: object) {
+    if(!rel.id && rel.did) {
+        logger("rels - rel is shareable",rel.did)
+        return true
+    } else {
+        logger("rels - rel NOT shareable",rel.id,rel.did)
+    }
+}
+
 export function getShareableRelByAlias(alias: string) {
     logger("roots - getting shareable rel by alias",alias)
     const rel = getRelItem(alias)

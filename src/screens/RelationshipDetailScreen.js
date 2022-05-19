@@ -18,24 +18,28 @@ import { Divider, IconButton, List, Title,ToggleButton } from 'react-native-pape
 import styles from "../styles/styles";
 
 import { showQR } from '../qrcode'
-import { getShareableRelByAlias,YOU_ALIAS } from '../relationships'
+import { getShareableRelByAlias,isShareable, YOU_ALIAS } from '../relationships'
 import { getChatsByRel } from '../roots'
 
 import IconActions from '../components/IconActions';
 
 export default function RelationshipDetailScreen({ route, navigation }) {
     console.log("route params are",JSON.stringify(route.params))
-    const [rel, setRel] = useState({});
+    const [shareableRel, setShareableRel] = useState({});
     const { colors } = useTheme();
     const { current } = useCardAnimation();
 
     useEffect(() => {
-        setRel(route.params.rel)
+        if(!isShareable(route.params.rel)) {
+            setShareableRel(getShareableRelByAlias(route.params.rel))
+        } else {
+            setShareableRel(route.params.rel)
+        }
     }, []);
 
     useEffect(() => {
-        console.log("rel changed",rel)
-    }, [rel]);
+        console.log("rel changed",shareableRel)
+    }, [shareableRel]);
 
   return (
     <View
@@ -78,7 +82,7 @@ export default function RelationshipDetailScreen({ route, navigation }) {
             icon="qrcode"
             size={36}
             color="#e69138"
-            onPress={() => showQR(navigation,getShareableRelByAlias(YOU_ALIAS))}
+            onPress={() => showQR(navigation,shareableRel)}
           />
           <IconButton
               icon="close-circle"
@@ -87,7 +91,7 @@ export default function RelationshipDetailScreen({ route, navigation }) {
               onPress={() => navigation.goBack()}
           />
         </View>
-        <Image source={rel.displayPictureUrl}
+        <Image source={shareableRel.displayPictureUrl}
             style={{
               width: '30%',
               height: '30%',
@@ -96,9 +100,9 @@ export default function RelationshipDetailScreen({ route, navigation }) {
               justifyContent:'flex-start',
             }}
         />
-        <Text style={styles.subText}>{rel.displayName}</Text>
+        <Text style={styles.subText}>{shareableRel.displayName}</Text>
         <Divider/>
-        <Text style={styles.subText}>{rel.did}</Text>
+        <Text style={styles.subText}>{shareableRel.did}</Text>
       </Animated.View>
     </View>
   );

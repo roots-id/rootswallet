@@ -189,7 +189,7 @@ export default function ChatScreen({ route, navigation }) {
                         console.log("ChatScreen - credential verification result",verify)
                     } else if (reply.value.endsWith(roots.CRED_VIEW)) {
                         console.log("ChatScreen - quick reply view credential")
-                        const cred = await roots.getCredentialByMsgId(reply.messageId)
+                        const cred = await roots.getImportedCredByMsgId(reply.messageId)
                         showQR(navigation,cred)
                     }
                 } else if(reply.value.startsWith(roots.PROMPT_SHAREABLE_REL_MSG_TYPE)) {
