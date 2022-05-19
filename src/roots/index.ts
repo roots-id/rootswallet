@@ -375,6 +375,14 @@ export async function createChat(alias: string, fromDidAlias: string, toDid: str
 
     if(chatItemCreated && chatItem) {
         logger("Created chat and added welcome to chat",chatItem.title)
+        if(!(alias === rel.YOU_ALIAS)) {
+            const chMsg = await sendMessage(chatItem,
+                "You are now in contact with "+alias,
+                TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
+            const statusMsg = await sendMessage(getChatItem(rel.YOU_ALIAS),
+                "New contact added: "+alias,
+                TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
+        }
         return true;
     } else {
         console.error("Could not create chat",fromDidAlias, toDid,title);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
 import Hyperlink from 'react-native-hyperlink'
-import { Title } from 'react-native-paper';
+import { Divider, List, Title } from 'react-native-paper';
 
 import FormButton from '../components/FormButton';
 import FormInput from '../components/FormInput';
@@ -66,6 +66,7 @@ export default function CreateWalletScreen({ navigation }) {
                   }
                 }}
             />
+            <Divider />
             <View>
               <Hyperlink linkStyle={ { color: '#2980b9', fontSize: 20 } }
                 linkText={ url => url === 'https://rootswallet.com/help' ? 'Need help?' : url }>
