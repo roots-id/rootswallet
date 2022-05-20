@@ -96,9 +96,9 @@ export default function CredentialDetailScreen({ route, navigation }) {
               justifyContent:'flex-start',
             }}
         />
-        <Text style={styles.subText}>{cred.verifiedCredential.encodedSignedCredential}</Text>
+        <Text style={styles.subText}>{JSON.stringify(cred.verifiedCredential)}</Text>
         <Divider/>
-        <Text style={styles.subText}>{cred.verifiedCredential.proof.hash}</Text>
+        <Text style={styles.subText}>{JSON.stringify(cred.verifiedCredential.proof)}</Text>
       </Animated.View>
     </View>
   );
