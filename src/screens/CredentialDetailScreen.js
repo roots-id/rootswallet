@@ -100,11 +100,11 @@ export default function CredentialDetailScreen({ route, navigation }) {
               justifyContent:'flex-start',
             }}
         />
-        <Text style={styles.subText}>Credential:</Text>
-        <Text style={styles.subText}>From:</Text>
-        <Text style={styles.subText}>Last Verified:</Text>
-        <Text style={styles.subText}>Value:</Text>
-        <Text style={styles.subText}>{utils.recursivePrint(JSON.stringify(cred))}</Text>
+        <Text style={styles.subText}>Credential: {cred.decoded.credentialSubject.name}</Text>
+        <Text style={styles.subText}>Last Verified: "Not verified"</Text>
+        <Text style={styles.subText}>From: {cred.decoded.id}</Text>
+        <Text style={styles.subText}>To: {cred.decoded.credentialSubject.id}</Text>
+
       </Animated.View>
     </View>
     );

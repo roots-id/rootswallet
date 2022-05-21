@@ -10,24 +10,29 @@ const CredentialsScreen = ({route,navigation}) => {
     const {walletName} = route.params
     const [refresh,setRefresh] = useState(true)
     const [creds,setCreds] = useState([])
-    useEffect(() => {
-        const decodedCreds = []
+
+    function loadCreds() {
+        const credObjs = []
         getImportedCredentials().forEach((encodedCred) => {
             console.log("cred screen - decoding cred",encodedCred)
             const decodedCred = decodeCredential(encodedCred)
             console.log("cred screen - decoded cred",decodedCred)
             const credObj = JSON.parse(decodedCred.replace(/\0/g, ''))
             console.log("cred screen - decoded cred obj has eys",Object.keys(credObj))
-            decodedCreds.push(credObj)
+            const credHash = encodedCred.verifiedCredential.proof.hash
+            console.log("cred screen - hash for decoded cred",credHash)
+            credObjs.push({hash: credHash, encoded: encodedCred, decoded: credObj})
         })
-        console.log("cred screen - setting creds",decodedCreds.length)
-        setCreds(decodedCreds)
+        console.log("cred screen - setting creds",credObjs.length)
+        return credObjs;
+    }
+
+    useEffect(() => {
+        setCreds(loadCreds())
         addRefreshTrigger(()=>{
             console.log("creds screen - toggling refresh")
             setRefresh(!refresh)
-            const importedCreds = getImportedCredentials()
-            console.log("creds screen - got imported creds size",importedCreds.length)
-            setCreds(importedCreds)
+            setCreds(loadCreds())
             console.log("creds screen - Creds size",creds.length)
         })
     },[])
@@ -38,7 +43,7 @@ const CredentialsScreen = ({route,navigation}) => {
                 <FlatList
                     data={creds}
                     extraData={refresh}
-                    keyExtractor={(item) => item.keyId}
+                    keyExtractor={(item) => item.hash}
                     ItemSeparatorComponent={() => <Divider />}
                     renderItem={({ item }) => (
                     <React.Fragment>
@@ -57,12 +62,12 @@ const CredentialsScreen = ({route,navigation}) => {
                             </SafeAreaView>
                             <SafeAreaView style={styles.container}>
                             <List.Item
-                              title={item.credentialSubject.name}
+                              title={item.decoded.credentialSubject.name}
                               titleNumberOfLines={1}
                               titleStyle={styles.clickableListTitle}
                               descriptionStyle={styles.listDescription}
                               descriptionNumberOfLines={1}
-                              onPress={() => navigation.navigate('Credential Details', { cred: item })}
+                              onPress={() => navigation.navigate('Credential Details', { cred: item})}
                             />
                             </SafeAreaView>
                         </View>
