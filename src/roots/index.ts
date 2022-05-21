@@ -83,7 +83,7 @@ export async function initRootsWallet() {
     const createdWalletMsg = await sendMessage(myChat,
         "You created your wallet: "+currentWal._id,TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
     const createdDidMsg = await sendMessage(myChat,
-        "You created your first decentralized ID!",
+        "You created your first decentralized ID (called a DID)!",
         TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
     await sendMessage(myChat,"Your new DID is being added to Prism so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
         TEXT_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
@@ -203,7 +203,7 @@ export async function createWallet(walName,mnemonic,walPass) {
     const prismWal = PrismModule.newWal(walName,mnemonic,walPass)
     const result = await updateWallet(walName,walPass,prismWal)
     if(result) {
-        logger('Wallet created',store.getWallet(currentWal._id))
+        logger('Wallet created',getWalletJson(currentWal._id))
         return result;
     } else {
         logger('Could not create wallet',walName,walPass)
@@ -259,6 +259,10 @@ export function getRootsWallet(walName) {
     }
 }
 
+export function getWalletJson(walId: string) {
+    return store.getWallet(walId)
+}
+
 export async function updateWallet(walName, walPass, walJson) {
     if(await store.saveWallet(walName, walPass, walJson)) {
         currentWal = JSON.parse(walJson)
@@ -279,7 +283,7 @@ async function createDid(didAlias: string) {
             return existingDid;
         } else {
             logger("roots - DID does not exist, creating",didAlias,"DID")
-            const walletJson = store.getWallet(currentWal._id)
+            const walletJson = getWalletJson(currentWal._id)
             logger("roots - requesting chat/did from prism, w/wallet",walletJson)
             const prismWalletJson = PrismModule.newDID(walletJson,didAlias)
             logger("roots - Chat/prismDid added to wallet", prismWalletJson)
@@ -357,7 +361,7 @@ export async function publishPrismDid(didAlias: string) {
         const longFormDid = did[walletSchema.DID_URI_LONG_FORM]
         logger("roots - Publishing DID to Prism",longFormDid)
         try {
-            const newWalJson = await PrismModule.publishDid(store.getWallet(currentWal._id), did.alias)
+            const newWalJson = await PrismModule.publishDid(getWalletJson(currentWal._id), did.alias)
             const result = await updateWallet(currentWal._id,currentWal.passphrase,newWalJson)
             return isDidPublished(getDid(didAlias))
         } catch(error) {
@@ -802,7 +806,7 @@ async function acceptCredential(credAlias: string) {
     const credHash = verCred.proof.hash
     if (!getImportedCredByHash(credHash)) {
         logger("roots - accepting credential",credAlias,verCredJson)
-        const newWalJson = await PrismModule.importCred(store.getWallet(currentWal._id), credAlias, verCredJson);
+        const newWalJson = await PrismModule.importCred(getWalletJson(currentWal._id), credAlias, verCredJson);
         if(newWalJson) {
             const savedWal = await updateWallet(currentWal._id,currentWal.passphrase,newWalJson)
             if(savedWal) {
@@ -944,7 +948,7 @@ async function issueCredential(didAlias: string,credAlias: string,cred: Object) 
     let result;
 
     try {
-        const newWalJson = await PrismModule.issueCred(store.getWallet(currentWal._id), didAlias, credJson);
+        const newWalJson = await PrismModule.issueCred(getWalletJson(currentWal._id), didAlias, credJson);
         logger("roots - wallet after issuing credential",newWalJson)
         if(newWalJson) {
             const savedWal = await updateWallet(currentWal._id,currentWal.passphrase,newWalJson)
@@ -966,11 +970,13 @@ async function issueCredential(didAlias: string,credAlias: string,cred: Object) 
     return result
 }
 
-function verifyCredential(credAlias: string) {
-    //TODO fix gradle build problems so that we can verify.
-    logger("Verifying credential not implemented yet",credAlias)
-    //const errorArray = JSON.parse(PrismModule.verifyCred(credAlias))
-//     logger("Credential verification not implemented yet",credAlias,errorArray)
+export async function verifyCredential(credHash: string) {
+    logger("Verifying credential",credHash)
+    const importedCred = getImportedCredByHash(credHash)
+    const jsonWallet = getWalletJson(currentWal._id)
+    logger("verifying imported cred",importedCred.alias,jsonWallet)
+    const messageArray = JSON.parse(PrismModule.verifyCred(jsonWallet,importedCred.alias))
+    logger("Verification result",credHash,messageArray)
 }
 
 // ------------------ Session ---------------
@@ -1101,7 +1107,7 @@ export async function issueDemoCredential(chat: Object,msgId: string) {
             alias: credAlias,
             issuingDidAlias: chat.fromAlias,
             claim: {
-                content: "{\"name\": \"RootsWallet\",\"degree\": \"law\",\"date\": \"2022-04-04 09:10:04\"}",
+                content: "{\"name\": \"Law Degree\",\"degree\": \"law\",\"date\": \"2022-04-04 09:10:04\"}",
                 subjectDid: didLong,
             },
             verifiedCredential: {

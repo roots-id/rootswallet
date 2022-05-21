@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import { credLogo, getCredentials, addRefreshTrigger, showCred} from '../credentials'
+import { addRefreshTrigger, credLogo, decodeCredential, getCredentials, showCred} from '../credentials'
 import { getImportedCredentials, getChatItem } from '../roots'
 import styles from "../styles/styles";
 
@@ -11,9 +11,17 @@ const CredentialsScreen = ({route,navigation}) => {
     const [refresh,setRefresh] = useState(true)
     const [creds,setCreds] = useState([])
     useEffect(() => {
-        setCreds(
-            getImportedCredentials()
-        )
+        const decodedCreds = []
+        getImportedCredentials().forEach((encodedCred) => {
+            console.log("cred screen - decoding cred",encodedCred)
+            const decodedCred = decodeCredential(encodedCred)
+            console.log("cred screen - decoded cred",decodedCred)
+            const credObj = JSON.parse(decodedCred.replace(/\0/g, ''))
+            console.log("cred screen - decoded cred obj has eys",Object.keys(credObj))
+            decodedCreds.push(credObj)
+        })
+        console.log("cred screen - setting creds",decodedCreds.length)
+        setCreds(decodedCreds)
         addRefreshTrigger(()=>{
             console.log("creds screen - toggling refresh")
             setRefresh(!refresh)
@@ -30,7 +38,7 @@ const CredentialsScreen = ({route,navigation}) => {
                 <FlatList
                     data={creds}
                     extraData={refresh}
-                    keyExtractor={(item) => item.verifiedCredential.proof.hash}
+                    keyExtractor={(item) => item.keyId}
                     ItemSeparatorComponent={() => <Divider />}
                     renderItem={({ item }) => (
                     <React.Fragment>
@@ -49,7 +57,7 @@ const CredentialsScreen = ({route,navigation}) => {
                             </SafeAreaView>
                             <SafeAreaView style={styles.container}>
                             <List.Item
-                              title={item.verifiedCredential.proof.hash}
+                              title={item.credentialSubject.name}
                               titleNumberOfLines={1}
                               titleStyle={styles.clickableListTitle}
                               descriptionStyle={styles.listDescription}

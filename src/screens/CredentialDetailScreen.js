@@ -18,33 +18,31 @@ import { Divider, IconButton, List, Title,ToggleButton } from 'react-native-pape
 import styles from "../styles/styles";
 
 import { showQR } from '../qrcode'
-import { credLogo, getShareableCred,isShareable } from '../credentials'
-import { getImportedCredByHash } from '../roots'
+import { credLogo, decodeCredential, getShareableCred,isShareable } from '../credentials'
+import { getImportedCredByHash, verifyCredential } from '../roots'
+import * as utils from '../utils'
 
 import IconActions from '../components/IconActions';
 
 export default function CredentialDetailScreen({ route, navigation }) {
-    console.log("route params are",JSON.stringify(route.params))
-    const [cred, setCred] = useState({});
+    console.log("cred details - route params are",JSON.stringify(route.params))
+    const [cred, setCred] = useState(route.params.cred);
     const { colors } = useTheme();
     const { current } = useCardAnimation();
 
     useEffect(() => {
+        console.log("cred details - initially setting cred",cred)
         setCred(route.params.cred)
     }, []);
 
-    useEffect(() => {
-        console.log("cred changed",cred)
-    }, [cred]);
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
+    return (
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
 
       <Pressable
         style={[
@@ -75,6 +73,12 @@ export default function CredentialDetailScreen({ route, navigation }) {
       >
       <View style={{flexDirection:'row',}}>
           <IconButton
+            icon="check-bold"
+            size={36}
+            color="#e69138"
+            onPress={() => verifyCredential(cred.verifiedCredential.proof.hash.toString())}
+          />
+          <IconButton
             icon="qrcode"
             size={36}
             color="#e69138"
@@ -96,10 +100,12 @@ export default function CredentialDetailScreen({ route, navigation }) {
               justifyContent:'flex-start',
             }}
         />
-        <Text style={styles.subText}>{JSON.stringify(cred.verifiedCredential)}</Text>
-        <Divider/>
-        <Text style={styles.subText}>{JSON.stringify(cred.verifiedCredential.proof)}</Text>
+        <Text style={styles.subText}>Credential:</Text>
+        <Text style={styles.subText}>From:</Text>
+        <Text style={styles.subText}>Last Verified:</Text>
+        <Text style={styles.subText}>Value:</Text>
+        <Text style={styles.subText}>{utils.recursivePrint(JSON.stringify(cred))}</Text>
       </Animated.View>
     </View>
-  );
+    );
 }

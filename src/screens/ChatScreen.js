@@ -445,7 +445,7 @@ export default function ChatScreen({ route, navigation }) {
                     onPress: (tag) => Linking.openURL(tag),
                 },
                 {
-                    pattern: /Click to see the blockchain details/,
+                    pattern: /Click to see the Cardano blockchain details/,
                     style: styles.prism,
                 }
           ]}

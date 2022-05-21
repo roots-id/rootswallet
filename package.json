@@ -36,6 +36,7 @@
     "react-i18next": "^11.15.3",
     "react-json-view": "^1.21.3",
     "react-native": "0.64.3",
+    "react-native-base64": "^0.2.1",
     "react-native-gesture-handler": "~2.1.0",
     "react-native-gifted-chat": "1.0.0-beta-3",
     "react-native-hyperlink": "^0.0.19",

@@ -23,6 +23,9 @@ export default function CreateWalletScreen({ navigation }) {
   const [walletName, setWalletName] = useState(TEST_WALLET_NAME);
   const [problemDisabled, setProblemDisabled] = useState(true)
   console.log("CreateWalletScreen - start")
+//    const test = "{\"id\":\"did:prism:31ffe06f89edb2fb967b94624cf952c2167de4f13342753d908922d1e45e682b\",\"keyId\":\"issuing0\",\"credentialSubject\":{\"name\":\"Law Degree\",\"degree\":\"law\",\"date\":\"2022-04-04 09:10:04\",\"id\":\"did:prism:31ffe06f89edb2fb967b94624cf952c2167de4f13342753d908922d1e45e682b:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQKGKosJGZmzaceD6cNfZSGRNiRtoRfo6afrbGZSFACS7hI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhAqJFtDr9_p0boTzzQiiwHcFnTK3hzo-D3k4kXPbfZe8vEj8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiEDogWkd0W5P-Qani_VxcODAqIs_DSeTqGGSqhk4CsqeeY\"}}"
+//    console.log("test is",test)
+//    console.log("test json is",JSON.parse(test))
 
   const { signIn } = React.useContext(AuthContext);
 
@@ -66,8 +69,9 @@ export default function CreateWalletScreen({ navigation }) {
                   }
                 }}
             />
-            <Divider />
+
             <View>
+              <Text></Text>
               <Hyperlink linkStyle={ { color: '#2980b9', fontSize: 20 } }
                 linkText={ url => url === 'https://rootswallet.com/help' ? 'Need help?' : url }>
                 <Text style={ { fontSize: 15 } }>
