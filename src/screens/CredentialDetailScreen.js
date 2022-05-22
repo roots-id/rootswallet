@@ -76,7 +76,7 @@ export default function CredentialDetailScreen({ route, navigation }) {
             icon="check-bold"
             size={36}
             color="#e69138"
-            onPress={() => verifyCredential(cred.verifiedCredential.proof.hash.toString())}
+            onPress={async () => await verifyCredential(cred.encoded)}
           />
           <IconButton
             icon="qrcode"

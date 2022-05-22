@@ -970,13 +970,19 @@ async function issueCredential(didAlias: string,credAlias: string,cred: Object) 
     return result
 }
 
-export async function verifyCredential(credHash: string) {
+export async function verifyCredentialByHash(credHash: string) {
     logger("Verifying credential",credHash)
     const importedCred = getImportedCredByHash(credHash)
+    return verifyCredential(importedCred)
+}
+
+export async function verifyCredential(importedCred: object) {
+    logger("Verifying credential w/keys",Object.keys(importedCred))
     const jsonWallet = getWalletJson(currentWal._id)
-    logger("verifying imported cred",importedCred.alias,jsonWallet)
-    const messageArray = JSON.parse(PrismModule.verifyCred(jsonWallet,importedCred.alias))
-    logger("Verification result",credHash,messageArray)
+    console.log("verifying imported cred",importedCred.alias,jsonWallet)
+    const messageArray = await PrismModule.verifyCred(jsonWallet,importedCred.alias)
+    logger("Verification result",JSON.stringify(messageArray))
+    return messageArray
 }
 
 // ------------------ Session ---------------
