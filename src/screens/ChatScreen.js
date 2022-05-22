@@ -185,8 +185,9 @@ export default function ChatScreen({ route, navigation }) {
                     console.log("ChatScreen - process quick reply for owned credential")
                     if (reply.value.endsWith(roots.CRED_VERIFY)) {
                         console.log("ChatScreen - quick reply verify credential",)
-                        const verify = await roots.verifyCredential(chat, reply)
-                        console.log("ChatScreen - credential verification result",verify)
+                        const credHash = roots.getMessageById(reply.messageId).data
+                        console.log("ChatScreen - verifying credential with hash",credHash)
+                        roots.processVerifyCredential(chat,credHash)
                     } else if (reply.value.endsWith(roots.CRED_VIEW)) {
                         console.log("ChatScreen - quick reply view credential")
                         const cred = await roots.getImportedCredByMsgId(reply.messageId)

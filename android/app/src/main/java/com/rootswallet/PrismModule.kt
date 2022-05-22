@@ -107,12 +107,12 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     }
 
     @ReactMethod
-    fun verifyCred(walJson: String, credAlias: String, promise: Promise) {
+    fun verifyImportedCred(walJson: String, credAlias: String, promise: Promise) {
         Log.d("PRISM_TAG","Verifying credential for "+credAlias+" from wallet "+walJson);
         thread(start = true) {
             try {
                 var cliWal = Json.decodeFromString<Wallet>(walJson);
-                var verResult = Json.encodeToString(verifyIssuedCredential(cliWal, credAlias))
+                var verResult = Json.encodeToString(verifyImportedCredential(cliWal, credAlias))
                 Log.d("PRISM_TAG","Credential "+credAlias+" is " + verResult)
                 promise.resolve(verResult);
             } catch (e: Exception) {

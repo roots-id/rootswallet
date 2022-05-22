@@ -22,8 +22,8 @@ export const rootsLogo = rwLogo;
 export const starLogo = starPng;
 
 export const YOU_ALIAS = "You"
-export const ROOTS_BOT = "RootsWallet Helper";
-export const PRISM_BOT = "Prism Helper";
+export const ROOTS_BOT = "RootsHelper";
+export const PRISM_BOT = "PrismHelper";
 
 export const LIBRARY_BOT = "did:prism:librarybot1";
 const IOG_TECH = "did:prism:iogtech1";

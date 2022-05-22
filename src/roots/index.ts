@@ -8,6 +8,9 @@ import * as rel from '../relationships'
 import { replaceSpecial } from '../utils'
 import * as walletSchema from '../schemas/WalletSchema'
 
+//ppp-node-test
+export const DEFAULT_PRISM_HOST = "ppp-node-test.atalaprism.io"
+
 //msg types
 export const BLOCKCHAIN_URL_MSG_TYPE = "blockchainUrlMsgType";
 export const CREDENTIAL_JSON_MSG_TYPE = "jsonCredential";
@@ -18,6 +21,7 @@ export const PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE = "rootsAcceptCredentialMsgType"
 export const PROMPT_OWN_CREDENTIAL_MSG_TYPE = "rootsOwnCredentialMsgType"
 export const PROMPT_OWN_DID_MSG_TYPE = "rootsOwnDidMsgType"
 export const PROMPT_PUBLISH_MSG_TYPE = "rootsPromptPublishMsgType";
+export const PROMPT_REVOKE_CREDENTIAL_MSG_TYPE = "rootsRevokeCredentialMsgType";
 export const QR_CODE_MSG_TYPE = "rootsQRCodeMsgType"
 export const STATUS_MSG_TYPE = "statusMsgType";
 export const TEXT_MSG_TYPE = "textMsgType"
@@ -150,7 +154,7 @@ export async function handleNewData(jsonData: string) {
 }
 
 //----------------- Prism ----------------------
-export function setPrismHost(host="ppp-node-test.atalaprism.io", port="50053") {
+export function setPrismHost(host=DEFAULT_PRISM_HOST, port="50053") {
     logger("roots - setting Prism host and port",host,port)
     PrismModule.setNetwork(host,port)
     store.updateItem(getSettingAlias("prismNodePort"),port)
@@ -159,7 +163,7 @@ export function setPrismHost(host="ppp-node-test.atalaprism.io", port="50053") {
 
 export function getPrismHost() {
     const host = store.getItem(getSettingAlias("prismNodeHost"))
-    return (host) ? host :  "ppp-node-test.atalaprism.io";
+    return (host) ? host :  DEFAULT_PRISM_HOST;
 }
 
 //--------------- Roots ----------------------
@@ -679,6 +683,7 @@ function addQuickReply(msg) {
             ],
         }
     }
+
     if(msg.type === PROMPT_OWN_CREDENTIAL_MSG_TYPE) {
         msg["quickReplies"] = {
             type: 'checkbox',
@@ -687,6 +692,11 @@ function addQuickReply(msg) {
             {
                 title: 'Show QR code',
                 value: PROMPT_OWN_CREDENTIAL_MSG_TYPE+CRED_VIEW,
+                messageId: msg.id,
+            },
+            {
+                title: 'Verify',
+                value: PROMPT_OWN_CREDENTIAL_MSG_TYPE+CRED_VERIFY,
                 messageId: msg.id,
             }]
         }
@@ -763,9 +773,9 @@ export async function processPublishResponse(chat: Object) {
                 if(credIssueAlias) {
                     const credPubTx = getCredPubTx(pubDid[walletSchema.DID_ALIAS],credIssueAlias)
                     const credSuccess = await sendMessage(chat,"You have issued yourself a verifiable credential!",
-                                     TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
+                        PROMPT_REVOKE_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
                     const credLinkMsg = await sendMessage(chat,BLOCKCHAIN_URL_MSG,
-                                    BLOCKCHAIN_URL_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,credPubTx.url)
+                        BLOCKCHAIN_URL_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,credPubTx.url)
 
                     if(credLinkMsg) {
                         logger("roots - demo credential issued",credIssueAlias)
@@ -970,6 +980,31 @@ async function issueCredential(didAlias: string,credAlias: string,cred: Object) 
     return result
 }
 
+export async function processVerifyCredential(chat: object, credHash:string) {
+    startProcessing(chat.id,credHash+CRED_VERIFY)
+    const verify = await verifyCredentialByHash(credHash)
+    const vDate = Date.now()
+    logger("roots - verification result",verify,vDate)
+    const verResult = JSON.parse(verify)
+    if(verResult && verResult.length <= 0) {
+        endProcessing(chat.id,credHash+CRED_VERIFY)
+        console.log("roots - credential verification result",verResult)
+        const credVerifiedMsg = await sendMessage(chat,"Credential is valid.",
+            TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT),false,vDate)
+    } else if(verResult.length > 0) {
+        endProcessing(chat.id,credHash+CRED_VERIFY)
+        console.log("roots - credential is invalid",verResult)
+        const credVerifiedMsg = await sendMessage(chat,"Credential is invalid w/ messages"+verResult,
+            TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT),false,vDate)
+    }
+    else {
+        endProcessing(chat.id,credHash+CRED_VERIFY)
+        console.log("roots - could not get credential verification result",verResult)
+        const credVerifiedMsg = await sendMessage(chat,"Could not verify credential at "+vDate,
+            TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
+    }
+}
+
 export async function verifyCredentialByHash(credHash: string) {
     logger("Verifying credential",credHash)
     const importedCred = getImportedCredByHash(credHash)
@@ -980,7 +1015,7 @@ export async function verifyCredential(importedCred: object) {
     logger("Verifying credential w/keys",Object.keys(importedCred))
     const jsonWallet = getWalletJson(currentWal._id)
     console.log("verifying imported cred",importedCred.alias,jsonWallet)
-    const messageArray = await PrismModule.verifyCred(jsonWallet,importedCred.alias)
+    const messageArray = await PrismModule.verifyImportedCred(jsonWallet,importedCred.alias)
     logger("Verification result",JSON.stringify(messageArray))
     return messageArray
 }
