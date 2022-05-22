@@ -37,6 +37,7 @@ export const SHOW_DID_QR_CODE = "Show Chat QR code";
 //state literals
 export const CRED_ACCEPTED = "credAccepted"
 export const CRED_REJECTED = "credRejected"
+export const CRED_REVOKE = "credRevoke"
 export const CRED_SENT = "credSent"
 export const CRED_VERIFY = "credVerify"
 export const CRED_VIEW = "credView"
@@ -683,7 +684,18 @@ function addQuickReply(msg) {
             ],
         }
     }
-
+    if(msg.type === PROMPT_REVOKE_CREDENTIAL_MSG_TYPE) {
+        msg["quickReplies"] = {
+            type: 'checkbox',
+            keepIt: true,
+            values: [{
+                title: 'Revoke',
+                value: PROMPT_REVOKE_CREDENTIAL_MSG_TYPE,
+                messageId: msg.id,
+            },
+            ],
+        }
+    }
     if(msg.type === PROMPT_OWN_CREDENTIAL_MSG_TYPE) {
         msg["quickReplies"] = {
             type: 'checkbox',
@@ -773,7 +785,7 @@ export async function processPublishResponse(chat: Object) {
                 if(credIssueAlias) {
                     const credPubTx = getCredPubTx(pubDid[walletSchema.DID_ALIAS],credIssueAlias)
                     const credSuccess = await sendMessage(chat,"You have issued yourself a verifiable credential!",
-                        PROMPT_REVOKE_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
+                        PROMPT_REVOKE_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT),false,credIssueAlias)
                     const credLinkMsg = await sendMessage(chat,BLOCKCHAIN_URL_MSG,
                         BLOCKCHAIN_URL_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,credPubTx.url)
 
@@ -980,6 +992,52 @@ async function issueCredential(didAlias: string,credAlias: string,cred: Object) 
     return result
 }
 
+export async function processRevokeCredential(chat: object, reply: object) {
+    const msg = getMessageById(reply.messageId)
+    const credAlias = msg.data
+    startProcessing(chat.id,credAlias+CRED_REVOKE)
+    logger("roots - revoking credential with alias",credAlias)
+    const revokedCred = await revokeCredentialByAlias(credAlias)
+    logger("roots - cred revoke result",revokedCred)
+    if(revokedCred) {
+        endProcessing(chat.id,credAlias+CRED_REVOKE)
+        console.log("roots - credential revoked",revokedCred)
+        const credRevokedMsg = await sendMessage(chat,"Credential is revoked.",
+            TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT),false,credAlias)
+    } else {
+        endProcessing(chat.id,credAlias+CRED_REVOKE)
+        console.log("roots - could not revoke credential",credAlias)
+        const credRevokedMsg = await sendMessage(chat,"Could not revoke credential "+credAlias,
+            TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT),false,credAlias)
+    }
+}
+
+export async function revokeCredentialByAlias(credAlias: string) {
+    logger("Revoking credential",credAlias)
+    const issuedCred = getIssuedCredential(credAlias)
+    return await revokeCredential(issuedCred)
+}
+
+export async function revokeCredential(issuedCred: object) {
+    logger("roots - Revoking issued credential w/keys",Object.keys(issuedCred))
+    const jsonWallet = getWalletJson(currentWal._id)
+    console.log("roots - Revoking issued cred",issuedCred.alias,jsonWallet)
+    const newWalJson = await PrismModule.revokeCred(jsonWallet,issuedCred.alias)
+    if(newWalJson) {
+        const savedWal = await updateWallet(currentWal._id,currentWal.passphrase,newWalJson)
+        if(savedWal) {
+            logger("roots - Revoked credential",issuedCred.alias)
+            return getIssuedCredential(issuedCred.alias)
+        } else {
+            console.error("Could not revoke credential, unable to save wallet",issuedCred.alias)
+            return
+        }
+    } else {
+        console.error("Could not revoke accepted credential",issuedCred.alias)
+        return
+    }
+}
+
 export async function processVerifyCredential(chat: object, credHash:string) {
     startProcessing(chat.id,credHash+CRED_VERIFY)
     const verify = await verifyCredentialByHash(credHash)
@@ -994,7 +1052,7 @@ export async function processVerifyCredential(chat: object, credHash:string) {
     } else if(verResult.length > 0) {
         endProcessing(chat.id,credHash+CRED_VERIFY)
         console.log("roots - credential is invalid",verResult)
-        const credVerifiedMsg = await sendMessage(chat,"Credential is invalid w/ messages"+verResult,
+        const credVerifiedMsg = await sendMessage(chat,"Credential is invalid w/ messages: "+verResult,
             TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT),false,vDate)
     }
     else {
@@ -1005,9 +1063,9 @@ export async function processVerifyCredential(chat: object, credHash:string) {
     }
 }
 
-export async function verifyCredentialByHash(credHash: string) {
+export async function verifyCredentialByHash(chat: object, credHash: string) {
     logger("Verifying credential",credHash)
-    const importedCred = getImportedCredByHash(credHash)
+    const importedCred = getImportedCredByHash(chat, credHash)
     return verifyCredential(importedCred)
 }
 

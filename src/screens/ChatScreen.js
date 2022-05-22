@@ -181,7 +181,12 @@ export default function ChatScreen({ route, navigation }) {
                     console.log("ChatScreen - process quick reply for accepting credential")
                     const res = await roots.processCredentialResponse(chat,reply)
                     console.log("ChatScreen - credential accepted?",res)
-                } else if(reply.value.startsWith(roots.PROMPT_OWN_CREDENTIAL_MSG_TYPE)) {
+                } else if(reply.value.startsWith(roots.PROMPT_REVOKE_CREDENTIAL_MSG_TYPE)) {
+                    console.log("ChatScreen - process quick reply for revoking credential")
+                    const res = await roots.processRevokeCredential(chat,reply)
+                    console.log("ChatScreen - credential revoked?",res)
+                }
+                else if(reply.value.startsWith(roots.PROMPT_OWN_CREDENTIAL_MSG_TYPE)) {
                     console.log("ChatScreen - process quick reply for owned credential")
                     if (reply.value.endsWith(roots.CRED_VERIFY)) {
                         console.log("ChatScreen - quick reply verify credential",)
