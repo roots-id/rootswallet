@@ -50,7 +50,7 @@ const allCredReqsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CR
 const allMsgsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_MESSAGE)+'*')
 const allSettingsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_SETTING)+'*')
 
-export const TEST_WALLET_NAME = "testWalletName"
+export const TEST_WALLET_NAME = "CatalystDemo"
 
 export const POLL_TIME = 1000
 
@@ -702,7 +702,7 @@ function addQuickReply(msg) {
             keepIt: true,
             values: [
             {
-                title: 'Show QR code',
+                title: 'View',
                 value: PROMPT_OWN_CREDENTIAL_MSG_TYPE+CRED_VIEW,
                 messageId: msg.id,
             },
@@ -1202,11 +1202,12 @@ export async function issueDemoCredential(chat: Object,msgId: string) {
         logger("roots - Chat is published and credential not found, creating....")
         const didLong = did[walletSchema.DID_URI_LONG_FORM]
         logger("roots - Creating demo credential for chat",chat.id,"w/long form did",didLong)
+        const today = new Date(Date.now());
         const cred = {
             alias: credAlias,
             issuingDidAlias: chat.fromAlias,
             claim: {
-                content: "{\"name\": \"Law Degree\",\"degree\": \"law\",\"date\": \"2022-04-04 09:10:04\"}",
+                content: "{\"name\": \"Prism DID publisher\",\"achievement\": \"Published a DID to Cardano - Atala Prism\",\"date\": \""+today.toISOString()+"\"}",
                 subjectDid: didLong,
             },
             verifiedCredential: {

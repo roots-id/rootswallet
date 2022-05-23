@@ -120,7 +120,7 @@ export default function AuthStack() {
         // We haven't finished checking for the token yet
         return <LoadingScreen />;
     }
-
+//<Tab.Screen name="Integration" component={IntegrationStack}/>
     const Main = () => {
         return (
             <Tab.Navigator screenOptions={{
@@ -138,7 +138,6 @@ export default function AuthStack() {
                  }}>
                 <Tab.Screen name="Contacts" component={RelationshipsStack}/>
                 <Tab.Screen name="Credentials" component={CredentialsStack}/>
-                <Tab.Screen name="Integration" component={IntegrationStack}/>
             </Tab.Navigator>
         )
     }
@@ -304,6 +303,7 @@ export default function AuthStack() {
                     <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen} />
                     <Stack.Screen name="Settings" component={SettingsScreen}/>
                     <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen} />
+                    <Stack.Screen name="Integration" component={IntegrationStack}/>
                 </Stack.Group>
               </>
             )}

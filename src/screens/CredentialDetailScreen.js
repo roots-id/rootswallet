@@ -17,9 +17,11 @@ import {logger} from '../logging';
 import { Divider, IconButton, List, Title,ToggleButton } from 'react-native-paper';
 import styles from "../styles/styles";
 
-import { showQR } from '../qrcode'
+import {RelRow} from '../components/RelRow'
 import { credLogo, decodeCredential, getShareableCred,isShareable } from '../credentials'
-import { getImportedCredByHash, verifyCredential } from '../roots'
+import { showQR } from '../qrcode'
+import { getShareableRelByAlias} from '../relationships'
+import { getImportedCredByHash, verifyCredentialByHash } from '../roots'
 import * as utils from '../utils'
 
 import IconActions from '../components/IconActions';
@@ -34,7 +36,10 @@ export default function CredentialDetailScreen({ route, navigation }) {
         console.log("cred details - initially setting cred",cred)
         setCred(route.params.cred)
     }, []);
-
+//        <RelRow rel={getShareableRelByAlias(cred.decoded.id)} nav={navigation}/>
+//        <Text style={styles.subText}>Last Verified: "Not verified"</Text>
+//          <Text style={styles.subText}>From: </Text>
+//          <Text style={styles.subText}>To: {cred.decoded.credentialSubject.id}</Text>
     return (
         <View
           style={{
@@ -76,13 +81,13 @@ export default function CredentialDetailScreen({ route, navigation }) {
             icon="check-bold"
             size={36}
             color="#e69138"
-            onPress={async () => await verifyCredential(cred.encoded)}
+            onPress={async () => await verifyCredentialByHash(cred.hash)}
           />
           <IconButton
             icon="qrcode"
             size={36}
             color="#e69138"
-            onPress={() => showQR(navigation,cred)}
+            onPress={() => showQR(navigation,cred.encoded)}
           />
           <IconButton
               icon="close-circle"
@@ -100,10 +105,18 @@ export default function CredentialDetailScreen({ route, navigation }) {
               justifyContent:'flex-start',
             }}
         />
-        <Text style={styles.subText}>Credential: {cred.decoded.credentialSubject.name}</Text>
-        <Text style={styles.subText}>Last Verified: "Not verified"</Text>
-        <Text style={styles.subText}>From: {cred.decoded.id}</Text>
-        <Text style={styles.subText}>To: {cred.decoded.credentialSubject.id}</Text>
+          <FlatList
+              data={Object.keys(cred.decoded.credentialSubject)}
+              keyExtractor={(item) => item}
+              ItemSeparatorComponent={() => <Divider />}
+              renderItem={({ item }) =>
+                  {
+                    const output = utils.recursivePrint(cred.decoded.credentialSubject[item])
+                    console.log(item,": ",output)
+                    return <Text style={{color: "black"}}>{item + ": " + output}</Text>
+                  }
+              }
+          />
 
       </Animated.View>
     </View>

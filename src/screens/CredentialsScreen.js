@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import { addRefreshTrigger, credLogo, decodeCredential, getCredentials, showCred} from '../credentials'
+import { addRefreshTrigger, credLogo, decodeCredential, getCredDetails, getCredentials, showCred} from '../credentials'
 import { getImportedCredentials, getChatItem } from '../roots'
 import styles from "../styles/styles";
 
@@ -14,14 +14,7 @@ const CredentialsScreen = ({route,navigation}) => {
     function loadCreds() {
         const credObjs = []
         getImportedCredentials().forEach((encodedCred) => {
-            console.log("cred screen - decoding cred",encodedCred)
-            const decodedCred = decodeCredential(encodedCred)
-            console.log("cred screen - decoded cred",decodedCred)
-            const credObj = JSON.parse(decodedCred.replace(/\0/g, ''))
-            console.log("cred screen - decoded cred obj has eys",Object.keys(credObj))
-            const credHash = encodedCred.verifiedCredential.proof.hash
-            console.log("cred screen - hash for decoded cred",credHash)
-            credObjs.push({hash: credHash, encoded: encodedCred, decoded: credObj})
+            credObjs.push(getCredDetails(encodedCred.verifiedCredential))
         })
         console.log("cred screen - setting creds",credObjs.length)
         return credObjs;

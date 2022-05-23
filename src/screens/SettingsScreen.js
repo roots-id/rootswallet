@@ -65,12 +65,20 @@ export default function RelationshipDetailScreen({ route, navigation }) {
       ],
     }}
     >
+      <View style={{flexDirection:'row',}}>
+        <IconButton
+          icon="chemical-weapon"
+          size={36}
+          color="#e69138"
+          onPress={() => navigation.navigate("Integration")}
+        />
         <IconButton
           icon="close-circle"
           size={36}
           color="#e69138"
           onPress={() => navigation.goBack()}
         />
+      </View>
         <Text style={{fontSize: 18}}>Select Prism Node:</Text>
         <View style={{backgroundColor: '#251520',width: "80%"}}>
         <Picker

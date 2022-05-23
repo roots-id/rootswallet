@@ -1,7 +1,8 @@
+import RelRow from '../components/RelRow'
 import React, {useEffect, useState} from 'react';
 import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import {getRelationships, addRefreshTrigger, showRel, YOU_ALIAS,
+import {getRelationships, getViewableRelRow, addRefreshTrigger, showRel, YOU_ALIAS,
     PRISM_BOT, ROOTS_BOT} from '../relationships'
 import Relationship from '../models/relationship'
 import { getChatItem } from '../roots'
@@ -37,28 +38,7 @@ const RelationshipsScreen = ({route,navigation}) => {
                     renderItem={({ item }) => (
                     <React.Fragment>
                         <View style={{flex: 1,flexDirection:'row',}}>
-                            <SafeAreaView>
-                            <TouchableOpacity onPress={() => showRel(navigation,item.id)}>
-                                <Image source={item.displayPictureUrl}
-                                    style={{
-                                      width:65,
-                                      height:75,
-                                      resizeMode:'contain',
-                                      margin:8
-                                    }}
-                                />
-                            </TouchableOpacity>
-                            </SafeAreaView>
-                            <SafeAreaView style={styles.container}>
-                            <List.Item
-                              title={item.displayName}
-                              titleNumberOfLines={1}
-                              titleStyle={styles.clickableListTitle}
-                              descriptionStyle={styles.listDescription}
-                              descriptionNumberOfLines={1}
-                              onPress={() => navigation.navigate('Chat', { chatId: getChatItem(item.id).id })}
-                            />
-                            </SafeAreaView>
+                            <RelRow rel={item} nav={navigation} />
                         </View>
                     </React.Fragment>
                     )}

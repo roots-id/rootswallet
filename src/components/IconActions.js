@@ -11,6 +11,12 @@ export default function IconActions(...props) {
   const person = props[0]["person"]
   const scan = props[0]["scan"]
   const settings = props[0]["settings"]
+//          <IconButton
+//                icon="plus"
+//                size={28}
+//                color="#e69138"
+//                onPress={() => navigation.navigate(add)}
+//            />
   return (
     <View style={{flexDirection:'row',}}>
         <IconButton
@@ -19,12 +25,6 @@ export default function IconActions(...props) {
             color="#e69138"
             onPress={() => showRel(navigation,person)}
         />
-        <IconButton
-              icon="plus"
-              size={28}
-              color="#e69138"
-              onPress={() => navigation.navigate(add)}
-          />
         <IconButton
             icon="qrcode-scan"
             size={28}

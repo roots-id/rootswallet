@@ -7,6 +7,7 @@ import { Actions, ActionsProps, Bubble, ChatInput,
 //import { useInterval } from 'usehooks-ts'
 //import { BarCodeScanner } from 'expo-barcode-scanner';
 //import emojiUtils from 'emoji-utils';
+import { getCredDetails } from '../credentials'
 import { showQR } from '../qrcode'
 import {getRelItem,YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
@@ -195,8 +196,9 @@ export default function ChatScreen({ route, navigation }) {
                         roots.processVerifyCredential(chat,credHash)
                     } else if (reply.value.endsWith(roots.CRED_VIEW)) {
                         console.log("ChatScreen - quick reply view credential")
-                        const cred = await roots.getImportedCredByMsgId(reply.messageId)
-                        showQR(navigation,cred)
+                        const iCredJson = await roots.getImportedCredByMsgId(reply.messageId)
+                        const vCred = JSON.parse(iCredJson).verifiedCredential
+                        navigation.navigate('Credential Details', { cred: getCredDetails(vCred)})
                     }
                 } else if(reply.value.startsWith(roots.PROMPT_SHAREABLE_REL_MSG_TYPE)) {
                   console.log("ChatScreen - quick reply shareable rel")

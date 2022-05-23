@@ -15,16 +15,15 @@ export function addRefreshTrigger(trigger) {
     refreshTriggers.push(trigger)
 }
 
-export function decodeCredential(cred: object) {
-    logger("roots - decoding cred object has keys",Object.keys(cred))
-    const encoded = cred.verifiedCredential.encodedSignedCredential
-    console.log("roots - decoding cred",encoded)
-    const credValues = encoded.toString().split('.')
+export function decodeCredential(encodedSignedCredential: object) {
+    console.log("creds - decoding cred",encodedSignedCredential)
+    const credValues = encodedSignedCredential.toString().split('.')
     credValues.forEach((val)=>console.log("val is",val))
-    console.log("roots - decoding cred values",credValues)
-    const decoded = base64.decode(credValues[0])
+    console.log("creds - decoding cred values",credValues)
+    //decode and replace any null characters
+    const decoded = base64.decode(credValues[0]).replace(/\0/g, '')
     //const decoded = PrismModule.issueCred(getWalletJson(currentWal._id), didAlias, credJson);cred
-    logger("roots - decoded cred value",decoded)
+    logger("creds - decoded cred value",decoded)
     return decoded
 }
 
@@ -39,6 +38,17 @@ export function getCredentials() {
     logger("creds - got cred items",String(credItemJsonArray))
     const creds = credItemJsonArray.map(credItemJson => JSON.parse(credItemJson))
     return creds;
+}
+
+export function getCredDetails(encodedCred: object) {
+    console.log("creds - decoding encoded cred",encodedCred)
+    const decodedCred = decodeCredential(encodedCred.encodedSignedCredential)
+    console.log("creds - decoded cred",decodedCred)
+    const credObj = JSON.parse(decodedCred)
+    console.log("cred - decoded cred obj has eys",Object.keys(credObj))
+    const credHash = encodedCred.proof.hash
+    console.log("cred - hash for decoded cred",credHash)
+    return {hash: credHash, encoded: encodedCred.encodedSignedCredential, decoded: credObj}
 }
 
 export function getCredItem(credHash: string) {
