@@ -705,11 +705,6 @@ function addQuickReply(msg) {
                 title: 'View',
                 value: PROMPT_OWN_CREDENTIAL_MSG_TYPE+CRED_VIEW,
                 messageId: msg.id,
-            },
-            {
-                title: 'Verify',
-                value: PROMPT_OWN_CREDENTIAL_MSG_TYPE+CRED_VERIFY,
-                messageId: msg.id,
             }]
         }
     }

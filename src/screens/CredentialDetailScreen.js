@@ -29,6 +29,7 @@ import IconActions from '../components/IconActions';
 export default function CredentialDetailScreen({ route, navigation }) {
     console.log("cred details - route params are",JSON.stringify(route.params))
     const [cred, setCred] = useState(route.params.cred);
+    const [verified, setVerified] = useState("help-circle");
     const { colors } = useTheme();
     const { current } = useCardAnimation();
 
@@ -36,6 +37,18 @@ export default function CredentialDetailScreen({ route, navigation }) {
         console.log("cred details - initially setting cred",cred)
         setCred(route.params.cred)
     }, []);
+
+    async function updateVerification() {
+        const result = JSON.parse(await verifyCredentialByHash(cred.hash));
+        logger("cred details - verify cred result",result)
+        if(result && result.length <= 0) {
+            setVerified("check-bold")
+        } else if(result && result.length > 0) {
+            setVerified("alert-octagon")
+        } else {
+            setVerified("help-circle")
+        }
+    }
 //        <RelRow rel={getShareableRelByAlias(cred.decoded.id)} nav={navigation}/>
 //        <Text style={styles.subText}>Last Verified: "Not verified"</Text>
 //          <Text style={styles.subText}>From: </Text>
@@ -78,10 +91,10 @@ export default function CredentialDetailScreen({ route, navigation }) {
       >
       <View style={{flexDirection:'row',}}>
           <IconButton
-            icon="check-bold"
+            icon={verified}
             size={36}
             color="#e69138"
-            onPress={async () => await verifyCredentialByHash(cred.hash)}
+            onPress={updateVerification()}
           />
           <IconButton
             icon="qrcode"
