@@ -12,6 +12,14 @@ export default function RelRow(...props) {
     const item = props[0]["rel"]
     const navigation = props[0]["nav"]
 
+    function getContactName(contact) {
+        if(contact.startsWith("You")) {
+            return "Your History"
+        } else {
+            return contact
+        }
+    }
+
   return (
   <React.Fragment>
         <SafeAreaView>
@@ -28,7 +36,7 @@ export default function RelRow(...props) {
         </SafeAreaView>
         <SafeAreaView style={styles.container}>
         <List.Item
-          title={item.displayName}
+          title={getContactName(item.displayName)}
           titleNumberOfLines={1}
           titleStyle={styles.clickableListTitle}
           descriptionStyle={styles.listDescription}

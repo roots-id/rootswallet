@@ -94,7 +94,7 @@ export default function ShowQRCodeScreen({ route, navigation }) {
       <View style={{flexDirection:'row',}}>
           <ToggleButton
                 icon={viewIcon}
-                size={36}
+                size={50}
                 color="#e69138"
                 value="toggle view switch"
                 status={viewSelection}
@@ -102,7 +102,7 @@ export default function ShowQRCodeScreen({ route, navigation }) {
               />
           <IconButton
               icon="close-circle"
-              size={20}
+              size={50}
               color="#e69138"
               onPress={() => navigation.goBack()}
           />

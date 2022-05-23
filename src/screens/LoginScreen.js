@@ -64,7 +64,13 @@ export default function LoginScreen({ navigation }) {
       <View style={styles.container}>
         <Title style={styles.titleText}>RootsWallet Login:</Title>
         <FormInput
-            labelName="Password"
+            labelName="Wallet Name"
+            value={TEST_WALLET_NAME}
+            secureTextEntry={false}
+            disabled={true}
+        />
+        <FormInput
+            labelName="Wallet Password"
             value={password}
             secureTextEntry={true}
             onChangeText={(userPassword) => setPassword(userPassword)}

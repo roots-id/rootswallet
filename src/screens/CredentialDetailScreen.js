@@ -94,7 +94,7 @@ export default function CredentialDetailScreen({ route, navigation }) {
             icon={verified}
             size={36}
             color="#e69138"
-            onPress={updateVerification()}
+            onPress={async () => updateVerification()}
           />
           <IconButton
             icon="qrcode"

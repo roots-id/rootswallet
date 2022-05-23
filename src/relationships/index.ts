@@ -32,7 +32,7 @@ const LANCE = "did:prism:lance";
 const TONY = "did:prism:tony";
 const DARRELL = "did:prism:darrell";
 const BUTCH = "did:prism:butch";
-const ESTEBAN = "did:prism:esteban";
+const ESTEBAN = "did:prism:80c682ff664252ac1a028e211ad05666e563027b2ffc35e07108dcb3abc2cc89:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQNzQ7J7uDoZiFdvKUPzH-CoLyDvDEIejxQLVWF3x19RhBI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhAuNpHbg4Xsg4uQIRyil3a7Cq8zyJH4gq9fZU9O7LFyDLEj8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiEDSfsTyBoTsaxMklJvFyugusdBWaUXzlKZyn4jhlts5HQ";
 const RODO = "did:prism:rodolfo";
 
 export const allRelsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_REL)+'*')

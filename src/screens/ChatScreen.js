@@ -182,10 +182,17 @@ export default function ChatScreen({ route, navigation }) {
                     console.log("ChatScreen - process quick reply for accepting credential")
                     const res = await roots.processCredentialResponse(chat,reply)
                     console.log("ChatScreen - credential accepted?",res)
-                } else if(reply.value.startsWith(roots.PROMPT_REVOKE_CREDENTIAL_MSG_TYPE)) {
-                    console.log("ChatScreen - process quick reply for revoking credential")
-                    const res = await roots.processRevokeCredential(chat,reply)
-                    console.log("ChatScreen - credential revoked?",res)
+                } else if(reply.value.startsWith(roots.PROMPT_ISSUED_CREDENTIAL_MSG_TYPE)) {
+                    if (reply.value.endsWith(roots.CRED_REVOKE)) {
+                        console.log("ChatScreen - process quick reply for revoking credential")
+                        const res = await roots.processRevokeCredential(chat,reply)
+                        console.log("ChatScreen - credential revoked?",res)
+                    } else if (reply.value.endsWith(roots.CRED_VIEW)) {
+                        console.log("ChatScreen - quick reply view credential")
+                        const iCredJson = await roots.getIssuedCredByMsgId(reply.messageId)
+                        const vCred = JSON.parse(iCredJson).verifiedCredential
+                        navigation.navigate('Credential Details', { cred: getCredDetails(vCred)})
+                    }
                 }
                 else if(reply.value.startsWith(roots.PROMPT_OWN_CREDENTIAL_MSG_TYPE)) {
                     console.log("ChatScreen - process quick reply for owned credential")
@@ -443,20 +450,20 @@ export default function ChatScreen({ route, navigation }) {
 //                     style: styles.prism,
 //                     onPress: (tag) => showQR(navigation,tag),
 //                 }
-          parsePatterns={(linkStyle) => [
 
-                  {
-                      pattern: /Your DID was added to Prism/,
-                      style: styles.prism,
-                      onPress: (tag) => console.log("Pressed DID added message"),
-                  },
+//                  {
+//                      pattern: /Your DID was added to Prism/,
+//                      style: styles.prism,
+//                      onPress: (tag) => console.log("Pressed DID added message"),
+//                  },
+          parsePatterns={(linkStyle) => [
                  {
                     type: 'url',
                     style: styles.clickableListTitle,
                     onPress: (tag) => Linking.openURL(tag),
                 },
                 {
-                    pattern: /\*Click to see the Cardano blockchain details\*/,
+                    pattern: /\*Click to geek out on Cardano blockchain details\*/,
                     style: styles.prism,
                 }
           ]}

@@ -42,8 +42,9 @@ export function createMessage(idText: string,bodyText: string,statusText: string
 }
 
 export function createMessageId(chatAlias: string,relId: string,msgNum: number) {
+    logger("model - creating message id",chatAlias,relId,msgNum)
     let msgId = getStorageKey(chatAlias,MODEL_TYPE_MESSAGE)+ID_SEPARATOR+relId+ID_SEPARATOR+String(msgNum);
-    logger("roots - Generated msg id",msgId);
+    logger("model - Generated msg id",msgId);
     return msgId;
 }
 

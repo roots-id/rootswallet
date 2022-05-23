@@ -21,7 +21,7 @@ export const PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE = "rootsAcceptCredentialMsgType"
 export const PROMPT_OWN_CREDENTIAL_MSG_TYPE = "rootsOwnCredentialMsgType"
 export const PROMPT_OWN_DID_MSG_TYPE = "rootsOwnDidMsgType"
 export const PROMPT_PUBLISH_MSG_TYPE = "rootsPromptPublishMsgType";
-export const PROMPT_REVOKE_CREDENTIAL_MSG_TYPE = "rootsRevokeCredentialMsgType";
+export const PROMPT_ISSUED_CREDENTIAL_MSG_TYPE = "rootsIssuedCredentialMsgType";
 export const QR_CODE_MSG_TYPE = "rootsQRCodeMsgType"
 export const STATUS_MSG_TYPE = "statusMsgType";
 export const TEXT_MSG_TYPE = "textMsgType"
@@ -29,7 +29,7 @@ export const LINK_MSG_TYPE = "linkMsgType"
 
 //meaningful literals
 export const ACHIEVEMENT_MSG_PREFIX = "You have a new achievement: ";
-export const BLOCKCHAIN_URL_MSG = "*Click to see the Cardano blockchain details*";
+export const BLOCKCHAIN_URL_MSG = "*Click to geek out on Cardano blockchain details*";
 export const PUBLISHED_TO_PRISM = "Your DID was added to Prism";
 export const SHOW_CRED_QR_CODE = "Show Cred QR code";
 export const SHOW_DID_QR_CODE = "Show Chat QR code";
@@ -50,12 +50,11 @@ const allCredReqsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CR
 const allMsgsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_MESSAGE)+'*')
 const allSettingsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_SETTING)+'*')
 
-export const TEST_WALLET_NAME = "CatalystDemo"
+export const TEST_WALLET_NAME = "Catalyst Fund 7 demo wallet"
 
 export const POLL_TIME = 1000
 
 const demo = true;
-
 let currentWal;
 
 const allProcessing = {};
@@ -83,7 +82,7 @@ export async function initRootsWallet() {
         "Welcome to your personal RootsWallet history!",
         TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
     const achMsg = await sendMessage(myChat,
-        "We'll post new events here.",
+        "We'll post new wallet events here.",
         TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
     const createdWalletMsg = await sendMessage(myChat,
         "You created your wallet: "+currentWal._id,TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
@@ -146,8 +145,28 @@ export async function handleNewData(jsonData: string) {
         return "VCs"
     } else if(obj.dataType === models.MODEL_TYPE_REL) {
         console.log("handling scanned rel",jsonData)
-        initRoot(obj.displayName, rel.YOU_ALIAS, obj.did, obj.displayName, obj.displayPictureUrl)
-        return "Relationships"
+        const rooted = await initRoot(obj.displayName, rel.YOU_ALIAS, obj.did, obj.displayName, obj.displayPictureUrl)
+        if(rooted) {
+            const chat = await getChatByRel(obj);
+            const msg = await sendMessage(chat,"To celebrate your new contact you are issuing "
+             + obj.displayName + " a verifiable credential",TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
+            if(isDemo()) {
+                const credIssueAlias = await issueDemoContactCredential(chat,msg.id)
+                if(credIssueAlias) {
+                    //const credPubTx = getCredPubTx(pubDid[walletSchema.DID_ALIAS],credIssueAlias)
+                    const credSuccess = await sendMessage(chat,"You have issued "+obj.displayName+" a verifiable credential!",
+                        PROMPT_ISSUED_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT),false,credIssueAlias)
+//                     const credLinkMsg = await sendMessage(chat,BLOCKCHAIN_URL_MSG,
+//                         BLOCKCHAIN_URL_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,credPubTx.url)
+                } else {
+                    console.error("roots - unable to issue cred",chat,pubDid)
+                }
+            }
+            return "Relationships"
+        } else {
+            console.error("Could not root with ",obj.displayName)
+            return "Relationships"
+        }
     } else {
         console.error("Did not recognize scanned data",jsonData)
         return "Relationships"
@@ -433,9 +452,12 @@ export async function getAllChats () {
     return result;
 }
 
-// export async function getChatByRel(relId: string) {
-//
-// }
+export async function getChatByRel(rel: object) {
+    logger("getting chat by rel",rel.displayName)
+    const chat = getChatItem(rel.displayName)
+    logger("got chat by rel",chat.id)
+    return chat
+}
 
 export function getChatItem(chatAlias: string) {
     logger("roots - getting chat item",chatAlias)
@@ -684,13 +706,17 @@ function addQuickReply(msg) {
             ],
         }
     }
-    if(msg.type === PROMPT_REVOKE_CREDENTIAL_MSG_TYPE) {
+    if(msg.type === PROMPT_ISSUED_CREDENTIAL_MSG_TYPE) {
         msg["quickReplies"] = {
             type: 'checkbox',
             keepIt: true,
             values: [{
+                 title: 'View',
+                 value: PROMPT_ISSUED_CREDENTIAL_MSG_TYPE+CRED_VIEW,
+                 messageId: msg.id,
+             },{
                 title: 'Revoke',
-                value: PROMPT_REVOKE_CREDENTIAL_MSG_TYPE,
+                value: PROMPT_ISSUED_CREDENTIAL_MSG_TYPE+CRED_REVOKE,
                 messageId: msg.id,
             },
             ],
@@ -776,11 +802,11 @@ export async function processPublishResponse(chat: Object) {
                 const vcMsg = await sendMessage(chat,
                     "To celebrate your published DID, a verifiable credential is being created for you.",
                     TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-                const credIssueAlias = await issueDemoCredential(chat, vcMsg.id)
+                const credIssueAlias = await issueDemoPublishDidCredential(chat, vcMsg.id)
                 if(credIssueAlias) {
                     const credPubTx = getCredPubTx(pubDid[walletSchema.DID_ALIAS],credIssueAlias)
                     const credSuccess = await sendMessage(chat,"You have issued yourself a verifiable credential!",
-                        PROMPT_REVOKE_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT),false,credIssueAlias)
+                        PROMPT_ISSUED_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT),false,credIssueAlias)
                     const credLinkMsg = await sendMessage(chat,BLOCKCHAIN_URL_MSG,
                         BLOCKCHAIN_URL_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,credPubTx.url)
 
@@ -877,6 +903,13 @@ function getCredentialAlias(msgId) {
 export async function getImportedCredByMsgId(msgId) {
     const importedCredHash = getMessageById(msgId).data
     return await store.getItem(importedCredHash)
+}
+
+export async function getIssuedCredByMsgId(msgId) {
+    const issuedCredAlias = getMessageById(msgId).data
+    const cred = getIssuedCredential(issuedCredAlias);
+    const credJson = JSON.stringify(cred)
+    return credJson
 }
 
 function getCredPubTx (didAlias: string, credAlias: string) {
@@ -1186,7 +1219,58 @@ export function updateProcessIndicator(processGroup,processing) {
 
 //----------- DEMO --------------------
 
-export async function issueDemoCredential(chat: Object,msgId: string) {
+export async function issueDemoContactCredential(chat: Object,msgId: string) {
+    logger("roots - Trying to create demo credential for contact",chat.id,msgId)
+    const credMsgs = []
+    const credAlias = getCredentialAlias(msgId)
+    const alreadyIssued = getIssuedCredential(credAlias)
+    const did = getDid(chat.fromAlias)
+    if(!alreadyIssued) {
+        logger("roots - credential not found, creating....",credAlias)
+        const didLong = did[walletSchema.DID_URI_LONG_FORM]
+        logger("roots - Creating demo credential for your chat",chat.id,"w/ your long form did",didLong)
+        const toDid = chat.toDids[0][0]
+        console.log("roots - contact credential being issued to DID",toDid)
+        const today = new Date(Date.now());
+        const cred = {
+            alias: credAlias,
+            issuingDidAlias: chat.fromAlias,
+            claim: {
+                content: "{\"name\": \"Added new contact\",\"achievement\": \"You added a new contact "+chat.id+"\",\"date\": \""+today.toISOString()+"\"}",
+                subjectDid: toDid,
+            },
+            verifiedCredential: {
+                encodedSignedCredential: "",
+                proof: {
+                    hash: "",
+                    index: -1,
+                    siblings: [],
+                },
+            },
+            batchId: "",
+            credentialHash: "",
+            operationHash: "",
+            revoked: false,
+        }
+        logger("roots - issuing demo contact credential",cred)
+        startProcessing(chat.id,credAlias)
+        const issuedCred = await issueCredential(chat.fromAlias, credAlias, cred)
+        endProcessing(chat.id,credAlias)
+        if(issuedCred) {
+            logger("Prism issued contact credential",issuedCred)
+            return credAlias;
+        } else {
+            logger("Could not issue Prism contact credential")
+            return false;
+        }
+    } else {
+        logger("roots - Couldn't issue demo contact credential, is the chat published",
+            didPub,"was the credential already found",alreadyIssued)
+        return false
+    }
+}
+
+export async function issueDemoPublishDidCredential(chat: object,msgId: string) {
     logger("roots - Trying to create demo credential for chat",chat.id,msgId)
     const credMsgs = []
     const credAlias = getCredentialAlias(msgId)
@@ -1234,26 +1318,6 @@ export async function issueDemoCredential(chat: Object,msgId: string) {
             didPub,"was the credential already found",alreadyIssued)
         return false
     }
-//        sendMessage(chat,"Valid credential",
-//                      STATUS_MSG_TYPE,
-//                      rel.getRelDisplay(rel.ROOTS_BOT))
-//
-//
-//        sendMessage(chat,"Credential imported"
-//                    STATUS_MSG_TYPE,
-//                    rel.getRelDisplay(rel.ROOTS_BOT))
-//        sendMessage(chat,"Valid credential.",
-//                      STATUS_MSG_TYPE,
-//                      rel.getRelDisplay(rel.ROOTS_BOT))
-    //    sendMessage(chat,"https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=0ce00bc602ef54dfc52b4106bebcafb72c2447bdf666cd609d50fd3a7e9d2474",
-    //                 BLOCKCHAIN_URI_MSG_TYPE,
-    //                 rel.getRelDisplay(rel.PRISM_BOT))
-//        sendMessage(chat,"Credential revoked",
-//                      STATUS_MSG_TYPE,
-//                      rel.getRelDisplay(rel.ROOTS_BOT))
-//        sendMessage(chat,"Invalid credential.",
-//                    STATUS_MSG_TYPE,
-//                    rel.getRelDisplay(rel.ROOTS_BOT))
 }
 
 async function initDemos(fromDidAlias) {
