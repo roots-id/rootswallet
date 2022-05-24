@@ -9,7 +9,7 @@ import { replaceSpecial } from '../utils'
 import * as walletSchema from '../schemas/WalletSchema'
 
 //ppp-node-test
-export const DEFAULT_PRISM_HOST = "ppp-node-test.atalaprism.io"
+export const DEFAULT_PRISM_HOST = "ppp.atalaprism.io"
 
 //msg types
 export const BLOCKCHAIN_URL_MSG_TYPE = "blockchainUrlMsgType";
