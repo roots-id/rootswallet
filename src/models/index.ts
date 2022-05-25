@@ -13,6 +13,70 @@ export const MODEL_TYPE_SETTING = "rootsSettingType"
 
 //TODO refactor away this general file to specific files, like 'chat'
 
+export type blocktxs = {
+    action: string,
+    description: string,
+    txId: string,
+    url: string,
+}
+
+export type claim = {
+    content: string,
+    subjectDid: string,
+}
+
+export type credential = {
+    alias: string,
+    batchId: string,
+    claim: claim,
+        credentialHash: string,
+        issuingDidAlias: string,
+        operationHash: string,
+        revoked: false,
+        verifiedCredential: vc,
+}
+
+export type did = {
+    alias: string,
+    didIdx: number,
+    keyPairs: key[],
+    operationHash: string,
+    uriCanonical: string,
+    uriLongForm: string,
+}
+
+export type key = {
+    didIdx: number,
+    keyDerivation: number,
+    keyId: string,
+    keyIdx: number,
+    keyTypeValue: number,
+    privateKey: string,
+    publicKey: string,
+}
+
+export type proof = {
+    hash: string,
+    index: number,
+}
+
+
+export type vc = {
+    encodedSignedCredential: string,
+    proof: proof,
+}
+
+
+export type wallet = {
+    _id: string,
+    mnemonic: string,
+    passphrase: string,
+    dids: did[],
+    importedCredentials: credential[],
+    issuedCredentials: credential[],
+    blockchainTxLogEntry: blocktxs[],
+};
+
 export function createChat(chatAlias: string, fromDidAlias: string, toIds: string[], title=chatAlias) {
     const chat = {
         dataType: MODEL_TYPE_CHAT,
@@ -26,7 +90,7 @@ export function createChat(chatAlias: string, fromDidAlias: string, toIds: strin
     return chat;
 }
 
-export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,relId: string,system?: boolean=false,data?: Object=undefined) {
+export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,relId: string,system=false,data=undefined) {
     const msg = {
         dataType: MODEL_TYPE_MESSAGE,
         id: idText,

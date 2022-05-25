@@ -55,7 +55,8 @@ export const TEST_WALLET_NAME = "Catalyst Fund 7 demo wallet"
 export const POLL_TIME = 1000
 
 const demo = true;
-let currentWal;
+
+let currentWal: models.wallet;
 
 const allProcessing = {};
 const handlers = {};
@@ -67,37 +68,40 @@ export async function initRootsWallet() {
     logger("roots - initializing your Did")
     const createdDid = await createDid(rel.YOU_ALIAS)
 
-    logger("roots - initializing your narrator bots roots")
-    const prism = await initRoot(rel.PRISM_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.PRISM_BOT), rel.PRISM_BOT, rel.prismLogo)
-    const rw = await initRoot(rel.ROOTS_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.ROOTS_BOT), rel.ROOTS_BOT, rel.rootsLogo)
+    if(createdDid) {
+        const didAlias = createdDid[walletSchema.DID_ALIAS]
 
-    logger("roots - initializing your root")
-    const relCreated = await initRoot(rel.YOU_ALIAS,createdDid[walletSchema.DID_ALIAS], createdDid[walletSchema.DID_URI_LONG_FORM], rel.YOU_ALIAS, rel.catalystLogo);
-    logger("roots - initialized your root",relCreated)
-    const myRel = rel.getRelItem(rel.YOU_ALIAS)
+        logger("roots - initializing your narrator bots roots")
+        const prism = await initRoot(rel.PRISM_BOT, didAlias, rootsDid(rel.PRISM_BOT), rel.PRISM_BOT, rel.prismLogo)
+        const rw = await initRoot(rel.ROOTS_BOT, didAlias, rootsDid(rel.ROOTS_BOT), rel.ROOTS_BOT, rel.rootsLogo)
 
-    logger("roots - posting your personal initialization messages")
-    const myChat = getChatItem(rel.YOU_ALIAS)
-    const welcomeAchMsg = await sendMessage(myChat,
-        "Welcome to your personal RootsWallet history!",
-        TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    const achMsg = await sendMessage(myChat,
-        "We'll post new wallet events here.",
-        TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    const createdWalletMsg = await sendMessage(myChat,
-        "You created your wallet: "+currentWal._id,TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    const createdDidMsg = await sendMessage(myChat,
-        "You created your first decentralized ID (called a DID)!",
-        TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    await sendMessage(myChat,"Your new DID is being added to Prism so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
-        TEXT_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
-    //intentionally not awaiting
-    processPublishResponse(myChat)
+        logger("roots - initializing your root")
+        const relCreated = await initRoot(rel.YOU_ALIAS, didAlias, createdDid[walletSchema.DID_URI_LONG_FORM], rel.YOU_ALIAS, rel.catalystLogo);
+        logger("roots - initialized your root", relCreated)
+        const myRel = rel.getRelItem(rel.YOU_ALIAS)
 
-    if(demo) {
-        logger("roots - initializing your demos")
-        await initDemos(createdDid[walletSchema.DID_ALIAS])
-//         await rel.initDemoRels();
+        logger("roots - posting your personal initialization messages")
+        const myChat = getChatItem(rel.YOU_ALIAS)
+        const welcomeAchMsg = await sendMessage(myChat,
+            "Welcome to your personal RootsWallet history!",
+            TEXT_MSG_TYPE, rel.getRelItem(rel.ROOTS_BOT))
+        const achMsg = await sendMessage(myChat,
+            "We'll post new wallet events here.",
+            TEXT_MSG_TYPE, rel.getRelItem(rel.ROOTS_BOT))
+        const createdWalletMsg = await sendMessage(myChat,
+            "You created your wallet: " + currentWal._id, TEXT_MSG_TYPE, rel.getRelItem(rel.ROOTS_BOT))
+        const createdDidMsg = await sendMessage(myChat,
+            "You created your first decentralized ID (called a DID)!",
+            TEXT_MSG_TYPE, rel.getRelItem(rel.ROOTS_BOT))
+        await sendMessage(myChat, "Your new DID is being added to Prism so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
+            TEXT_MSG_TYPE, rel.getRelItem(rel.PRISM_BOT))
+        //intentionally not awaiting
+        processPublishResponse(myChat)
+
+        if (demo) {
+            logger("roots - initializing your demos")
+            await initDemos(didAlias)
+        }
     }
 }
 
@@ -917,7 +921,7 @@ function getCredPubTx (didAlias: string, credAlias: string) {
     const txLogs = currentWal[walletSchema.WALLET_TX_LOGS]
     const txName = didAlias+"/"+credAlias
     logger("roots - got tx logs",txLogs,"searching for",txName)
-    credPubTxLog = txLogs?.find(txLog => (txLog.action === walletSchema.CRED_ISSUE_TX && txLog.description === txName))
+    const credPubTxLog = txLogs?.find(txLog => (txLog.action === walletSchema.CRED_ISSUE_TX && txLog.description === txName))
     logger("roots - got cred publish tx log",credPubTxLog)
     return credPubTxLog;
 }
@@ -926,10 +930,10 @@ function getCredRequestAlias(msgId) {
     return msgId.replace(models.MODEL_TYPE_MESSAGE,models.MODEL_TYPE_CRED_REQUEST)
 }
 
-export function getIssuedCredential(credAlias) {
+export function getIssuedCredential(credAlias: string) {
     logger("roots - getting issued credential",credAlias)
 
-    if(currentWal["issuedCredentials"]) {
+    if(currentWal && currentWal["issuedCredentials"]) {
         const cred = currentWal["issuedCredentials"].find(cred => {
             if(cred["alias"] === credAlias) {
                 logger("roots - Found alias",cred["alias"])
