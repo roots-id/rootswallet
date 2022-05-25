@@ -65,14 +65,22 @@ export default function RelationshipDetailScreen({ route, navigation }) {
       ],
     }}
     >
+      <View style={{flexDirection:'row',}}>
+        <IconButton
+          icon="chemical-weapon"
+          size={36}
+          color="#e69138"
+          onPress={() => navigation.navigate("Integration")}
+        />
         <IconButton
           icon="close-circle"
           size={36}
-          color="#5b3a70"
+          color="#e69138"
           onPress={() => navigation.goBack()}
         />
+      </View>
         <Text style={{fontSize: 18}}>Select Prism Node:</Text>
-        <View style={{backgroundColor: '#251520',width: "20%"}}>
+        <View style={{backgroundColor: '#251520',width: "80%"}}>
         <Picker
           style={styles.clickableListTitle}
           mode="dropdown"
@@ -80,8 +88,8 @@ export default function RelationshipDetailScreen({ route, navigation }) {
           numberOfLines={5}
           selectedValue={host}
           onValueChange={(itemValue) => setHost(itemValue)}>
-          <Picker.Item label="Prism Test Net" value="ppp.atalaprism.io"/>
-          <Picker.Item label="Local Dev" value="ppp-node-test.atalaprism.io"/>
+          <Picker.Item label="Local Test Node" value="ppp-node-test.atalaprism.io"/>
+          <Picker.Item label="Prism Test Net Node" value="ppp.atalaprism.io"/>
         </Picker>
         </View>
       </Animated.View>
