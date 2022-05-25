@@ -106,27 +106,34 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
         }
     }
 
-    //TODO deal with build errors regarding iog.api
-//    @ReactMethod
-//    fun verifyCred(walJson: String, credAlias: String, promise: Promise) {
-//        Log.d("PRISM_TAG","Verifying credential for "+credAlias+" from wallet "+walJson);
-//        thread(start = true) {
-//            try {
-//                var cliWal = Json.decodeFromString<Wallet>(walJson);
-//                var verResult = Json.encodeToString(verifyIssuedCredential(cliWal, credAlias))
-//                Log.d("PRISM_TAG","Credential "+credAlias+" is " + verResult)
-//                promise.resolve(verResult);
-//            } catch (e: Exception) {
-//                promise.reject("Publish Error", e);
-//            }
-//        }
-//    }
-//    @ReactMethod
-//    public void fetch(final String path, final Promise promise) {
-//        new Thread(new Runnable() {
-//            public void run() {
-//                root.child(path)...
-//            }
-//        }).start();
-//    }
+    @ReactMethod
+    fun revokeCred(walJson: String, credAlias: String, promise: Promise) {
+        Log.d("PRISM_TAG","Revoking credential "+credAlias+" from wallet "+walJson);
+        thread(start = true) {
+            try {
+                var cliWal = Json.decodeFromString<Wallet>(walJson);
+                cliWal = revokeCredential(cliWal, credAlias)
+                var newWalJson = Json.encodeToString(cliWal)
+                Log.d("PRISM_TAG","Credential revoked"+credAlias+" from wallet "+newWalJson)
+                promise.resolve(newWalJson);
+            } catch (e: Exception) {
+                promise.reject("Revoke Credential Error", e);
+            }
+        }
+    }
+
+    @ReactMethod
+    fun verifyImportedCred(walJson: String, credAlias: String, promise: Promise) {
+        Log.d("PRISM_TAG","Verifying credential for "+credAlias+" from wallet "+walJson);
+        thread(start = true) {
+            try {
+                var cliWal = Json.decodeFromString<Wallet>(walJson);
+                var verResult = Json.encodeToString(verifyImportedCredential(cliWal, credAlias))
+                Log.d("PRISM_TAG","Credential "+credAlias+" is " + verResult)
+                promise.resolve(verResult);
+            } catch (e: Exception) {
+                promise.reject("Publish Error", e);
+            }
+        }
+    }
 }

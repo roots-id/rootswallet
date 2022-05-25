@@ -1,7 +1,7 @@
 import React from 'react';
 import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import 'react-native-gesture-handler';
-import { IconButton, Title } from 'react-native-paper';
+import { Avatar, IconButton, Title } from 'react-native-paper';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
 import {
@@ -14,11 +14,12 @@ import IconActions from '../components/IconActions';
 import LogoTitle from '../components/LogoTitle';
 import CreateRelScreen from '../screens/CreateRelScreen';
 import CredentialsScreen from '../screens/CredentialsScreen';
-import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
+import CredentialDetailScreen from "../screens/CredentialDetailScreen";
 import HelpScreen from '../screens/HelpScreen';
 import HomeScreen from "../screens/HomeScreen"
 import MyIdentityScreen from '../screens/MyIdentityScreen';
 import RelationshipsScreen from "../screens/RelationshipsScreen";
+import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import SimpleTitle from '../components/SimpleTitle';
 import WalletScreen from "../screens/WalletScreen";
@@ -34,8 +35,11 @@ import ScanQRCodeScreen from '../screens/ScanQRCodeScreen'
 import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
 import StartChatScreen from '../screens/StartChatScreen';
 
-import { getChatItem, getRootsWallet, storageStatus,
-    hasWallet, loadSettings, TEST_WALLET_NAME } from '../roots'
+import { getChatItem, getRootsWallet,
+    hasWallet, loadSettings, storageStatus,
+    TEST_WALLET_NAME } from '../roots'
+
+import {YOU_ALIAS} from '../relationships'
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator()
@@ -116,12 +120,24 @@ export default function AuthStack() {
         // We haven't finished checking for the token yet
         return <LoadingScreen />;
     }
-
+//<Tab.Screen name="Integration" component={IntegrationStack}/>
     const Main = () => {
         return (
-            <Tab.Navigator screenOptions={{headerShown:false}}>
-                <Tab.Screen name="relationships" component={RelationshipsStack}/>
-                <Tab.Screen name="integration" component={IntegrationStack}/>
+            <Tab.Navigator screenOptions={{
+                 headerShown:false,
+                 tabBarIcon: ({ focused, color, size }) => {
+                     const iconName = focused ? 'check-bold' : 'checkbox-blank-circle-outline';
+                     // You can return any component that you like here!
+                     return <Avatar.Icon size={20} icon={iconName} />
+                 },
+                 tabBarActiveBackgroundColor: '#362631',
+                 tabBarInactiveBackgroundColor: '#150510',
+                 tabBarActiveTintColor: 'orange',
+                 tabBarInactiveTintColor: 'grey',
+                 tabBarLabelStyle: {fontSize: 22},
+                 }}>
+                <Tab.Screen name="Contacts" component={RelationshipsStack}/>
+                <Tab.Screen name="Credentials" component={CredentialsStack}/>
             </Tab.Navigator>
         )
     }
@@ -147,8 +163,8 @@ export default function AuthStack() {
                       component={RelationshipsScreen}
                       initialParams={{walletName: walletName}}
                       options={ ({ navigation, route }) => ({
-                          headerTitle: (props) => <LogoTitle {...props} title="Relationships:"/>,
-                          headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" scan='Scan QR Code' settings='Settings'/>,
+                          headerTitle: (props) => <LogoTitle {...props} title="Contacts"/>,
+                          headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={YOU_ALIAS} scan='Scan QR Code' settings='Settings'/>,
                       })}
                 />
                 <Stack.Screen
@@ -156,14 +172,14 @@ export default function AuthStack() {
                     component={ChatScreen}
                     options={ ({ navigation, route }) => ({
                         headerTitle: (props) => <SimpleTitle {...props} title={getChatItem(route.params.chatId).title}/>,
-                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code' settings='Settings'/>,
+                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={YOU_ALIAS} scan='Scan QR Code' settings='Settings'/>,
                     })}
                 />
             </Stack.Group>
         </Stack.Navigator>
         )
     }
-    const ChatsStack = () => {
+    const YouStack = () => {
         return (
             <Stack.Navigator
                 screenOptions={{
@@ -183,26 +199,49 @@ export default function AuthStack() {
             >
             <Stack.Group>
                 <Stack.Screen
-                    name="Chats"
-                    component={ChatListScreen}
-                    options={ ({ navigation, route }) => ({
-                        headerTitle: (props) => <LogoTitle {...props} title="Secure Chats:"/>,
-                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Secure Chat" scan='Scan QR Code'/>,
-                    })}
-                />
-                <Stack.Screen
                     name="Chat"
                     component={ChatScreen}
+                    initialParams={{chatId: YOU_ALIAS}}
                     options={ ({ navigation, route }) => ({
-                        headerTitle: (props) => <SimpleTitle {...props} title={getChatItem(route.params.chatId).title}/>,
-                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code'/>,
+                        headerTitle: (props) => <LogoTitle {...props} title={"You"}/>,
+                        headerRight: (props) => <IconActions {...props} nav={navigation}
+                            add="Create Rel" person={YOU_ALIAS} scan='Scan QR Code' settings='Settings'/>,
                     })}
                 />
             </Stack.Group>
             </Stack.Navigator>
         )
     }
-
+    const CredentialsStack = () => {
+        return (
+        <Stack.Navigator
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: '#150510',
+              },
+              headerTintColor: '#eeeeee',
+              headerTitleStyle: {
+                fontSize: 22,
+              },
+              gestureEnabled: true,
+              gestureDirection: "horizontal",
+              cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
+              animationEnabled: true,
+              }}
+        >
+            <Stack.Group>
+                <Stack.Screen name="VCs"
+                      component={CredentialsScreen}
+                      initialParams={{walletName: walletName}}
+                      options={ ({ navigation, route }) => ({
+                          headerTitle: (props) => <LogoTitle {...props} title="Credentials"/>,
+                          headerRight: (props) => <IconActions {...props} nav={navigation} person={YOU_ALIAS} scan="Scan QR Code" settings="Settings"/>,
+                      })}
+                />
+            </Stack.Group>
+        </Stack.Navigator>
+        )
+    }
     const IntegrationStack = () => {
         return (
         <Stack.Navigator>
@@ -212,7 +251,6 @@ export default function AuthStack() {
                               component={RelationshipsScreen}
                               initialParams={{walletName: walletName}}
                 />
-                <Stack.Screen name="Credentials" component={CredentialsScreen}/>
                 <Stack.Screen name="Communications" component={CommunicationsScreen}/>
                 <Stack.Screen name="Help" component={HelpScreen}/>
                 <Stack.Screen name="Settings" component={SettingsScreen}/>
@@ -254,16 +292,18 @@ export default function AuthStack() {
             ) : (
               <>
                 <Stack.Group>
-                    <Stack.Screen name="relationshipStack" component={Main}/>
+                    <Stack.Screen name="mainTabs" component={Main}/>
                 </Stack.Group>
                 <Stack.Group screenOptions={{ presentation: 'transparentModal' }}>
-                    <Stack.Screen name="Help" component={HelpScreen}/>
+                    <Stack.Screen name="Credential Details" component={CredentialDetailScreen}/>
                     <Stack.Screen name="Create Rel" component={CreateRelScreen}/>
                     <Stack.Screen name="Create Secure Chat" component={StartChatScreen} />
+                    <Stack.Screen name="Help" component={HelpScreen}/>
+                    <Stack.Screen name="Relationship Details" component={RelationshipDetailScreen}/>
+                    <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen} />
                     <Stack.Screen name="Settings" component={SettingsScreen}/>
                     <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen} />
-                    <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen} />
-                    <Stack.Screen name="Relationship Details" component={RelationshipDetailScreen}/>
+                    <Stack.Screen name="Integration" component={IntegrationStack}/>
                 </Stack.Group>
               </>
             )}

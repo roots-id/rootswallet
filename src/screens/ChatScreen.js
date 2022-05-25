@@ -7,6 +7,8 @@ import { Actions, ActionsProps, Bubble, ChatInput,
 //import { useInterval } from 'usehooks-ts'
 //import { BarCodeScanner } from 'expo-barcode-scanner';
 //import emojiUtils from 'emoji-utils';
+import { getCredDetails } from '../credentials'
+import { showQR } from '../qrcode'
 import {getRelItem,YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
@@ -27,16 +29,13 @@ export default function ChatScreen({ route, navigation }) {
     const [showSystem, setShowSystem] = useState(false)
 
     useEffect(() => {
-        let isCancelled = false;
         console.log("ChatScreen - useEffect",chat)
         const chatSession = roots.startChatSession({
             chat: chat,
             onReceivedMessage: (message) => {
-                if (!isCancelled) {
-                    setMessages((currentMessages) =>
-                        GiftedChat.append(currentMessages, [mapMessage(message)])
-                    );
-                }
+                setMessages((currentMessages) =>
+                    GiftedChat.append(currentMessages, [mapMessage(message)])
+                );
             },
             onReceivedKeystrokes: (keystrokes) => {
              // handle received typing keystrokes
@@ -66,9 +65,8 @@ export default function ChatScreen({ route, navigation }) {
              // handle chat changes
             },
             onProcessing: (processing) => {
-                if (!isCancelled) {
-                    setProcessing(processing)
-                }
+                setProcessing(processing)
+                console.log("updated processing indicator",processing)
             },
         });
         if (chatSession.succeeded) {
@@ -86,17 +84,15 @@ export default function ChatScreen({ route, navigation }) {
 //                setLoading(false);
 //            });
         return () =>
-            {chatSession.end
-            isCanceled = true;}
+            {chatSession.end}
     }, [chat]);
 
     useEffect(() => {
-        //console.log("ChatScreen - Front-end messages updated")
     }, [messages]);
 
-    useEffect(() => {
-        console.log("ChatScreen - Checked Processing")
-    }, [processing]);
+//    useEffect(() => {
+//        console.log("ChatScreen - Checked Processing",processing)
+//    }, [processing]);
 
     useEffect(() => {
         console.log("ChatScreen - getting all messages")
@@ -163,6 +159,7 @@ export default function ChatScreen({ route, navigation }) {
 //processQuickReply(chat,reply)
     async function handleQuickReply(replies) {
         console.log("ChatScreen - Processing Quick Reply w/ chat",chat.id,"w/ replies",replies.length)
+        roots.isProcessing(chat.id)
         if(replies) {
             replies.forEach(async (reply) =>
             {
@@ -179,26 +176,48 @@ export default function ChatScreen({ route, navigation }) {
                 } else if(reply.value.startsWith(roots.PROMPT_OWN_DID_MSG_TYPE)) {
                     console.log("ChatScreen - quick reply view did")
                     const longDid = roots.getMessageById(reply.messageId).data
-                    console.log("View did",longDid);
-                    showQR(longDid)
+                    console.log("View rel",longDid);
+                    showQR(navigation,longDid)
                 } else if(reply.value.startsWith(roots.PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE)) {
                     console.log("ChatScreen - process quick reply for accepting credential")
                     const res = await roots.processCredentialResponse(chat,reply)
                     console.log("ChatScreen - credential accepted?",res)
-                } else if(reply.value.startsWith(roots.PROMPT_OWN_CREDENTIAL_MSG_TYPE)) {
+                } else if(reply.value.startsWith(roots.PROMPT_ISSUED_CREDENTIAL_MSG_TYPE)) {
+                    if (reply.value.endsWith(roots.CRED_REVOKE)) {
+                        console.log("ChatScreen - process quick reply for revoking credential")
+                        const res = await roots.processRevokeCredential(chat,reply)
+                        console.log("ChatScreen - credential revoked?",res)
+                    } else if (reply.value.endsWith(roots.CRED_VIEW)) {
+                        console.log("ChatScreen - quick reply view credential")
+                        const iCredJson = await roots.getIssuedCredByMsgId(reply.messageId)
+                        const vCred = JSON.parse(iCredJson).verifiedCredential
+                        navigation.navigate('Credential Details', { cred: getCredDetails(vCred)})
+                    }
+                }
+                else if(reply.value.startsWith(roots.PROMPT_OWN_CREDENTIAL_MSG_TYPE)) {
                     console.log("ChatScreen - process quick reply for owned credential")
                     if (reply.value.endsWith(roots.CRED_VERIFY)) {
                         console.log("ChatScreen - quick reply verify credential",)
-                        const verify = await roots.verifyCredential(chat, reply)
-                        console.log("ChatScreen - credential verification result",verify)
+                        const credHash = roots.getMessageById(reply.messageId).data
+                        console.log("ChatScreen - verifying credential with hash",credHash)
+                        roots.processVerifyCredential(chat,credHash)
                     } else if (reply.value.endsWith(roots.CRED_VIEW)) {
                         console.log("ChatScreen - quick reply view credential")
-                        const cred = await roots.getCredentialByMsgId(reply.messageId)
-                        const credJson = JSON.stringify(cred)
-                        console.log("View credential",credJson);
-                        showQR(JSON.stringify(credJson))
+                        const iCredJson = await roots.getImportedCredByMsgId(reply.messageId)
+                        const vCred = JSON.parse(iCredJson).verifiedCredential
+                        navigation.navigate('Credential Details', { cred: getCredDetails(vCred)})
                     }
-                } else {
+                } else if(reply.value.startsWith(roots.PROMPT_SHAREABLE_REL_MSG_TYPE)) {
+                  console.log("ChatScreen - quick reply shareable rel")
+                  const rel = roots.getMessageById(reply.messageId).data
+                  if(rel) {
+                      const relJson = JSON.stringify(rel)
+                      console.log("View shareable",relJson);
+                      showQR(navigation,relJson)
+                  }else {
+                    console.log("Could not show undefined shareable",rel)
+                  }
+                }else {
                     console.log("ChatScreen - reply value not recognized, was",chat.id,reply.value)
                     return;
                 }
@@ -233,7 +252,7 @@ export default function ChatScreen({ route, navigation }) {
                 break;
             case roots.DID_MSG_TYPE:
                 console.log("Clickable did msg",message.data)
-                showQR(message.data)
+                showQR(navigation,message.data)
             default:
                 console.log("Clicked non-active message type",message.type)
         }
@@ -404,44 +423,47 @@ export default function ChatScreen({ route, navigation }) {
 //              style: styles.prism,
 //              onPress: (tag) => setShowSystem(!showSystem),
 //          },
+//                {
+//                      pattern: /RootsWallet/,
+//                      style: styles.rootswallet,
+//                      onPress: (tag) => console.log("Pressed RootsWallet"),
+//                  },
+//                {
+//                      pattern: /Cardano/,
+//                      style: styles.cardano,
+//                      onPress: (tag) => console.log("Pressed Cardano"),
+//                  },
+//                  {
+//                        pattern: /Prism/,
+//                        style: styles.prism,
+//                        onPress: (tag) => console.log("Pressed Prism"),
+//                    },
+//,
+//                  {
+//                      pattern: /Show Chat QR code/,
+//                      style: styles.qr,
+//                      onPress: (tag) => showQR(navigation,roots.getDid(chat.fromAlias).uriLongForm),
+//                  }
+//,
+//                 {
+//                     pattern: /did:prism:[\S]*/,
+//                     style: styles.prism,
+//                     onPress: (tag) => showQR(navigation,tag),
+//                 }
+
+//                  {
+//                      pattern: /Your DID was added to Prism/,
+//                      style: styles.prism,
+//                      onPress: (tag) => console.log("Pressed DID added message"),
+//                  },
           parsePatterns={(linkStyle) => [
-                {
-                      pattern: /RootsWallet/,
-                      style: styles.rootswallet,
-                      onPress: (tag) => console.log("Pressed RootsWallet"),
-                  },
-                {
-                      pattern: /Cardano/,
-                      style: styles.cardano,
-                      onPress: (tag) => console.log("Pressed Cardano"),
-                  },
-                  {
-                        pattern: /Prism/,
-                        style: styles.prism,
-                        onPress: (tag) => console.log("Pressed Prism"),
-                    },
-                  {
-                      pattern: /Your DID was added to Prism/,
-                      style: styles.prism,
-                      onPress: (tag) => console.log("Pressed DID added message"),
-                  },
-                  {
-                      pattern: /Show Chat QR code/,
-                      style: styles.qr,
-                      onPress: (tag) => showQR(roots.getDid(chat.fromAlias).uriLongForm),
-                  },
-                 {
-                     pattern: /did:prism:[\S]*/,
-                     style: styles.prism,
-                     onPress: (tag) => showQR(tag),
-                 },
                  {
                     type: 'url',
                     style: styles.clickableListTitle,
                     onPress: (tag) => Linking.openURL(tag),
                 },
                 {
-                    pattern: /Click to see the blockchain details/,
+                    pattern: /\*Click to geek out on Cardano blockchain details\*/,
                     style: styles.prism,
                 }
           ]}
@@ -508,11 +530,6 @@ export default function ChatScreen({ route, navigation }) {
       name: rel.displayName,
       avatar: rel.displayPictureUrl,
     };
-  }
-
-  function showQR(data: string[]) {
-    console.log("ChatScreen - Showing QR data",data)
-    navigation.navigate('Show QR Code', {qrdata: data})
   }
 }
 
