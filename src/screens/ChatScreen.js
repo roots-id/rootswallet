@@ -12,6 +12,7 @@ import { showQR } from '../qrcode'
 import {getRelItem,YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
+import {getMessagesByChat} from "../roots";
 
 const { PrismModule } = NativeModules;
 
@@ -96,7 +97,7 @@ export default function ChatScreen({ route, navigation }) {
 
     useEffect(() => {
         console.log("ChatScreen - getting all messages")
-        const msgs = roots.getMessages(chat.id)
+        const msgs = roots.getMessagesByChat(chat.id)
         console.log("ChatScreen - got",msgs.length,"msgs")
         msgs.forEach(msg => console.log("ChatScreen - got msg w/keys",Object.keys(msg)))
         //const msgs = {paginator: {items: }}

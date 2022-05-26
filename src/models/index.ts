@@ -1,15 +1,18 @@
 import { logger } from '../logging';
+import { QuickReplies} from 'react-native-gifted-chat';
 import { replaceSpecial } from '../utils';
 
 const ID_SEPARATOR = "_"
 
 //these types must be unique enough to use in regex without conflict
-export const MODEL_TYPE_CHAT = "rootsChatType"
-export const MODEL_TYPE_CREDENTIAL = "rootsCredentialType"
-export const MODEL_TYPE_CRED_REQUEST = "rootsCredRequestType"
-export const MODEL_TYPE_MESSAGE = "rootsMsgType"
-export const MODEL_TYPE_REL = "rootsRelType"
-export const MODEL_TYPE_SETTING = "rootsSettingType"
+export enum ModelType {
+     CHAT = "rootsChatType",
+     CREDENTIAL = "rootsCredentialType",
+     CRED_REQUEST = "rootsCredRequestType",
+     MESSAGE = "rootsMsgType",
+     CONTACT = "rootsContactType",
+     SETTING = "rootsSettingType",
+}
 
 //TODO refactor away this general file to specific files, like 'chat'
 
@@ -23,6 +26,21 @@ export type blocktxs = {
 export type claim = {
     content: string,
     subjectDid: string,
+}
+
+export type chat = {
+    id: string,
+    toDids: string[],
+    fromAlias: string,
+    title: string,
+    published: boolean,
+}
+
+export type contact = {
+    id: string,
+    displayName: string,
+    displayPictureUrl: string,
+    did?: string,
 }
 
 export type credential = {
@@ -55,11 +73,41 @@ export type key = {
     publicKey: string,
 }
 
+export type message = {
+    id: string,
+    body: string,
+    type: string,
+    createdTime: number,
+    rel: string,
+    system: boolean,
+    data: object,
+    quickReplies?: QuickReplies,
+}
+
 export type proof = {
     hash: string,
     index: number,
 }
 
+export type session = {
+    chat: chat,
+    onReceivedMessage: (message: message) => {},
+    onReceivedKeystrokes: (keystrokes: string) => {},
+    onTypingStarted: (user: string) => {},
+    onTypingStopped: (user: string) => {},
+    onParticipantEnteredChat: (user: string) => {},
+    onParticipantLeftChat: (user: string) => {},
+    onParticipantPresenceChanged: (user: string) => {},
+    onMessageRead: (message: message, receipt: boolean) => {},
+    onMessageUpdated: (message: message) => {},
+    onChatUpdated: (chat: chat) => {},
+    onProcessing: (processing: boolean) => {},
+}
+
+export type sessionStatus = {
+    succeeded: string,
+    end: string,
+}
 
 export type vc = {
     encodedSignedCredential: string,
@@ -77,22 +125,20 @@ export type wallet = {
     blockchainTxLogEntry: blocktxs[],
 };
 
-export function createChat(chatAlias: string, fromDidAlias: string, toIds: string[], title=chatAlias) {
+export function createChat(chatAlias: string, fromDidAlias: string, toIds: string[], title=chatAlias): chat {
     const chat = {
-        dataType: MODEL_TYPE_CHAT,
         id: chatAlias,
         toDids: toIds,
         fromAlias: fromDidAlias,
         title: title,
-        published: "false"
+        published: false,
     }
     logger("models - created chat model w/keys",Object.keys(chat))
     return chat;
 }
 
-export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,relId: string,system=false,data=undefined) {
+export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,relId: string,system=false,data :object): message {
     const msg = {
-        dataType: MODEL_TYPE_MESSAGE,
         id: idText,
         body: bodyText,
         type: statusText,
@@ -107,14 +153,13 @@ export function createMessage(idText: string,bodyText: string,statusText: string
 
 export function createMessageId(chatAlias: string,relId: string,msgNum: number) {
     logger("model - creating message id",chatAlias,relId,msgNum)
-    let msgId = getStorageKey(chatAlias,MODEL_TYPE_MESSAGE)+ID_SEPARATOR+relId+ID_SEPARATOR+String(msgNum);
+    let msgId = getStorageKey(chatAlias,ModelType.MESSAGE)+ID_SEPARATOR+relId+ID_SEPARATOR+String(msgNum);
     logger("model - Generated msg id",msgId);
     return msgId;
 }
 
-export function createRel(relAlias: string, relName: string, relPicUrl: string, did?: string) {
+export function createRel(relAlias: string, relName: string, relPicUrl: string, did?: string) :contact{
     const rel = {
-        dataType: MODEL_TYPE_REL,
         id: relAlias,
         displayName: relName,
         displayPictureUrl: relPicUrl,

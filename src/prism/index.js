@@ -1,3 +1,3 @@
 import { NativeModules } from "react-native";
 
-module.exports = NativeModules.PrismModule;
+export const PrismModule = NativeModules.PrismModule;
