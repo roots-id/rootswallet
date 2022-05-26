@@ -47,11 +47,14 @@ export type credential = {
     alias: string,
     batchId: string,
     claim: claim,
+    verifiedCredential: vc,
+}
+
+export interface issuedCredential extends credential {
         credentialHash: string,
         issuingDidAlias: string,
         operationHash: string,
-        revoked: false,
-        verifiedCredential: vc,
+        revoked: boolean,
 }
 
 export type did = {
@@ -121,7 +124,7 @@ export type wallet = {
     passphrase: string,
     dids: did[],
     importedCredentials: credential[],
-    issuedCredentials: credential[],
+    issuedCredentials: issuedCredential[],
     blockchainTxLogEntry: blocktxs[],
 };
 

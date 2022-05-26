@@ -882,7 +882,7 @@ function getCredRequestAlias(msgId: string) {
     return msgId.replace(models.ModelType.MESSAGE,models.ModelType.CRED_REQUEST)
 }
 
-export function getIssuedCredential(credAlias: string): models.credential|undefined {
+export function getIssuedCredential(credAlias: string): models.issuedCredential|undefined {
     logger("roots - getting issued credential",credAlias)
 
     if(currentWal && currentWal.issuedCredentials) {
@@ -1160,22 +1160,20 @@ export function isProcessing(processGroup: string) {
 }
 
 //TODO set processing per group
-export function updateProcessIndicator(processGroup,processing) {
+export function updateProcessIndicator(processGroup: string,processing: boolean) {
     logger("roots - updating processing indicator",processGroup,processing)
-    if(handlers.onProcessing) {
-         handlers.onProcessing(processing)
-    }
+    sessions[processGroup].onProcessing(processing)
 }
 
 //----------- DEMO --------------------
 
-export async function issueDemoContactCredential(chat: Object,msgId: string) {
+export async function issueDemoContactCredential(chat: models.chat,msgId: string) {
     logger("roots - Trying to create demo credential for contact",chat.id,msgId)
     const credMsgs = []
     const credAlias = getCredentialAlias(msgId)
     const alreadyIssued = getIssuedCredential(credAlias)
     const did = getDid(chat.fromAlias)
-    if(!alreadyIssued) {
+    if(!alreadyIssued && did) {
         logger("roots - credential not found, creating....",credAlias)
         const didLong = did[walletSchema.DID_URI_LONG_FORM]
         logger("roots - Creating demo credential for your chat",chat.id,"w/ your long form did",didLong)
@@ -1184,11 +1182,15 @@ export async function issueDemoContactCredential(chat: Object,msgId: string) {
         const today = new Date(Date.now());
         const cred = {
             alias: credAlias,
-            issuingDidAlias: chat.fromAlias,
+            batchId: "",
             claim: {
                 content: "{\"name\": \"Added new contact\",\"achievement\": \"You added a new contact "+chat.id+"\",\"date\": \""+today.toISOString()+"\"}",
                 subjectDid: toDid,
             },
+            credentialHash: "",
+            issuingDidAlias: chat.fromAlias,
+            operationHash: "",
+            revoked: false,
             verifiedCredential: {
                 encodedSignedCredential: "",
                 proof: {
@@ -1197,10 +1199,6 @@ export async function issueDemoContactCredential(chat: Object,msgId: string) {
                     siblings: [],
                 },
             },
-            batchId: "",
-            credentialHash: "",
-            operationHash: "",
-            revoked: false,
         }
         logger("roots - issuing demo contact credential",cred)
         startProcessing(chat.id,credAlias)
@@ -1214,83 +1212,87 @@ export async function issueDemoContactCredential(chat: Object,msgId: string) {
             return false;
         }
     } else {
-        logger("roots - Couldn't issue demo contact credential, is the chat published",
-            didPub,"was the credential already found",alreadyIssued)
+        logger("roots - Couldn't issue demo contact credential, is the DID published",
+            did,"was the credential already found",alreadyIssued)
         return false
     }
 }
 
-export async function issueDemoPublishDidCredential(chat: object,msgId: string) {
+export async function issueDemoPublishDidCredential(chat: models.chat,msgId: string) {
     logger("roots - Trying to create demo credential for chat",chat.id,msgId)
     const credMsgs = []
     const credAlias = getCredentialAlias(msgId)
     const alreadyIssued = getIssuedCredential(credAlias)
     const did = getDid(chat.fromAlias)
-    const didPub = isDidPublished(did)
-    if(didPub && !alreadyIssued) {
-        logger("roots - Chat is published and credential not found, creating....")
-        const didLong = did[walletSchema.DID_URI_LONG_FORM]
-        logger("roots - Creating demo credential for chat",chat.id,"w/long form did",didLong)
-        const today = new Date(Date.now());
-        const cred = {
-            alias: credAlias,
-            issuingDidAlias: chat.fromAlias,
-            claim: {
-                content: "{\"name\": \"Prism DID publisher\",\"achievement\": \"Published a DID to Cardano - Atala Prism\",\"date\": \""+today.toISOString()+"\"}",
-                subjectDid: didLong,
-            },
-            verifiedCredential: {
-                encodedSignedCredential: "",
-                proof: {
-                    hash: "",
-                    index: -1,
-                    siblings: [],
+    if(did) {
+        const didPub = isDidPublished(did)
+        if (didPub && !alreadyIssued) {
+            logger("roots - Chat is published and credential not found, creating....")
+            const didLong = did[walletSchema.DID_URI_LONG_FORM]
+            logger("roots - Creating demo credential for chat", chat.id, "w/long form did", didLong)
+            const today = new Date(Date.now());
+            const cred = {
+                alias: credAlias,
+                issuingDidAlias: chat.fromAlias,
+                claim: {
+                    content: "{\"name\": \"Prism DID publisher\",\"achievement\": \"Published a DID to Cardano - Atala Prism\",\"date\": \"" + today.toISOString() + "\"}",
+                    subjectDid: didLong,
                 },
-            },
-            batchId: "",
-            credentialHash: "",
-            operationHash: "",
-            revoked: false,
-        }
-        logger("roots - issuing demo credential",cred)
-        startProcessing(chat.id,credAlias)
-        const issuedCred = await issueCredential(chat.fromAlias, credAlias, cred)
-        endProcessing(chat.id,credAlias)
-        if(issuedCred) {
-            logger("Prism issued credential",issuedCred)
-            return credAlias;
+                verifiedCredential: {
+                    encodedSignedCredential: "",
+                    proof: {
+                        hash: "",
+                        index: -1,
+                        siblings: [],
+                    },
+                },
+                batchId: "",
+                credentialHash: "",
+                operationHash: "",
+                revoked: false,
+            }
+            logger("roots - issuing demo credential", cred)
+            startProcessing(chat.id, credAlias)
+            const issuedCred = await issueCredential(chat.fromAlias, credAlias, cred)
+            endProcessing(chat.id, credAlias)
+            if (issuedCred) {
+                logger("Prism issued credential", issuedCred)
+                return credAlias;
+            } else {
+                logger("Could not issue Prism credential")
+                return false;
+            }
         } else {
-            logger("Could not issue Prism credential")
-            return false;
+            logger("roots - Couldn't issue demo credential, is the chat published",
+                didPub, "was the credential already found", alreadyIssued)
+            return false
         }
     } else {
-        logger("roots - Couldn't issue demo credential, is the chat published",
-            didPub,"was the credential already found",alreadyIssued)
-        return false
+        console.error("roots - couldn't issue demo cred, DID not found",did)
     }
 }
 
-async function initDemos(fromDidAlias) {
+async function initDemos(fromDidAlias: string) {
     //const libraryRoot = await initRoot("libraryRoot", fromDidAlias, rootsDid("library"), "Library")
     //const rentalRoot = await initRoot("rentalRoot", fromDidAlias, rootsDid("vacationRental"), "Vacation Rental")
     //return libraryRoot && rentalRoot;
     return true;
 }
 
-async function initDemoAchievements(chat: Object) {
+async function initDemoAchievements(chat: models.chat) {
 
 
-    await sendMessage(achieveCh,ACHIEVEMENT_MSG_PREFIX+"Opened RootsWallet!",
-      STATUS_MSG_TYPE,
+    await sendMessage(chat,ACHIEVEMENT_MSG_PREFIX+"Opened RootsWallet!",
+      MessageType.STATUS,
       rel.getRelItem(rel.ROOTS_BOT))
-    await sendMessage(achieveCh,"{subject: you,issuer: RootsWallet,credential: Opened RootsWallet}",
-      CREDENTIAL_JSON_MSG_TYPE,
+    await sendMessage(chat,"{subject: you,issuer: RootsWallet,credential: Opened RootsWallet}",
+      MessageType.CREDENTIAL_JSON,
       rel.getRelItem(rel.ROOTS_BOT))
-    await sendMessage(achieveCh,ACHIEVEMENT_MSG_PREFIX+"Clicked Example!",
-      STATUS_MSG_TYPE,
+    await sendMessage(chat,ACHIEVEMENT_MSG_PREFIX+"Clicked Example!",
+      MessageType.STATUS,
       rel.getRelItem(rel.ROOTS_BOT))
-    await sendMessage(achieveCh,"{subject: you,issuer: RootsWallet,credential: Clicked Example}",
-      CREDENTIAL_JSON_MSG_TYPE,
+    await sendMessage(chat,"{subject: you,issuer: RootsWallet,credential: Clicked Example}",
+      MessageType.CREDENTIAL_JSON,
       rel.getRelItem(rel.ROOTS_BOT))
 }
 
