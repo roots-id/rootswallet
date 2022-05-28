@@ -1,25 +1,30 @@
 import * as models from '../models'
 import { logger } from '../logging'
+import {TypedNavigator} from  '@react-navigation/core'
+import type {
+    DefaultRouterOptions,
+    InitialState,
+    NavigationAction,
+    NavigationState,
+    ParamListBase,
+    PartialState,
+    Route,
+} from '@react-navigation/routers';
 import * as store from '../store'
 
-import apLogo from '../assets/ATALAPRISM.png';
-import butchLogo from '../assets/butch.png'
-import catalystPng from '../assets/catalyst.png'
-import darrellLogo from '../assets/darrell.png'
-import estebanLogo from '../assets/esteban.png'
-import iogLogo from '../assets/iog.png'
-import lanceLogo from '../assets/lance.png'
-import perLogo from '../assets/smallBWPerson.png';
-import rodoLogo from '../assets/rodo.png'
-import rwLogo from '../assets/LogoCropped.png';
-import starPng from '../assets/star.png';
-import tonyLogo from '../assets/tony.png';
+export const butchLogo = require('../assets/butch.png');
+export const darrellLogo = require('../assets/darrell.png');
+export const estebanLogo = require('../assets/esteban.png');
+export const iogLogo = require('../assets/iog.png');
+export const lanceLogo = require('../assets/lance.png');
+export const rodoLogo = require('../assets/rodo.png');
+export const tonyLogo = require('../assets/tony.png');
 
-export const prismLogo = apLogo;
-export const catalystLogo = catalystPng;
-export const personLogo = perLogo;
-export const rootsLogo = rwLogo;
-export const starLogo = starPng;
+export const prismLogo = require('../assets/ATALAPRISM.png');
+export const catalystLogo = require('../assets/catalyst.png');
+export const personLogo = require('../assets/smallBWPerson.png');
+export const rootsLogo = require('../assets/LogoCropped.png');
+export const starLogo = require('../assets/star.png');
 
 export const YOU_ALIAS = "You"
 export const ROOTS_BOT = "RootsHelper";
@@ -309,24 +314,24 @@ const ESTEBAN = "did:prism:95f08753750ce5246001f40046a55d2a0bba299f1de7b38503538
 //                 description:    You/You_rootsCredentialType_RootsHelper_1653490433925,]
 const RODO = "did:prism:0206326ed47eda4bd9917886cfad6bdaf9d6420af80ecc23af5791bfc7bcc05c:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQN6DKpb9OFDasJVeXCPBU34cF4E6FGaljA3VBlA7EJqjhI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhA1NKHFw8xk2ptXovPwKGzMokfddV9YRvs2X14P66HrzsEj8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiECH-dwm0ZXDHz6xSDKAQDQFl3hQT0pcyqdE0xKJcm7nrs";
 
-export const allRelsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_REL)+'*')
+export const allRelsRegex = new RegExp(models.getStorageKey("",models.ModelType.CONTACT)+'*')
 
-export const refreshTriggers = []
+export const refreshTriggers: {(): void}[] = []
 
 let currentDemoRel = -1
 const demoRelOrder = [ESTEBAN,RODO,LANCE,BUTCH,DARRELL,TONY,ROOTSID,IOG_TECH,LIBRARY_BOT]
-const demoRels = {}
-demoRels[LIBRARY_BOT] = [LIBRARY_BOT,"Library",personLogo,LIBRARY_BOT]
-demoRels[IOG_TECH] = [IOG_TECH, "IOG Tech Community",iogLogo,IOG_TECH]
-demoRels[ROOTSID] = [ROOTSID, "RootsID",rootsLogo,ROOTSID]
-demoRels[LANCE] = [LANCE, "MeGrimLance",lanceLogo,LANCE]
-demoRels[TONY] = [TONY,"Tony.Rose",tonyLogo,TONY]
-demoRels[DARRELL] = [DARRELL,"Darrell O'Donnell",darrellLogo,DARRELL]
-demoRels[BUTCH] = [BUTCH,"Butch Clark",butchLogo,BUTCH]
-demoRels[ESTEBAN] = [ESTEBAN,"Esteban Garcia",estebanLogo,ESTEBAN]
-demoRels[RODO] = [RODO,"Rodolfo Miranda",rodoLogo,RODO]
+const demoRels: {[did: string]: models.contact} = {}
+demoRels[LIBRARY_BOT] = models.createRel(LIBRARY_BOT,"Library",personLogo,LIBRARY_BOT);
+demoRels[IOG_TECH] = models.createRel(IOG_TECH, "IOG Tech Community",iogLogo,IOG_TECH);
+demoRels[ROOTSID] = models.createRel(ROOTSID, "RootsID",rootsLogo,ROOTSID);
+demoRels[LANCE] = models.createRel(LANCE, "MeGrimLance",lanceLogo,LANCE);
+demoRels[TONY] = models.createRel(TONY,"Tony.Rose",tonyLogo,TONY);
+demoRels[DARRELL] = models.createRel(DARRELL,"Darrell O'Donnell",darrellLogo,DARRELL);
+demoRels[BUTCH] = models.createRel(BUTCH,"Butch Clark",butchLogo,BUTCH);
+demoRels[ESTEBAN] = models.createRel(ESTEBAN,"Esteban Garcia",estebanLogo,ESTEBAN);
+demoRels[RODO] = models.createRel(RODO,"Rodolfo Miranda",rodoLogo,RODO);
 
-export function addRefreshTrigger(trigger) {
+export function addRefreshTrigger(trigger: ()=>{}) {
     logger("rels - adding refresh trigger")
     refreshTriggers.push(trigger)
 }
@@ -343,7 +348,7 @@ export async function createRelItem(alias: string, name: string, pic=personLogo,
             const relItem = models.createRel(alias, name, pic,did)
             const relItemJson = JSON.stringify(relItem)
             logger("rels - generated rel",relItemJson)
-            const result = await store.saveItem(models.getStorageKey(alias, models.MODEL_TYPE_REL), relItemJson)
+            const result = await store.saveItem(models.getStorageKey(alias, models.ModelType.CONTACT), relItemJson)
             logger("rels - created rel",alias,"?",result)
             hasNewRels()
             return result;
@@ -364,13 +369,14 @@ export function getRelationships() {
     const relItemJsonArray = store.getItems(allRelsRegex)
     logger("rels - got rel items",String(relItemJsonArray))
     const rels = relItemJsonArray.map(relItemJson => JSON.parse(relItemJson))
+    logger("rels - got # of rels",rels.length)
     return rels;
 }
 
-export function getRelItem(relId) {
+export function getRelItem(relId: string) {
     logger("rels - Getting rel",relId)
     if(relId) {
-        const relItemJson = store.getItem(models.getStorageKey(relId,models.MODEL_TYPE_REL));
+        const relItemJson = store.getItem(models.getStorageKey(relId,models.ModelType.CONTACT));
         logger("rels - Got rel json",relItemJson)
         if(relItemJson) {
             const relItem = JSON.parse(relItemJson)
@@ -385,7 +391,7 @@ export function getRelItem(relId) {
     }
 }
 
-export function isShareable(rel: object) {
+export function isShareable(rel: models.contact) {
     if(!rel.id && rel.did) {
         logger("rels - rel is shareable",rel.did)
         return true
@@ -405,9 +411,9 @@ export function getShareableRelByAlias(alias: string) {
     return shareable
 }
 
-export function showRel(navigation,rel) {
+export function showRel(navigation: any, rel: string) {
     console.log("rel - show rel",rel)
-    navigation.navigate('Relationship Details',{rel: getShareableRelByAlias(rel)})
+    navigation["navigate"]('Relationship Details',{rel: getShareableRelByAlias(rel)})
 }
 
 // export async function initDemoRels() {
@@ -428,13 +434,8 @@ export function getDemoRel() {
         return getFakeRelItem()
     } else {
         currentDemoRel++
-        const dRel = demoRelOrder[currentDemoRel]
-        console.log("rels - get demo rel data for",dRel)
-        const demoRel = demoRels[dRel]
-        console.log("rels - got demo rel args",demoRel)
-        const result = models.createRel(...demoRel)
-        console.log("rels - got demo rel",result)
-        return result
+        const dRel = demoRels[demoRelOrder[currentDemoRel]]
+        return dRel
     }
 }
 

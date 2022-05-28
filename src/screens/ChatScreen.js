@@ -1,37 +1,25 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Linking, NativeModules, StyleSheet, Text, View } from 'react-native';
-import { Actions, ActionsProps, Bubble, ChatInput,
-    Composer, GiftedChat, InputToolbar, Message, SendButton } from 'react-native-gifted-chat';
+import React, { useEffect, useState } from 'react';
+import { Linking, StyleSheet, Text, View } from 'react-native';
+import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 
-//import { Video, VideoPlayer } from 'react-native-video'
-//import { useInterval } from 'usehooks-ts'
-//import { BarCodeScanner } from 'expo-barcode-scanner';
-//import emojiUtils from 'emoji-utils';
 import { getCredDetails } from '../credentials'
 import { showQR } from '../qrcode'
 import {getRelItem,YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
-import {getMessagesByChat} from "../roots";
-
-const { PrismModule } = NativeModules;
 
 export default function ChatScreen({ route, navigation }) {
     console.log("ChatScreen - route params",route.params)
-//  const [ user, setUser ] = useState(user);
     const [chat, setChat] = useState(roots.getChatItem(route.params.chatId));
     console.log("ChatScreen - got chatItem ",chat)
-//    const [hasPermission, setHasPermission] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [madeCredential, setMadeCredential] = useState(false)
     const [messages, setMessages] = useState([]);
     const [processing, setProcessing] = useState(false)
-//    const [scanned, setScanned] = useState(false);
     const [showSystem, setShowSystem] = useState(false)
 
     useEffect(() => {
         console.log("ChatScreen - useEffect",chat)
-        const chatSession = roots.startChatSession({
+        const chatSession = roots.startChatSession(chat.id,{
             chat: chat,
             onReceivedMessage: (message) => {
                 setMessages((currentMessages) =>
@@ -152,7 +140,7 @@ export default function ChatScreen({ route, navigation }) {
 
     async function handleSend(pendingMsgs) {
         console.log("ChatScreen - handle send",pendingMsgs)
-        const result = await roots.sendMessages(chat, pendingMsgs, roots.TEXT_MSG_TYPE, getRelItem(YOU_ALIAS));
+        const result = await roots.sendMessages(chat, pendingMsgs, roots.MessageType.TEXT, getRelItem(YOU_ALIAS));
 //        await setMessages((prevMessages) => GiftedChat.append(prevMessages, pendingMsgs));
     }
 
@@ -165,25 +153,25 @@ export default function ChatScreen({ route, navigation }) {
             replies.forEach(async (reply) =>
             {
                 console.log("ChatScreen - processing quick reply",chat.id,reply)
-                if(reply.value.startsWith(roots.PROMPT_PUBLISH_MSG_TYPE)) {
+                if(reply.value.startsWith(roots.MessageType.PROMPT_PUBLISH)) {
                     console.log("ChatScreen - process quick reply to publish DID")
-                    if(reply.value.endsWith(roots.PUBLISH_DID)) {
+                    if(reply.value.endsWith(roots.MessageType.PUBLISH_DID)) {
                         console.log("ChatScreen - publishing DID w/alias",chat.fromAlias)
                         const pubChat = await roots.processPublishResponse(chat,reply)
                         setChat(pubChat)
                     } else {
                         console.log("ChatScreen - not publishing DID")
                     }
-                } else if(reply.value.startsWith(roots.PROMPT_OWN_DID_MSG_TYPE)) {
+                } else if(reply.value.startsWith(roots.MessageType.PROMPT_OWN_DID)) {
                     console.log("ChatScreen - quick reply view did")
                     const longDid = roots.getMessageById(reply.messageId).data
                     console.log("View rel",longDid);
                     showQR(navigation,longDid)
-                } else if(reply.value.startsWith(roots.PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE)) {
+                } else if(reply.value.startsWith(roots.MessageType.PROMPT_ACCEPT_CREDENTIAL)) {
                     console.log("ChatScreen - process quick reply for accepting credential")
                     const res = await roots.processCredentialResponse(chat,reply)
                     console.log("ChatScreen - credential accepted?",res)
-                } else if(reply.value.startsWith(roots.PROMPT_ISSUED_CREDENTIAL_MSG_TYPE)) {
+                } else if(reply.value.startsWith(roots.MessageType.PROMPT_ISSUED_CREDENTIAL)) {
                     if (reply.value.endsWith(roots.CRED_REVOKE)) {
                         console.log("ChatScreen - process quick reply for revoking credential")
                         const res = await roots.processRevokeCredential(chat,reply)
@@ -195,7 +183,7 @@ export default function ChatScreen({ route, navigation }) {
                         navigation.navigate('Credential Details', { cred: getCredDetails(vCred)})
                     }
                 }
-                else if(reply.value.startsWith(roots.PROMPT_OWN_CREDENTIAL_MSG_TYPE)) {
+                else if(reply.value.startsWith(roots.MessageType.PROMPT_OWN_CREDENTIAL)) {
                     console.log("ChatScreen - process quick reply for owned credential")
                     if (reply.value.endsWith(roots.CRED_VERIFY)) {
                         console.log("ChatScreen - quick reply verify credential",)
@@ -208,7 +196,7 @@ export default function ChatScreen({ route, navigation }) {
                         const vCred = JSON.parse(iCredJson).verifiedCredential
                         navigation.navigate('Credential Details', { cred: getCredDetails(vCred)})
                     }
-                } else if(reply.value.startsWith(roots.PROMPT_SHAREABLE_REL_MSG_TYPE)) {
+                } else if(reply.value.startsWith(roots.MessageType.PROMPT_SHAREABLE_REL)) {
                   console.log("ChatScreen - quick reply shareable rel")
                   const rel = roots.getMessageById(reply.messageId).data
                   if(rel) {
@@ -219,13 +207,11 @@ export default function ChatScreen({ route, navigation }) {
                     console.log("Could not show undefined shareable",rel)
                   }
                 }else {
-                    console.log("ChatScreen - reply value not recognized, was",chat.id,reply.value)
-                    return;
+                    console.log("ChatScreen - reply value not recognized, was",chat.id,reply.value);
                 }
             });
         } else {
-            console.log("ChatScreen - reply",replies,"or chat",chat,"were undefined")
-            return;
+            console.log("ChatScreen - reply",replies,"or chat",chat,"were undefined");
         }
     }
 
@@ -247,11 +233,11 @@ export default function ChatScreen({ route, navigation }) {
     function processBubbleClick(context,message) {
         console.log("bubble pressed",context,message)
         switch(message.type) {
-            case roots.BLOCKCHAIN_URL_MSG_TYPE:
+            case roots.MessageType.BLOCKCHAIN_URL:
                 console.log("Clicked blockchain url msg",message.data)
                 Linking.openURL(message.data)
                 break;
-            case roots.DID_MSG_TYPE:
+            case roots.MessageType.DID:
                 console.log("Clickable did msg",message.data)
                 showQR(navigation,message.data)
             default:
@@ -486,11 +472,11 @@ export default function ChatScreen({ route, navigation }) {
     //        Platform.OS === 'android' && <KeyboardAoidingView behavior="padding" />
     //      }
 
-  //,      ...(message.type === BLOCKCHAIN_URI_MSG_TYPE) && {system: true}
+  //,      ...(message.type === BLOCKCHAIN_URI) && {system: true}
   //<Text onPress={() => { alert('hello')}} style={{ fontStyle:'italic',color: 'red' }}>{}</Text>
   function mapMessage(message) {
       console.log("ChatScreen - Map message for gifted",message);
-      mappedMsg={}
+      const mappedMsg={}
       mappedMsg["_id"] = message.id
       mappedMsg["text"] = message.body
       mappedMsg["createdAt"] = new Date(message.createdTime)

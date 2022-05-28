@@ -51,10 +51,10 @@ export type credential = {
 }
 
 export interface issuedCredential extends credential {
-        credentialHash: string,
-        issuingDidAlias: string,
-        operationHash: string,
-        revoked: boolean,
+    credentialHash: string,
+    issuingDidAlias: string,
+    operationHash: string,
+    revoked: boolean,
 }
 
 export type did = {

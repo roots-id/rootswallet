@@ -9,10 +9,10 @@ import * as store from '../store'
 import { replaceSpecial } from '../utils'
 
 //ppp-node-test
-export const DEFAULT_PRISM_HOST = "ppp.atalaprism.io"
+export const DEFAULT_PRISM_HOST = "ppp-node-test.atalaprism.io"
 
 //msg types
-enum MessageType {
+export enum MessageType {
     BLOCKCHAIN_URL = "blockchainUrlMsgType",
     CREDENTIAL_JSON = "jsonCredential",
     DID_JSON = "jsonDid",
@@ -357,9 +357,9 @@ export function getDid(didAlias: string) {
 function getDidPubTx(didAlias: string) {
     logger("roots - getting DID pub tx",didAlias)
     const txLogs = currentWal[walletSchema.WALLET_TX_LOGS]
-    logger("roots - got tx logs",txLogs)
+    logger("roots - got tx logs",JSON.stringify(txLogs))
     const didPublishTxLog = txLogs?.find(txLog => (txLog.action === walletSchema.DID_PUBLISH_TX && txLog.description === didAlias))
-    logger("roots - got DID publish tx log",didPublishTxLog)
+    logger("roots - got DID publish tx log",JSON.stringify(didPublishTxLog))
     return didPublishTxLog;
 }
 
@@ -742,7 +742,7 @@ export async function processPublishResponse(chat: models.chat) {
                 MessageType.BLOCKCHAIN_URL, rel.getRelItem(rel.PRISM_BOT),
                 false, didPubTx?.url)
             if (didLinkMsg) {
-                //const didMsg = await sendMessage(chat,JSON.stringify(pubDid),DID_JSON_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),true);
+                //const didMsg = await sendMessage(chat,JSON.stringify(pubDid),DID_JSON,rel.getRelItem(rel.PRISM_BOT),true);
                 if (demo) {
                     logger("roots - demo celebrating did publishing credential", pubDid[walletSchema.DID_URI_LONG_FORM])
                     const vcMsg = await sendMessage(chat,
@@ -897,11 +897,13 @@ export function getIssuedCredential(credAlias: string): models.issuedCredential|
             }
         })
         if(iCred) {
-            logger("roots - got issued cred",cred)
+            logger("roots - got issued cred",JSON.stringify(cred))
             return iCred
+        } else {
+            logger("roots - no issued cred",credAlias)
         }
     } else {
-        console.error("roots - No issued credential for",credAlias)
+        logger("roots - No issued credential in wallet",credAlias)
         return;
     }
 }
@@ -1162,7 +1164,9 @@ export function isProcessing(processGroup: string) {
 //TODO set processing per group
 export function updateProcessIndicator(processGroup: string,processing: boolean) {
     logger("roots - updating processing indicator",processGroup,processing)
-    sessions[processGroup].onProcessing(processing)
+    if(sessions[processGroup]) {
+        sessions[processGroup].onProcessing(processing)
+    }
 }
 
 //----------- DEMO --------------------
@@ -1219,7 +1223,7 @@ export async function issueDemoContactCredential(chat: models.chat,msgId: string
 }
 
 export async function issueDemoPublishDidCredential(chat: models.chat,msgId: string) {
-    logger("roots - Trying to create demo credential for chat",chat.id,msgId)
+    logger("roots - Trying to create demo credential for publishing DID",chat.id,msgId)
     const credMsgs = []
     const credAlias = getCredentialAlias(msgId)
     const alreadyIssued = getIssuedCredential(credAlias)

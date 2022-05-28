@@ -1,27 +1,29 @@
 import * as models from '../models'
 import { logger } from '../logging'
-import base64 from 'react-native-base64'
 import * as store from '../store'
+import {vc} from "../models";
 
-import credentialLogo from '../assets/vc.png';
-export const credLogo = credentialLogo;
+export const credLogo = require('../assets/vc.png');
 
-export const allCredsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CRED)+'*')
+export const allCredsRegex = new RegExp(models.getStorageKey("",models.ModelType.CREDENTIAL)+'*')
 
-export const refreshTriggers = []
+export const refreshTriggers: {(): void}[] = []
 
-export function addRefreshTrigger(trigger) {
+export function addRefreshTrigger(trigger: {(): void}) {
     logger("creds - adding refresh trigger")
     refreshTriggers.push(trigger)
 }
 
-export function decodeCredential(encodedSignedCredential: object) {
+function atob(data: string) { return new Buffer(data, "base64").toString("binary"); }
+function btoa(data: string) { return new Buffer(data, "binary").toString("base64"); }
+
+export function decodeCredential(encodedSignedCredential: string) {
     console.log("creds - decoding cred",encodedSignedCredential)
     const credValues = encodedSignedCredential.toString().split('.')
     credValues.forEach((val)=>console.log("val is",val))
     console.log("creds - decoding cred values",credValues)
     //decode and replace any null characters
-    const decoded = base64.decode(credValues[0]).replace(/\0/g, '')
+    const decoded = atob(credValues[0]).replace("/\0/g", "")
     //const decoded = PrismModule.issueCred(getWalletJson(currentWal._id), didAlias, credJson);cred
     logger("creds - decoded cred value",decoded)
     return decoded
@@ -40,7 +42,7 @@ export function getCredentials() {
     return creds;
 }
 
-export function getCredDetails(encodedCred: object) {
+export function getCredDetails(encodedCred: models.vc) {
     console.log("creds - decoding encoded cred",encodedCred)
     const decodedCred = decodeCredential(encodedCred.encodedSignedCredential)
     console.log("creds - decoded cred",decodedCred)
@@ -54,7 +56,7 @@ export function getCredDetails(encodedCred: object) {
 export function getCredItem(credHash: string) {
     logger("creds - Getting cred",credHash)
     if(credHash) {
-        const credItemJson = store.getItem(models.getStorageKey(credHash,models.MODEL_TYPE_CRED));
+        const credItemJson = store.getItem(models.getStorageKey(credHash,models.ModelType.CREDENTIAL));
         logger("creds - Got cred json",credItemJson)
         if(credItemJson) {
             const credItem = JSON.parse(credItemJson)
@@ -79,7 +81,7 @@ export function getShareableCred(hash: string) {
     return shareable
 }
 
-export function showCred(navigation,cred) {
-    console.log("cred - show cred",cred)
-    navigation.navigate('Credential Details',{cred: getShareableCred(cred)})
+export function showCred(navigation: any,credHash: string) {
+    console.log("cred - show cred",credHash)
+    navigation.navigate('Credential Details',{cred: getShareableCred(credHash)})
 }

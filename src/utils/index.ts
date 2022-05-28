@@ -2,7 +2,7 @@ export function replaceSpecial(alias: string) {
     return alias.replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_');
 }
 
-export function recursivePrint(val, indent="\t") {
+export function recursivePrint(val: any, indent="\t") {
     let printMe = ""
     if(val.constructor === Object) {
         //console.log("utils - recursive printing object",val)
