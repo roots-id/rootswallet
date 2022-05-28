@@ -7,6 +7,7 @@ import * as walletSchema from '../schemas/WalletSchema'
 import { QuickReplies, Reply } from 'react-native-gifted-chat';
 import * as store from '../store'
 import { replaceSpecial } from '../utils'
+import {credential, issuedCredential} from "../models";
 
 //ppp-node-test
 export const DEFAULT_PRISM_HOST = "ppp-node-test.atalaprism.io"
@@ -151,10 +152,10 @@ async function loadItems(regex: RegExp) {
 
 export async function handleNewData(jsonData: string) {
     const obj = JSON.parse(jsonData)
-    if(obj.dataType === models.ModelType.CREDENTIAL) {
+    if((obj as models.credential).verifiedCredential) {
         console.log("handling scanned cred",jsonData)
         return "VCs"
-    } else if(obj.dataType === models.ModelType.CONTACT) {
+    } else if((obj as models.contact).displayName) {
         console.log("handling scanned rel",jsonData)
         const rooted = await initRoot(obj.displayName, rel.YOU_ALIAS, obj.did, obj.displayName, obj.displayPictureUrl)
         if(rooted) {
@@ -198,7 +199,6 @@ export function getPrismHost() {
 }
 
 //--------------- Roots ----------------------
-
 export async function initRoot(alias: string, fromDidAlias: string, toDid: string, display=alias, avatar=rel.personLogo) {
     logger("roots - creating root",alias,fromDidAlias,toDid,display,avatar)
     try {
@@ -825,6 +825,21 @@ async function acceptCredential(credAlias: string) {
     }
 }
 
+function getCredByHash(credHash: string) {
+    const imported = getImportedCredByHash(credHash)
+    if(imported) {
+        logger("roots - got cred (imported) by hash",credHash)
+        return imported;
+    }
+    const issued = getIssuedCredByHash(credHash)
+    if(issued) {
+        logger("roots - got cred (issued) by hash",credHash)
+        return issued;
+    }
+
+    console.warn("No imported or issued cred hash found",credHash)
+}
+
 export function getImportedCredByHash(credHash: string) {
     logger("roots - Getting imported credential",credHash)
 
@@ -846,6 +861,31 @@ export function getImportedCredByHash(credHash: string) {
         }
     } else {
         logger("roots - No imported credential hash",credHash)
+        return;
+    }
+}
+
+export function getIssuedCredByHash(credHash: string) {
+    logger("roots - Getting issued credential",credHash)
+
+    if(currentWal.issuedCredentials) {
+        const cred = currentWal.issuedCredentials.find((cred) => {
+            const curCredHash = cred.verifiedCredential.proof.hash
+            if(curCredHash === credHash) {
+                logger("roots - Found issued cred hash",curCredHash)
+                return true
+            }
+            else {
+                logger("roots - issued cred hash",curCredHash,"does not match",credHash)
+                return false
+            }
+        })
+        if(cred) {
+            logger("roots - got issued cred w/keys"+Object.keys(cred))
+            return cred
+        }
+    } else {
+        logger("roots - No issued credential hash",credHash)
         return;
     }
 }
@@ -950,9 +990,19 @@ export function getIssuedCredentials(didAlias: string) {
     return;
 }
 
+function isIssuedCred(cred: credential) {
+    if ((cred as issuedCredential).issuingDidAlias) {
+        logger("roots - cred is issued cred",JSON.stringify(cred))
+        return true
+    } else {
+        logger("roots - cred is NOT issued cred",JSON.stringify(cred))
+        return false
+    }
+}
+
 async function issueCredential(didAlias: string,credAlias: string,cred: models.credential) {
     const credJson = JSON.stringify(cred)
-    console.log("roots - issuing credential", credJson)
+    console.log("roots - issuing credential", didAlias, credAlias, credJson)
     let result;
 
     try {
@@ -1056,21 +1106,13 @@ export async function processVerifyCredential(chat: models.chat, credHash:string
 
 export async function verifyCredentialByHash(credHash: string) {
     logger("Verifying credential",credHash)
-    const importedCred = getImportedCredByHash(credHash)
-    if(importedCred) {
-        return verifyCredential(importedCred)
-    } else {
-        console.error("could not verify credential by hash",credHash)
+    const cred = getCredByHash(credHash)
+    if(cred) {
+        const messageArray = await PrismModule.verifyCred(getWalletJson(currentWal._id),cred.alias, isIssuedCred(cred))
+        return messageArray
+    } else{
+        console.error("could not verify credential by hash, no cred found",credHash)
     }
-}
-
-export async function verifyCredential(importedCred: models.credential) {
-    logger("Verifying credential w/keys",Object.keys(importedCred))
-    const jsonWallet = getWalletJson(currentWal._id)
-    console.log("verifying imported cred",importedCred.alias,jsonWallet)
-    const messageArray = await PrismModule.verifyImportedCred(jsonWallet,importedCred.alias)
-    logger("Verification result",JSON.stringify(messageArray))
-    return messageArray
 }
 
 // ------------------ Session ---------------
@@ -1181,7 +1223,7 @@ export async function issueDemoContactCredential(chat: models.chat,msgId: string
         logger("roots - credential not found, creating....",credAlias)
         const didLong = did[walletSchema.DID_URI_LONG_FORM]
         logger("roots - Creating demo credential for your chat",chat.id,"w/ your long form did",didLong)
-        const toDid = chat.toDids[0][0]
+        const toDid = chat.toDids[0]
         console.log("roots - contact credential being issued to DID",toDid)
         const today = new Date(Date.now());
         const cred = {
