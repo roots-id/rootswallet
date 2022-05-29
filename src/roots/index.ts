@@ -10,7 +10,7 @@ import { replaceSpecial } from '../utils'
 import {credential, issuedCredential} from "../models";
 
 //ppp-node-test
-export const DEFAULT_PRISM_HOST = "ppp-node-test.atalaprism.io"
+export const DEFAULT_PRISM_HOST = "ppp.atalaprism.io"
 
 //msg types
 export enum MessageType {
@@ -55,7 +55,7 @@ const allSettingsRegex = new RegExp(models.getStorageKey("",models.ModelType.SET
 
 export const TEST_WALLET_NAME = "Catalyst Fund 7 demo wallet"
 
-export const POLL_TIME = 1000
+export const POLL_TIME = 2000
 
 const demo = true;
 
@@ -66,7 +66,7 @@ type process = {
     polling: NodeJS.Timer,
     startDate: number,
 }
-//TODO move all Processing into session
+
 const allProcessing: {[processGroup: string]: {[processAlias: string]: process}} = {};
 const sessions: {[chatId: string]: models.session} = {};
 
@@ -1108,7 +1108,8 @@ export async function verifyCredentialByHash(credHash: string) {
     logger("Verifying credential",credHash)
     const cred = getCredByHash(credHash)
     if(cred) {
-        const messageArray = await PrismModule.verifyCred(getWalletJson(currentWal._id),cred.alias, isIssuedCred(cred))
+        console.log("roots - Got cred for verification",JSON.stringify(cred));
+        const messageArray = await PrismModule.verifyCred(getWalletJson(currentWal._id),cred.alias, !isIssuedCred(cred))
         return messageArray
     } else{
         console.error("could not verify credential by hash, no cred found",credHash)
@@ -1116,8 +1117,6 @@ export async function verifyCredentialByHash(credHash: string) {
 }
 
 // ------------------ Session ---------------
-const sessionInfo={};
-const sessionState=[];
 export function startChatSession(chatId: string, sessionInfo: models.session): models.sessionStatus {
     logger("roots - starting session w/chat",sessionInfo.chat.title);
     sessions[chatId] = sessionInfo
@@ -1138,8 +1137,7 @@ export function startProcessing(processGroup: string, processAlias:string) {
     allProcessing[processGroup][processAlias] = {
         startDate: Date.now(),
         polling: setInterval(async function () {
-             const processing = isProcessing(processGroup)
-             updateProcessIndicator(processGroup, processing)
+             updateProcessIndicator(processGroup)
         }, POLL_TIME),
     }
     logger("started processing",processGroup,processAlias,allProcessing[processGroup][processAlias])
@@ -1155,7 +1153,7 @@ export function endProcessing(processGroup: string, processAlias: string) {
         logger("processing ended",processGroup,processAlias)
         clearInterval(allProcessing[processGroup][processAlias].polling)
         allProcessing[processGroup][processAlias].endDate = Date.now()
-        updateProcessIndicator(processGroup,isProcessing(processGroup))
+        updateProcessIndicator(processGroup)
     }
 }
 
@@ -1167,20 +1165,20 @@ function isActiveProcess(processGroup: string,processAlias: string) {
 }
 
 function getActiveProcesses(processGroup: string) {
-    const allActive: process[] = []
+    let allActive: process[] = []
     if(!processGroup) {
-        logger("getting all active processing groups")
+        logger("roots - getting all active processing groups")
         const allGroups = Object.keys(allProcessing)
         allGroups.forEach(group => {allActive.concat(getActiveProcesses(group))})
     } else {
-        logger("getting active processing for group",processGroup)
+        logger("roots - getting active processing for group",processGroup)
         if(allProcessing[processGroup]) {
             const allProcAliases = Object.keys(allProcessing[processGroup])
             const activeProcAliases = allProcAliases.filter(procAlias => isActiveProcess(processGroup,procAlias))
             if(activeProcAliases && activeProcAliases.length > 0) {
                 const active = activeProcAliases.map(procAlias => allProcessing[processGroup][procAlias]);
-                logger("found active processing",JSON.stringify(active))
-                allActive.concat(active)
+                logger("roots - found active processing",JSON.stringify(active))
+                allActive = allActive.concat(active)
             }
         }
     }
@@ -1203,8 +1201,8 @@ export function isProcessing(processGroup: string) {
     return processing;
 }
 
-//TODO set processing per group
-export function updateProcessIndicator(processGroup: string,processing: boolean) {
+export function updateProcessIndicator(processGroup: string) {
+    const processing = isProcessing(processGroup)
     logger("roots - updating processing indicator",processGroup,processing)
     if(sessions[processGroup]) {
         sessions[processGroup].onProcessing(processing)

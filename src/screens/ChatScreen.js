@@ -7,6 +7,7 @@ import { showQR } from '../qrcode'
 import {getRelItem,YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
+import {updateProcessIndicator} from "../roots";
 
 export default function ChatScreen({ route, navigation }) {
     console.log("ChatScreen - route params",route.params)
@@ -79,10 +80,6 @@ export default function ChatScreen({ route, navigation }) {
     useEffect(() => {
     }, [messages]);
 
-//    useEffect(() => {
-//        console.log("ChatScreen - Checked Processing",processing)
-//    }, [processing]);
-
     useEffect(() => {
         console.log("ChatScreen - getting all messages")
         const msgs = roots.getMessagesByChat(chat.id)
@@ -144,14 +141,11 @@ export default function ChatScreen({ route, navigation }) {
 //        await setMessages((prevMessages) => GiftedChat.append(prevMessages, pendingMsgs));
     }
 
-    //getFakePromiseAsync(10000);
-//processQuickReply(chat,reply)
     async function handleQuickReply(replies) {
         console.log("ChatScreen - Processing Quick Reply w/ chat",chat.id,"w/ replies",replies.length)
-        roots.isProcessing(chat.id)
+        updateProcessIndicator(chat.id)
         if(replies) {
-            replies.forEach(async (reply) =>
-            {
+            for (const reply of replies) {
                 console.log("ChatScreen - processing quick reply",chat.id,reply)
                 if(reply.value.startsWith(roots.MessageType.PROMPT_PUBLISH)) {
                     console.log("ChatScreen - process quick reply to publish DID")
@@ -196,20 +190,10 @@ export default function ChatScreen({ route, navigation }) {
                         const vCred = JSON.parse(iCredJson).verifiedCredential
                         navigation.navigate('Credential Details', { cred: getCredDetails(vCred)})
                     }
-                } else if(reply.value.startsWith(roots.MessageType.PROMPT_SHAREABLE_REL)) {
-                  console.log("ChatScreen - quick reply shareable rel")
-                  const rel = roots.getMessageById(reply.messageId).data
-                  if(rel) {
-                      const relJson = JSON.stringify(rel)
-                      console.log("View shareable",relJson);
-                      showQR(navigation,relJson)
-                  }else {
-                    console.log("Could not show undefined shareable",rel)
-                  }
-                }else {
+                } else {
                     console.log("ChatScreen - reply value not recognized, was",chat.id,reply.value);
                 }
-            });
+            }
         } else {
             console.log("ChatScreen - reply",replies,"or chat",chat,"were undefined");
         }
