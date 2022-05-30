@@ -333,7 +333,7 @@ export async function addDidDoc(contact: models.contactShareable) {
             const didDoc = JSON.parse(didDocJson)
             saveMe.didDoc = didDoc
             contact.didDoc = didDoc
-            await saveContact(saveMe)
+            await updateContact(saveMe)
         }
     }
     return contact;
@@ -375,7 +375,7 @@ export async function createRelItem(alias: string, name: string, pic=personLogo,
         } else {
             logger("rels - rel did not exist",alias)
             const relItem = createRel(alias, name, pic,did)
-            const result = saveContact(relItem)
+            const result = updateContact(relItem)
             logger("rels - created rel",alias,"?",result)
             hasNewRels()
             return result;
@@ -447,10 +447,10 @@ export function getShareableRelByAlias(alias: string): models.contactShareable|u
     }
 }
 
-export async function saveContact(contact: models.contact): Promise<boolean> {
+export async function updateContact(contact: models.contact): Promise<boolean> {
     const contactJson = JSON.stringify(contact)
-    logger("rels - saved contact",contactJson)
-    const result = await store.saveItem(models.getStorageKey(contact.id, models.ModelType.CONTACT), contactJson)
+    logger("rels - updating contact",contactJson)
+    const result = await store.updateItem(models.getStorageKey(contact.id, models.ModelType.CONTACT), contactJson)
     return result;
 }
 

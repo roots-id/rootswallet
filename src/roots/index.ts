@@ -8,7 +8,7 @@ import { QuickReplies, Reply } from 'react-native-gifted-chat';
 import * as store from '../store'
 import { replaceSpecial } from '../utils'
 import {credential, issuedCredential} from "../models";
-import {saveContact} from "../relationships";
+import {updateContact} from "../relationships";
 
 //ppp-node-test
 export const DEFAULT_PRISM_HOST = "ppp-node-test.atalaprism.io"
