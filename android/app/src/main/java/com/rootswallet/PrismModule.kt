@@ -23,13 +23,12 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     }
 
     @ReactMethod
-    fun getDidDocument(walJson: String, didAlias: String, promise: Promise) {
-        Log.d("PRISM_TAG","Publishing "+didAlias+" w/ wallet "+walJson);
+    fun getDidDocument(did: String, promise: Promise) {
+        Log.d("PRISM_TAG","Getting DID doc"+did);
         thread(start = true) {
             try {
-                var cliWal = Json.decodeFromString<Wallet>(walJson);
-                var didDocJson = getDidDocumentJson(cliWal, didAlias);
-                Log.d("PRISM_TAG","Got did document "+didAlias+" w/ doc"+didDocJson)
+                var didDocJson = getDidDocumentJson(did);
+                Log.d("PRISM_TAG","Got did document "+did+" w/ doc"+didDocJson)
                 promise.resolve(didDocJson);
             } catch (e: Exception) {
                 promise.reject("Publish Error", e);

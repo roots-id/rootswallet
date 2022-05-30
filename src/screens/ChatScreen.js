@@ -4,7 +4,7 @@ import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 
 import { getCredDetails } from '../credentials'
 import { showQR } from '../qrcode'
-import {getRelItem,YOU_ALIAS} from '../relationships'
+import {getContactByAlias,YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
 import {updateProcessIndicator} from "../roots";
@@ -137,7 +137,7 @@ export default function ChatScreen({ route, navigation }) {
 
     async function handleSend(pendingMsgs) {
         console.log("ChatScreen - handle send",pendingMsgs)
-        const result = await roots.sendMessages(chat, pendingMsgs, roots.MessageType.TEXT, getRelItem(YOU_ALIAS));
+        const result = await roots.sendMessages(chat, pendingMsgs, roots.MessageType.TEXT, getContactByAlias(YOU_ALIAS));
 //        await setMessages((prevMessages) => GiftedChat.append(prevMessages, pendingMsgs));
     }
 
@@ -448,7 +448,7 @@ export default function ChatScreen({ route, navigation }) {
           renderQuickReplySend={() => <Text style={{color: '#e69138',fontSize: 18}}>Confirm</Text>}
           renderUsernameOnMessage={true}
           showAvatarForEveryMessage={true}
-          user={mapUser(getRelItem(chat.id))}
+          user={mapUser(getContactByAlias(chat.id))}
       />
     </View>
   );
@@ -464,7 +464,7 @@ export default function ChatScreen({ route, navigation }) {
       mappedMsg["_id"] = message.id
       mappedMsg["text"] = message.body
       mappedMsg["createdAt"] = new Date(message.createdTime)
-      mappedMsg["user"] = mapUser(getRelItem(message.rel))
+      mappedMsg["user"] = mapUser(getContactByAlias(message.rel))
       if(message["image"]) {
         mappedMsg["image"] = message["image"]
       }

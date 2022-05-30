@@ -22,7 +22,7 @@ import * as roots from '../roots'
 
 import IconActions from '../components/IconActions';
 
-export default function RelationshipDetailScreen({ route, navigation }) {
+export default function SettingsScreen({ route, navigation }) {
     const [host, setHost] = useState(roots.getPrismHost());
     const { colors } = useTheme();
     const { current } = useCardAnimation();

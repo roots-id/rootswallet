@@ -16,6 +16,12 @@ export enum ModelType {
 
 //TODO refactor away this general file to specific files, like 'chat'
 
+export type addOn = {
+    transactionId: string,
+    ledger: string,
+    timestampInfo: timeStampInfo,
+}
+
 export type blocktxs = {
     action: string,
     description: string,
@@ -36,18 +42,20 @@ export type chat = {
     published: boolean,
 }
 
-export type contact = {
+export type compressedEcKeyData = {
+    curve: string,
+    data: string,
+}
+
+export interface contact extends contactShareable{
     id: string,
-    displayName: string,
-    displayPictureUrl: string,
-    did: string,
-    didDoc?: string,
 }
 
 export type contactShareable = {
     displayName: string,
     displayPictureUrl: string,
     did: string,
+    didDoc?: didDocument,
 }
 
 export type credential = {
@@ -57,13 +65,6 @@ export type credential = {
     verifiedCredential: vc,
 }
 
-export interface issuedCredential extends credential {
-    credentialHash: string,
-    issuingDidAlias: string,
-    operationHash: string,
-    revoked: boolean,
-}
-
 export type did = {
     alias: string,
     didIdx: number,
@@ -71,6 +72,17 @@ export type did = {
     operationHash: string,
     uriCanonical: string,
     uriLongForm: string,
+}
+
+export type didDocument = {
+    publicKeys: publicKey[]
+}
+
+export interface issuedCredential extends credential {
+    credentialHash: string,
+    issuingDidAlias: string,
+    operationHash: string,
+    revoked: boolean,
 }
 
 export type key = {
@@ -99,6 +111,13 @@ export type proof = {
     index: number,
 }
 
+export type publicKey = {
+    id: string,
+    usage: string,
+    addedOn: addOn,
+    compressedEcKeyData: compressedEcKeyData,
+}
+
 export type session = {
     chat: chat,
     onReceivedMessage: (message: message) => {},
@@ -117,6 +136,11 @@ export type session = {
 export type sessionStatus = {
     succeeded: string,
     end: string,
+}
+
+export type timeStampInfo = {
+    blockSequenceNumber: number,
+    blockTimestamp: string,
 }
 
 export type vc = {
@@ -168,17 +192,6 @@ export function createMessageId(chatAlias: string,relId: string,msgNum: number):
     let msgId = getStorageKey(chatAlias,ModelType.MESSAGE)+ID_SEPARATOR+relId+ID_SEPARATOR+String(msgNum);
     logger("model - Generated msg id",msgId);
     return msgId;
-}
-
-export function createRel(relAlias: string, relName: string, relPicUrl: string, did: string) :contact{
-    const rel = {
-        id: relAlias,
-        displayName: relName,
-        displayPictureUrl: relPicUrl,
-        did: did,
-    }
-    logger("models - create rel model w/keys",Object.keys(rel))
-    return rel;
 }
 
 //---------------- Keys -----------------------

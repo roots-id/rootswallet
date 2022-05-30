@@ -1,6 +1,9 @@
 import * as models from '../models'
 import {logger} from '../logging'
+import {contact, contactShareable} from "../models";
+import {getPrismDidDoc} from "../prism";
 import * as store from '../store'
+
 
 export const butchLogo = require('../assets/butch.png');
 export const darrellLogo = require('../assets/darrell.png');
@@ -311,15 +314,30 @@ export const refreshTriggers: {(): void}[] = []
 let currentDemoRel = -1
 const demoRelOrder = [ESTEBAN,RODO,LANCE,BUTCH,DARRELL,TONY,ROOTSID,IOG_TECH,LIBRARY_BOT]
 const demoRels: {[did: string]: models.contact} = {}
-demoRels[LIBRARY_BOT] = models.createRel(LIBRARY_BOT,"Library",personLogo,LIBRARY_BOT);
-demoRels[IOG_TECH] = models.createRel(IOG_TECH, "IOG Tech Community",iogLogo,IOG_TECH);
-demoRels[ROOTSID] = models.createRel(ROOTSID, "RootsID",rootsLogo,ROOTSID);
-demoRels[LANCE] = models.createRel(LANCE, "MeGrimLance",lanceLogo,LANCE);
-demoRels[TONY] = models.createRel(TONY,"Tony.Rose",tonyLogo,TONY);
-demoRels[DARRELL] = models.createRel(DARRELL,"Darrell O'Donnell",darrellLogo,DARRELL);
-demoRels[BUTCH] = models.createRel(BUTCH,"Butch Clark",butchLogo,BUTCH);
-demoRels[ESTEBAN] = models.createRel(ESTEBAN,"Esteban Garcia",estebanLogo,ESTEBAN);
-demoRels[RODO] = models.createRel(RODO,"Rodolfo Miranda",rodoLogo,RODO);
+demoRels[LIBRARY_BOT] = createRel(LIBRARY_BOT,"Library",personLogo,LIBRARY_BOT);
+demoRels[IOG_TECH] = createRel(IOG_TECH, "IOG Tech Community",iogLogo,IOG_TECH);
+demoRels[ROOTSID] = createRel(ROOTSID, "RootsID",rootsLogo,ROOTSID);
+demoRels[LANCE] = createRel(LANCE, "MeGrimLance",lanceLogo,LANCE);
+demoRels[TONY] = createRel(TONY,"Tony.Rose",tonyLogo,TONY);
+demoRels[DARRELL] = createRel(DARRELL,"Darrell O'Donnell",darrellLogo,DARRELL);
+demoRels[BUTCH] = createRel(BUTCH,"Butch Clark",butchLogo,BUTCH);
+demoRels[ESTEBAN] = createRel(ESTEBAN,"Esteban Garcia",estebanLogo,ESTEBAN);
+demoRels[RODO] = createRel(RODO,"Rodolfo Miranda",rodoLogo,RODO);
+
+export async function addDidDoc(contact: models.contactShareable) {
+    logger("roots - getting did doc for contact",contact.did)
+    const didDocJson = await getPrismDidDoc(contact.did)
+    if(didDocJson) {
+        const saveMe = getContactByDid(contact.did)
+        if(saveMe) {
+            const didDoc = JSON.parse(didDocJson)
+            saveMe.didDoc = didDoc
+            contact.didDoc = didDoc
+            await saveContact(saveMe)
+        }
+    }
+    return contact;
+}
 
 //triggers for updating Contacts
 export function addRefreshTrigger(trigger: ()=>{}) {
@@ -327,27 +345,37 @@ export function addRefreshTrigger(trigger: ()=>{}) {
     refreshTriggers.push(trigger)
 }
 
-export function asContactShareable(contact: models.contact) {
+export function asContactShareable(contact: models.contact): contactShareable {
     return {
         displayName: contact.displayName,
         displayPictureUrl: contact.displayPictureUrl,
         did: contact.did,
+        didDoc: contact.didDoc,
     }
+}
+
+export function createRel(relAlias: string, relName: string, relPicUrl: string, did: string) :contact{
+    const rel = {
+        id: relAlias,
+        displayName: relName,
+        displayPictureUrl: relPicUrl,
+        did: did,
+    }
+    logger("models - create rel model w/keys",Object.keys(rel))
+    return rel;
 }
 
 //TODO unify aliases and storageKeys?
 export async function createRelItem(alias: string, name: string, pic=personLogo, did: string) {
     try {
         logger("rels - create rel item",alias,name,pic);
-        if(getRelItem(alias)) {
+        if(getContactByAlias(alias)) {
             logger("rels - rel already exists",alias)
             return true;
         } else {
             logger("rels - rel did not exist",alias)
-            const relItem = models.createRel(alias, name, pic,did)
-            const relItemJson = JSON.stringify(relItem)
-            logger("rels - generated rel",relItemJson)
-            const result = await store.saveItem(models.getStorageKey(alias, models.ModelType.CONTACT), relItemJson)
+            const relItem = createRel(alias, name, pic,did)
+            const result = saveContact(relItem)
             logger("rels - created rel",alias,"?",result)
             hasNewRels()
             return result;
@@ -372,7 +400,7 @@ export function getRelationships() {
     return rels;
 }
 
-export function getRelItem(relId: string): models.contact|undefined {
+export function getContactByAlias(relId: string): models.contact|undefined {
     logger("rels - Getting rel",relId)
     if(relId) {
         const relItemJson = store.getItem(models.getStorageKey(relId,models.ModelType.CONTACT));
@@ -387,12 +415,18 @@ export function getRelItem(relId: string): models.contact|undefined {
     } else {
         logger("rels - can't get rel for undefined relId",relId)
     }
-    // return {
-    //     id: relId,
-    //     displayName: "unknown",
-    //     displayPictureUrl: personLogo,
-    //     did: "no did",
-    // };
+    return;
+}
+
+export function getContactByDid(did: string): models.contact|undefined {
+    logger("rels - Getting contact by DID",did)
+    if(did) {
+        const contact = getRelationships().find(con => con.did === did);
+        logger("rels - Got contact",JSON.stringify(contact))
+        return contact
+    } else {
+        logger("rels - can't get contact for undefined did",did)
+    }
     return;
 }
 
@@ -407,10 +441,17 @@ export function isShareable(rel: models.contact) {
 
 export function getShareableRelByAlias(alias: string): models.contactShareable|undefined {
     logger("roots - getting shareable rel by alias",alias)
-    const rel = getRelItem(alias)
+    const rel = getContactByAlias(alias)
     if(rel && rel.did) {
         return asContactShareable(rel)
     }
+}
+
+export async function saveContact(contact: models.contact): Promise<boolean> {
+    const contactJson = JSON.stringify(contact)
+    logger("rels - saved contact",contactJson)
+    const result = await store.saveItem(models.getStorageKey(contact.id, models.ModelType.CONTACT), contactJson)
+    return result;
 }
 
 export function showRel(navigation: any, rel: string) {
