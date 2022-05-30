@@ -46,7 +46,7 @@ export async function hasWallet(walName: string) {
         }
     }
     else{
-        logger("store - Has wallet in cache",getWallet());
+        logger("store - Has wallet in cache",getWallet(walName));
         return true;
     }
 }
@@ -189,21 +189,21 @@ export async function restoreItems(aliases: string[]) {
         return true;
     } else {
         try {
-            const allRestored = await aliases.reduce(async (previousStatus,alias) => {
-                logger("store - restoring",alias)
-                alias = replaceSpecial(alias)
-                const itemJson = await AsyncStore.getItem(alias)
-                if(!itemJson || itemJson == null) {
-                    logger("store - No item found",alias)
-                    previousStatus = previousStatus && false;
-                    return previousStatus
-                } else {
-                    logger("store - putting restored item in cache",alias,":",itemJson)
-                    const result = CachedStore.storeItem(alias,itemJson)
-                    previousStatus = previousStatus && result;
-                    return previousStatus
-                }
-            },true);
+            const allRestored = aliases.reduce(
+                async (prev: string, alias: string, currentIndex: number, array: string[]) => {
+                    logger("store - restoring", alias)
+                    alias = replaceSpecial(alias)
+                    const itemJson = await AsyncStore.getItem(alias)
+                    if (!itemJson || itemJson == null) {
+                        logger("store - No item found", alias)
+                        return prev + "Could not restore "+alias+"\n"
+                    } else {
+                        logger("store - putting restored item in cache", alias, ":", itemJson)
+                        const result = CachedStore.storeItem(alias, itemJson)
+                        return prev + "Restored "+alias+"\n"
+                    }
+                },"Restoration status is:\n"
+            );
             logger("were all items restored",allRestored)
             return allRestored;
         } catch (error) {

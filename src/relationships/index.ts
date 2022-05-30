@@ -1,15 +1,5 @@
 import * as models from '../models'
-import { logger } from '../logging'
-import {TypedNavigator} from  '@react-navigation/core'
-import type {
-    DefaultRouterOptions,
-    InitialState,
-    NavigationAction,
-    NavigationState,
-    ParamListBase,
-    PartialState,
-    Route,
-} from '@react-navigation/routers';
+import {logger} from '../logging'
 import * as store from '../store'
 
 export const butchLogo = require('../assets/butch.png');
@@ -24,7 +14,6 @@ export const prismLogo = require('../assets/ATALAPRISM.png');
 export const catalystLogo = require('../assets/catalyst.png');
 export const personLogo = require('../assets/smallBWPerson.png');
 export const rootsLogo = require('../assets/LogoCropped.png');
-export const starLogo = require('../assets/star.png');
 
 export const YOU_ALIAS = "You"
 export const ROOTS_BOT = "RootsHelper";
@@ -35,7 +24,7 @@ const IOG_TECH = "did:roots:iogtech1";
 const ROOTSID = "did:roots:rootsid";
 const LANCE = "did:roots:lance";
 const TONY = "did:roots:tony";
-const DARRELL = "did:roots:darrell";
+const DARRELL = "did:prism:4ae7d4dbd6da5f84447295dd8a13b3a5d492a39c8b8ac789e7f448def37abc6f:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQN9Sdkyn-sKjLPNSsDBQlFUTiKI5HZcA5shofvNW88ZSBI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhAzyaj2ahjGAx3jRtDggBgDVq_TSkz6wYg2Qgtp1AVbhREj8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiECxG5IzkkIhF5d7tCB1hwza_VpXI58rNklVe3f_iskw-A";
 
 // roots - getRootsWallet has wallet [object Object]
 // _id :   Catalyst Fund 7 demo wallet
@@ -318,6 +307,7 @@ export const allRelsRegex = new RegExp(models.getStorageKey("",models.ModelType.
 
 export const refreshTriggers: {(): void}[] = []
 
+//DEMO stuff
 let currentDemoRel = -1
 const demoRelOrder = [ESTEBAN,RODO,LANCE,BUTCH,DARRELL,TONY,ROOTSID,IOG_TECH,LIBRARY_BOT]
 const demoRels: {[did: string]: models.contact} = {}
@@ -331,13 +321,22 @@ demoRels[BUTCH] = models.createRel(BUTCH,"Butch Clark",butchLogo,BUTCH);
 demoRels[ESTEBAN] = models.createRel(ESTEBAN,"Esteban Garcia",estebanLogo,ESTEBAN);
 demoRels[RODO] = models.createRel(RODO,"Rodolfo Miranda",rodoLogo,RODO);
 
+//triggers for updating Contacts
 export function addRefreshTrigger(trigger: ()=>{}) {
     logger("rels - adding refresh trigger")
     refreshTriggers.push(trigger)
 }
 
+export function asContactShareable(contact: models.contact) {
+    return {
+        displayName: contact.displayName,
+        displayPictureUrl: contact.displayPictureUrl,
+        did: contact.did,
+    }
+}
+
 //TODO unify aliases and storageKeys?
-export async function createRelItem(alias: string, name: string, pic=personLogo, did?: string) {
+export async function createRelItem(alias: string, name: string, pic=personLogo, did: string) {
     try {
         logger("create rel item",alias,name,pic);
         if(getRelItem(alias)) {
@@ -373,7 +372,7 @@ export function getRelationships() {
     return rels;
 }
 
-export function getRelItem(relId: string) {
+export function getRelItem(relId: string): models.contact {
     logger("rels - Getting rel",relId)
     if(relId) {
         const relItemJson = store.getItem(models.getStorageKey(relId,models.ModelType.CONTACT));
@@ -384,11 +383,16 @@ export function getRelItem(relId: string) {
             return relItem
         } else {
             logger("rels - rel not found",relId)
-            return relItemJson
         }
     } else {
         logger("rels - can't get rel for undefined relId",relId)
     }
+    return {
+        id: relId,
+        displayName: "unknown",
+        displayPictureUrl: personLogo,
+        did: "no did",
+    };
 }
 
 export function isShareable(rel: models.contact) {
@@ -400,15 +404,12 @@ export function isShareable(rel: models.contact) {
     }
 }
 
-export function getShareableRelByAlias(alias: string) {
+export function getShareableRelByAlias(alias: string): models.contactShareable|undefined {
     logger("roots - getting shareable rel by alias",alias)
     const rel = getRelItem(alias)
-    const shareable = {
-        displayName: rel.displayName,
-        displayPictureUrl: rel.displayPictureUrl,
-        did: rel.did,
+    if(rel && rel.did) {
+        return asContactShareable(rel)
     }
-    return shareable
 }
 
 export function showRel(navigation: any, rel: string) {
@@ -416,31 +417,17 @@ export function showRel(navigation: any, rel: string) {
     navigation["navigate"]('Relationship Details',{rel: getShareableRelByAlias(rel)})
 }
 
-// export async function initDemoRels() {
-//     logger("rels - init demo rels")
-//     await createRelItem(LIBRARY_BOT,"Library",personLogo,LIBRARY_BOT)
-//     await createRelItem(IOG_TECH, "IOG Tech Community",iogLogo,IOG_TECH);
-//     await createRelItem(ROOTSID, "RootsID",rootsLogo,ROOTSID);
-//     await createRelItem(LANCE, "MeGrimLance",lanceLogo,LANCE);
-//     await createRelItem(TONY,"Tony.Rose",tonyLogo,TONY)
-//     await createRelItem(DARRELL,"Darrell O'Donnell",darrellLogo,DARRELL)
-//     await createRelItem(BUTCH,"Butch Clark",butchLogo,BUTCH)
-//     await createRelItem(ESTEBAN,"Esteban Garcia",estebanLogo,ESTEBAN)
-//     await createRelItem(RODO,"Rodolfo Miranda",rodoLogo,RODO)
-// }
-
-export function getDemoRel() {
+export function getDemoRel(): models.contactShareable {
     if(currentDemoRel >= (demoRelOrder.length-1)) {
         return getFakeRelItem()
     } else {
         currentDemoRel++
-        const dRel = demoRels[demoRelOrder[currentDemoRel]]
-        return dRel
+        return asContactShareable(demoRels[demoRelOrder[currentDemoRel]])
     }
 }
 
-function getFakeRelItem() {
-   return {  dataType: "rel",
+function getFakeRelItem(): models.contactShareable {
+   return {
         displayPictureUrl: personLogo,
         displayName: "fakePerson"+Date.now(),
         did: "did:roots:fakedid"+Date.now(),

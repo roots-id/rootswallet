@@ -40,7 +40,14 @@ export type contact = {
     id: string,
     displayName: string,
     displayPictureUrl: string,
-    did?: string,
+    did: string,
+    didDoc?: string,
+}
+
+export type contactShareable = {
+    displayName: string,
+    displayPictureUrl: string,
+    did: string,
 }
 
 export type credential = {
@@ -128,7 +135,8 @@ export type wallet = {
     blockchainTxLogEntry: blocktxs[],
 };
 
-export function createChat(chatAlias: string, fromDidAlias: string, toIds: string[], title=chatAlias): chat {
+export function createChat(chatAlias: string, fromDidAlias: string,
+                           toIds: string[], title=chatAlias): chat {
     const chat = {
         id: chatAlias,
         toDids: toIds,
@@ -140,7 +148,8 @@ export function createChat(chatAlias: string, fromDidAlias: string, toIds: strin
     return chat;
 }
 
-export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,relId: string,system=false,data :object): message {
+export function createMessage(idText: string,bodyText: string,statusText: string,
+                              timeInMillis: number,relId: string,system=false,data :object): message {
     const msg = {
         id: idText,
         body: bodyText,
@@ -154,14 +163,14 @@ export function createMessage(idText: string,bodyText: string,statusText: string
     return msg;
 }
 
-export function createMessageId(chatAlias: string,relId: string,msgNum: number) {
+export function createMessageId(chatAlias: string,relId: string,msgNum: number): string {
     logger("model - creating message id",chatAlias,relId,msgNum)
     let msgId = getStorageKey(chatAlias,ModelType.MESSAGE)+ID_SEPARATOR+relId+ID_SEPARATOR+String(msgNum);
     logger("model - Generated msg id",msgId);
     return msgId;
 }
 
-export function createRel(relAlias: string, relName: string, relPicUrl: string, did?: string) :contact{
+export function createRel(relAlias: string, relName: string, relPicUrl: string, did: string) :contact{
     const rel = {
         id: relAlias,
         displayName: relName,

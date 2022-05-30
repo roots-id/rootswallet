@@ -106,10 +106,10 @@ export async function initRootsWallet() {
         //intentionally not awaiting
         processPublishResponse(myChat)
 
-        if (demo) {
-            logger("roots - initializing your demos")
-            await initDemos(didAlias)
-        }
+        // if (demo) {
+        //     logger("roots - initializing your demos")
+        //     await initDemos(didAlias)
+        // }
     }
 }
 
@@ -205,9 +205,9 @@ export async function initRoot(alias: string, fromDidAlias: string, toDid: strin
         const relCreated = await rel.createRelItem(alias,display, avatar, toDid);
         logger("roots - rel created/existed?",relCreated)
         const relationship = rel.getRelItem(alias)
-        logger("roots - creating chat for rel",relationship.id)
-        //toDid: string, fromDidAliasAlias: string, myRel: Object, title: string
+        logger("roots - getting rel DID document")
         if(alias !== rel.PRISM_BOT && alias !== rel.ROOTS_BOT) {
+            logger("roots - creating chat for rel",relationship.id)
             const chat = await createChat(alias,fromDidAlias,toDid,display)
         }
         return true;
@@ -352,6 +352,16 @@ export function getDid(didAlias: string) {
         return;
     }
 
+}
+
+export async function getPrismDidDoc(contact: models.contact) {
+    logger("getting DID doc", contact)
+    try {
+        const didDocJson = await PrismModule.getDidDocument(contact.did);
+        contact.didDoc = didDocJson;
+    } catch (error) {
+        console.error("roots - Error getting DID doc for", contact.displayName,contact.did,error, error.stack)
+    }
 }
 
 function getDidPubTx(didAlias: string) {
@@ -1316,16 +1326,7 @@ export async function issueDemoPublishDidCredential(chat: models.chat,msgId: str
     }
 }
 
-async function initDemos(fromDidAlias: string) {
-    //const libraryRoot = await initRoot("libraryRoot", fromDidAlias, rootsDid("library"), "Library")
-    //const rentalRoot = await initRoot("rentalRoot", fromDidAlias, rootsDid("vacationRental"), "Vacation Rental")
-    //return libraryRoot && rentalRoot;
-    return true;
-}
-
 async function initDemoAchievements(chat: models.chat) {
-
-
     await sendMessage(chat,ACHIEVEMENT_MSG_PREFIX+"Opened RootsWallet!",
       MessageType.STATUS,
       rel.getRelItem(rel.ROOTS_BOT))
