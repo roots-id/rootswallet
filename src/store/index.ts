@@ -4,6 +4,7 @@ import * as CachedStore from './CachedStore'
 import * as SecureStore from 'expo-secure-store';
 import { logger } from '../logging'
 import { replaceSpecial } from '../utils'
+import {promisify} from "util";
 
 const quickReplyResults = {}
 
@@ -189,23 +190,18 @@ export async function restoreItems(aliases: string[]) {
         return true;
     } else {
         try {
-            const allRestored = aliases.reduce(
-                async (prev: string, alias: string, currentIndex: number, array: string[]) => {
-                    logger("store - restoring", alias)
-                    alias = replaceSpecial(alias)
-                    const itemJson = await AsyncStore.getItem(alias)
-                    if (!itemJson || itemJson == null) {
-                        logger("store - No item found", alias)
-                        return prev + "Could not restore "+alias+"\n"
-                    } else {
-                        logger("store - putting restored item in cache", alias, ":", itemJson)
-                        const result = CachedStore.storeItem(alias, itemJson)
-                        return prev + "Restored "+alias+"\n"
-                    }
-                },"Restoration status is:\n"
-            );
-            logger("were all items restored",allRestored)
-            return allRestored;
+            aliases.forEach(async (alias) => {
+                logger("store - restoring", alias);
+                alias = replaceSpecial(alias);
+                const itemJson = await AsyncStore.getItem(alias);
+                if (!itemJson || itemJson == null) {
+                    console.error("store - Could not restore, no item found", alias);
+                } else {
+                    logger("store - putting restored item in cache", alias, ":", itemJson);
+                    const result = CachedStore.storeItem(alias, itemJson);
+                }
+            });
+            return true;
         } catch (error) {
             logger("store - getting items from storage failed",aliases,error)
             return false;
@@ -256,14 +252,4 @@ export async function updateItem(alias: string, itemJson: string) {
         console.error("Could not update item",alias,itemJson)
         return false
     }
-}
-
-export function getQuickReplyResult(replyId: string) {
-    logger("store - Getting quick reply result for id",replyId,"=",quickReplyResults[replyId])
-    return quickReplyResults[replyId]
-}
-
-export function addQuickReplyResult(replyId: string,result: string) {
-    logger("store - Adding quick reply result",replyId,"=",result)
-    quickReplyResults[replyId]=result
 }

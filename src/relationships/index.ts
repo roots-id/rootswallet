@@ -338,7 +338,7 @@ export function asContactShareable(contact: models.contact) {
 //TODO unify aliases and storageKeys?
 export async function createRelItem(alias: string, name: string, pic=personLogo, did: string) {
     try {
-        logger("create rel item",alias,name,pic);
+        logger("rels - create rel item",alias,name,pic);
         if(getRelItem(alias)) {
             logger("rels - rel already exists",alias)
             return true;
@@ -372,7 +372,7 @@ export function getRelationships() {
     return rels;
 }
 
-export function getRelItem(relId: string): models.contact {
+export function getRelItem(relId: string): models.contact|undefined {
     logger("rels - Getting rel",relId)
     if(relId) {
         const relItemJson = store.getItem(models.getStorageKey(relId,models.ModelType.CONTACT));
@@ -387,12 +387,13 @@ export function getRelItem(relId: string): models.contact {
     } else {
         logger("rels - can't get rel for undefined relId",relId)
     }
-    return {
-        id: relId,
-        displayName: "unknown",
-        displayPictureUrl: personLogo,
-        did: "no did",
-    };
+    // return {
+    //     id: relId,
+    //     displayName: "unknown",
+    //     displayPictureUrl: personLogo,
+    //     did: "no did",
+    // };
+    return;
 }
 
 export function isShareable(rel: models.contact) {

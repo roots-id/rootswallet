@@ -29,7 +29,7 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
             try {
                 var cliWal = Json.decodeFromString<Wallet>(walJson);
                 var didDocJson = getDidDocumentJson(cliWal, didAlias);
-                Log.d("PRISM_TAG","Got did document "+didAlias+" w/ doc"+didDoc)
+                Log.d("PRISM_TAG","Got did document "+didAlias+" w/ doc"+didDocJson)
                 promise.resolve(didDocJson);
             } catch (e: Exception) {
                 promise.reject("Publish Error", e);

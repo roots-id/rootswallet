@@ -10,7 +10,7 @@ import { replaceSpecial } from '../utils'
 import {credential, issuedCredential} from "../models";
 
 //ppp-node-test
-export const DEFAULT_PRISM_HOST = "ppp.atalaprism.io"
+export const DEFAULT_PRISM_HOST = "ppp-node-test.atalaprism.io"
 
 //msg types
 export enum MessageType {
@@ -92,17 +92,17 @@ export async function initRootsWallet() {
         const myChat = getChatItem(rel.YOU_ALIAS)
         const welcomeAchMsg = await sendMessage(myChat,
             "Welcome to your personal RootsWallet history!",
-            MessageType.TEXT, rel.getRelItem(rel.ROOTS_BOT))
+            MessageType.TEXT, rel.ROOTS_BOT)
         const achMsg = await sendMessage(myChat,
             "We'll post new wallet events here.",
-            MessageType.TEXT, rel.getRelItem(rel.ROOTS_BOT))
+            MessageType.TEXT, rel.ROOTS_BOT)
         const createdWalletMsg = await sendMessage(myChat,
-            "You created your wallet: " + currentWal._id, MessageType.TEXT, rel.getRelItem(rel.ROOTS_BOT))
+            "You created your wallet: " + currentWal._id, MessageType.TEXT, rel.ROOTS_BOT)
         const createdDidMsg = await sendMessage(myChat,
             "You created your first decentralized ID (called a DID)!",
-            MessageType.TEXT, rel.getRelItem(rel.ROOTS_BOT))
+            MessageType.TEXT, rel.ROOTS_BOT)
         await sendMessage(myChat, "Your new DID is being added to Prism so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
-            MessageType.TEXT, rel.getRelItem(rel.PRISM_BOT))
+            MessageType.TEXT, rel.PRISM_BOT)
         //intentionally not awaiting
         processPublishResponse(myChat)
 
@@ -161,15 +161,15 @@ export async function handleNewData(jsonData: string) {
         if(rooted) {
             const chat = await getChatByRel(obj);
             const msg = await sendMessage(chat,"To celebrate your new contact you are issuing "
-             + obj.displayName + " a verifiable credential",MessageType.TEXT,rel.getRelItem(rel.ROOTS_BOT))
+             + obj.displayName + " a verifiable credential",MessageType.TEXT,rel.ROOTS_BOT)
             if(msg && isDemo()) {
                 const credIssueAlias = await issueDemoContactCredential(chat,msg.id)
                 if(credIssueAlias) {
                     //const credPubTx = getCredPubTx(pubDid[walletSchema.DID_ALIAS],credIssueAlias)
                     const credSuccess = await sendMessage(chat,"You have issued "+obj.displayName+" a verifiable credential!",
-                        MessageType.PROMPT_ISSUED_CREDENTIAL,rel.getRelItem(rel.ROOTS_BOT),false,credIssueAlias)
+                        MessageType.PROMPT_ISSUED_CREDENTIAL,rel.ROOTS_BOT,false,credIssueAlias)
 //                     const credLinkMsg = await sendMessage(chat,BLOCKCHAIN_URL_MSG,
-//                         MessageType.BLOCKCHAIN_URL,rel.getRelItem(rel.PRISM_BOT),false,credPubTx.url)
+//                         MessageType.BLOCKCHAIN_URL,rel.PRISM_BOT,false,credPubTx.url)
                 } else {
                     console.error("roots - unable to issue cred",chat,"for msg",msg.id)
                 }
@@ -206,7 +206,7 @@ export async function initRoot(alias: string, fromDidAlias: string, toDid: strin
         logger("roots - rel created/existed?",relCreated)
         const relationship = rel.getRelItem(alias)
         logger("roots - getting rel DID document")
-        if(alias !== rel.PRISM_BOT && alias !== rel.ROOTS_BOT) {
+        if(relationship && alias !== rel.PRISM_BOT && alias !== rel.ROOTS_BOT) {
             logger("roots - creating chat for rel",relationship.id)
             const chat = await createChat(alias,fromDidAlias,toDid,display)
         }
@@ -439,10 +439,10 @@ export async function createChat(alias: string, fromDidAlias: string, toDid: str
         if(!(alias === rel.YOU_ALIAS)) {
             const chMsg = await sendMessage(chatItem,
                 "You are now in contact with "+alias,
-                MessageType.TEXT,rel.getRelItem(rel.ROOTS_BOT))
+                MessageType.TEXT,rel.ROOTS_BOT)
             const statusMsg = await sendMessage(getChatItem(rel.YOU_ALIAS),
                 "New contact added: "+alias,
-                MessageType.TEXT,rel.getRelItem(rel.ROOTS_BOT))
+                MessageType.TEXT,rel.ROOTS_BOT)
         }
         return true;
     } else {
@@ -509,47 +509,47 @@ function getChatItems() {
     return chats;
 }
 
-function getAllDidAliases(wallet: models.wallet) {
-    const dids = wallet[walletSchema.WALLET_DIDS];
-    if(!dids || dids == null || dids.length <= 0) {
-        logger("No dids to get")
-        return [];
-    } else {
-        const aliases = dids.map(did => did[walletSchema.DID_ALIAS]);
-        logger("got did aliases",String(aliases));
-        return aliases;
-    }
-}
+// function getAllDidAliases(wallet: models.wallet) {
+//     const dids = wallet[walletSchema.WALLET_DIDS];
+//     if(!dids || dids == null || dids.length <= 0) {
+//         logger("No dids to get")
+//         return [];
+//     } else {
+//         const aliases = dids.map(did => did[walletSchema.DID_ALIAS]);
+//         logger("got did aliases",String(aliases));
+//         return aliases;
+//     }
+// }
 
-async function loadChats() {
-    try {
-        const aliases = getAllDidAliases(currentWal);
-        const result = await store.restoreItems(models.getStorageKeys(aliases,models.ModelType.CHAT));
-        if(result) {
-            logger("roots - successfully loaded chat items",aliases)
-            return true;
-        }
-        else {
-            console.error("roots - Failed to load chat items",aliases)
-            return false;
-        }
-    } catch(error) {
-        console.error("roots - Failed to load chat items",error,error.stack)
-        return false;
-    }
-}
-
-async function updateChat(chat: models.chat) {
-    const chatStoreId = models.getStorageKey(chat.id,models.ModelType.CHAT);
-    const updated = await store.updateItem(chatStoreId,JSON.stringify(chat));
-    if(updated) {
-        logger("Updated chat storage",chatStoreId);
-        return true;
-    }else {
-        logger("Unable to update chat storage",chatStoreId);
-        return false;
-    }
-}
+// async function loadChats() {
+//     try {
+//         const aliases = getAllDidAliases(currentWal);
+//         const result = await store.restoreItems(models.getStorageKeys(aliases,models.ModelType.CHAT));
+//         if(result) {
+//             logger("roots - successfully loaded chat items",aliases)
+//             return true;
+//         }
+//         else {
+//             console.error("roots - Failed to load chat items",aliases)
+//             return false;
+//         }
+//     } catch(error) {
+//         console.error("roots - Failed to load chat items",error,error.stack)
+//         return false;
+//     }
+// }
+//
+// async function updateChat(chat: models.chat) {
+//     const chatStoreId = models.getStorageKey(chat.id,models.ModelType.CHAT);
+//     const updated = await store.updateItem(chatStoreId,JSON.stringify(chat));
+//     if(updated) {
+//         logger("Updated chat storage",chatStoreId);
+//         return true;
+//     }else {
+//         logger("Unable to update chat storage",chatStoreId);
+//         return false;
+//     }
+// }
 
 // ---------------- Messages  ----------------------
 
@@ -666,28 +666,33 @@ export function getMessagesByRel(relId: string) {
     return chatMsgs;
 }
 
-export async function sendMessages(chat: models.chat,msgs: string[],msgType: MessageType,relDisplay: models.contact) {
-    msgs.map(async (msg) => await sendMessage(chat,msg,msgType,relDisplay))
+export async function sendMessages(chat: models.chat,msgs: string[],msgType: MessageType,contactAlias: string) {
+    msgs.map(async (msg) => await sendMessage(chat,msg,msgType,contactAlias))
 }
 
 //TODO unify aliases and storageKeys?
-export async function sendMessage(chat: models.chat,msgText: string,msgType: MessageType,relDisplay: models.contact,system=false,data={}) {
+export async function sendMessage(chat: models.chat,msgText: string,msgType: MessageType,contactAlias: string,system=false,data={}) {
     const msgTime = Date.now()
-    logger("roots - rel",relDisplay.id,"sending",msgText,"to chat",chat.id);
-    const msgId = models.createMessageId(chat.id,relDisplay.id,msgTime);
-    let msg = models.createMessage(msgId, msgText, msgType, msgTime, relDisplay.id, system, data);
-    msg = addMessageExtensions(msg);
-    try {
-        const msgJson = JSON.stringify(msg)
-        const result = await store.saveItem(msg.id,msgJson)
-        if(sessions[chat.id]) {
-            sessions[chat.id].onReceivedMessage(msg)
+    const relDisplay = rel.getRelItem(contactAlias)
+    if(relDisplay) {
+        logger("roots - rel", relDisplay.id, "sending", msgText, "to chat", chat.id);
+        const msgId = models.createMessageId(chat.id, relDisplay.id, msgTime);
+        let msg = models.createMessage(msgId, msgText, msgType, msgTime, relDisplay.id, system, data);
+        msg = addMessageExtensions(msg);
+        try {
+            const msgJson = JSON.stringify(msg)
+            const result = await store.saveItem(msg.id, msgJson)
+            if (sessions[chat.id]) {
+                sessions[chat.id].onReceivedMessage(msg)
+            }
+            logger("roots - Sent/Stored message", msgJson)
+            return msg
+        } catch (error) {
+            console.error("roots - Could not save message for rel", relDisplay.id, "w/msg", msgText, "to chat", chat.id, error, error.stack)
+            return;
         }
-        logger("roots - Sent/Stored message",msgJson)
-        return msg
-    } catch(error) {
-        console.error("roots - Could not save message for rel",relDisplay.id,"w/msg",msgText,"to chat",chat.id,error,error.stack)
-        return;
+    } else {
+        console.error("roots - Unable to send message, contact not found",contactAlias)
     }
 }
 
@@ -712,10 +717,10 @@ export async function processCredentialResponse(chat: models.chat, reply: Reply)
                 const hashStr = credHash.toString()
                 logger("accepted credential w/hash",hashStr)
                 const credOwnMsg = await sendMessage(chat,"Credential accepted.",
-                    MessageType.PROMPT_OWN_CREDENTIAL,rel.getRelItem(rel.ROOTS_BOT),false,hashStr)
+                    MessageType.PROMPT_OWN_CREDENTIAL,rel.ROOTS_BOT,false,hashStr)
                 if(!(chat.id === rel.YOU_ALIAS)) {
                     await sendMessage(getChatItem(rel.YOU_ALIAS),"You accepted a credential from "+
-                        chat.id,MessageType.PROMPT_OWN_CREDENTIAL,rel.getRelItem(rel.ROOTS_BOT),false,hashStr)
+                        chat.id,MessageType.PROMPT_OWN_CREDENTIAL,rel.ROOTS_BOT,false,hashStr)
                 }
                 const importedCred = await getImportedCredByHash(hashStr)
                 const credJson = JSON.stringify(importedCred)
@@ -746,32 +751,32 @@ export async function processPublishResponse(chat: models.chat) {
         if(pubDid) {
             const didPubTx = getDidPubTx(pubDid[walletSchema.DID_ALIAS])
             const didPubMsg = await sendMessage(chat, PUBLISHED_TO_PRISM,
-                MessageType.PROMPT_OWN_DID, rel.getRelItem(rel.PRISM_BOT),
+                MessageType.PROMPT_OWN_DID, rel.PRISM_BOT,
                 false, pubDid[walletSchema.DID_URI_LONG_FORM])
             const didLinkMsg = await sendMessage(chat, BLOCKCHAIN_URL_MSG,
-                MessageType.BLOCKCHAIN_URL, rel.getRelItem(rel.PRISM_BOT),
+                MessageType.BLOCKCHAIN_URL, rel.PRISM_BOT,
                 false, didPubTx?.url)
             if (didLinkMsg) {
-                //const didMsg = await sendMessage(chat,JSON.stringify(pubDid),DID_JSON,rel.getRelItem(rel.PRISM_BOT),true);
+                //const didMsg = await sendMessage(chat,JSON.stringify(pubDid),DID_JSON,rel.PRISM_BOT,true);
                 if (demo) {
                     logger("roots - demo celebrating did publishing credential", pubDid[walletSchema.DID_URI_LONG_FORM])
                     const vcMsg = await sendMessage(chat,
                         "To celebrate your published DID, a verifiable credential is being created for you.",
-                        MessageType.TEXT, rel.getRelItem(rel.ROOTS_BOT))
+                        MessageType.TEXT, rel.ROOTS_BOT)
                     if(vcMsg) {
                         const credIssueAlias = await issueDemoPublishDidCredential(chat, vcMsg.id)
                         if (credIssueAlias) {
                             const credPubTx = getCredPubTx(pubDid[walletSchema.DID_ALIAS], credIssueAlias)
                             const credSuccess = await sendMessage(chat, "You have issued yourself a verifiable credential!",
-                                MessageType.PROMPT_ISSUED_CREDENTIAL, rel.getRelItem(rel.ROOTS_BOT), false, credIssueAlias)
+                                MessageType.PROMPT_ISSUED_CREDENTIAL, rel.ROOTS_BOT, false, credIssueAlias)
                             const credLinkMsg = await sendMessage(chat, BLOCKCHAIN_URL_MSG,
-                                MessageType.BLOCKCHAIN_URL, rel.getRelItem(rel.PRISM_BOT), false, credPubTx?.url)
+                                MessageType.BLOCKCHAIN_URL, rel.PRISM_BOT, false, credPubTx?.url)
 
                             if (credLinkMsg) {
                                 logger("roots - demo credential issued", credIssueAlias)
                                 const credReqMsg = await sendMessage(chat,
                                     "Do you want to accept this verifiable credential",
-                                    MessageType.PROMPT_ACCEPT_CREDENTIAL, rel.getRelItem(rel.ROOTS_BOT))
+                                    MessageType.PROMPT_ACCEPT_CREDENTIAL, rel.ROOTS_BOT)
                                 if (credReqMsg) {
                                     const credAcceptAlias = getCredentialAlias(credReqMsg.id)
                                     const cred = getIssuedCredential(credIssueAlias);
@@ -797,7 +802,7 @@ export async function processPublishResponse(chat: models.chat) {
         logger("roots - Could not process publish DID request",chat.id)
         const credReqMsg = await sendMessage(chat,
                             "DID was already added to Prism",
-                            MessageType.TEXT,rel.getRelItem(rel.PRISM_BOT))
+                            MessageType.TEXT,rel.PRISM_BOT)
         return chat;
     }
 }
@@ -1049,12 +1054,12 @@ export async function processRevokeCredential(chat: models.chat, reply: Reply) {
         endProcessing(chat.id,credAlias+CRED_REVOKE)
         console.log("roots - credential revoked",revokedCred)
         const credRevokedMsg = await sendMessage(chat,"Credential is revoked.",
-            MessageType.TEXT,rel.getRelItem(rel.ROOTS_BOT),false,credAlias)
+            MessageType.TEXT,rel.ROOTS_BOT,false,credAlias)
     } else {
         endProcessing(chat.id,credAlias+CRED_REVOKE)
         console.log("roots - could not revoke credential",credAlias)
         const credRevokedMsg = await sendMessage(chat,"Could not revoke credential "+credAlias,
-            MessageType.TEXT,rel.getRelItem(rel.ROOTS_BOT),false,credAlias)
+            MessageType.TEXT,rel.ROOTS_BOT,false,credAlias)
     }
 }
 
@@ -1099,18 +1104,18 @@ export async function processVerifyCredential(chat: models.chat, credHash:string
         endProcessing(chat.id,credHash+CRED_VERIFY)
         console.log("roots - credential verification result",verResult)
         const credVerifiedMsg = await sendMessage(chat,"Credential is valid.",
-            MessageType.TEXT,rel.getRelItem(rel.ROOTS_BOT),false,vDate)
+            MessageType.TEXT,rel.ROOTS_BOT,false,vDate)
     } else if(verResult.length > 0) {
         endProcessing(chat.id,credHash+CRED_VERIFY)
         console.log("roots - credential is invalid",verResult)
         const credVerifiedMsg = await sendMessage(chat,"Credential is invalid w/ messages: "+verResult,
-            MessageType.TEXT,rel.getRelItem(rel.ROOTS_BOT),false,vDate)
+            MessageType.TEXT,rel.ROOTS_BOT,false,vDate)
     }
     else {
         endProcessing(chat.id,credHash+CRED_VERIFY)
         console.log("roots - could not get credential verification result",verResult)
         const credVerifiedMsg = await sendMessage(chat,"Could not verify credential at "+vDate,
-            MessageType.TEXT,rel.getRelItem(rel.ROOTS_BOT))
+            MessageType.TEXT,rel.ROOTS_BOT)
     }
 }
 
@@ -1329,16 +1334,16 @@ export async function issueDemoPublishDidCredential(chat: models.chat,msgId: str
 async function initDemoAchievements(chat: models.chat) {
     await sendMessage(chat,ACHIEVEMENT_MSG_PREFIX+"Opened RootsWallet!",
       MessageType.STATUS,
-      rel.getRelItem(rel.ROOTS_BOT))
+      rel.ROOTS_BOT)
     await sendMessage(chat,"{subject: you,issuer: RootsWallet,credential: Opened RootsWallet}",
       MessageType.CREDENTIAL_JSON,
-      rel.getRelItem(rel.ROOTS_BOT))
+      rel.ROOTS_BOT)
     await sendMessage(chat,ACHIEVEMENT_MSG_PREFIX+"Clicked Example!",
       MessageType.STATUS,
-      rel.getRelItem(rel.ROOTS_BOT))
+      rel.ROOTS_BOT)
     await sendMessage(chat,"{subject: you,issuer: RootsWallet,credential: Clicked Example}",
       MessageType.CREDENTIAL_JSON,
-      rel.getRelItem(rel.ROOTS_BOT))
+      rel.ROOTS_BOT)
 }
 
 async function initDemoResume() {
