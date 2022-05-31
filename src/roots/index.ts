@@ -712,8 +712,16 @@ export async function processCredentialResponse(chat: models.chat, reply: Reply)
             if(msg) {
                 startProcessing(chat.id, reply.messageId)
                 const credHash = msg.data
-                const aCred = await acceptCredential(credHash)
-                if (aCred) {
+                const success = await cred.addImportedCredential(credHash,currentWal)
+                if (success) {
+                    const newWalJson = JSON.stringify(currentWal)
+                    logger("roots - imported credential into wallet", newWalJson)
+                    const savedWal = await updateWallet(currentWal._id, currentWal.passphrase, newWalJson)
+                    if (savedWal) {
+                        logger("roots - Accepted credential", credHash)
+                    } else {
+                        console.error("Could not accept credential, unable to save wallet", credHash)
+                    }
                     logger("roots - accepted credential w/hash", credHash)
                     const credOwnMsg = await sendMessage(chat, "Credential accepted.",
                         MessageType.PROMPT_OWN_CREDENTIAL, contact.ROOTS_BOT, false, credHash)
@@ -801,39 +809,6 @@ export async function processPublishResponse(chat: models.chat) {
 
 // ------------------ Credentials ----------
 
-async function acceptCredential(credHash: string) {
-    logger("accepting credential",credHash)
-    const iCredJson = store.getItem(credHash);
-    logger("accepting credential found in storage",iCredJson)
-    if (iCredJson) {
-        console.log("roots - parsing accepted cred json",iCredJson)
-        const iCred = JSON.parse(iCredJson)
-        const credHash = iCred.verifiedCredential.proof.hash
-        const alreadyExists = cred.getImportedCredByHash(credHash, currentWal)
-        if (!alreadyExists) {
-            logger("roots - accepting credential", credHash, iCredJson)
-            const importedCred = (iCred as models.credential)
-            if(!currentWal.importedCredentials) {
-                currentWal.importedCredentials = []
-            }
-            currentWal.importedCredentials.push(importedCred)
-            const newWalJson = JSON.stringify(currentWal)
-            logger("roots - imported credential into wallet", newWalJson)
-            const savedWal = await updateWallet(currentWal._id, currentWal.passphrase, newWalJson)
-            if (savedWal) {
-                logger("roots - Accepted credential", credHash)
-                return credHash
-            } else {
-                console.error("Could not accept credential, unable to save wallet", credHash)
-            }
-        } else {
-            logger("Credential alias already in use", credHash)
-        }
-    } else {
-        console.error("Credential not found in storage", credHash)
-    }
-}
-
 function getCredentialAlias(msgId: string) {
     const alias = msgId.replace(models.ModelType.MESSAGE, models.ModelType.CREDENTIAL)
     logger("roots - generated credential alias", alias)
@@ -852,47 +827,6 @@ function getCredPubTx(didAlias: string, credAlias: string) {
 
 function getCredRequestAlias(msgId: string) {
     return msgId.replace(models.ModelType.MESSAGE, models.ModelType.CRED_REQUEST)
-}
-
-export function getImportedCredentials() {
-    logger("roots - Getting imported credentials")
-    let result: models.credential[] = []
-    logger("roots - current wal has keys", Object.keys(currentWal))
-    if (currentWal.importedCredentials) {
-        const creds = currentWal.importedCredentials;
-        if (creds && creds.length > 0) {
-            logger("roots - getting imported creds", creds.length)
-            creds.forEach(cred => logger("roots - imported cred", JSON.stringify(cred)))
-            result = creds
-        } else {
-            logger("roots - no imported creds found")
-        }
-    } else {
-        logger("roots - No imported credentials")
-    }
-    return result;
-}
-
-export function getIssuedCredentials(didAlias: string) {
-    logger("roots - Getting issued credentials", didAlias)
-    const longDid = getDid(didAlias)?.uriLongForm
-    if (currentWal.issuedCredentials) {
-        const creds = currentWal.issuedCredentials.filter(cred => {
-            if (cred.claim.subjectDid === longDid) {
-                logger("roots - Found alias", cred.alias)
-                return true
-            } else {
-                logger("roots - Alias", cred.claim.subjectDid, "does not match", longDid)
-                return false
-            }
-        })
-        if (creds && creds.length > 0) {
-            return creds
-        }
-    } else {
-        logger("roots - No issued credentials for", didAlias)
-    }
-    return;
 }
 
 export async function processIssueCredential(iCred: models.issuedCredential, chat: models.chat) {
