@@ -66,25 +66,6 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     }
 
     @ReactMethod
-    fun importCred(walJson: String, credAlias: String, credJson: String, promise: Promise) {
-        Log.d("PRISM_TAG","Importing credential for "+credAlias+" from wallet "+walJson);
-        thread(start = true) {
-            try {
-                val importedCredential = ImportedCredential(
-                    credAlias,
-                    Json.decodeFromString<VerifiedCredential>(credJson)
-                )
-                var newWal = Json.decodeFromString<Wallet>(walJson);
-                newWal.importedCredentials.add(importedCredential)
-                //Log.d("PRISM_TAG","Credential imported",walJson)
-                promise.resolve(Json.encodeToString(newWal));
-            } catch (e: Exception) {
-                promise.reject("Publish Error", e);
-            }
-        }
-    }
-
-    @ReactMethod
     fun issueCred(walJson: String, didAlias: String, credJson: String, promise: Promise) {
         Log.d("PRISM_TAG","Issuing credential for "+didAlias+" from wallet "+walJson);
         thread(start = true) {

@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 import { Bubble, GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 
-import { getCredDetails } from '../credentials'
+import * as cred from '../credentials'
 import { showQR } from '../qrcode'
 import {getContactByAlias,YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
-import {updateProcessIndicator} from "../roots";
+import {processViewCredential, updateProcessIndicator} from "../roots";
 
 export default function ChatScreen({ route, navigation }) {
     console.log("ChatScreen - route params",route.params)
@@ -56,15 +56,15 @@ export default function ChatScreen({ route, navigation }) {
             },
             onProcessing: (processing) => {
                 setProcessing(processing)
-                console.log("updated processing indicator",processing)
+                console.log("ChatScreen - updated processing indicator",processing)
             },
         });
         if (chatSession.succeeded) {
-            console.log("chat session started")
+            console.log("ChatScreen - chat session started")
             const session = chatSession.session; // Handle session
         }
         if (chatSession.failed) {
-            console.log("chat session failed")
+            console.log("ChatScreen - chat session failed")
             const error = chatSession.error; // Handle error
         }
 //        console.log("Getting all messages")
@@ -132,7 +132,7 @@ export default function ChatScreen({ route, navigation }) {
 //        }, madeCredential ? null : 5000,);
 //    }
     function bubblePressed(context,message) {
-        console.log("context",context,"message",message)
+        console.log("ChatScreen - context",context,"message",message)
     }
 
     async function handleSend(pendingMsgs) {
@@ -159,7 +159,7 @@ export default function ChatScreen({ route, navigation }) {
                 } else if(reply.value.startsWith(roots.MessageType.PROMPT_OWN_DID)) {
                     console.log("ChatScreen - quick reply view did")
                     const longDid = roots.getMessageById(reply.messageId).data
-                    console.log("View rel",longDid);
+                    console.log("ChatScreen - View rel",longDid);
                     showQR(navigation,longDid)
                 } else if(reply.value.startsWith(roots.MessageType.PROMPT_ACCEPT_CREDENTIAL)) {
                     console.log("ChatScreen - process quick reply for accepting credential")
@@ -171,10 +171,9 @@ export default function ChatScreen({ route, navigation }) {
                         const res = await roots.processRevokeCredential(chat,reply)
                         console.log("ChatScreen - credential revoked?",res)
                     } else if (reply.value.endsWith(roots.CRED_VIEW)) {
-                        console.log("ChatScreen - quick reply view credential")
-                        const iCredJson = await roots.getIssuedCredByMsgId(reply.messageId)
-                        const vCred = JSON.parse(iCredJson).verifiedCredential
-                        navigation.navigate('Credential Details', { cred: getCredDetails(vCred)})
+                        console.log("ChatScreen - quick reply view issued credential")
+                        const vCred = roots.processViewCredential(reply.messageId)
+                        navigation.navigate('Credential Details', { cred: cred.getCredDetails(vCred.verifiedCredential)})
                     }
                 }
                 else if(reply.value.startsWith(roots.MessageType.PROMPT_OWN_CREDENTIAL)) {
@@ -185,10 +184,9 @@ export default function ChatScreen({ route, navigation }) {
                         console.log("ChatScreen - verifying credential with hash",credHash)
                         roots.processVerifyCredential(chat,credHash)
                     } else if (reply.value.endsWith(roots.CRED_VIEW)) {
-                        console.log("ChatScreen - quick reply view credential")
-                        const iCredJson = await roots.getImportedCredByMsgId(reply.messageId)
-                        const vCred = JSON.parse(iCredJson).verifiedCredential
-                        navigation.navigate('Credential Details', { cred: getCredDetails(vCred)})
+                        console.log("ChatScreen - quick reply view imported credential")
+                        const vCred = roots.processViewCredential(reply.messageId)
+                        navigation.navigate('Credential Details', { cred: cred.getCredDetails(vCred.verifiedCredential)})
                     }
                 } else {
                     console.log("ChatScreen - reply value not recognized, was",chat.id,reply.value);
@@ -215,17 +213,17 @@ export default function ChatScreen({ route, navigation }) {
 //  }
 
     function processBubbleClick(context,message) {
-        console.log("bubble pressed",context,message)
+        console.log("ChatScreen - bubble pressed",context,message)
         switch(message.type) {
             case roots.MessageType.BLOCKCHAIN_URL:
-                console.log("Clicked blockchain url msg",message.data)
+                console.log("ChatScreen - Clicked blockchain url msg",message.data)
                 Linking.openURL(message.data)
                 break;
             case roots.MessageType.DID:
-                console.log("Clickable did msg",message.data)
+                console.log("ChatScreen - Clickable did msg",message.data)
                 showQR(navigation,message.data)
             default:
-                console.log("Clicked non-active message type",message.type)
+                console.log("ChatScreen - Clicked non-active message type",message.type)
         }
     }
 
@@ -363,7 +361,7 @@ export default function ChatScreen({ route, navigation }) {
 //  }
 
   if (loading) {
-    console.log("Loading....")
+    console.log("ChatScreen - Loading....")
     return <Loading />;
   }
 

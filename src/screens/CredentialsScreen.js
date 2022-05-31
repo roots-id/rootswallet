@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import { addRefreshTrigger, credLogo, decodeCredential, getCredDetails, getCredentials, showCred} from '../credentials'
+import { addRefreshTrigger, credLogo, decodeCredential, getCredDetails, showCred} from '../credentials'
 import { getImportedCredentials, getChatItem } from '../roots'
 import styles from "../styles/styles";
 
