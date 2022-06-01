@@ -8,11 +8,11 @@ import {QuickReplies, Reply} from 'react-native-gifted-chat';
 import * as store from '../store'
 import {replaceSpecial} from '../utils'
 import {credential, issuedCredential, message} from "../models";
-import {updateContact} from "../relationships";
-import {getCredByAlias, getCredDetails, getIssuedCredByAlias, getIssuedCredByHash} from "../credentials";
+import { getCredDetails, getIssuedCredByHash} from "../credentials";
+import {hasNewRels} from "../relationships";
 
 //ppp-node-test
-export const DEFAULT_PRISM_HOST = "ppp.atalaprism.io"
+export const DEFAULT_PRISM_HOST = "ppp-node-test.atalaprism.io"
 
 //msg types
 export enum MessageType {
@@ -151,37 +151,40 @@ async function loadItems(regex: RegExp) {
     }
 }
 
-export async function handleNewData(jsonData: string) {
+export async function handleNewData(jsonData: string): Promise<boolean|undefined> {
     const obj = JSON.parse(jsonData)
     if ((obj as models.credential).verifiedCredential) {
         console.log("handling scanned cred", jsonData)
-        return "VCs"
+        return true
     } else if ((obj as models.contact).displayName) {
         console.log("handling scanned rel", jsonData)
         const rooted = await initRoot(obj.displayName, contact.YOU_ALIAS, obj.did, obj.displayName, obj.displayPictureUrl)
         if (rooted) {
-            const chat = await getChatByRel(obj);
-            const msg = await sendMessage(chat, "To celebrate your new contact you are issuing "
-                + obj.displayName + " a verifiable credential", MessageType.TEXT, contact.ROOTS_BOT)
-            if (msg && isDemo()) {
-                const iCred = await issueDemoContactCredential(chat, msg.id)
-                if (iCred) {
-                    //const credPubTx = getCredPubTx(pubDid[walletSchema.DID_ALIAS],credIssueAlias)
-                    const credSuccess = await sendMessage(chat, "You have issued " + obj.displayName + " a verifiable credential!",
-                        MessageType.PROMPT_ISSUED_CREDENTIAL, contact.ROOTS_BOT, false, iCred.credentialHash)
-//                     const credLinkMsg = await sendMessage(chat,BLOCKCHAIN_URL_MSG,
-//                         MessageType.BLOCKCHAIN_URL,rel.PRISM_BOT,false,credPubTx.url)
-                } else {
-                    console.error("roots - unable to issue cred", chat, "for msg", msg.id)
-                }
-            }
-        } else {
-            console.error("Could not root with ", obj.displayName)
+//             const chat = await getChatByRel(obj);
+//             const msg = await sendMessage(chat, "To celebrate your new contact you are issuing "
+//                 + obj.displayName + " a verifiable credential", MessageType.TEXT, contact.ROOTS_BOT)
+//             if (msg && isDemo()) {
+//                 const iCred = await issueDemoContactCredential(chat, msg.id)
+//                 if (iCred) {
+//                     //const credPubTx = getCredPubTx(pubDid[walletSchema.DID_ALIAS],credIssueAlias)
+//                     const credSuccess = await sendMessage(chat, "You have issued " + obj.displayName + " a verifiable credential!",
+//                         MessageType.PROMPT_ISSUED_CREDENTIAL, contact.ROOTS_BOT, false, iCred.credentialHash)
+// //                     const credLinkMsg = await sendMessage(chat,BLOCKCHAIN_URL_MSG,
+// //                         MessageType.BLOCKCHAIN_URL,rel.PRISM_BOT,false,credPubTx.url)
+//                 } else {
+//                     console.error("roots - unable to issue cred", chat, "for msg", msg.id)
+//                 }
+//             }
+//         } else {
+//             console.error("Could not root with ", obj.displayName)
+//         }
+            return true;
         }
     } else {
         console.error("Did not recognize scanned data", jsonData)
+        return false;
     }
-    return "Relationships"
+
 }
 
 //----------------- Prism ----------------------
@@ -211,6 +214,7 @@ export async function initRoot(alias: string, fromDidAlias: string, toDid: strin
             //TODO add this back
             //await contact.addDidDoc(con)
         }
+        hasNewRels()
         return true;
     } catch (error) {
         console.error("Failed to initRoot", error, error.stack)

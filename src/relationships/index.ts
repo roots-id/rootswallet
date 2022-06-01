@@ -27,7 +27,7 @@ const IOG_TECH = "did:roots:iogtech1";
 const ROOTSID = "did:roots:rootsid";
 //password is 'a'
 const LANCE = "did:prism:c3830f7f8441ed7dfe0cc26c38be2da21c43cf7fa5e78f498ebfb4d5028c776b:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQMdkSItMex2CvyD6p4idSylxEYS1l5CEIowmo0GjnTeYBI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhAqRnmPJdAwnQrBuBR8ewEN84D9mdNvLFOJbFH8gPNlYKEj8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiECeT-pVl-LayXPVemYBoIAATUJf00Q2exbtJIlmEAdXbQ";
-const TONY = "did:roots:tony";
+const TONY = "did:prism:4bf45ec2f222b5e1e6e2c90310742650623ceaf5102088f6181904907d8cbe78:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQPia7nkvQ_W0AS0CjsytT7edGdexYOh69g2SId9Yo1EQBI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhAloWhDDh4LOINfHsTaUI4rsByRrv8mkTl4zrxOD2VmEiEj8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiEDz4g5LHC_9Dtwvc1WiUl1qK0nhUVfz6pVx-ObuFnhIzo";
 const DARRELL = "did:prism:4ae7d4dbd6da5f84447295dd8a13b3a5d492a39c8b8ac789e7f448def37abc6f:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQN9Sdkyn-sKjLPNSsDBQlFUTiKI5HZcA5shofvNW88ZSBI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhAzyaj2ahjGAx3jRtDggBgDVq_TSkz6wYg2Qgtp1AVbhREj8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiECxG5IzkkIhF5d7tCB1hwza_VpXI58rNklVe3f_iskw-A";
 
 // roots - getRootsWallet has wallet [object Object]
@@ -378,7 +378,6 @@ export async function createRelItem(alias: string, name: string, pic=personLogo,
             const relItem = createRel(alias, name, pic,did)
             const result = updateContact(relItem)
             logger("rels - created rel",alias,"?",result)
-            hasNewRels()
             return result;
         }
     } catch(error) {

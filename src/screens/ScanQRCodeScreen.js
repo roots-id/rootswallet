@@ -25,20 +25,24 @@ export default function ScanQRCodeScreen({ route, navigation }) {
   const { current } = useCardAnimation();
   let interval;
 
-    const handleDemo = () => {
-      if(isDemo()) {
-        console.log("scan qr - pretending to scan with demo data")
-        clearInterval(interval)
-        setScanned(true)
-        const demoData = getDemoRel()
-        console.log("scan qr - pretend object has keys",Object.keys(demoData))
-        const jsonData = JSON.stringify(demoData)
-        console.log("scan qr - pretend data is",jsonData)
-        handleNewData(jsonData)
-        if(navigation.canGoBack()) {
-            navigation.goBack()
+    const handleDemo = async () => {
+        if (isDemo()) {
+            console.log("scan qr - pretending to scan with demo data")
+            clearInterval(interval)
+            setScanned(true)
+            const demoData = getDemoRel()
+            console.log("scan qr - pretend object has keys", Object.keys(demoData))
+            const jsonData = JSON.stringify(demoData)
+            console.log("scan qr - pretend data is", jsonData)
+            const success = await handleNewData(jsonData)
+            if (success) {
+                if (navigation.canGoBack()) {
+                    navigation.goBack()
+                }
+            } else if (navigation.canGoBack()) {
+                navigation.goBack()
+            }
         }
-      }
     }
 
     useEffect(async () => {
