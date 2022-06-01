@@ -10,7 +10,7 @@ export const credLogo = require('../assets/vc.png');
 
 export const refreshTriggers: {(): void}[] = []
 
-export async function addImportedCredential(credHash: string, wal: models.wallet): Promise<boolean|undefined> {
+export async function addImportedCredential(credHash: string, credAlias: string, wal: models.wallet): Promise<boolean|undefined> {
     logger("creds - adding imported credential",credHash)
     const iCredJson = store.getItem(credHash);
     logger("creds - adding import credential found in storage",iCredJson)
@@ -21,7 +21,9 @@ export async function addImportedCredential(credHash: string, wal: models.wallet
         const alreadyExists = getImportedCredByHash(credHash, wal)
         if (!alreadyExists) {
             logger("creds - adding imported credential", credHash, iCredJson)
-            const importedCred = (iCred as models.credential)
+            const importedCred = {alias: credAlias,
+                verifiedCredential: iCred.verifiedCredential,
+            }
             if(!wal.importedCredentials) {
                 wal.importedCredentials = []
             }
@@ -153,6 +155,25 @@ export function getImportedCredByHash(credHash: string, wal: models.wallet): mod
     }
 }
 
+export function getImportedCreds(wal: models.wallet): models.credential[] {
+    logger("roots - Getting imported credentials")
+    let result: credential[] = []
+    logger("roots - current wal has keys",Object.keys(wal))
+    if(wal["importedCredentials"]) {
+        const creds = wal["importedCredentials"];
+        if(creds && creds.length > 0) {
+            logger("roots - getting imported creds",creds.length)
+            creds.forEach(cred => logger("roots - imported cred",JSON.stringify(cred)))
+            result = creds
+        } else {
+            logger("roots - no imported creds found")
+        }
+    } else {
+        logger("roots - No imported credentials")
+    }
+    return result;
+}
+
 export function getIssuedCredByAlias(credAlias: string, wal: models.wallet): models.issuedCredential|undefined {
     logger("creds - Getting imported credential",credAlias)
 
@@ -270,12 +291,14 @@ export async function revokeCredential(issuedCred: models.issuedCredential, wal:
     }
 }
 
-export async function verifyCredentialByHash(credHash: string, wal: models.wallet) {
+export async function verifyCredentialByHash(credHash: string, wal: models.wallet): Promise<string|undefined> {
     logger("Verifying credential",credHash)
     const cred = getCredByHash(credHash, wal)
     if(cred) {
         console.log("creds - Got cred for verification",JSON.stringify(cred));
-        const messageArray = await PrismModule.verifyCred(JSON.stringify(wal),cred.alias, !isIssuedCred(cred))
+        const issued = isIssuedCred(cred)
+        logger("creds - is cred issued?",issued)
+        const messageArray = await PrismModule.verifyCred(JSON.stringify(wal),cred.alias, !issued)
         return messageArray
     } else{
         console.error("could not verify credential by hash, no cred found",credHash)

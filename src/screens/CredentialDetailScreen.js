@@ -17,14 +17,12 @@ import {logger} from '../logging';
 import { Divider, IconButton, List, Title,ToggleButton } from 'react-native-paper';
 import styles from "../styles/styles";
 
-import {RelRow} from '../components/RelRow'
-import { credLogo, decodeCredential, getShareableCred,isShareable } from '../credentials'
+import RelRow from '../components/RelRow'
+import { credLogo, verifyCredentialByHash } from '../credentials'
 import { showQR } from '../qrcode'
-import { getShareableRelByAlias} from '../relationships'
-import { getImportedCredByHash, verifyCredentialByHash } from '../roots'
+import * as roots from '../roots'
 import * as utils from '../utils'
 
-import IconActions from '../components/IconActions';
 
 export default function CredentialDetailScreen({ route, navigation }) {
     console.log("cred details - route params are",JSON.stringify(route.params))
@@ -39,7 +37,7 @@ export default function CredentialDetailScreen({ route, navigation }) {
     }, []);
 
     async function updateVerification() {
-        const result = JSON.parse(await verifyCredentialByHash(cred.hash));
+        const result = JSON.parse(await verifyCredentialByHash(cred.hash,roots.getRootsWallet(roots.TEST_WALLET_NAME)));
         logger("cred details - verify cred result",result)
         if(result && result.length <= 0) {
             setVerified("check-bold")

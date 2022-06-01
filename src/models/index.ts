@@ -60,8 +60,6 @@ export type contactShareable = {
 
 export type credential = {
     alias: string,
-    batchId: string,
-    claim: claim,
     verifiedCredential: vc,
 }
 
@@ -79,6 +77,8 @@ export type didDocument = {
 }
 
 export interface issuedCredential extends credential {
+    batchId: string,
+    claim: claim,
     credentialHash: string,
     issuingDidAlias: string,
     operationHash: string,
@@ -102,7 +102,7 @@ export type message = {
     createdTime: number,
     rel: string,
     system: boolean,
-    data: object,
+    data: any,
     quickReplies?: QuickReplies,
 }
 

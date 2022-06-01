@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import { addRefreshTrigger, credLogo, decodeCredential, getCredDetails, showCred} from '../credentials'
-import { getImportedCredentials, getChatItem } from '../roots'
+import {addRefreshTrigger, credLogo, decodeCredential, getCredDetails, getImportedCreds} from '../credentials'
+import * as roots from '../roots'
 import styles from "../styles/styles";
 
 const CredentialsScreen = ({route,navigation}) => {
@@ -13,7 +13,7 @@ const CredentialsScreen = ({route,navigation}) => {
 
     function loadCreds() {
         const credObjs = []
-        getImportedCredentials().forEach((encodedCred) => {
+        getImportedCreds(roots.getRootsWallet(roots.TEST_WALLET_NAME)).forEach((encodedCred) => {
             credObjs.push(getCredDetails(encodedCred.verifiedCredential))
         })
         console.log("cred screen - setting creds",credObjs.length)
@@ -42,7 +42,7 @@ const CredentialsScreen = ({route,navigation}) => {
                     <React.Fragment>
                         <View style={{flex: 1,flexDirection:'row',}}>
                             <SafeAreaView>
-                            <TouchableOpacity onPress={() => showCred(navigation,{cred: item})}>
+                            <TouchableOpacity onPress={() => roots.showCred(navigation,item.hash)}>
                                 <Image source={credLogo}
                                     style={{
                                       width:65,

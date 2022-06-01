@@ -21,11 +21,14 @@ const RelationshipsScreen = ({route,navigation}) => {
         addRefreshTrigger(()=>{
             console.log("toggling refresh")
             setRefresh(!refresh)
-            setRels(
-                getRelationships(walletName).filter(rel => rel.displayName !== PRISM_BOT && rel.displayName !== ROOTS_BOT)
-            )
         })
     },[])
+
+    useEffect(() => {
+        setRels(
+            getRelationships(walletName).filter(rel => rel.displayName !== PRISM_BOT && rel.displayName !== ROOTS_BOT)
+        )
+    },[refresh])
 
     return (
         <View style={styles.container}>
