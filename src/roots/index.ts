@@ -9,10 +9,10 @@ import * as store from '../store'
 import {replaceSpecial} from '../utils'
 import {credential, issuedCredential, message} from "../models";
 import {updateContact} from "../relationships";
-import {getCredByAlias, getIssuedCredByAlias, getIssuedCredByHash} from "../credentials";
+import {getCredByAlias, getCredDetails, getIssuedCredByAlias, getIssuedCredByHash} from "../credentials";
 
 //ppp-node-test
-export const DEFAULT_PRISM_HOST = "ppp-node-test.atalaprism.io"
+export const DEFAULT_PRISM_HOST = "ppp.atalaprism.io"
 
 //msg types
 export enum MessageType {
@@ -175,15 +175,13 @@ export async function handleNewData(jsonData: string) {
                     console.error("roots - unable to issue cred", chat, "for msg", msg.id)
                 }
             }
-            return "Relationships"
         } else {
             console.error("Could not root with ", obj.displayName)
-            return "Relationships"
         }
     } else {
         console.error("Did not recognize scanned data", jsonData)
-        return "Relationships"
     }
+    return "Relationships"
 }
 
 //----------------- Prism ----------------------
@@ -209,9 +207,9 @@ export async function initRoot(alias: string, fromDidAlias: string, toDid: strin
         logger("roots - getting rel DID document")
         if (con && alias !== contact.PRISM_BOT && alias !== contact.ROOTS_BOT) {
             logger("roots - creating chat for rel", con.id)
-            const chat = await createChat(alias, fromDidAlias, toDid, display)
-
-            await contact.addDidDoc(con)
+            await createChat(alias, fromDidAlias, toDid, display)
+            //TODO add this back
+            //await contact.addDidDoc(con)
         }
         return true;
     } catch (error) {
@@ -933,7 +931,13 @@ export async function processVerifyCredential(chat: models.chat, credHash: strin
 
 export function showCred(navigation: any, credHash: string) {
     console.log("cred - show cred", credHash)
-    navigation.navigate('Credential Details', {cred: cred.getCredByHash(credHash, currentWal)})
+    const iCred = cred.getCredByHash(credHash, currentWal)
+    if(iCred) {
+        const credDetails = getCredDetails(iCred.verifiedCredential)
+        navigation.navigate('Credential Details', {cred: credDetails})
+    } else {
+        console.error("Cannot show cred, cred not found", credHash)
+    }
 }
 
 // ------------------ Session ---------------

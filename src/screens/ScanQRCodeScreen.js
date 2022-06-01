@@ -50,10 +50,10 @@ export default function ScanQRCodeScreen({ route, navigation }) {
     },[])
 
 
-    const handleBarCodeScanned = ({ type, data }) => {
+    const handleBarCodeScanned = async ({ type, data }) => {
         setScanned(true);
         clearInterval(interval)
-        handleNewData(data)
+        await handleNewData(data)
         if(navigation.canGoBack()) {
             navigation.goBack()
         }
@@ -115,7 +115,7 @@ export default function ScanQRCodeScreen({ route, navigation }) {
                           height: 250,
                         }}>
           <BarCodeScanner
-            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+            onBarCodeScanned={async () => {(scanned ? undefined : await handleBarCodeScanned)}}
             style={StyleSheet.absoluteFillObject}
           />
           {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />}

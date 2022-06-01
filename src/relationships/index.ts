@@ -25,7 +25,8 @@ export const PRISM_BOT = "PrismHelper";
 export const LIBRARY_BOT = "did:roots:librarybot1";
 const IOG_TECH = "did:roots:iogtech1";
 const ROOTSID = "did:roots:rootsid";
-const LANCE = "did:roots:lance";
+//password is 'a'
+const LANCE = "did:prism:c3830f7f8441ed7dfe0cc26c38be2da21c43cf7fa5e78f498ebfb4d5028c776b:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQMdkSItMex2CvyD6p4idSylxEYS1l5CEIowmo0GjnTeYBI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhAqRnmPJdAwnQrBuBR8ewEN84D9mdNvLFOJbFH8gPNlYKEj8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiECeT-pVl-LayXPVemYBoIAATUJf00Q2exbtJIlmEAdXbQ";
 const TONY = "did:roots:tony";
 const DARRELL = "did:prism:4ae7d4dbd6da5f84447295dd8a13b3a5d492a39c8b8ac789e7f448def37abc6f:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQN9Sdkyn-sKjLPNSsDBQlFUTiKI5HZcA5shofvNW88ZSBI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhAzyaj2ahjGAx3jRtDggBgDVq_TSkz6wYg2Qgtp1AVbhREj8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiECxG5IzkkIhF5d7tCB1hwza_VpXI58rNklVe3f_iskw-A";
 

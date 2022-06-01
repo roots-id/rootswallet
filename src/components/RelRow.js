@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import {getRelationships, getViewableRelRow, addRefreshTrigger, showRel, YOU_ALIAS,
-    PRISM_BOT, ROOTS_BOT} from '../relationships'
+import { showRel } from '../relationships'
 import Relationship from '../models/relationship'
 import { getChatItem } from '../roots'
 import styles from "../styles/styles";

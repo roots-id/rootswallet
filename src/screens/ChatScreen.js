@@ -137,7 +137,7 @@ export default function ChatScreen({ route, navigation }) {
 
     async function handleSend(pendingMsgs) {
         console.log("ChatScreen - handle send",pendingMsgs)
-        const result = await roots.sendMessages(chat, pendingMsgs, roots.MessageType.TEXT, getContactByAlias(YOU_ALIAS));
+        const result = await roots.sendMessages(chat, pendingMsgs.map(msg => msg.text), roots.MessageType.TEXT, YOU_ALIAS);
 //        await setMessages((prevMessages) => GiftedChat.append(prevMessages, pendingMsgs));
     }
 
