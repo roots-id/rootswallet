@@ -12,8 +12,8 @@ import {useTheme} from '@react-navigation/native';
 import {useCardAnimation} from '@react-navigation/stack';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
-import {getDemoRel} from '../relationships';
-import {isDemo, handleNewData} from '../roots'
+import {getDemoRel, YOU_ALIAS} from '../relationships';
+import {getDid, handleNewData, isDemo } from '../roots'
 
 //import styles from "../styles/styles";
 
@@ -38,7 +38,7 @@ export default function ScanQRCodeScreen({route, navigation}) {
                 demoData = getDemoRel()
             } else {
                 console.log("scan qr - getting credential demo data")
-                demoData = getDemoCred()
+                demoData = getDemoCred(getDid(YOU_ALIAS))
             }
             console.log("scan qr - pretend object has keys", Object.keys(demoData))
             const jsonData = JSON.stringify(demoData)

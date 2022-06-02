@@ -1,33 +1,39 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import {addRefreshTrigger, credLogo, decodeCredential, getCredDetails, getImportedCreds} from '../credentials'
+import {
+    addRefreshTrigger,
+    credLogo,
+    decodeCredential,
+    getCredDetails,
+    getImportedCreds,
+    hasNewCreds
+} from '../credentials'
+import * as models from '../models'
 import * as roots from '../roots'
 import styles from "../styles/styles";
 
-const CredentialsScreen = ({route,navigation}) => {
+const CredentialsScreen = ({route ,navigation}) => {
     console.log("creds screen - params",route.params)
     const {walletName} = route.params
     const [refresh,setRefresh] = useState(true)
-    const [creds,setCreds] = useState([])
-
-    function loadCreds() {
-        const credObjs = []
-        getImportedCreds(roots.getRootsWallet(roots.TEST_WALLET_NAME)).forEach((encodedCred) => {
-            credObjs.push(getCredDetails(encodedCred.verifiedCredential))
-        })
-        console.log("cred screen - setting creds",credObjs.length)
-        return credObjs;
-    }
+    const emptyCredDeets: models.credentialDetails[] = []
+    const [creds,setCreds] = useState(emptyCredDeets)
 
     useEffect(() => {
-        setCreds(loadCreds())
         addRefreshTrigger(()=>{
             console.log("creds screen - toggling refresh")
+            const iCreds = getImportedCreds(roots.getRootsWallet(walletName))
+            console.log("creds screen - got imported creds",iCreds.length)
+            const credDeets = iCreds.map((encodedCred) => {
+                return getCredDetails(encodedCred.verifiedCredential)
+            })
+            console.log("creds screen - got cred deets",credDeets.length)
+            setCreds(credDeets);
+            console.log("creds screen - set creds size",creds.length)
             setRefresh(!refresh)
-            setCreds(loadCreds())
-            console.log("creds screen - Creds size",creds.length)
         })
+        hasNewCreds()
     },[])
 
     return (

@@ -386,9 +386,9 @@ export async function createRelItem(alias: string, name: string, pic=personLogo,
     }
 }
 
-export function hasNewRels() {
+export async function hasNewRels() {
     logger("rels - triggering rel refresh",refreshTriggers.length)
-   refreshTriggers.forEach(trigger=>trigger())
+    refreshTriggers.forEach(trigger=>trigger())
 }
 
 export function getRelationships() {

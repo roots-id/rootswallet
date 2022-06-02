@@ -4,7 +4,7 @@ export function replaceSpecial(alias: string) {
 
 export function recursivePrint(val: any, indent="\t") {
     let printMe = ""
-    if(val) {
+    if(val !== undefined) {
         if (val.constructor === Object) {
             //console.log("utils - recursive printing object",val)
             indent = indent + "\t"

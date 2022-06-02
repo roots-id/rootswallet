@@ -1,61 +1,78 @@
-import { logger } from '../logging'
+import {logger} from '../logging'
 import * as models from '../models'
 import {PrismModule} from "../prism";
-import {credential, issuedCredential} from "../models";
+import {credential, decodedSignedCredential, issuedCredential} from "../models";
 import * as store from "../store";
 import {asContactShareable} from "../relationships";
+import {updateWallet} from "../roots";
 
 export const credLogo = require('../assets/vc.png');
 
 //export const allCredsRegex = new RegExp(models.getStorageKey("",models.ModelType.CREDENTIAL)+'*')
 
-export const refreshTriggers: {(): void}[] = []
+export const refreshTriggers: { (): void }[] = []
 
-export async function addImportedCredential(credHash: string, credAlias: string, wal: models.wallet): Promise<boolean|undefined> {
-    logger("creds - adding imported credential",credHash)
-    const iCredJson = store.getItem(credHash);
-    logger("creds - adding import credential found in storage",iCredJson)
-    if (iCredJson) {
-        console.log("creds - parsing added imported cred json",iCredJson)
-        const iCred = JSON.parse(iCredJson)
-        const credHash = iCred.verifiedCredential.proof.hash
-        const alreadyExists = getImportedCredByHash(credHash, wal)
-        if (!alreadyExists) {
-            logger("creds - adding imported credential", credHash, iCredJson)
-            const importedCred = {alias: credAlias,
-                verifiedCredential: iCred.verifiedCredential,
-            }
-            if(!wal.importedCredentials) {
-                wal.importedCredentials = []
-            }
-            wal.importedCredentials.push(importedCred)
-            return true
-        } else {
-            logger("creds - Credential alias already in use", credHash)
+export async function addImportedCredential(iCred: models.credential, wal: models.wallet): Promise<boolean | undefined> {
+
+    const credHash = iCred.verifiedCredential.proof.hash
+    const alreadyExists = getImportedCredByHash(credHash, wal)
+    if (!alreadyExists) {
+        logger("creds - adding imported credential", credHash, JSON.stringify(iCred))
+        const importedCred = {
+            alias: iCred.alias,
+            verifiedCredential: iCred.verifiedCredential,
         }
+        if (!wal.importedCredentials) {
+            wal.importedCredentials = []
+        }
+        wal.importedCredentials.push(importedCred)
+        const newWalJson = JSON.stringify(wal)
+        logger("roots - imported credential into wallet", newWalJson)
+        const savedWal = await updateWallet(wal._id, wal.passphrase, newWalJson)
+        if (savedWal) {
+            logger("roots - imported credential", credHash)
+        } else {
+            console.error("Could not import credential, unable to save wallet", credHash)
+        }
+        hasNewCreds()
+        return true
     } else {
-        console.error("creds - Credential not found in storage", credHash)
+        logger("creds - Credential alias already in use", credHash)
     }
 }
 
-export function addRefreshTrigger(trigger: {(): void}) {
+export function addRefreshTrigger(trigger: { (): void }) {
     logger("creds - adding refresh trigger")
     refreshTriggers.push(trigger)
 }
 
-function atob(data: string) { return new Buffer(data, "base64").toString("binary"); }
-function btoa(data: string) { return new Buffer(data, "binary").toString("base64"); }
+function atob(data: string) {
+    return new Buffer(data, "base64").toString("binary");
+}
 
-export function decodeCredential(encodedSignedCredential: string) {
-    console.log("creds - decoding cred",encodedSignedCredential)
+function btoa(data: string) {
+    return new Buffer(data, "binary").toString("base64");
+}
+
+export function decodeCredential(encodedSignedCredential: string): models.decodedSignedCredential {
+    console.log("creds - decoding cred", encodedSignedCredential)
     const credValues = encodedSignedCredential.toString().split('.')
-    credValues.forEach((val)=>console.log("val is",val))
-    console.log("creds - decoding cred values",credValues)
+    credValues.forEach((val) => console.log("val is", val))
+    console.log("creds - decoding cred values", credValues)
     //decode and replace any null characters
     const decoded = atob(credValues[0]).replace("/\0/g", "")
     //const decoded = PrismModule.issueCred(getWalletJson(currentWal._id), didAlias, credJson);cred
-    logger("creds - decoded cred value",decoded)
-    return decoded
+    logger("creds - decoded cred value", decoded)
+    const decodedObj = JSON.parse(decoded)
+    return decodedObj
+}
+
+export function encodeCredential(cred: models.decodedSignedCredential): string {
+    const credJson = JSON.stringify(cred)
+    console.log("creds - encoding cred", credJson)
+    const encoded = btoa(credJson)
+    logger("creds - encoded cred", encoded)
+    return encoded;
 }
 
 // export function getCredentials() {
@@ -66,92 +83,88 @@ export function decodeCredential(encodedSignedCredential: string) {
 //     return creds;
 // }
 
-export function getCredByAlias(credAlias: string,wal: models.wallet) {
-    const imported = getImportedCredByAlias(credAlias,wal)
-    if(imported) {
-        logger("creds - got cred (imported) by hash",credAlias)
+export function getCredByAlias(credAlias: string, wal: models.wallet) {
+    const imported = getImportedCredByAlias(credAlias, wal)
+    if (imported) {
+        logger("creds - got cred (imported) by hash", credAlias)
         return imported;
     }
-    const issued = getIssuedCredByAlias(credAlias,wal)
-    if(issued) {
-        logger("creds - got cred (issued) by hash",credAlias)
+    const issued = getIssuedCredByAlias(credAlias, wal)
+    if (issued) {
+        logger("creds - got cred (issued) by hash", credAlias)
         return issued;
     }
 
-    console.warn("No imported or issued cred hash found",credAlias)
+    console.warn("No imported or issued cred hash found", credAlias)
 }
 
-export function getCredByHash(credHash: string,wal: models.wallet) {
-    const imported = getImportedCredByHash(credHash,wal)
-    if(imported) {
-        logger("creds - got cred (imported) by hash",credHash)
+export function getCredByHash(credHash: string, wal: models.wallet) {
+    const imported = getImportedCredByHash(credHash, wal)
+    if (imported) {
+        logger("creds - got cred (imported) by hash", credHash)
         return imported;
     }
-    const issued = getIssuedCredByHash(credHash,wal)
-    if(issued) {
-        logger("creds - got cred (issued) by hash",credHash)
+    const issued = getIssuedCredByHash(credHash, wal)
+    if (issued) {
+        logger("creds - got cred (issued) by hash", credHash)
         return issued;
     }
 
-    console.warn("No imported or issued cred hash found",credHash)
+    console.warn("No imported or issued cred hash found", credHash)
 }
 
-export function getCredDetails(encodedCred: models.vc) {
-    console.log("creds - decoding encoded cred",encodedCred)
+export function getCredDetails(encodedCred: models.vc): models.credentialDetails {
+    console.log("creds - decoding encoded cred", encodedCred)
     const decodedCred = decodeCredential(encodedCred.encodedSignedCredential)
-    console.log("creds - decoded cred",decodedCred)
-    const credObj = JSON.parse(decodedCred)
-    console.log("cred - decoded cred obj has eys",Object.keys(credObj))
+    console.log("cred - decoded cred obj has eys", Object.keys(decodedCred))
     const credHash = encodedCred.proof.hash
-    console.log("cred - hash for decoded cred",credHash)
-    return {hash: credHash, encoded: encodedCred.encodedSignedCredential, decoded: credObj}
+    console.log("cred - hash for decoded cred", credHash)
+    return {hash: credHash, encoded: encodedCred.encodedSignedCredential, decoded: decodedCred}
 }
 
-export function getImportedCredByAlias(credAlias: string, wal: models.wallet): models.credential|undefined {
-    logger("creds - Getting imported credential",credAlias)
+export function getImportedCredByAlias(credAlias: string, wal: models.wallet): models.credential | undefined {
+    logger("creds - Getting imported credential", credAlias)
 
-    if(wal.importedCredentials) {
+    if (wal.importedCredentials) {
         const iCred = wal.importedCredentials.find((cred) => {
-            if(cred.alias === credAlias) {
-                logger("creds - Found cred alias",credAlias)
+            if (cred.alias === credAlias) {
+                logger("creds - Found cred alias", credAlias)
                 return true
-            }
-            else {
-                logger("creds - cred alias",cred.alias,"does not match",credAlias)
+            } else {
+                logger("creds - cred alias", cred.alias, "does not match", credAlias)
                 return false
             }
         })
-        if(iCred) {
-            logger("creds - got imported cred w/keys",Object.keys(iCred))
+        if (iCred) {
+            logger("creds - got imported cred w/keys", Object.keys(iCred))
             return iCred
         }
     } else {
-        logger("creds - No imported credential hash",credAlias)
+        logger("creds - No imported credential hash", credAlias)
         return;
     }
 }
 
-export function getImportedCredByHash(credHash: string, wal: models.wallet): models.credential|undefined {
-    logger("creds - Getting imported credential",credHash)
+export function getImportedCredByHash(credHash: string, wal: models.wallet): models.credential | undefined {
+    logger("creds - Getting imported credential", credHash)
 
-    if(wal.importedCredentials) {
+    if (wal.importedCredentials) {
         const iCred = wal.importedCredentials.find((cred) => {
             const curCredHash = cred.verifiedCredential.proof.hash
-            if(curCredHash === credHash) {
-                logger("creds - Found cred hash",curCredHash)
+            if (curCredHash === credHash) {
+                logger("creds - Found cred hash", curCredHash)
                 return true
-            }
-            else {
-                logger("creds - cred hash",curCredHash,"does not match",credHash)
+            } else {
+                logger("creds - cred hash", curCredHash, "does not match", credHash)
                 return false
             }
         })
-        if(iCred) {
-            logger("creds - got imported cred w/keys",Object.keys(iCred))
+        if (iCred) {
+            logger("creds - got imported cred w/keys", Object.keys(iCred))
             return iCred
         }
     } else {
-        logger("creds - No imported credential hash",credHash)
+        logger("creds - No imported credential hash", credHash)
         return;
     }
 }
@@ -159,12 +172,12 @@ export function getImportedCredByHash(credHash: string, wal: models.wallet): mod
 export function getImportedCreds(wal: models.wallet): models.credential[] {
     logger("roots - Getting imported credentials")
     let result: credential[] = []
-    logger("roots - current wal has keys",Object.keys(wal))
-    if(wal["importedCredentials"]) {
+    logger("roots - current wal has keys", Object.keys(wal))
+    if (wal["importedCredentials"]) {
         const creds = wal["importedCredentials"];
-        if(creds && creds.length > 0) {
-            logger("roots - getting imported creds",creds.length)
-            creds.forEach(cred => logger("roots - imported cred",JSON.stringify(cred)))
+        if (creds && creds.length > 0) {
+            logger("roots - getting imported creds", creds.length)
+            creds.forEach(cred => logger("roots - imported cred", JSON.stringify(cred)))
             result = creds
         } else {
             logger("roots - no imported creds found")
@@ -175,57 +188,55 @@ export function getImportedCreds(wal: models.wallet): models.credential[] {
     return result;
 }
 
-export function getIssuedCredByAlias(credAlias: string, wal: models.wallet): models.issuedCredential|undefined {
-    logger("creds - Getting imported credential",credAlias)
+export function getIssuedCredByAlias(credAlias: string, wal: models.wallet): models.issuedCredential | undefined {
+    logger("creds - Getting imported credential", credAlias)
 
-    if(wal.issuedCredentials) {
+    if (wal.issuedCredentials) {
         const iCred = wal.issuedCredentials.find((cred) => {
-            if(cred.alias === credAlias) {
-                logger("creds - Found cred alias",credAlias)
+            if (cred.alias === credAlias) {
+                logger("creds - Found cred alias", credAlias)
                 return true
-            }
-            else {
-                logger("creds - cred alias",cred.alias,"does not match",credAlias)
+            } else {
+                logger("creds - cred alias", cred.alias, "does not match", credAlias)
                 return false
             }
         })
-        if(iCred) {
-            logger("creds - got imported cred w/keys",Object.keys(iCred))
+        if (iCred) {
+            logger("creds - got imported cred w/keys", Object.keys(iCred))
             return iCred
         }
     } else {
-        logger("creds - No imported credential alias",credAlias)
+        logger("creds - No imported credential alias", credAlias)
         return;
     }
 }
 
-export function getIssuedCredByHash(credHash: string, wal: models.wallet): models.issuedCredential|undefined {
-    logger("creds - Getting issued credential",credHash)
+export function getIssuedCredByHash(credHash: string, wal: models.wallet): models.issuedCredential | undefined {
+    logger("creds - Getting issued credential", credHash)
 
-    if(wal.issuedCredentials) {
+    if (wal.issuedCredentials) {
         const iCred = wal.issuedCredentials.find((cred) => {
             const curCredHash = cred.verifiedCredential.proof.hash
-            if(curCredHash === credHash) {
-                logger("creds - Found issued cred hash",curCredHash)
+            if (curCredHash === credHash) {
+                logger("creds - Found issued cred hash", curCredHash)
                 return true
-            }
-            else {
-                logger("creds - issued cred hash",curCredHash,"does not match",credHash)
+            } else {
+                logger("creds - issued cred hash", curCredHash, "does not match", credHash)
                 return false
             }
         })
-        if(iCred) {
-            logger("creds - got issued cred w/keys"+Object.keys(iCred))
+        if (iCred) {
+            logger("creds - got issued cred w/keys" + Object.keys(iCred))
             return iCred
         }
     } else {
-        logger("creds - No issued credential hash",credHash)
+        logger("creds - No issued credential hash", credHash)
         return;
     }
 }
 
 export function getShareableCred(iCred: models.credential) {
-    logger("creds - getting shareable cred for cred",JSON.stringify(iCred))
+    logger("creds - getting shareable cred for cred", JSON.stringify(iCred))
     const shareable = {
         encodedSignedCredential: iCred.verifiedCredential.encodedSignedCredential,
         proof: iCred.verifiedCredential.proof,
@@ -234,21 +245,21 @@ export function getShareableCred(iCred: models.credential) {
 }
 
 export function hasNewCreds() {
-    logger("creds - triggering cred refresh",refreshTriggers.length)
-    refreshTriggers.forEach(trigger=>trigger())
+    logger("creds - triggering cred refresh", refreshTriggers.length)
+    refreshTriggers.forEach(trigger => trigger())
 }
 
 function isIssuedCred(cred: credential) {
     if ((cred as issuedCredential).issuingDidAlias) {
-        logger("creds - cred is issued cred",JSON.stringify(cred))
+        logger("creds - cred is issued cred", JSON.stringify(cred))
         return true
     } else {
-        logger("creds - cred is NOT issued cred",JSON.stringify(cred))
+        logger("creds - cred is NOT issued cred", JSON.stringify(cred))
         return false
     }
 }
 
-export async function issueCredential(didAlias: string, iCred: models.issuedCredential, wal: models.wallet): Promise<models.wallet|undefined> {
+export async function issueCredential(didAlias: string, iCred: models.issuedCredential, wal: models.wallet): Promise<models.wallet | undefined> {
     const credJson = JSON.stringify(iCred)
     console.log("creds - issuing credential", didAlias, credJson)
     let result;
@@ -268,18 +279,18 @@ export async function issueCredential(didAlias: string, iCred: models.issuedCred
     return result
 }
 
-export async function revokeCredentialByHash(credHash: string, wal: models.wallet): Promise<models.wallet|undefined> {
+export async function revokeCredentialByHash(credHash: string, wal: models.wallet): Promise<models.wallet | undefined> {
     logger("Revoking credential", credHash)
     const issuedCred = getIssuedCredByHash(credHash, wal)
     if (issuedCred) {
-        return await revokeCredential(issuedCred,wal)
+        return await revokeCredential(issuedCred, wal)
     } else {
         console.error("could not revoke credential by hash", credHash)
         return issuedCred
     }
 }
 
-export async function revokeCredential(issuedCred: models.issuedCredential, wal: models.wallet): Promise<models.wallet|undefined> {
+export async function revokeCredential(issuedCred: models.issuedCredential, wal: models.wallet): Promise<models.wallet | undefined> {
     logger("creds - Revoking issued credential w/keys", Object.keys(issuedCred))
     const jsonWallet = JSON.stringify(wal)
     console.log("creds - Revoking issued cred", issuedCred.alias, jsonWallet)
@@ -292,41 +303,54 @@ export async function revokeCredential(issuedCred: models.issuedCredential, wal:
     }
 }
 
-export async function verifyCredentialByHash(credHash: string, wal: models.wallet): Promise<string|undefined> {
-    logger("Verifying credential",credHash)
+export async function verifyCredentialByHash(credHash: string, wal: models.wallet): Promise<string | undefined> {
+    logger("Verifying credential", credHash)
     const cred = getCredByHash(credHash, wal)
-    if(cred) {
-        console.log("creds - Got cred for verification",JSON.stringify(cred));
+    if (cred) {
+        console.log("creds - Got cred for verification", JSON.stringify(cred));
         const issued = isIssuedCred(cred)
-        logger("creds - is cred issued?",issued)
-        const messageArray = await PrismModule.verifyCred(JSON.stringify(wal),cred.alias, !issued)
+        logger("creds - is cred issued?", issued)
+        const messageArray = await PrismModule.verifyCred(JSON.stringify(wal), cred.alias, !issued)
         return messageArray
-    } else{
-        console.error("could not verify credential by hash, no cred found",credHash)
+    } else {
+        console.error("could not verify credential by hash, no cred found", credHash)
     }
 }
 
-export function getDemoCred(): models.credential {
+export function getDemoCred(did: models.did): models.credential {
     // if(currentDemoCred >= (demoCredOrder.length-1)) {
-        return getFakeCredItem()
+    return getFakeCredItem(did)
     // } else {
     //     currentDemoCred++
     //     return asCredShareable(demoCreds[demoCredOrder[currentDemoCred]])
     // }
 }
 
-function getFakeCredItem(): models.credential {
+function getFakeCredItem(did: models.did): models.credential {
+    const today = new Date(Date.now());
+    const credSub = {
+        name: "FakeCred " + today.getMilliseconds().toString(),
+        achievement: "Created fake cred",
+        date: today.toISOString(),
+        id: did.uriLongForm,
+    }
+    // const credSubJson = JSON.stringify(credSub)
+    const decodedSignedCred = {
+        id: did.uriCanonical,
+        keyId: "issuing0",
+        credentialSubject: credSub,
+    }
     const prf: models.proof = {
-        hash: Date.now().toString(),
+        hash: today.getMilliseconds().toString(),
         index: 1,
     };
-    const esc = "encoded"
+    const esc = encodeCredential(decodedSignedCred)
     const verCred: models.vc = {
         encodedSignedCredential: esc,
         proof: prf,
     }
     return {
-        alias: "fakeCred"+Date.now(),
+        alias: "fakeCred" + today.getMilliseconds().toString(),
         verifiedCredential: verCred,
     }
 }

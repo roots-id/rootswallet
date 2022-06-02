@@ -19,11 +19,12 @@ const RelationshipsScreen = ({route,navigation}) => {
 
     useEffect(() => {
         addRefreshTrigger(()=>{
-            console.log("toggling refresh")
+            console.log("contacts screen - toggling refresh")
             setContacts(
                 getRelationships(walletName).filter(rel => rel.displayName !== PRISM_BOT && rel.displayName !== ROOTS_BOT)
             )
             setRefresh(!refresh)
+            console.log("contacts screen - contacts size",contacts.length)
         })
         hasNewRels()
     },[])

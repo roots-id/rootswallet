@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Animated,
-  Button,
-  FlatList,
-  Image,
-  Text,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
-  View,
+    Animated,
+    Button,
+    FlatList,
+    Image,
+    Text,
+    Pressable,
+    SafeAreaView,
+    StyleSheet,
+    View, ScrollView,
 } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { useCardAnimation } from '@react-navigation/stack';
@@ -116,19 +116,24 @@ export default function CredentialDetailScreen({ route, navigation }) {
               justifyContent:'flex-start',
             }}
         />
-          <FlatList
-              data={Object.keys(cred.decoded.credentialSubject)}
-              keyExtractor={(item) => item}
-              ItemSeparatorComponent={() => <Divider />}
-              renderItem={({ item }) =>
-                  {
-                    const output = utils.recursivePrint(cred.decoded.credentialSubject[item])
-                    console.log(item,": ",output)
-                    return <Text style={{color: "black"}}>{item + ": " + output}</Text>
+              <FlatList
+                  data={Object.keys(cred.decoded.credentialSubject)}
+                  keyExtractor={(item) => item}
+                  ItemSeparatorComponent={() => <Divider />}
+                  renderItem={({ item }) =>
+                      {
+                        const output = utils.recursivePrint(cred.decoded.credentialSubject[item])
+                        console.log(item,": ",output)
+                        return           <ScrollView style={{
+                            padding: 16,
+                            width: '90%',
+                            maxWidth: 450,
+                            maxHeight: 150,
+                            borderRadius: 3,
+                            backgroundColor: colors.card,}}><Text style={{color: "black"}}>{item + ": " + output}</Text></ScrollView>
+                      }
                   }
-              }
-          />
-
+              />
       </Animated.View>
     </View>
     );
