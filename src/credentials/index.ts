@@ -3,6 +3,7 @@ import * as models from '../models'
 import {PrismModule} from "../prism";
 import {credential, issuedCredential} from "../models";
 import * as store from "../store";
+import {asContactShareable} from "../relationships";
 
 export const credLogo = require('../assets/vc.png');
 
@@ -302,5 +303,30 @@ export async function verifyCredentialByHash(credHash: string, wal: models.walle
         return messageArray
     } else{
         console.error("could not verify credential by hash, no cred found",credHash)
+    }
+}
+
+export function getDemoCred(): models.credential {
+    // if(currentDemoCred >= (demoCredOrder.length-1)) {
+        return getFakeCredItem()
+    // } else {
+    //     currentDemoCred++
+    //     return asCredShareable(demoCreds[demoCredOrder[currentDemoCred]])
+    // }
+}
+
+function getFakeCredItem(): models.credential {
+    const prf: models.proof = {
+        hash: Date.now().toString(),
+        index: 1,
+    };
+    const esc = "encoded"
+    const verCred: models.vc = {
+        encodedSignedCredential: esc,
+        proof: prf,
+    }
+    return {
+        alias: "fakeCred"+Date.now(),
+        verifiedCredential: verCred,
     }
 }

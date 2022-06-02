@@ -29,7 +29,7 @@ export default function IconActions(...props) {
             icon="qrcode-scan"
             size={28}
             color="#e69138"
-            onPress={() => navigation.navigate(scan)}
+            onPress={() => navigation.navigate("Scan QR Code",{type: scan})}
         />
         <IconButton
               icon="cog-outline"

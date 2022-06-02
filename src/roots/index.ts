@@ -1042,8 +1042,18 @@ export function updateProcessIndicator(processGroup: string) {
 //----------- DEMO --------------------
 
 export async function issueDemoContactCredential(chat: models.chat, msgId: string): Promise<issuedCredential|undefined> {
+    const today = new Date(Date.now());
+    const content = {
+        name: "Added new contact",
+        achievement: "You added a new contact " + chat.id,
+        date: today.toISOString(),
+    }
+    const contentJson = JSON.stringify(content)
+    return issueDemoCredential(chat,msgId,contentJson)
+}
+
+export async function issueDemoCredential(chat: models.chat, msgId: string, contentJson: string): Promise<issuedCredential|undefined> {
     logger("roots - Trying to create demo credential for contact", chat.id, msgId)
-    const credMsgs = []
     const msg = getMessageById(msgId)
     if(msg) {
         const credHash = msg.data
@@ -1055,13 +1065,12 @@ export async function issueDemoContactCredential(chat: models.chat, msgId: strin
             logger("roots - Creating demo credential for your chat", chat.id, "w/ your long form did", didLong)
             const toDid = chat.toDids[0]
             console.log("roots - contact credential being issued to DID", toDid)
-            const today = new Date(Date.now());
             const credAlias = getCredentialAlias(msgId)
             const iCred = {
                 alias: credAlias,
                 batchId: "",
                 claim: {
-                    content: "{\"name\": \"Added new contact\",\"achievement\": \"You added a new contact " + chat.id + "\",\"date\": \"" + today.toISOString() + "\"}",
+                    content: contentJson,
                     subjectDid: toDid,
                 },
                 credentialHash: "",

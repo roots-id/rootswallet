@@ -164,7 +164,7 @@ export default function AuthStack() {
                       initialParams={{walletName: walletName}}
                       options={ ({ navigation, route }) => ({
                           headerTitle: (props) => <LogoTitle {...props} title="Contacts"/>,
-                          headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={YOU_ALIAS} scan='Scan QR Code' settings='Settings'/>,
+                          headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={YOU_ALIAS} scan='contact' settings='Settings'/>,
                       })}
                 />
                 <Stack.Screen
@@ -172,7 +172,7 @@ export default function AuthStack() {
                     component={ChatScreen}
                     options={ ({ navigation, route }) => ({
                         headerTitle: (props) => <SimpleTitle {...props} title={getChatItem(route.params.chatId).title}/>,
-                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={YOU_ALIAS} scan='Scan QR Code' settings='Settings'/>,
+                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={YOU_ALIAS} scan='credential' settings='Settings'/>,
                     })}
                 />
             </Stack.Group>
@@ -205,7 +205,7 @@ export default function AuthStack() {
                     options={ ({ navigation, route }) => ({
                         headerTitle: (props) => <LogoTitle {...props} title={"You"}/>,
                         headerRight: (props) => <IconActions {...props} nav={navigation}
-                            add="Create Rel" person={YOU_ALIAS} scan='Scan QR Code' settings='Settings'/>,
+                            add="Create Rel" person={YOU_ALIAS} scan='contact' settings='Settings'/>,
                     })}
                 />
             </Stack.Group>
@@ -235,7 +235,7 @@ export default function AuthStack() {
                       initialParams={{walletName: walletName}}
                       options={ ({ navigation, route }) => ({
                           headerTitle: (props) => <LogoTitle {...props} title="Credentials"/>,
-                          headerRight: (props) => <IconActions {...props} nav={navigation} person={YOU_ALIAS} scan="Scan QR Code" settings="Settings"/>,
+                          headerRight: (props) => <IconActions {...props} nav={navigation} person={YOU_ALIAS} scan="credential" settings="Settings"/>,
                       })}
                 />
             </Stack.Group>
