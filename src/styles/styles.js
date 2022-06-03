@@ -1,13 +1,18 @@
 import {StyleSheet} from "react-native";
 
 const styles = StyleSheet.create({
-    button:{
+    bigBlue: {
+        color: 'blue',
+        fontWeight: 'bold',
+        fontSize: 30,
+    },
+    button: {
         width: 150,
         borderRadius: 10,
         backgroundColor: 'gold',
         alignSelf: 'center'
     },
-    buttonText:{
+    buttonText: {
         marginHorizontal: 10,
         fontSize: 18,
         fontWeight: "bold",
@@ -19,8 +24,8 @@ const styles = StyleSheet.create({
         color: '#1c04ba'
     },
     clickableListTitle: {
-      fontSize: 22,
-      color: '#e69138',
+        fontSize: 22,
+        color: '#e69138',
     },
     container: {
         backgroundColor: '#251520',
@@ -31,8 +36,14 @@ const styles = StyleSheet.create({
         fontSize: 20,
         color: '#111111',
     },
+    email: {
+        textDecorationLine: 'underline',
+    },
+    hashTag: {
+        fontStyle: 'italic',
+    },
     header: {
-            color: '#999999',
+        color: '#999999',
         fontSize: 20,
         fontWeight: 'bold',
         marginHorizontal: 15,
@@ -66,10 +77,10 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     item: {
-      backgroundColor: '#20190e',
-      padding: 20,
-      marginVertical: 8,
-      marginHorizontal: 16,
+        backgroundColor: '#20190e',
+        padding: 20,
+        marginVertical: 8,
+        marginHorizontal: 16,
     },
     leftheader: {
         color: '#999999',
@@ -84,53 +95,71 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: '#eeeeee',
     },
-      listTitle: {
+    listTitle: {
         fontSize: 22,
         color: '#dddddd',
-      },
-      listDescription: {
+    },
+    listDescription: {
         fontSize: 16,
         color: '#dddddd',
-      },
+    },
     loginButtonLabel: {
-      fontSize: 18,
+        fontSize: 18,
+    },
+    magicNumber: {
+        fontSize: 42,
+        color: 'pink',
     },
     modalContainer: {
         backgroundColor: '#251520',
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-      },
+    },
+    name: {
+        color: 'red',
+    },
     navButtonText: {
-      fontSize: 16,
+        fontSize: 16,
     },
-  none: {
-      display: 'none'
-  },
-  prism: {
-    color: '#940000',
-    textDecorationLine: 'underline',
-  },
-  problem: {
-      color: 'red',
-  },
-  rootsWallet: {
-    color: '#e69138'
-  },
-  row: {
-      flexDirection: "row",
-      flexWrap: "wrap",
+    none: {
+        display: 'none'
     },
-  subText: {
-      fontSize: 16,
-      marginBottom: 10,
-      color: '#111111',
-      fontWeight: 'normal',
-      alignSelf: "flex-start",
-      justifyContent: "flex-start"
-  },
+    phone: {
+        color: 'blue',
+        textDecorationLine: 'underline',
+    },
+    prism: {
+        color: '#940000',
+        textDecorationLine: 'underline',
+    },
+    problem: {
+        color: 'red',
+    },
+    qr: {
+        color: 'orange',
+    },
+    red: {
+        color: 'red',
+    },
+    rootsWallet: {
+        color: '#e69138'
+    },
+    row: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+    },
+    subText: {
+        fontSize: 16,
+        marginBottom: 10,
+        color: '#111111',
+        fontWeight: 'normal',
+        alignSelf: "flex-start",
+        justifyContent: "flex-start"
+    },
     text: {
-        fontSize: 30,
+        color: 'blue',
+        fontSize: 15,
     },
     titleText: {
         fontSize: 24,
@@ -139,6 +168,17 @@ const styles = StyleSheet.create({
         fontWeight: 'normal',
         textAlignVertical: "center",
         textAlign: "center",
+    },
+    videoContainer: {
+        marginTop: 50,
+    },
+    url: {
+        color: 'red',
+        textDecorationLine: 'underline',
+    },
+    username: {
+        color: 'green',
+        fontWeight: 'bold',
     },
     walletIconStyle: {
         fontSize: 24,

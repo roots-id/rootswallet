@@ -12,6 +12,7 @@ import {
 import * as models from '../models'
 import * as roots from '../roots'
 import styles from "../styles/styles";
+import * as wallet from '../wallet'
 
 const CredentialsScreen = ({route ,navigation}) => {
     console.log("creds screen - params",route.params)
@@ -23,7 +24,7 @@ const CredentialsScreen = ({route ,navigation}) => {
     useEffect(() => {
         addRefreshTrigger(()=>{
             console.log("creds screen - toggling refresh")
-            const iCreds = getImportedCreds(roots.getRootsWallet(walletName))
+            const iCreds = getImportedCreds(wallet.getRootsWallet(walletName))
             console.log("creds screen - got imported creds",iCreds.length)
             const credDeets = iCreds.map((encodedCred) => {
                 return getCredDetails(encodedCred.verifiedCredential)

@@ -10,18 +10,17 @@ import {
     StyleSheet,
     View, ScrollView,
 } from 'react-native';
+import { Divider, IconButton, List, Title,ToggleButton } from 'react-native-paper';
 import { useTheme } from '@react-navigation/native';
 import { useCardAnimation } from '@react-navigation/stack';
 
-import {logger} from '../logging';
-import { Divider, IconButton, List, Title,ToggleButton } from 'react-native-paper';
-import styles from "../styles/styles";
-
-import RelRow from '../components/RelRow'
 import { credLogo, verifyCredentialByHash } from '../credentials'
+import {logger} from '../logging';
 import { showQR } from '../qrcode'
 import * as roots from '../roots'
+import styles from "../styles/styles";
 import * as utils from '../utils'
+import * as wallet from '../wallet'
 
 
 export default function CredentialDetailScreen({ route, navigation }) {
@@ -37,14 +36,17 @@ export default function CredentialDetailScreen({ route, navigation }) {
     }, []);
 
     async function updateVerification() {
-        const result = JSON.parse(await verifyCredentialByHash(cred.hash,roots.getRootsWallet(roots.TEST_WALLET_NAME)));
-        logger("cred details - verify cred result",result)
-        if(result && result.length <= 0) {
-            setVerified("check-bold")
-        } else if(result && result.length > 0) {
-            setVerified("alert-octagon")
-        } else {
-            setVerified("help-circle")
+        const verify = await verifyCredentialByHash(cred.hash,wallet.getRootsWallet(roots.TEST_WALLET_NAME))
+        if(verify) {
+            const result = JSON.parse(verify);
+            logger("cred details - verify cred result", result)
+            if (result && result.length <= 0) {
+                setVerified("check-bold")
+            } else if (result && result.length > 0) {
+                setVerified("alert-octagon")
+            } else {
+                setVerified("help-circle")
+            }
         }
     }
 //        <RelRow rel={getShareableRelByAlias(cred.decoded.id)} nav={navigation}/>

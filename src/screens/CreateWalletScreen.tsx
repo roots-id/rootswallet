@@ -10,7 +10,8 @@ import Loading from '../components/Loading';
 import * as SecureStore from 'expo-secure-store';
 
 import AuthContext from '../context/AuthenticationContext';
-import { createWallet, initRootsWallet, storageStatus, TEST_WALLET_NAME } from '../roots'
+import { initRootsWallet, storageStatus, TEST_WALLET_NAME } from '../roots'
+import { createWallet } from '../wallet'
 
 import styles from "../styles/styles";
 

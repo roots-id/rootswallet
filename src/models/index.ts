@@ -109,14 +109,15 @@ export type key = {
 }
 
 export type message = {
-    id: string,
     body: string,
     type: string,
     createdTime: number,
+    data: any,
+    id: string,
+    image?: string,
+    quickReplies?: QuickReplies,
     rel: string,
     system: boolean,
-    data: any,
-    quickReplies?: QuickReplies,
 }
 
 export type proof = {
@@ -133,22 +134,23 @@ export type publicKey = {
 
 export type session = {
     chat: chat,
-    onReceivedMessage: (message: message) => {},
-    onReceivedKeystrokes: (keystrokes: string) => {},
-    onTypingStarted: (user: string) => {},
-    onTypingStopped: (user: string) => {},
-    onParticipantEnteredChat: (user: string) => {},
-    onParticipantLeftChat: (user: string) => {},
-    onParticipantPresenceChanged: (user: string) => {},
-    onMessageRead: (message: message, receipt: boolean) => {},
-    onMessageUpdated: (message: message) => {},
-    onChatUpdated: (chat: chat) => {},
-    onProcessing: (processing: boolean) => {},
+    onReceivedMessage: (message: message) => void,
+    onReceivedKeystrokes: (keystrokes: string) => void,
+    onTypingStarted: (user: string) => void,
+    onTypingStopped: (user: string) => void,
+    onParticipantEnteredChat: (user: string) => void,
+    onParticipantLeftChat: (user: string) => void,
+    onParticipantPresenceChanged: (user: string) => void,
+    onMessageRead: (message: message, receipt: boolean) => void,
+    onMessageUpdated: (message: message) => void,
+    onChatUpdated: (chat: chat) => void,
+    onProcessing: (processing: boolean) => void,
 }
 
 export type sessionStatus = {
     succeeded: string,
     end: string,
+    error: string,
 }
 
 export type timeStampInfo = {
@@ -188,13 +190,13 @@ export function createChat(chatAlias: string, fromDidAlias: string,
 export function createMessage(idText: string, bodyText: string, statusText: string,
                               timeInMillis: number, relId: string, system = false, data: object): message {
     const msg = {
-        id: idText,
         body: bodyText,
-        type: statusText,
         createdTime: timeInMillis,
+        data: data,
+        id: idText,
         rel: relId,
         system: system,
-        data: data,
+        type: statusText,
     }
     logger("models - created msg model w/keys", Object.keys(msg))
     return msg;

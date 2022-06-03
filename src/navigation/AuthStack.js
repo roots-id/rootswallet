@@ -34,12 +34,10 @@ import LoginScreen from '../screens/LoginScreen';
 import ScanQRCodeScreen from '../screens/ScanQRCodeScreen'
 import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
 import StartChatScreen from '../screens/StartChatScreen';
-
-import { getChatItem, getRootsWallet,
-    hasWallet, loadSettings, storageStatus,
-    TEST_WALLET_NAME } from '../roots'
-
 import {YOU_ALIAS} from '../relationships'
+import { getChatItem, loadSettings, storageStatus,
+    TEST_WALLET_NAME } from '../roots'
+import {getRootsWallet, hasWallet} from '../wallet'
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator()

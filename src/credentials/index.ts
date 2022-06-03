@@ -4,7 +4,7 @@ import {PrismModule} from "../prism";
 import {credential, decodedSignedCredential, issuedCredential} from "../models";
 import * as store from "../store";
 import {asContactShareable} from "../relationships";
-import {updateWallet} from "../roots";
+import {updateWallet} from "../wallet";
 
 export const credLogo = require('../assets/vc.png');
 
@@ -189,7 +189,7 @@ export function getImportedCreds(wal: models.wallet): models.credential[] {
 }
 
 export function getIssuedCredByAlias(credAlias: string, wal: models.wallet): models.issuedCredential | undefined {
-    logger("creds - Getting imported credential", credAlias)
+    logger("creds - Getting issued credential", credAlias)
 
     if (wal.issuedCredentials) {
         const iCred = wal.issuedCredentials.find((cred) => {
