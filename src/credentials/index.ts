@@ -194,19 +194,19 @@ export function getIssuedCredByAlias(credAlias: string, wal: models.wallet): mod
     if (wal.issuedCredentials) {
         const iCred = wal.issuedCredentials.find((cred) => {
             if (cred.alias === credAlias) {
-                logger("creds - Found cred alias", credAlias)
+                logger("creds - Found issued cred alias", credAlias)
                 return true
             } else {
-                logger("creds - cred alias", cred.alias, "does not match", credAlias)
+                logger("creds - issued cred alias", cred.alias, "does not match", credAlias)
                 return false
             }
         })
         if (iCred) {
-            logger("creds - got imported cred w/keys", Object.keys(iCred))
+            logger("creds - got issued cred w/keys", Object.keys(iCred))
             return iCred
         }
     } else {
-        logger("creds - No imported credential alias", credAlias)
+        logger("creds - No issued credential alias", credAlias)
         return;
     }
 }

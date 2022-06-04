@@ -1004,11 +1004,8 @@ export async function issueDemoCredential(chat: models.chat, msgId: string, cont
     if (msg) {
         const credHash = msg.data
         const alreadyIssued = cred.getIssuedCredByHash(credHash, wallet.getWallet())
-        const did = getDid(chat.fromAlias)
-        if (!alreadyIssued && did) {
+        if (!alreadyIssued) {
             logger("roots - credential not found, creating....", credHash)
-            const didLong = did[walletSchema.DID_URI_LONG_FORM]
-            logger("roots - Creating demo credential for your chat", chat.id, "w/ your long form did", didLong)
             const toDid = chat.toDids[0]
             console.log("roots - contact credential being issued to DID", toDid)
             const credAlias = getCredentialAlias(msgId)
@@ -1035,8 +1032,7 @@ export async function issueDemoCredential(chat: models.chat, msgId: string, cont
             const result = await processIssueCredential(iCred, chat)
             return result;
         } else {
-            logger("roots - Couldn't issue demo contact credential, is the DID published",
-                did, "was the credential already found", alreadyIssued)
+            logger("roots - Couldn't issue demo contact credential, was the credential already found", alreadyIssued)
         }
     } else {
         console.error("unable to issued demo contact credential, unable to find message", msgId)
@@ -1056,28 +1052,13 @@ export async function issueDemoPublishDidCredential(chat: models.chat, msgId: st
             const didLong = did[walletSchema.DID_URI_LONG_FORM]
             logger("roots - Creating demo credential for chat", chat.id, "w/long form did", didLong)
             const today = new Date(Date.now());
-            const iCred = {
-                alias: credAlias,
-                issuingDidAlias: chat.fromAlias,
-                claim: {
-                    content: "{\"name\": \"Prism DID publisher\",\"achievement\": \"Published a DID to Cardano - Atala Prism\",\"date\": \"" + today.toISOString() + "\"}",
-                    subjectDid: didLong,
-                },
-                verifiedCredential: {
-                    encodedSignedCredential: "",
-                    proof: {
-                        hash: "",
-                        index: -1,
-                        siblings: [],
-                    },
-                },
-                batchId: "",
-                credentialHash: "",
-                operationHash: "",
-                revoked: false,
+            const content = {
+                name: "Prism DID publisher",
+                achievement: "Published a DID to Cardano - Atala Prism",
+                date: today.toISOString(),
             }
-            const result = await processIssueCredential(iCred, chat)
-            return result;
+            const contentJson = JSON.stringify(content)
+            return issueDemoCredential(chat, msgId, contentJson)
         } else {
             logger("roots - Couldn't issue demo credential, is the chat published",
                 didPub, "was the credential already found", alreadyIssued)
@@ -1102,28 +1083,9 @@ async function initDemoAchievements(chat: models.chat) {
         contact.ROOTS_BOT)
 }
 
-async function initDemoResume() {
-}
-
 export function isDemo() {
     return demo
 }
-
-export const walCliCommands = [
-    " ./wal.sh new-wallet holder_wallet -m poet,account,require,learn,misery,monitor,medal,great,blossom,steak,rain,crisp",
-    "./wal.sh new-did holder_wallet holder_did",
-    "./wal.sh new-did issuer_wallet issuer_did -i",
-    "./wal.sh publish-did issuer_wallet issuer_did",
-    "./wal.sh show-did holder_wallet holder_did",
-    "./wal.sh issue-cred issuer_wallet issuer_did did:prism:654a4a9113e7625087fd0d3143fcac05ba34013c55e1be12daadd2d5210adc4d:Cj8KPRI7CgdtYXN0ZXIwEAFKLgoJc2VjcDI1NmsxEiEDA7B2nZ_CvcIdkU2ovzBEovGzjwZECMUeHUeNo5_0Jug credential_a",
-    "./wal.sh verify-cred issuer_wallet issued credential_a",
-    "./wal.sh export-cred issuer_wallet credential_a credential_a.json",
-    "cat credential_a.json",
-    "./wal.sh import-cred holder_wallet credential_a credential_a.json",
-    "./wal.sh verify-cred holder_wallet imported credential_a",
-    "./wal.sh revoke-cred issuer_wallet credential_a",
-    "./wal.sh verify-cred issuer_wallet issued credential_a",
-]
 
 function rootsDid(alias: string) {
     return "did:root:" + replaceSpecial(alias);
