@@ -1,4 +1,7 @@
 {
+  "resolutions": {
+    "@types/react": "17.0.1"
+  },
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",

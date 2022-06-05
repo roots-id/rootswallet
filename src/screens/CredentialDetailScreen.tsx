@@ -36,17 +36,22 @@ export default function CredentialDetailScreen({ route, navigation }) {
     }, []);
 
     async function updateVerification() {
-        const verify = await verifyCredentialByHash(cred.hash,wallet.getRootsWallet(roots.TEST_WALLET_NAME))
-        if(verify) {
-            const result = JSON.parse(verify);
-            logger("cred details - verify cred result", result)
-            if (result && result.length <= 0) {
-                setVerified("check-bold")
-            } else if (result && result.length > 0) {
-                setVerified("alert-octagon")
-            } else {
-                setVerified("help-circle")
+        const wal = wallet.getWallet(roots.TEST_WALLET_NAME)
+        if(wal) {
+            const verify = await verifyCredentialByHash(cred.hash, wal)
+            if (verify) {
+                const result = JSON.parse(verify);
+                logger("cred details - verify cred result", result)
+                if (result && result.length <= 0) {
+                    setVerified("check-bold")
+                } else if (result && result.length > 0) {
+                    setVerified("alert-octagon")
+                } else {
+                    setVerified("help-circle")
+                }
             }
+        } else {
+            console.error("CredDeetsScreen - could not get wallet",roots.TEST_WALLET_NAME,wal)
         }
     }
 //        <RelRow rel={getShareableRelByAlias(cred.decoded.id)} nav={navigation}/>

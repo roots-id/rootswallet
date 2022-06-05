@@ -189,7 +189,7 @@ export function getImportedCreds(wal: models.wallet): models.credential[] {
 }
 
 export function getIssuedCredByAlias(credAlias: string, wal: models.wallet): models.issuedCredential | undefined {
-    logger("creds - Getting issued credential", credAlias)
+    logger("creds - Getting issued credential by alias", credAlias)
 
     if (wal.issuedCredentials) {
         const iCred = wal.issuedCredentials.find((cred) => {
@@ -212,7 +212,7 @@ export function getIssuedCredByAlias(credAlias: string, wal: models.wallet): mod
 }
 
 export function getIssuedCredByHash(credHash: string, wal: models.wallet): models.issuedCredential | undefined {
-    logger("creds - Getting issued credential", credHash)
+    logger("creds - Getting issued credential by hash", credHash)
 
     if (wal.issuedCredentials) {
         const iCred = wal.issuedCredentials.find((cred) => {
