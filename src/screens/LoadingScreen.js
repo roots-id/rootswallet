@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Title } from 'react-native-paper';
 
-export default function LoadingScreen({ navigation }) {
+export default function LoadingScreen() {
   console.log("Loading screen...")
   return (
       <View style={styles.container}>

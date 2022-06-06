@@ -1,22 +1,20 @@
-import { useIsFocused } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { FlatList, NativeModules, SafeAreaView, StyleSheet, View, Text } from 'react-native';
+import { FlatList, SafeAreaView, View, Text } from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import FormButton from '../components/FormButton';
 
 import * as models from '../models'
 import { TEST_WALLET_NAME } from '../roots'
-import { getRootsWallet } from '../wallet'
+import { getWallet } from '../wallet'
 import { recursivePrint } from '../utils'
 
-import styles from "../styles/styles";
+import {styles} from "../styles/styles";
 
-export default function WalletScreen({navigation}) {
+export default function WalletScreen({ route, navigation }) {
     const [wallet, setWallet] = useState<models.wallet>();
 
-    useEffect(async () => {
+    useEffect(() => {
         try {
-            setWallet(await getRootsWallet(TEST_WALLET_NAME));
+            setWallet(getWallet(TEST_WALLET_NAME));
             console.log("WalletScreen - set wallet",wallet)
         } catch(error) {
             console.error("WalletScreen - Could not get roots wallet",TEST_WALLET_NAME,error,error.stack)
@@ -32,11 +30,11 @@ export default function WalletScreen({navigation}) {
                         data={keys}
                         keyExtractor={(item) => item}
                         ItemSeparatorComponent={() => <Divider/>}
-                        renderItem={({item}) => {
-                            const output = recursivePrint((wallet as any)[item])
-                            console.log(item, ": ", output)
-                            return <Text style={styles.listItem}>{item + ": " + output}</Text>
-                        }
+                            renderItem={({item}) => {
+                                const output = recursivePrint((wallet as any)[item])
+                                console.log(item, ": ", output)
+                                return <Text style={styles.listItem}>{item + ": " + output}</Text>
+                            }
                         }
                     />
                 </SafeAreaView>

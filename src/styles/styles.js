@@ -1,6 +1,6 @@
 import {StyleSheet} from "react-native";
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
     bigBlue: {
         color: 'blue',
         fontWeight: 'bold',
@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         marginHorizontal: 10,
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: "bold",
         flex: 1,
         alignSelf: 'center'
@@ -27,10 +27,28 @@ const styles = StyleSheet.create({
         fontSize: 22,
         color: '#e69138',
     },
+    closeButtonContainer: {
+        position: 'absolute',
+        top: 30,
+        right: 0,
+        zIndex: 1,
+    },
     container: {
         backgroundColor: '#251520',
         flex: 1,
         justifyContent: 'center',
+    },
+    containerCenter: {
+        backgroundColor: '#251520',
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    credLogoStyle: {
+        width:65,
+            height:75,
+        resizeMode:'contain',
+        margin:8
     },
     detailTitle: {
         fontSize: 20,
@@ -61,6 +79,11 @@ const styles = StyleSheet.create({
     highlightedItem: {
         fontSize: 18,
         fontWeight: "bold"
+    },
+    innerContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     inputStyle: {
         flex: 1,
@@ -169,6 +192,11 @@ const styles = StyleSheet.create({
         textAlignVertical: "center",
         textAlign: "center",
     },
+    titleTextOrange: {
+        fontSize: 24,
+        marginBottom: 10,
+        color: '#ff9138',
+    },
     videoContainer: {
         marginTop: 50,
     },
@@ -196,4 +224,11 @@ const styles = StyleSheet.create({
     },
 })
 
-export default styles
+export function displayProblem(problemDisabled) {
+    if(problemDisabled){
+        return styles.none
+    }
+    else{
+        return styles.problem
+    }
+}

@@ -4,7 +4,7 @@ import { Divider, List } from 'react-native-paper';
 import { showRel } from '../relationships'
 import Relationship from '../models/relationship'
 import { getChatItem } from '../roots'
-import styles from "../styles/styles";
+import {styles} from "../styles/styles";
 
 export default function RelRow(...props) {
 

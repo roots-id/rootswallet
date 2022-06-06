@@ -3,7 +3,7 @@ import {logger} from "../logging";
 import * as store from "../store";
 import * as models from "../models";
 
-export async function createWallet(walName: string, mnemonic: string[], walPass: string) {
+export async function createWallet(walName: string, mnemonic: string, walPass: string) {
     const prismWal = PrismModule.newWal(walName, mnemonic, walPass)
     const result = await updateWallet(walName, walPass, prismWal)
     if (result) {
@@ -21,7 +21,7 @@ export function getWallet(walName: string): models.wallet|undefined{
         if (walJson) {
             return JSON.parse(walJson);
         } else {
-            console.error("Wallet not found", walName)
+            console.log("Wallet not found", walName)
         }
     } else {
         console.error("Wal name was undefined",walName)

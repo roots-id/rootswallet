@@ -1845,13 +1845,12 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*":
-  version "18.0.6"
-  resolved "https://registry.npmjs.org/@types/react/-/react-18.0.6.tgz"
-  integrity sha512-bPqwzJRzKtfI0mVYr5R+1o9BOE8UEXefwc1LwcBtfnaAn6OoqMhLa/91VA8aeWfDPJt1kHvYKI8RHcQybZLHHA==
+"@types/react@*", "@types/react@17.0.1":
+  version "17.0.1"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.1.tgz#eb1f1407dea8da3bc741879c1192aa703ab9975b"
+  integrity sha512-w8t9f53B2ei4jeOqf/gxtc2Sswnc3LBK5s0DyJcg5xd10tMHXts2N31cKjWfH9IC/JvEPa/YF1U4YeP1t4R6HQ==
   dependencies:
     "@types/prop-types" "*"
-    "@types/scheduler" "*"
     csstype "^3.0.2"
 
 "@types/react@~17.0.21":
@@ -5840,10 +5839,10 @@ react-native-gesture-handler@~2.1.0:
     lodash "^4.17.21"
     prop-types "^15.7.2"
 
-react-native-gifted-chat@1.0.0-beta-3:
-  version "1.0.0-beta-3"
-  resolved "https://registry.npmjs.org/react-native-gifted-chat/-/react-native-gifted-chat-1.0.0-beta-3.tgz"
-  integrity sha512-/EguNca6hg+qjnTno8BT3wLvV/nVZZS5Uud043Q30pfEgcIwJF/jbV00Mks1yl9lQeUTAoriQ0FXJoa2AtjzIQ==
+react-native-gifted-chat@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-gifted-chat/-/react-native-gifted-chat-1.0.0.tgz#53c60145463ae0bb4f50b9ce7896a6a3107d00b4"
+  integrity sha512-7j/vmJi12GN0D8X9KIIPvYTVAZ8dmBqZk+EE9mkjB1qqA9wxOv88Lp2Tg3PcNBWC1srRxc6CTDK6jdPw7egmeg==
   dependencies:
     "@expo/react-native-action-sheet" "3.13.0"
     dayjs "1.8.26"

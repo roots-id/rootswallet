@@ -1,14 +1,7 @@
-import React from 'react';
-import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import 'react-native-gesture-handler';
-import { Avatar, IconButton, Title } from 'react-native-paper';
+import { Avatar } from 'react-native-paper';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
-import {
-    HOME_SCREEN,
-    SETUP_SCREEN,
-    RELATIONSHIPS_SCREEN,
-} from "../constants/navigationConstants";
 import CommunicationsScreen from '../screens/CommunicationsScreen';
 import IconActions from '../components/IconActions';
 import LogoTitle from '../components/LogoTitle';
@@ -16,8 +9,7 @@ import CreateRelScreen from '../screens/CreateRelScreen';
 import CredentialsScreen from '../screens/CredentialsScreen';
 import CredentialDetailScreen from "../screens/CredentialDetailScreen";
 import HelpScreen from '../screens/HelpScreen';
-import HomeScreen from "../screens/HomeScreen"
-import MyIdentityScreen from '../screens/MyIdentityScreen';
+import HomeScreen from "../screens/HomeScreen";
 import RelationshipsScreen from "../screens/RelationshipsScreen";
 import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
 import SettingsScreen from "../screens/SettingsScreen";
@@ -28,24 +20,25 @@ import AuthContext from '../context/AuthenticationContext';
 
 import ChatScreen from '../screens/ChatScreen';
 import CreateWalletScreen from '../screens/CreateWalletScreen';
-import ChatListScreen from '../screens/ChatListScreen';
 import LoadingScreen from '../screens/LoadingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import ScanQRCodeScreen from '../screens/ScanQRCodeScreen'
 import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
 import StartChatScreen from '../screens/StartChatScreen';
+import * as models from '../models'
+import React from "react";
 import {YOU_ALIAS} from '../relationships'
 import { getChatItem, loadSettings, storageStatus,
     TEST_WALLET_NAME } from '../roots'
-import {getRootsWallet, hasWallet} from '../wallet'
+import * as wallet from '../wallet'
 
 const Stack = createStackNavigator();
-const Tab = createBottomTabNavigator()
+const Tab = createBottomTabNavigator();
 
 export default function AuthStack() {
     console.log("AuthStack - Determining which auth screen to use.")
-    const [walletFound,setWalletFound] = React.useState(false)
-    const [walletName,setWalletName] = React.useState(TEST_WALLET_NAME)
+    const [walletFound,setWalletFound] = React.useState<boolean>(false)
+    const [walletName,setWalletName] = React.useState<string>(TEST_WALLET_NAME)
 
     const [state, dispatch] = React.useReducer(
       (prevState, action) => {
@@ -82,13 +75,13 @@ export default function AuthStack() {
           const settingsLoaded = await loadSettings()
           if(settingsLoaded) {
               //TODO ditch test wallet name
-              const walFound = await hasWallet(walletName)
+              const walFound = await wallet.hasWallet(walletName)
               console.log("AuthStack - wallet found?",walFound)
               setWalletFound(walFound)
               if(walFound) {
                 //TODO ditch test wallet name
                 console.log("AuthStack - since wallet found, getting rootsWallet")
-                userToken = getRootsWallet(walletName)
+                userToken = wallet.getWallet(walletName)
               } else {
                 console.log("AuthStack - since wallet NOT found, auth token not set")
               }
@@ -101,12 +94,12 @@ export default function AuthStack() {
         dispatch({ type: 'RESTORE_TOKEN', token: userToken });
       };
 
-      bootstrapAsync();
+      bootstrapAsync().then(r => {console.log("AuthStack - Bootstrap complete",r)});
     }, []);
 
-    const authContext = React.useMemo(
+    let authContext = React.useMemo(
         () => ({
-          signIn: (data,created=false) => {
+          signIn: (data: string,created=false) => {
             setWalletFound(created)
             dispatch({ type: 'SIGN_IN', token: data});
           }
@@ -118,7 +111,7 @@ export default function AuthStack() {
         // We haven't finished checking for the token yet
         return <LoadingScreen />;
     }
-//<Tab.Screen name="Integration" component={IntegrationStack}/>
+
     const Main = () => {
         return (
             <Tab.Navigator screenOptions={{
@@ -177,39 +170,39 @@ export default function AuthStack() {
         </Stack.Navigator>
         )
     }
-    const YouStack = () => {
-        return (
-            <Stack.Navigator
-                screenOptions={{
-                  headerStyle: {
-                    backgroundColor: '#150510',
-                  },
-                  headerTintColor: '#eeeeee',
-                  headerTitleStyle: {
-                    fontSize: 22,
-                  },
-                  gestureEnabled: true,
-                  gestureDirection: "horizontal",
-                  cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
-                  animationEnabled: true,
-                }}
-
-            >
-            <Stack.Group>
-                <Stack.Screen
-                    name="Chat"
-                    component={ChatScreen}
-                    initialParams={{chatId: YOU_ALIAS}}
-                    options={ ({ navigation, route }) => ({
-                        headerTitle: (props) => <LogoTitle {...props} title={"You"}/>,
-                        headerRight: (props) => <IconActions {...props} nav={navigation}
-                            add="Create Rel" person={YOU_ALIAS} scan='contact' settings='Settings'/>,
-                    })}
-                />
-            </Stack.Group>
-            </Stack.Navigator>
-        )
-    }
+    // const YouStack = () => {
+    //     return (
+    //         <Stack.Navigator
+    //             screenOptions={{
+    //               headerStyle: {
+    //                 backgroundColor: '#150510',
+    //               },
+    //               headerTintColor: '#eeeeee',
+    //               headerTitleStyle: {
+    //                 fontSize: 22,
+    //               },
+    //               gestureEnabled: true,
+    //               gestureDirection: "horizontal",
+    //               cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
+    //               animationEnabled: true,
+    //             }}
+    //
+    //         >
+    //         <Stack.Group>
+    //             <Stack.Screen
+    //                 name="Chat"
+    //                 component={ChatScreen}
+    //                 initialParams={{chatId: YOU_ALIAS}}
+    //                 options={ ({ navigation, route }) => ({
+    //                     headerTitle: (props) => <LogoTitle {...props} title={"You"}/>,
+    //                     headerRight: (props) => <IconActions {...props} nav={navigation}
+    //                         add="Create Rel" person={YOU_ALIAS} scan='contact' settings='Settings'/>,
+    //                 })}
+    //             />
+    //         </Stack.Group>
+    //         </Stack.Navigator>
+    //     )
+    // }
     const CredentialsStack = () => {
         return (
         <Stack.Navigator
@@ -258,13 +251,13 @@ export default function AuthStack() {
         )
     }
 
-    const WalletHistoryStack = () => {
-        <Stack.Navigator>
-            <Stack.Group>
-                <Stack.Screen name="WalletHistory" component={WalletHistoryScreen}/>
-            </Stack.Group>
-        </Stack.Navigator>
-    }
+    // const WalletHistoryStack = () => {
+    //     <Stack.Navigator>
+    //         <Stack.Group>
+    //             <Stack.Screen name="WalletHistory" component={WalletHistoryScreen}/>
+    //         </Stack.Group>
+    //     </Stack.Navigator>
+    // }
 
  //TODO refactor hasWallet call where we capture walletName
   return (

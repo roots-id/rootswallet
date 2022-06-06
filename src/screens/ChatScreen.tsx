@@ -8,7 +8,7 @@ import {showQR} from '../qrcode'
 import {getContactByAlias, YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
-import styles from "../styles/styles";
+import {styles} from "../styles/styles";
 
 export default function ChatScreen({route, navigation}) {
     console.log("ChatScreen - route params", route.params)
@@ -243,7 +243,7 @@ export default function ChatScreen({route, navigation}) {
         <View style={{backgroundColor: "#251520", flex: 1, display: "flex",}}>
             <GiftedChat
                 isTyping={processing}
-                messages={messages.sort((a, b) => b.createdAt - a.createdAt)}
+                messages={messages?.sort((a, b) => b.createdAt - a.createdAt)}
                 onPress={ (context, message) => processBubbleClick(context,message)}
                 onQuickReply={reply => handleQuickReply(reply)}
                 onSend={messages => handleSend(messages)}

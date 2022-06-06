@@ -1,6 +1,5 @@
 import React from 'react';
-import {Button, StyleSheet, View, Text} from 'react-native';
-// const { PrismModule } = NativeModules;
+import { View, Text} from 'react-native';
 
 const HelpScreen = (props) => {
     console.log(`Entering Help screen`);

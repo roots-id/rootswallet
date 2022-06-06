@@ -22,6 +22,16 @@ export type addOn = {
     timestampInfo: timeStampInfo,
 }
 
+export type authState = {
+    userToken: wallet,
+    isLoading: boolean,
+}
+
+export type authToken = {
+    type: string,
+    token: wallet,
+}
+
 export type blocktxs = {
     action: string,
     description: string,

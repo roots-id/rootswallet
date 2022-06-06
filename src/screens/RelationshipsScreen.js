@@ -8,7 +8,7 @@ import {
 } from '../relationships'
 import Relationship from '../models/relationship'
 import {getChatItem, isDemo} from '../roots'
-import styles from "../styles/styles";
+import {styles} from "../styles/styles";
 import {BarCodeScanner} from "expo-barcode-scanner";
 
 const RelationshipsScreen = ({route,navigation}) => {

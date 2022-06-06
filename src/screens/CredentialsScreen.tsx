@@ -11,7 +11,7 @@ import {
 } from '../credentials'
 import * as models from '../models'
 import * as roots from '../roots'
-import styles from "../styles/styles";
+import {styles} from "../styles/styles";
 import * as wallet from '../wallet'
 
 const CredentialsScreen = ({route ,navigation}) => {
@@ -24,15 +24,18 @@ const CredentialsScreen = ({route ,navigation}) => {
     useEffect(() => {
         addRefreshTrigger(()=>{
             console.log("creds screen - toggling refresh")
-            const iCreds = getImportedCreds(wallet.getRootsWallet(walletName))
-            console.log("creds screen - got imported creds",iCreds.length)
-            const credDeets = iCreds.map((encodedCred) => {
-                return getCredDetails(encodedCred.verifiedCredential)
-            })
-            console.log("creds screen - got cred deets",credDeets.length)
-            setCreds(credDeets);
-            console.log("creds screen - set creds size",creds.length)
-            setRefresh(!refresh)
+            const wal = wallet.getWallet(walletName)
+            if(wal) {
+                const iCreds = getImportedCreds(wal)
+                console.log("creds screen - got imported creds", iCreds.length)
+                const credDeets = iCreds.map((encodedCred) => {
+                    return getCredDetails(encodedCred.verifiedCredential)
+                })
+                console.log("creds screen - got cred deets", credDeets.length)
+                setCreds(credDeets);
+                console.log("creds screen - set creds size", creds.length)
+                setRefresh(!refresh)
+            }
         })
         hasNewCreds()
     },[])
@@ -51,12 +54,7 @@ const CredentialsScreen = ({route ,navigation}) => {
                             <SafeAreaView>
                             <TouchableOpacity onPress={() => roots.showCred(navigation,item.hash)}>
                                 <Image source={credLogo}
-                                    style={{
-                                      width:65,
-                                      height:75,
-                                      resizeMode:'contain',
-                                      margin:8
-                                    }}
+                                    style={styles.credLogoStyle}
                                 />
                             </TouchableOpacity>
                             </SafeAreaView>

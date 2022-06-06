@@ -1,47 +1,39 @@
 import React, {useEffect, useState} from 'react';
 import {
     Animated,
-    Button,
-    FlatList,
     Image,
     Text,
     Pressable,
-    SafeAreaView,
     ScrollView,
     StyleSheet,
     View,
 } from 'react-native';
 import {useTheme} from '@react-navigation/native';
 import {useCardAnimation} from '@react-navigation/stack';
-
-import {logger} from '../logging';
-import {Divider, IconButton, List, Title, ToggleButton} from 'react-native-paper';
-import styles from "../styles/styles";
+import {Divider, IconButton } from 'react-native-paper';
+import {styles} from "../styles/styles";
 
 import * as models from '../models'
 import {showQR} from '../qrcode'
 import {
     addDidDoc,
     asContactShareable,
-    getContactByAlias,
-    getContactByDid,
-    getShareableRelByAlias,
     isShareable
 } from '../relationships'
 import {recursivePrint} from '../utils'
 
 export default function RelationshipDetailScreen({route, navigation}) {
     console.log("route params are", JSON.stringify(route.params))
-    const [shareableRel, setShareableRel] = useState({});
+    const [shareableRel, setShareableRel] = useState<models.contactShareable>();
     const {colors} = useTheme();
     const {current} = useCardAnimation();
 
     useEffect(() => {
         const contact = (route.params.rel)
         if (!isShareable(contact)) {
-            setShareableRel(asContactShareable(getContactByAlias(contact.id)))
+            setShareableRel(asContactShareable(contact))
         } else {
-            setShareableRel(asContactShareable(getContactByDid(contact.did)))
+            setShareableRel(asContactShareable(contact))
         }
     }, []);
 
@@ -90,13 +82,27 @@ export default function RelationshipDetailScreen({route, navigation}) {
                         icon="text-box"
                         size={36}
                         color="#e69138"
-                        onPress={async () => setShareableRel(await addDidDoc(shareableRel))}
+                        onPress={async () => {
+                            if (shareableRel) {
+                                console.log("RelDetailScreen - setting shareableRel", shareableRel)
+                                setShareableRel(await addDidDoc(shareableRel))
+                            } else {
+                                console.error("RelDetailScreen - cant set shareableRel, shareableRel not set", shareableRel)
+                            }
+                        }}
                     />
                     <IconButton
                         icon="qrcode"
                         size={36}
                         color="#e69138"
-                        onPress={() => showQR(navigation, shareableRel)}
+                        onPress={() => {
+                            if (shareableRel) {
+                                console.log("RelDetailScreen - show QR for shareableRel", shareableRel)
+                                showQR(navigation, JSON.stringify(shareableRel))
+                            } else {
+                                console.error("RelDetailScreen - cant show qr, shareableRel not set", shareableRel)
+                            }
+                        }}
                     />
                     <IconButton
                         icon="close-circle"
@@ -105,7 +111,7 @@ export default function RelationshipDetailScreen({route, navigation}) {
                         onPress={() => navigation.goBack()}
                     />
                 </View>
-                <Image source={shareableRel.displayPictureUrl}
+                <Image source={shareableRel?.displayPictureUrl}
                        style={{
                            width: '30%',
                            height: '30%',
@@ -114,35 +120,21 @@ export default function RelationshipDetailScreen({route, navigation}) {
                            justifyContent: 'flex-start',
                        }}
                 />
-                <Text style={styles.subText}>{shareableRel.displayName}</Text>
+                <Text style={styles.subText}>{shareableRel?.displayName}</Text>
                 <Divider/>
                 <ScrollView style={{
-                        padding: 16,
-                        width: '90%',
-                        maxWidth: 450,
-                        maxHeight: 250,
-                        borderRadius: 3,
-                        backgroundColor: colors.card,}}>
-                    <Text style={styles.subText}>{shareableRel.did}</Text>
+                    padding: 16,
+                    width: '90%',
+                    maxWidth: 450,
+                    maxHeight: 250,
+                    borderRadius: 3,
+                    backgroundColor: colors.card,
+                }}>
+                    <Text style={styles.subText}>{shareableRel?.did}</Text>
                     <Divider/>
-                    <Text style={styles.subText}>{recursivePrint(shareableRel.didDoc)}</Text>
+                    <Text style={styles.subText}>{recursivePrint(shareableRel?.didDoc)}</Text>
                 </ScrollView>
             </Animated.View>
         </View>
     );
 }
-
-// <SafeAreaView style={styles.container}>
-//     <FlatList
-//         data={keys}
-//         keyExtractor={(item) => item}
-//         ItemSeparatorComponent={() => <Divider />}
-//         renderItem={({ item }) =>
-//         {
-//             const output = recursivePrint(wallet[item])
-//             console.log(item,": ",output)
-//             return <Text style={styles.listItem}>{item + ": " + output}</Text>
-//         }
-//         }
-//     />
-// </SafeAreaView>
