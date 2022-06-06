@@ -172,6 +172,14 @@ export const styles = StyleSheet.create({
         flexDirection: "row",
         flexWrap: "wrap",
     },
+    scrollableModal: {
+        padding: 16,
+        width: '90%',
+        maxWidth: 350,
+        maxHeight: 250,
+        borderRadius: 3,
+        backgroundColor: '#ffffff',
+    },
     subText: {
         fontSize: 16,
         marginBottom: 10,

@@ -25,7 +25,6 @@ import {recursivePrint} from '../utils'
 export default function RelationshipDetailScreen({route, navigation}) {
     console.log("route params are", JSON.stringify(route.params))
     const [shareableRel, setShareableRel] = useState<models.contactShareable>();
-    const {colors} = useTheme();
     const {current} = useCardAnimation();
 
     useEffect(() => {
@@ -63,7 +62,7 @@ export default function RelationshipDetailScreen({route, navigation}) {
                     width: '90%',
                     maxWidth: 500,
                     borderRadius: 3,
-                    backgroundColor: colors.card,
+                    backgroundColor: '#ffffff',
                     alignItems: 'center',
                     justifyContent: 'flex-start',
                     transform: [
@@ -122,14 +121,7 @@ export default function RelationshipDetailScreen({route, navigation}) {
                 />
                 <Text style={styles.subText}>{shareableRel?.displayName}</Text>
                 <Divider/>
-                <ScrollView style={{
-                    padding: 16,
-                    width: '90%',
-                    maxWidth: 450,
-                    maxHeight: 250,
-                    borderRadius: 3,
-                    backgroundColor: colors.card,
-                }}>
+                <ScrollView style={styles.scrollableModal}>
                     <Text style={styles.subText}>{shareableRel?.did}</Text>
                     <Divider/>
                     <Text style={styles.subText}>{recursivePrint(shareableRel?.didDoc)}</Text>

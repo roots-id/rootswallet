@@ -4,6 +4,9 @@ import {replaceSpecial} from '../utils';
 
 const ID_SEPARATOR = "_"
 
+export const CRED_ISSUE_TX = "ISSUE_CREDENTIAL"
+export const DID_PUBLISH_TX = "PUBLISH_DID"
+
 //these types must be unique enough to use in regex without conflict
 export enum ModelType {
     CHAT = "rootsChatType",

@@ -172,19 +172,22 @@ export default function ChatScreen({route, navigation}) {
         }
     }
 
-    function processBubbleClick(context: any, message: { type: roots.MessageType; data: string; }): void {
+    function processBubbleClick(context: any, message: IMessage): void {
         console.log("ChatScreen - bubble pressed", context, message)
-        switch (message.type) {
-            case roots.MessageType.BLOCKCHAIN_URL:
-                console.log("ChatScreen - Clicked blockchain url msg", message.data)
-                Linking.openURL(message.data)
-                break;
-            case roots.MessageType.DID:
-                console.log("ChatScreen - Clickable did msg", message.data)
-                showQR(navigation, message.data)
-                break;
-            default:
-                console.log("ChatScreen - Clicked non-active message type", message.type)
+        const msg = roots.getMessageById(message._id.toString())
+        if(msg) {
+            switch (msg.type) {
+                case roots.MessageType.BLOCKCHAIN_URL:
+                    console.log("ChatScreen - Clicked blockchain url msg", msg.data)
+                    Linking.openURL(msg.data)
+                    break;
+                case roots.MessageType.DID:
+                    console.log("ChatScreen - Clickable did msg", msg.data)
+                    showQR(navigation, msg.data)
+                    break;
+                default:
+                    console.log("ChatScreen - Clicked non-active message type", msg.type)
+            }
         }
     }
 
@@ -294,7 +297,7 @@ export default function ChatScreen({route, navigation}) {
                     },
                     {
                         pattern: /\*Click to geek out on Cardano blockchain details\*/,
-                        style: styles.prism,
+                        style: styles.red,
                     }
                 ]}
                 //quickReplyStyle={{backgroundColor: '#e69138',borderColor: '#e69138',elevation: 3}}

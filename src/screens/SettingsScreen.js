@@ -1,30 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import {
   Animated,
-  Button,
-  FlatList,
-  Image,
   Text,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   View,
 } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import {Picker} from '@react-native-picker/picker';
 import { useCardAnimation } from '@react-navigation/stack';
-
-import {logger} from '../logging';
-import { Divider, IconButton, List, Title,ToggleButton } from 'react-native-paper';
-import styles from "../styles/styles";
+import { IconButton } from 'react-native-paper';
+import { styles } from "../styles/styles";
 
 import * as roots from '../roots'
 
-import IconActions from '../components/IconActions';
-
 export default function SettingsScreen({ route, navigation }) {
     const [host, setHost] = useState(roots.getPrismHost());
-    const { colors } = useTheme();
     const { current } = useCardAnimation();
 
     useEffect(() => {

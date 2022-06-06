@@ -3,7 +3,6 @@ import * as models from '../models'
 import {logger} from '../logging'
 import {PrismModule} from '../prism'
 import * as contact from '../relationships'
-import * as walletSchema from '../schemas/WalletSchema'
 import {QuickReplies, Reply} from 'react-native-gifted-chat';
 import * as store from '../store'
 import {replaceSpecial} from '../utils'
@@ -78,14 +77,14 @@ export async function initRootsWallet() {
     const createdDid = await createDid(contact.YOU_ALIAS)
 
     if (createdDid) {
-        const didAlias = createdDid[walletSchema.DID_ALIAS]
+        const didAlias = createdDid.alias
 
         logger("roots - initializing your narrator bots roots")
         const prism = await initRoot(contact.PRISM_BOT, didAlias, rootsDid(contact.PRISM_BOT), contact.PRISM_BOT, contact.prismLogo)
         const rw = await initRoot(contact.ROOTS_BOT, didAlias, rootsDid(contact.ROOTS_BOT), contact.ROOTS_BOT, contact.rootsLogo)
 
         logger("roots - initializing your root")
-        const relCreated = await initRoot(contact.YOU_ALIAS, didAlias, createdDid[walletSchema.DID_URI_LONG_FORM], contact.YOU_ALIAS, contact.catalystLogo);
+        const relCreated = await initRoot(contact.YOU_ALIAS, didAlias, createdDid.uriLongForm, contact.YOU_ALIAS, contact.catalystLogo);
         logger("roots - initialized your root", relCreated)
         const myRel = contact.getContactByAlias(contact.YOU_ALIAS)
 
@@ -169,6 +168,8 @@ export async function handleNewData(jsonData: string): Promise<boolean | undefin
     } else if ((obj as models.contact).displayName) {
         console.log("handling scanned rel", jsonData)
         await initRoot(obj.displayName, contact.YOU_ALIAS, obj.did, obj.displayName, obj.displayPictureUrl)
+        //intentionally not awaiting
+        hasNewContact((obj as models.contact))
     } else {
         console.error("roots - Did not recognize scanned data", jsonData)
         return false;
@@ -206,7 +207,7 @@ export async function initRoot(alias: string, fromDidAlias: string, toDid: strin
                 //hasNewChat(getChatItem(alias));
             }
         }
-        //not awaiting on purpose
+        //intentionally not awaiting
         hasNewRels()
         return true;
     } catch (error) {
@@ -291,25 +292,25 @@ function getDidPubTx(didAlias: string) {
     logger("roots - getting DID pub tx", didAlias)
     const txLogs = wallet.getWallet(TEST_WALLET_NAME)?.blockchainTxLogEntry
     logger("roots - got tx logs", JSON.stringify(txLogs))
-    const didPublishTxLog = txLogs?.find(txLog => (txLog.action === walletSchema.DID_PUBLISH_TX && txLog.description === didAlias))
+    const didPublishTxLog = txLogs?.find(txLog => (txLog.action === models.DID_PUBLISH_TX && txLog.description === didAlias))
     logger("roots - got DID publish tx log", JSON.stringify(didPublishTxLog))
     return didPublishTxLog;
 }
 
 function hasLongForm(did: models.did) {
-    console.log("roots - checking DID has long form", did[walletSchema.DID_URI_LONG_FORM]);
-    const hasLong = did[walletSchema.DID_URI_LONG_FORM] && did[walletSchema.DID_URI_LONG_FORM].length > 0;
+    console.log("roots - checking DID has long form", did.uriLongForm);
+    const hasLong = did.uriLongForm && did.uriLongForm.length > 0;
     if (hasLong) {
-        logger("roots - DID has long form", did[walletSchema.DID_URI_LONG_FORM]);
+        logger("roots - DID has long form", did.uriLongForm);
         return true;
     } else {
-        logger("roots - DID does not have long form", did[walletSchema.DID_URI_CANONICAL_FORM]);
+        logger("roots - DID does not have long form", did.uriCanonical);
         return false;
     }
 }
 
 function isDidPublished(did: models.did): boolean {
-    const didAlias = did[walletSchema.DID_ALIAS]
+    const didAlias = did.alias
     console.log("roots - checking DID has been published", didAlias);
     const didPubTxLog = getDidPubTx(didAlias)
     if (didPubTxLog) {
@@ -324,10 +325,10 @@ function isDidPublished(did: models.did): boolean {
 export async function publishPrismDid(didAlias: string): Promise<boolean> {
     const did = getDid(didAlias)
     if (did) {
-        logger("publishing DID", did[walletSchema.DID_URI_CANONICAL_FORM],
-            "and long form", did[walletSchema.DID_URI_LONG_FORM])
+        logger("publishing DID", did.uriCanonical,
+            "and long form", did.uriLongForm)
         if (!isDidPublished(did)) {
-            const longFormDid = did[walletSchema.DID_URI_LONG_FORM]
+            const longFormDid = did.uriLongForm
             logger("roots - Publishing DID to Prism", longFormDid)
             try {
                 const wal = wallet.getWallet(TEST_WALLET_NAME)
@@ -435,14 +436,15 @@ function getChatItems() {
     return chats;
 }
 
-export async function hasNewDidDoc(chat: models.chat) {
+export async function hasNewContact(rel: models.contact) {
     if(isDemo()) {
+        const chat = await getChatByRel(rel)
         const msg = await sendMessage(chat, "To celebrate your new contact, you are issuing "
             + chat.title + " a verifiable credential", MessageType.TEXT, contact.ROOTS_BOT)
         if (msg) {
             const iCred = await issueDemoContactCredential(chat, msg.id)
             if (iCred) {
-                //const credPubTx = getCredPubTx(pubDid[walletSchema.DID_ALIAS],credIssueAlias)
+                //const credPubTx = getCredPubTx(pubDid.alias,credIssueAlias)
                 const credSuccess = await sendMessage(chat, "You have issued " + chat.title + " a verifiable credential!",
                     MessageType.PROMPT_ISSUED_CREDENTIAL, contact.ROOTS_BOT, false, iCred.credentialHash)
 //                     const credLinkMsg = await sendMessage(chat,BLOCKCHAIN_URL_MSG,
@@ -453,48 +455,6 @@ export async function hasNewDidDoc(chat: models.chat) {
         }
     }
 }
-
-// function getAllDidAliases(wallet: models.wallet) {
-//     const dids = wallet[walletSchema.WALLET_DIDS];
-//     if(!dids || dids == null || dids.length <= 0) {
-//         logger("No dids to get")
-//         return [];
-//     } else {
-//         const aliases = dids.map(did => did[walletSchema.DID_ALIAS]);
-//         logger("got did aliases",String(aliases));
-//         return aliases;
-//     }
-// }
-
-// async function loadChats() {
-//     try {
-//         const aliases = getAllDidAliases(currentWal);
-//         const result = await store.restoreItems(models.getStorageKeys(aliases,models.ModelType.CHAT));
-//         if(result) {
-//             logger("roots - successfully loaded chat items",aliases)
-//             return true;
-//         }
-//         else {
-//             console.error("roots - Failed to load chat items",aliases)
-//             return false;
-//         }
-//     } catch(error) {
-//         console.error("roots - Failed to load chat items",error,error.stack)
-//         return false;
-//     }
-// }
-//
-// async function updateChat(chat: models.chat) {
-//     const chatStoreId = models.getStorageKey(chat.id,models.ModelType.CHAT);
-//     const updated = await store.updateItem(chatStoreId,JSON.stringify(chat));
-//     if(updated) {
-//         logger("Updated chat storage",chatStoreId);
-//         return true;
-//     }else {
-//         logger("Unable to update chat storage",chatStoreId);
-//         return false;
-//     }
-// }
 
 // ---------------- Messages  ----------------------
 
@@ -715,28 +675,26 @@ export async function processPublishResponse(chat: models.chat) {
         endProcessing(chat.id, chat.fromAlias)
         const pubDid = getDid(chat.fromAlias)
         if (pubDid) {
-            const didPubTx = getDidPubTx(pubDid[walletSchema.DID_ALIAS])
+            const didPubTx = getDidPubTx(pubDid.alias)
             const didPubMsg = await sendMessage(chat, PUBLISHED_TO_PRISM,
                 MessageType.PROMPT_OWN_DID, contact.PRISM_BOT,
-                false, pubDid[walletSchema.DID_URI_LONG_FORM])
+                false, pubDid.uriLongForm)
             const didLinkMsg = await sendMessage(chat, BLOCKCHAIN_URL_MSG,
                 MessageType.BLOCKCHAIN_URL, contact.PRISM_BOT,
                 false, didPubTx?.url)
             if (didLinkMsg) {
                 //const didMsg = await sendMessage(chat,JSON.stringify(pubDid),DID_JSON,rel.PRISM_BOT,true);
                 if (demo) {
-                    logger("roots - demo celebrating did publishing credential", pubDid[walletSchema.DID_URI_LONG_FORM])
+                    logger("roots - demo celebrating did publishing credential", pubDid.uriLongForm)
                     const vcMsg = await sendMessage(chat,
                         "To celebrate your published DID, a verifiable credential is being created for you.",
                         MessageType.TEXT, contact.ROOTS_BOT)
                     if (vcMsg) {
                         const iCred = await issueDemoPublishDidCredential(chat, vcMsg.id)
                         if (iCred) {
-                            const credPubTx = getCredPubTx(pubDid[walletSchema.DID_ALIAS], iCred.alias)
+                            const credPubTx = getCredPubTx(pubDid.alias, iCred.alias)
                             const credSuccess = await sendMessage(chat, "You have issued yourself a verifiable credential!",
                                 MessageType.PROMPT_ISSUED_CREDENTIAL, contact.ROOTS_BOT, false, iCred.credentialHash)
-                            const credLinkMsg = await sendMessage(chat, BLOCKCHAIN_URL_MSG,
-                                MessageType.BLOCKCHAIN_URL, contact.PRISM_BOT, false, credPubTx?.url)
 
                             if (credSuccess) {
                                 //TODO create credential acceptance method
@@ -780,7 +738,7 @@ function getCredPubTx(didAlias: string, credAlias: string) {
     const txLogs = wallet.getWallet(TEST_WALLET_NAME)?.blockchainTxLogEntry
     const txName = didAlias + "/" + credAlias
     logger("roots - got tx logs", txLogs, "searching for", txName)
-    const credPubTxLog = txLogs?.find(txLog => (txLog.action === walletSchema.CRED_ISSUE_TX && txLog.description === txName))
+    const credPubTxLog = txLogs?.find(txLog => (txLog.action === models.CRED_ISSUE_TX && txLog.description === txName))
     logger("roots - got cred publish tx log", credPubTxLog)
     return credPubTxLog;
 }
@@ -803,6 +761,9 @@ export async function processIssueCredential(iCred: models.issuedCredential, cha
             if (savedWal) {
                 logger("roots - Added issued credential to wallet", newWalJson)
                 endProcessing(chat.id, credAlias)
+                const credPubTx = getCredPubTx(iCred.issuingDidAlias, iCred.alias)
+                const credLinkMsg = await sendMessage(chat, BLOCKCHAIN_URL_MSG,
+                    MessageType.BLOCKCHAIN_URL, contact.PRISM_BOT, false, credPubTx?.url)
                 return cred.getIssuedCredByAlias(credAlias, newWal)
             } else {
                 console.error("Could not save issued credential, unable to save wallet", credAlias)
@@ -1093,7 +1054,7 @@ export async function issueDemoPublishDidCredential(chat: models.chat, msgId: st
             const alreadyIssued = cred.getIssuedCredByAlias(credAlias, wal)
             if (didPub && !alreadyIssued) {
                 logger("roots - Chat is published and credential not found, creating....")
-                const didLong = did[walletSchema.DID_URI_LONG_FORM]
+                const didLong = did.uriLongForm
                 logger("roots - Creating demo credential for chat", chat.id, "w/long form did", didLong)
                 const today = new Date(Date.now());
                 const content = {

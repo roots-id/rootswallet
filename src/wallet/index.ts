@@ -5,6 +5,7 @@ import * as models from "../models";
 
 export async function createWallet(walName: string, mnemonic: string, walPass: string) {
     const prismWal = PrismModule.newWal(walName, mnemonic, walPass)
+    logger("wallet - created new wallet, updating stored wallet")
     const result = await updateWallet(walName, walPass, prismWal)
     if (result) {
         logger('Wallet created', getWalletJson(walName))

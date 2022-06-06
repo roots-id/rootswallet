@@ -13,8 +13,7 @@ import { useCardAnimation } from '@react-navigation/stack';
 import {logger} from '../logging';
 import { IconButton, ToggleButton } from 'react-native-paper';
 import QRCode from 'react-native-qrcode-svg';
-import { prismLogo } from '../roots'
-import styles from "../styles/styles";
+import {styles} from "../styles/styles";
 
 export default function ShowQRCodeScreen({ route, navigation }) {
     const data = route.params.qrdata

@@ -14,8 +14,7 @@ import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
 import {getDemoRel, YOU_ALIAS} from '../relationships';
 import {getDid, handleNewData, isDemo } from '../roots'
-
-//import styles from "../styles/styles";
+import {styles} from "../styles/styles";
 
 export default function ScanQRCodeScreen({route, navigation}) {
     console.log("Scan QR - rout params", route.params)

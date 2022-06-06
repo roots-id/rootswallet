@@ -1,13 +1,3 @@
-export const CRED_ISSUE_TX = "ISSUE_CREDENTIAL"
-
-export const DID_ALIAS = "alias";
-export const DID_PUBLISH_TX = "PUBLISH_DID"
-export const DID_URI_CANONICAL_FORM = "uriCanonical"
-export const DID_URI_LONG_FORM = "uriLongForm"
-
-export const WALLET_DIDS = "dids";
-export const WALLET_TX_LOGS = "blockchainTxLogEntry";
-
 //const keyMaster0 =
 //{
 //    keyId: "master0",
