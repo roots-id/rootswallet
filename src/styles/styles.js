@@ -208,7 +208,11 @@ export const styles = StyleSheet.create({
     videoContainer: {
         marginTop: 50,
     },
-    url: {
+    urlBlue: {
+        color: 'blue',
+        textDecorationLine: 'underline',
+    },
+    urlRed: {
         color: 'red',
         textDecorationLine: 'underline',
     },

@@ -12,7 +12,7 @@ import {addImportedCredential, getCredByHash, getCredDetails, getIssuedCredByHas
 import {hasNewRels} from "../relationships";
 
 //ppp-node-test
-export const DEFAULT_PRISM_HOST = "ppp-node-test.atalaprism.io"
+export const DEFAULT_PRISM_HOST = "ppp.atalaprism.io"
 
 //msg types
 export enum MessageType {

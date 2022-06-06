@@ -34,7 +34,7 @@ export async function addImportedCredential(iCred: models.credential, wal: model
         } else {
             console.error("Could not import credential, unable to save wallet", credHash)
         }
-        hasNewCreds()
+        hasNewCred()
         return true
     } else {
         logger("creds - Credential alias already in use", credHash)
@@ -244,7 +244,7 @@ export function getShareableCred(iCred: models.credential) {
     return shareable
 }
 
-export function hasNewCreds() {
+export function hasNewCred() {
     logger("creds - triggering cred refresh", refreshTriggers.length)
     refreshTriggers.forEach(trigger => trigger())
 }
@@ -329,7 +329,7 @@ export function getDemoCred(did: models.did): models.credential {
 function getFakeCredItem(did: models.did): models.credential {
     const today = new Date(Date.now());
     const credSub = {
-        name: "FakeCred " + today.getMilliseconds().toString(),
+        name: "Demo Credential " + today.getMilliseconds().toString(),
         achievement: "Created fake cred",
         date: today.toISOString(),
         id: did.uriLongForm,
@@ -350,7 +350,7 @@ function getFakeCredItem(did: models.did): models.credential {
         proof: prf,
     }
     return {
-        alias: "fakeCred" + today.getMilliseconds().toString(),
+        alias: "demoCred" + today.getMilliseconds().toString(),
         verifiedCredential: verCred,
     }
 }

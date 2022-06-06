@@ -7,7 +7,7 @@ import {
     decodeCredential,
     getCredDetails,
     getImportedCreds,
-    hasNewCreds
+    hasNewCred
 } from '../credentials'
 import * as models from '../models'
 import * as roots from '../roots'
@@ -37,7 +37,7 @@ const CredentialsScreen = ({route ,navigation}) => {
                 setRefresh(!refresh)
             }
         })
-        hasNewCreds()
+        hasNewCred()
     },[])
 
     return (
