@@ -24,8 +24,8 @@ import LoadingScreen from '../screens/LoadingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import ScanQRCodeScreen from '../screens/ScanQRCodeScreen'
 import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
+import * as SplashScreen from 'expo-splash-screen';
 import StartChatScreen from '../screens/StartChatScreen';
-import * as models from '../models'
 import React from "react";
 import {YOU_ALIAS} from '../relationships'
 import { getChatItem, loadSettings, storageStatus,
@@ -162,7 +162,7 @@ export default function AuthStack() {
                     name="Chat"
                     component={ChatScreen}
                     options={ ({ navigation, route }) => ({
-                        headerTitle: (props) => <SimpleTitle {...props} title={getChatItem(route.params.chatId).title}/>,
+                        headerTitle: (props) => <SimpleTitle {...props} title={getChatItem(route.params?.chatId).title}/>,
                         headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={YOU_ALIAS} scan='credential' settings='Settings'/>,
                     })}
                 />
@@ -258,6 +258,8 @@ export default function AuthStack() {
     //         </Stack.Group>
     //     </Stack.Navigator>
     // }
+
+    SplashScreen.hideAsync();
 
  //TODO refactor hasWallet call where we capture walletName
   return (

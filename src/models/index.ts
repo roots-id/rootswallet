@@ -62,22 +62,18 @@ export type compressedEcKeyData = {
 
 export interface contact extends contactShareable {
     id: string,
+    didDoc?: didDocument,
 }
 
 export type contactShareable = {
     displayName: string,
     displayPictureUrl: string,
     did: string,
-    didDoc?: didDocument,
 }
 
 export type credential = {
     alias: string,
     verifiedCredential: vc,
-}
-
-export type credentialDetails = {
-    hash: string, encoded: string, decoded: decodedSignedCredential,
 }
 
 //id: did:prism:13fa8c3c4ee3ae007b44f5fad55c1b16536f4bba755d5edcef636be910932dfa"

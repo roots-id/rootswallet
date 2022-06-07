@@ -23,7 +23,7 @@ export const ROOTS_BOT = "RootsHelper";
 export const PRISM_BOT = "PrismHelper";
 
 export const LIBRARY_BOT = "did:roots:librarybot1";
-const IOG_TECH = "did:roots:iogtech1";
+const IOG_TECH = "\"did:prism:b4766dae6f496f2b1980ed5a0977e126014d2da2126f588ca4e5088cef52e989:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQLW_ckfGDXfS0iftU8_FwzWR-q2xqPwepaWPG58u1Qc_hI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhAnt_c7RF_oYNbB6ELgF7AhXiQ9s905oHkiMTnf8_FFBWEj8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiECHwzsoV7NrJdo5AAvzmk4WtYWN0130GruIViUSNVU4w8";
 const ROOTSID = "did:prism:96a6c1857f3dff794375affb0bd44c6168f416d9344777231c61b18426b3b852:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQI9he3p0tbnoHSQbpbMzgtqtvEy26DjAjVyJXH47_HlsxI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhArSwvGsU30Ehl3y4D0rq2Qk3VcbQuj_9R8NplqWQCz0ZEj8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiED1RGpK9yJZWYTIxS28ResIqzyem9B6qFfK4wo-_heExk";
 //password is 'a'
 const LANCE = "did:prism:c3830f7f8441ed7dfe0cc26c38be2da21c43cf7fa5e78f498ebfb4d5028c776b:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQMdkSItMex2CvyD6p4idSylxEYS1l5CEIowmo0GjnTeYBI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhAqRnmPJdAwnQrBuBR8ewEN84D9mdNvLFOJbFH8gPNlYKEj8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiECeT-pVl-LayXPVemYBoIAATUJf00Q2exbtJIlmEAdXbQ";
@@ -325,7 +325,7 @@ demoRels[BUTCH] = createRel(BUTCH,"Butch Clark",butchLogo,BUTCH);
 demoRels[ESTEBAN] = createRel(ESTEBAN,"Esteban Garcia",estebanLogo,ESTEBAN);
 demoRels[RODO] = createRel(RODO,"Rodolfo Miranda",rodoLogo,RODO);
 
-export async function addDidDoc(contact: models.contactShareable) {
+export async function addDidDoc(contact: models.contact) {
     logger("roots - getting did doc for contact",contact.did)
     const didDocJson = await getPrismDidDoc(contact.did)
     if(didDocJson) {
@@ -351,7 +351,6 @@ export function asContactShareable(contact: models.contact): contactShareable {
         displayName: contact.displayName,
         displayPictureUrl: contact.displayPictureUrl,
         did: contact.did,
-        didDoc: contact.didDoc,
     }
 }
 
@@ -456,7 +455,7 @@ export async function updateContact(contact: models.contact): Promise<boolean> {
 
 export function showRel(navigation: any, rel: string) {
     console.log("rel - show rel",rel)
-    navigation["navigate"]('Relationship Details',{rel: getShareableRelByAlias(rel)})
+    navigation["navigate"]('Relationship Details',{rel: rel})
 }
 
 export function getDemoRel(): models.contactShareable {

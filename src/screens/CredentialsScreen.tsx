@@ -5,7 +5,6 @@ import {
     addRefreshTrigger,
     credLogo,
     decodeCredential,
-    getCredDetails,
     getImportedCreds,
     hasNewCred
 } from '../credentials'
@@ -13,27 +12,21 @@ import * as models from '../models'
 import * as roots from '../roots'
 import {styles} from "../styles/styles";
 import * as wallet from '../wallet'
+import {credential} from "../models";
 
 const CredentialsScreen = ({route ,navigation}) => {
     console.log("creds screen - params",route.params)
     const {walletName} = route.params
     const [refresh,setRefresh] = useState(true)
-    const emptyCredDeets: models.credentialDetails[] = []
-    const [creds,setCreds] = useState(emptyCredDeets)
+    const [creds,setCreds] = useState<credential[]>()
 
     useEffect(() => {
         addRefreshTrigger(()=>{
             console.log("creds screen - toggling refresh")
             const wal = wallet.getWallet(walletName)
             if(wal) {
-                const iCreds = getImportedCreds(wal)
-                console.log("creds screen - got imported creds", iCreds.length)
-                const credDeets = iCreds.map((encodedCred) => {
-                    return getCredDetails(encodedCred.verifiedCredential)
-                })
-                console.log("creds screen - got cred deets", credDeets.length)
-                setCreds(credDeets);
-                console.log("creds screen - set creds size", creds.length)
+                setCreds(getImportedCreds(wal))
+                console.log("creds screen - got imported creds", creds?.length)
                 setRefresh(!refresh)
             }
         })
@@ -46,13 +39,13 @@ const CredentialsScreen = ({route ,navigation}) => {
                 <FlatList
                     data={creds}
                     extraData={refresh}
-                    keyExtractor={(item) => item.hash}
+                    keyExtractor={(item) => item.verifiedCredential.proof.hash}
                     ItemSeparatorComponent={() => <Divider />}
                     renderItem={({ item }) => (
                     <React.Fragment>
                         <View style={{flex: 1,flexDirection:'row',}}>
                             <SafeAreaView>
-                            <TouchableOpacity onPress={() => roots.showCred(navigation,item.hash)}>
+                            <TouchableOpacity onPress={() => roots.showCred(navigation,item.verifiedCredential.proof.hash)}>
                                 <Image source={credLogo}
                                     style={styles.credLogoStyle}
                                 />
@@ -60,7 +53,7 @@ const CredentialsScreen = ({route ,navigation}) => {
                             </SafeAreaView>
                             <SafeAreaView style={styles.container}>
                             <List.Item
-                              title={item.decoded.credentialSubject.name}
+                              title={decodeCredential(item.verifiedCredential.encodedSignedCredential).credentialSubject.name}
                               titleNumberOfLines={1}
                               titleStyle={styles.clickableListTitle}
                               descriptionStyle={styles.listDescription}

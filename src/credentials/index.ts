@@ -113,15 +113,6 @@ export function getCredByHash(credHash: string, wal: models.wallet) {
     console.warn("No imported or issued cred hash found", credHash)
 }
 
-export function getCredDetails(encodedCred: models.vc): models.credentialDetails {
-    console.log("creds - decoding encoded cred", encodedCred)
-    const decodedCred = decodeCredential(encodedCred.encodedSignedCredential)
-    console.log("cred - decoded cred obj has eys", Object.keys(decodedCred))
-    const credHash = encodedCred.proof.hash
-    console.log("cred - hash for decoded cred", credHash)
-    return {hash: credHash, encoded: encodedCred.encodedSignedCredential, decoded: decodedCred}
-}
-
 export function getImportedCredByAlias(credAlias: string, wal: models.wallet): models.credential | undefined {
     logger("creds - Getting imported credential", credAlias)
 

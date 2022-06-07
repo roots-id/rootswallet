@@ -38,7 +38,6 @@ export default function ShowQRCodeScreen({ route, navigation }) {
                 setViewOut(<QRCode
                     value={jsonData}
                     size={300}
-                    logo={require('../assets/ATALAPRISM.png')}
                     logoSize={50}
                     logoBackgroundColor='transparent'
                     key="{qr}"

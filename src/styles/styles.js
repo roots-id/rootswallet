@@ -118,6 +118,14 @@ export const styles = StyleSheet.create({
         fontSize: 18,
         color: '#eeeeee',
     },
+    listItemCenteredBlack: {
+        fontSize: 18,
+        marginBottom: 10,
+        color: '#111111',
+        fontWeight: 'normal',
+        textAlignVertical: "center",
+        textAlign: "center",
+    },
     listTitle: {
         fontSize: 22,
         color: '#dddddd',

@@ -13,7 +13,7 @@ import {useCardAnimation} from '@react-navigation/stack';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
 import {getDemoRel, YOU_ALIAS} from '../relationships';
-import {getDid, handleNewData, isDemo } from '../roots'
+import {getDid, importContact, importVerifiedCredential, isDemo } from '../roots'
 import {styles} from "../styles/styles";
 
 export default function ScanQRCodeScreen({route, navigation}) {
@@ -28,28 +28,18 @@ export default function ScanQRCodeScreen({route, navigation}) {
 
     const handleDemo = async () => {
         if (isDemo()) {
-            console.log("scan qr - pretending to scan with demo data")
+            console.log("Scan QR - pretending to scan with demo data")
             clearInterval(interval)
-            setScanned(true)
             let demoData;
             if (type === 'contact') {
-                console.log("scan qr - getting contact demo data")
+                console.log("Scan QR - getting contact demo data")
                 demoData = getDemoRel()
             } else {
-                console.log("scan qr - getting credential demo data")
-                demoData = getDemoCred(getDid(YOU_ALIAS))
+                console.log("Scan QR - getting credential demo data")
+                demoData = getDemoCred(getDid(YOU_ALIAS)).verifiedCredential
             }
-            console.log("scan qr - pretend object has keys", Object.keys(demoData))
             const jsonData = JSON.stringify(demoData)
-            console.log("scan qr - pretend data is", jsonData)
-            const success = await handleNewData(jsonData)
-            if (success) {
-                if (navigation.canGoBack()) {
-                    navigation.goBack()
-                }
-            } else if (navigation.canGoBack()) {
-                navigation.goBack()
-            }
+            await handleBarCodeScanned({type,jsonData})
         }
     }
 
@@ -62,10 +52,15 @@ export default function ScanQRCodeScreen({route, navigation}) {
     }, [])
 
 
-    const handleBarCodeScanned = async ({type, data}) => {
+    const handleBarCodeScanned = async ({t, data}) => {
+        console.log("Scan QR - scanned data",type,data)
         setScanned(true);
         clearInterval(interval)
-        await handleNewData(data)
+        if(type == "credential") {
+            await importVerifiedCredential(data)
+        } else if(type == "contact") {
+            await importContact(data)
+        }
         if (navigation.canGoBack()) {
             navigation.goBack()
         }
@@ -127,9 +122,7 @@ export default function ScanQRCodeScreen({route, navigation}) {
                     height: 250,
                 }}>
                     <BarCodeScanner
-                        onBarCodeScanned={async () => {
-                            (scanned ? undefined : await handleBarCodeScanned)
-                        }}
+                        onBarCodeScanned={handleBarCodeScanned}
                         style={StyleSheet.absoluteFillObject}
                     />
                     {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)}/>}

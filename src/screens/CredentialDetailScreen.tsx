@@ -14,8 +14,9 @@ import {Divider, IconButton, List, Title, ToggleButton} from 'react-native-paper
 import {useTheme} from '@react-navigation/native';
 import {useCardAnimation} from '@react-navigation/stack';
 
-import {credLogo, verifyCredentialByHash} from '../credentials'
+import {credLogo, decodeCredential, verifyCredentialByHash} from '../credentials'
 import {logger} from '../logging';
+import * as models from '../models';
 import {showQR} from '../qrcode'
 import * as roots from '../roots'
 import {styles} from "../styles/styles";
@@ -25,7 +26,7 @@ import * as wallet from '../wallet'
 
 export default function CredentialDetailScreen({route, navigation}) {
     console.log("cred details - route params are", JSON.stringify(route.params))
-    const [cred, setCred] = useState(route.params.cred);
+    const [cred, setCred] = useState<models.credential>(route.params.cred);
     const [verified, setVerified] = useState("help-circle");
     const {colors} = useTheme();
     const {current} = useCardAnimation();
@@ -38,7 +39,7 @@ export default function CredentialDetailScreen({route, navigation}) {
     async function updateVerification() {
         const wal = wallet.getWallet(roots.TEST_WALLET_NAME)
         if (wal) {
-            const verify = await verifyCredentialByHash(cred.hash, wal)
+            const verify = await verifyCredentialByHash(cred.verifiedCredential.proof.hash, wal)
             if (verify) {
                 const result = JSON.parse(verify);
                 logger("cred details - verify cred result", result)
@@ -106,7 +107,7 @@ export default function CredentialDetailScreen({route, navigation}) {
                         icon="qrcode"
                         size={36}
                         color="#e69138"
-                        onPress={() => showQR(navigation, cred.encoded)}
+                        onPress={() => showQR(navigation, cred)}
                     />
                     <IconButton
                         icon="close-circle"
@@ -119,11 +120,11 @@ export default function CredentialDetailScreen({route, navigation}) {
                        style={styles.credLogoStyle}
                 />
                 <FlatList
-                    data={Object.keys(cred.decoded.credentialSubject)}
+                    data={Object.keys(decodeCredential(cred.verifiedCredential.encodedSignedCredential).credentialSubject)}
                     keyExtractor={(item) => item}
                     ItemSeparatorComponent={() => <Divider/>}
                     renderItem={({item}) => {
-                        const output = utils.recursivePrint(cred.decoded.credentialSubject[item])
+                        const output = utils.recursivePrint(decodeCredential(cred.verifiedCredential.encodedSignedCredential).credentialSubject[item])
                         console.log(item, ": ", output)
                         return <ScrollView style={styles.scrollableModal}><Text style={{color: "black"}}>{item + ": " + output}</Text></ScrollView>
                     }}

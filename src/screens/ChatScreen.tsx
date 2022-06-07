@@ -5,7 +5,7 @@ import {Bubble, GiftedChat, IMessage, InputToolbar, Reply, User} from 'react-nat
 import * as cred from '../credentials'
 import * as models from "../models";
 import {showQR} from '../qrcode'
-import {getContactByAlias, YOU_ALIAS} from '../relationships'
+import {asContactShareable, getContactByAlias, getContactByDid, YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
 import {styles} from "../styles/styles";
@@ -132,7 +132,10 @@ export default function ChatScreen({route, navigation}) {
                     console.log("ChatScreen - quick reply view did")
                     const longDid = roots.getMessageById(reply.messageId)?.data
                     console.log("ChatScreen - View rel", longDid);
-                    showQR(navigation, longDid)
+                    const c = getContactByDid(longDid)
+                    if(c) {
+                        showQR(navigation, asContactShareable(c))
+                    }
                 } else if (reply.value.startsWith(roots.MessageType.PROMPT_ACCEPT_CREDENTIAL)) {
                     console.log("ChatScreen - process quick reply for accepting credential")
                     const res = await roots.processCredentialResponse(chat, reply)
@@ -146,7 +149,7 @@ export default function ChatScreen({route, navigation}) {
                         console.log("ChatScreen - quick reply view issued credential")
                         const vCred = roots.processViewCredential(reply.messageId)
                         if (vCred) {
-                            navigation.navigate('Credential Details', {cred: cred.getCredDetails(vCred.verifiedCredential)})
+                            navigation.navigate('Credential Details', {cred: vCred})
                         }
                     }
                 } else if (reply.value.startsWith(roots.MessageType.PROMPT_OWN_CREDENTIAL)) {
@@ -160,7 +163,7 @@ export default function ChatScreen({route, navigation}) {
                         console.log("ChatScreen - quick reply view imported credential")
                         const vCred = roots.processViewCredential(reply.messageId)
                         if (vCred) {
-                            navigation.navigate('Credential Details', {cred: cred.getCredDetails(vCred.verifiedCredential)})
+                            navigation.navigate('Credential Details', {cred: vCred})
                         }
                     }
                 } else {
@@ -183,7 +186,10 @@ export default function ChatScreen({route, navigation}) {
                     break;
                 case roots.MessageType.DID:
                     console.log("ChatScreen - Clickable did msg", msg.data)
-                    showQR(navigation, msg.data)
+                    const c = getContactByDid(msg.data)
+                    if(c) {
+                        showQR(navigation,asContactShareable(c))
+                    }
                     break;
                 default:
                     console.log("ChatScreen - Clicked non-active message type", msg.type)

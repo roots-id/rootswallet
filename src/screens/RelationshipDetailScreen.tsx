@@ -8,7 +8,6 @@ import {
     StyleSheet,
     View,
 } from 'react-native';
-import {useTheme} from '@react-navigation/native';
 import {useCardAnimation} from '@react-navigation/stack';
 import {Divider, IconButton } from 'react-native-paper';
 import {styles} from "../styles/styles";
@@ -24,21 +23,12 @@ import {recursivePrint} from '../utils'
 
 export default function RelationshipDetailScreen({route, navigation}) {
     console.log("route params are", JSON.stringify(route.params))
-    const [shareableRel, setShareableRel] = useState<models.contactShareable>();
+    const [rel, setRel] = useState<models.contact>(route.params.rel);
     const {current} = useCardAnimation();
 
     useEffect(() => {
-        const contact = (route.params.rel)
-        if (!isShareable(contact)) {
-            setShareableRel(asContactShareable(contact))
-        } else {
-            setShareableRel(asContactShareable(contact))
-        }
-    }, []);
-
-    useEffect(() => {
-        console.log("rel changed", shareableRel)
-    }, [shareableRel]);
+        console.log("rel changed", rel)
+    }, [rel]);
 
     return (
         <View
@@ -82,11 +72,11 @@ export default function RelationshipDetailScreen({route, navigation}) {
                         size={36}
                         color="#e69138"
                         onPress={async () => {
-                            if (shareableRel) {
-                                console.log("RelDetailScreen - setting shareableRel", shareableRel)
-                                setShareableRel(await addDidDoc(shareableRel))
+                            if (rel) {
+                                console.log("RelDetailScreen - setting rel", rel)
+                                setRel(await addDidDoc(rel))
                             } else {
-                                console.error("RelDetailScreen - cant set shareableRel, shareableRel not set", shareableRel)
+                                console.error("RelDetailScreen - cant set rel, rel not set", rel)
                             }
                         }}
                     />
@@ -95,11 +85,11 @@ export default function RelationshipDetailScreen({route, navigation}) {
                         size={36}
                         color="#e69138"
                         onPress={() => {
-                            if (shareableRel) {
-                                console.log("RelDetailScreen - show QR for shareableRel", shareableRel)
-                                showQR(navigation, JSON.stringify(shareableRel))
+                            if (rel) {
+                                console.log("RelDetailScreen - show QR for rel", rel)
+                                showQR(navigation, asContactShareable(rel))
                             } else {
-                                console.error("RelDetailScreen - cant show qr, shareableRel not set", shareableRel)
+                                console.error("RelDetailScreen - cant show qr, rel not set", rel)
                             }
                         }}
                     />
@@ -110,7 +100,7 @@ export default function RelationshipDetailScreen({route, navigation}) {
                         onPress={() => navigation.goBack()}
                     />
                 </View>
-                <Image source={shareableRel?.displayPictureUrl}
+                <Image source={rel?.displayPictureUrl}
                        style={{
                            width: '30%',
                            height: '30%',
@@ -119,12 +109,12 @@ export default function RelationshipDetailScreen({route, navigation}) {
                            justifyContent: 'flex-start',
                        }}
                 />
-                <Text style={styles.subText}>{shareableRel?.displayName}</Text>
+                <Text style={styles.subText}>{rel?.displayName}</Text>
                 <Divider/>
                 <ScrollView style={styles.scrollableModal}>
-                    <Text style={styles.subText}>{shareableRel?.did}</Text>
+                    <Text style={styles.subText}>{rel?.did}</Text>
                     <Divider/>
-                    <Text style={styles.subText}>{recursivePrint(shareableRel?.didDoc)}</Text>
+                    <Text style={styles.subText}>{recursivePrint(rel?.didDoc)}</Text>
                 </ScrollView>
             </Animated.View>
         </View>
