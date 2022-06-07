@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, SafeAreaView, TouchableOpacity} from 'react-native';
 import { List } from 'react-native-paper';
-import { showRel } from '../relationships'
+import {asContactShareable, showRel} from '../relationships'
 import { getChatItem } from '../roots'
 import {styles} from "../styles/styles";
 
@@ -21,7 +21,7 @@ export default function RelRow(...props) {
   return (
   <React.Fragment>
         <SafeAreaView>
-        <TouchableOpacity onPress={() => showRel(navigation,item.id)}>
+        <TouchableOpacity onPress={() => showRel(navigation,asContactShareable(item))}>
             <Image source={item.displayPictureUrl}
                 style={{
                   width:65,

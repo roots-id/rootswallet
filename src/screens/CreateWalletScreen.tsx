@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {Button, Linking, StyleSheet, Text, TextInput, TextProps, View} from 'react-native';
-import Hyperlink from 'react-native-hyperlink'
 import { Divider, List, Title } from 'react-native-paper';
 
 import FormButton from '../components/FormButton';
@@ -11,7 +10,6 @@ import {initRootsWallet, TEST_WALLET_NAME} from '../roots'
 import {createWallet, getWallet} from '../wallet'
 
 import { displayProblem, styles } from "../styles/styles";
-import {Link} from "@react-navigation/native";
 
 export default function CreateWalletScreen() {
   const [initialized,setInitialized] = useState<boolean>(false);

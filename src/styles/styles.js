@@ -135,7 +135,7 @@ export const styles = StyleSheet.create({
         color: '#dddddd',
     },
     loginButtonLabel: {
-        fontSize: 18,
+        fontSize: 16,
     },
     magicNumber: {
         fontSize: 42,

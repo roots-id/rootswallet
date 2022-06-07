@@ -130,12 +130,9 @@ export default function ChatScreen({route, navigation}) {
                     }
                 } else if (reply.value.startsWith(roots.MessageType.PROMPT_OWN_DID)) {
                     console.log("ChatScreen - quick reply view did")
-                    const longDid = roots.getMessageById(reply.messageId)?.data
-                    console.log("ChatScreen - View rel", longDid);
-                    const c = getContactByDid(longDid)
-                    if(c) {
-                        showQR(navigation, asContactShareable(c))
-                    }
+                    const r = roots.getMessageById(reply.messageId)?.data
+                    console.log("ChatScreen - View rel", r);
+                    showQR(navigation, asContactShareable(r))
                 } else if (reply.value.startsWith(roots.MessageType.PROMPT_ACCEPT_CREDENTIAL)) {
                     console.log("ChatScreen - process quick reply for accepting credential")
                     const res = await roots.processCredentialResponse(chat, reply)

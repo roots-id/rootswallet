@@ -22,12 +22,12 @@ import {
 import {recursivePrint} from '../utils'
 
 export default function RelationshipDetailScreen({route, navigation}) {
-    console.log("route params are", JSON.stringify(route.params))
+    console.log("RelDetailScreen - route params are", JSON.stringify(route.params))
     const [rel, setRel] = useState<models.contact>(route.params.rel);
     const {current} = useCardAnimation();
 
     useEffect(() => {
-        console.log("rel changed", rel)
+        console.log("RelDetailScreen - rel changed", rel)
     }, [rel]);
 
     return (

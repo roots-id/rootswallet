@@ -453,7 +453,7 @@ export async function updateContact(contact: models.contact): Promise<boolean> {
     return result;
 }
 
-export function showRel(navigation: any, rel: string) {
+export function showRel(navigation: any, rel: contactShareable) {
     console.log("rel - show rel",rel)
     navigation["navigate"]('Relationship Details',{rel: rel})
 }
