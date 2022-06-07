@@ -12,34 +12,41 @@ import {useTheme} from '@react-navigation/native';
 import {useCardAnimation} from '@react-navigation/stack';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
+import * as models from "../models"
 import {getDemoRel, YOU_ALIAS} from '../relationships';
 import {getDid, importContact, importVerifiedCredential, isDemo } from '../roots'
 import {styles} from "../styles/styles";
+import React from 'react';
 
 export default function ScanQRCodeScreen({route, navigation}) {
     console.log("Scan QR - rout params", route.params)
-    const [hasPermission, setHasPermission] = useState(null);
+    const [hasPermission, setHasPermission] = useState<boolean>(false);
     const {colors} = useTheme();
     const {current} = useCardAnimation();
-    const [scanned, setScanned] = useState(false);
+    const [scanned, setScanned] = useState<boolean>(false);
     const type = route.params.type
 
-    let interval;
+    let interval: NodeJS.Timeout;
 
     const handleDemo = async () => {
         if (isDemo()) {
             console.log("Scan QR - pretending to scan with demo data")
             clearInterval(interval)
-            let demoData;
             if (type === 'contact') {
                 console.log("Scan QR - getting contact demo data")
-                demoData = getDemoRel()
+                const demoData = getDemoRel()
+                await importContact(demoData)
             } else {
                 console.log("Scan QR - getting credential demo data")
-                demoData = getDemoCred(getDid(YOU_ALIAS)).verifiedCredential
+                const did = getDid(YOU_ALIAS)
+                if(did) {
+                    const demoData = getDemoCred(did).verifiedCredential
+                    await importVerifiedCredential(demoData)
+                }
             }
-            const jsonData = JSON.stringify(demoData)
-            await handleBarCodeScanned({type,jsonData})
+            if (navigation.canGoBack()) {
+                navigation.goBack()
+            }
         }
     }
 
@@ -57,9 +64,9 @@ export default function ScanQRCodeScreen({route, navigation}) {
         setScanned(true);
         clearInterval(interval)
         if(type == "credential") {
-            await importVerifiedCredential(data)
+            await importVerifiedCredential(JSON.parse(data))
         } else if(type == "contact") {
-            await importContact(data)
+            await importContact(JSON.parse(data))
         }
         if (navigation.canGoBack()) {
             navigation.goBack()

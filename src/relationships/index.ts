@@ -347,11 +347,13 @@ export function addRefreshTrigger(trigger: ()=>{}) {
 }
 
 export function asContactShareable(contact: models.contact): contactShareable {
-    return {
+    const shareable = {
         displayName: contact.displayName,
         displayPictureUrl: contact.displayPictureUrl,
         did: contact.did,
     }
+    console.log("rels - shareable contact", JSON.stringify(shareable))
+    return shareable
 }
 
 export function createRel(relAlias: string, relName: string, relPicUrl: string, did: string) :contact{
