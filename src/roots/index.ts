@@ -19,6 +19,7 @@ export enum MessageType {
     BLOCKCHAIN_URL = "blockchainUrlMsgType",
     CREDENTIAL_JSON = "jsonCredential",
     DID = "didMsgType",
+    PROMPT_RETRY_PROCESS = "rootsFailedProcessingMsgType",
     PROMPT_ACCEPT_CREDENTIAL = "rootsAcceptCredentialMsgType",
     PROMPT_OWN_CREDENTIAL = "rootsOwnCredentialMsgType",
     PROMPT_OWN_DID = "rootsOwnDidMsgType",
@@ -477,7 +478,7 @@ function addQuickReply(msg: models.message) {
             keepIt: true,
             values: [
                 {
-                    title: 'Show QR code',
+                    title: 'View',
                     value: MessageType.PROMPT_OWN_DID,
                     messageId: msg.id,
                 }]
@@ -519,6 +520,18 @@ function addQuickReply(msg: models.message) {
                 {
                     title: 'View',
                     value: MessageType.PROMPT_OWN_CREDENTIAL + CRED_VIEW,
+                    messageId: msg.id,
+                }]
+        }
+    }
+    if(msg.type === MessageType.PROMPT_RETRY_PROCESS) {
+        msg.quickReplies = {
+            type: 'checkbox',
+            keepIt: true,
+            values: [
+                {
+                    title: 'Retry(Coming Soon)',
+                    value: MessageType.PROMPT_RETRY_PROCESS,
                     messageId: msg.id,
                 }]
         }
@@ -577,7 +590,7 @@ export async function sendMessages(chat: models.chat, msgs: string[], msgType: M
 }
 
 //TODO unify aliases and storageKeys?
-export async function sendMessage(chat: models.chat, msgText: string, msgType: MessageType, contactAlias: string, system = false, data = {}) {
+export async function sendMessage(chat: models.chat, msgText: string, msgType: MessageType, contactAlias: string, system = false, data: any = {}) {
     const msgTime = Date.now()
     const relDisplay = contact.getContactByAlias(contactAlias)
     if (relDisplay) {
@@ -626,32 +639,37 @@ export async function processCredentialResponse(chat: models.chat, reply: Reply)
             const msg = getMessageById(reply.messageId)
             if (msg) {
                 startProcessing(chat.id, reply.messageId)
-                const credHash = msg.data
-                logger("creds - adding imported credential", credHash)
-                const iCredJson = store.getItem(credHash);
-                logger("creds - adding import credential found in storage", iCredJson)
-                if (iCredJson) {
-                    console.log("creds - parsing added imported cred json", iCredJson)
-                    const iCred = JSON.parse(iCredJson)
-                    const wal = wallet.getWallet(TEST_WALLET_NAME)
-                    if (wal) {
-                        const success = await cred.addImportedCredential(iCred, wal)
-                        if (success) {
-                            logger("roots - accepted credential w/hash", credHash)
-                            const credOwnMsg = await sendMessage(chat, "Credential accepted.",
-                                MessageType.PROMPT_OWN_CREDENTIAL, contact.ROOTS_BOT, false, credHash)
-                            if (!(chat.id === contact.YOU_ALIAS)) {
-                                await sendMessage(getChatItem(contact.YOU_ALIAS), "You accepted a credential from " +
-                                    chat.id, MessageType.PROMPT_OWN_CREDENTIAL, contact.ROOTS_BOT, false, credHash)
+                try {
+                    const credHash = msg.data
+                    logger("creds - adding imported credential", credHash)
+                    const iCredJson = store.getItem(credHash);
+                    logger("creds - adding import credential found in storage", iCredJson)
+                    if (iCredJson) {
+                        console.log("creds - parsing added imported cred json", iCredJson)
+                        const iCred = JSON.parse(iCredJson)
+                        const wal = wallet.getWallet(TEST_WALLET_NAME)
+                        if (wal) {
+                            const success = await cred.addImportedCredential(iCred, wal)
+                            if (success) {
+                                logger("roots - accepted credential w/hash", credHash)
+                                const credOwnMsg = await sendMessage(chat, "Credential accepted.",
+                                    MessageType.PROMPT_OWN_CREDENTIAL, contact.ROOTS_BOT, false, credHash)
+                                if (!(chat.id === contact.YOU_ALIAS)) {
+                                    await sendMessage(getChatItem(contact.YOU_ALIAS), "You accepted a credential from " +
+                                        chat.id, MessageType.PROMPT_OWN_CREDENTIAL, contact.ROOTS_BOT, false, credHash)
+                                }
                             }
+                        } else {
+                            console.error("Couldn't get wallet", TEST_WALLET_NAME, wal)
                         }
+                        endProcessing(chat.id, reply.messageId)
+                        return credHash;
                     } else {
-                        console.error("Couldn't get wallet", TEST_WALLET_NAME, wal)
+                        console.error("creds - Credential not found in storage", credHash)
                     }
+                } catch(error) {
                     endProcessing(chat.id, reply.messageId)
-                    return credHash;
-                } else {
-                    console.error("creds - Credential not found in storage", credHash)
+                    console.error("creds - Unable to finish accepting credential",error,error.stack)
                 }
             } else {
                 console.error("Could not find message for reply", reply.messageId)
@@ -1024,8 +1042,20 @@ export async function issueDemoCredential(chat: models.chat, msgId: string, cont
                         },
                     },
                 }
-                const result = await processIssueCredential(iCred, chat)
-                return result;
+                try {
+                    const result = await processIssueCredential(iCred, chat)
+                    if(result) {
+                        return result;
+                    } else {
+                        console.log("Unable to issue credential",chat.fromAlias,JSON.stringify(iCred))
+                        const tryAgain = await sendMessage(chat, "Unable to issue credential at this time",
+                            MessageType.PROMPT_RETRY_PROCESS, contact.ROOTS_BOT, false, async ()=>{await processIssueCredential(iCred, chat)})
+                    }
+                } catch(error) {
+                    console.log("Unable to issue credential",chat.fromAlias,JSON.stringify(iCred))
+                    const tryAgain = await sendMessage(chat, "Unable to issue credential at this time",
+                        MessageType.PROMPT_RETRY_PROCESS, contact.ROOTS_BOT, false, async ()=>{await processIssueCredential(iCred, chat)})
+                }
             } else {
                 logger("roots - Couldn't issue demo contact credential, was the credential already found", alreadyIssued)
             }

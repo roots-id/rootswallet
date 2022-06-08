@@ -457,7 +457,7 @@ export async function updateContact(contact: models.contact): Promise<boolean> {
 
 export function showRel(navigation: any, rel: contactShareable) {
     console.log("rel - show rel",rel)
-    navigation["navigate"]('Relationship Details',{rel: rel})
+    navigation.navigate('Relationship Details',{rel: rel})
 }
 
 export function getDemoRel(): models.contactShareable {

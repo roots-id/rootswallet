@@ -279,6 +279,10 @@ export default function AuthStack() {
                     ) : (
                     <>
                         <Stack.Screen name="Create Wallet" component={CreateWalletScreen} />
+                        <Stack.Group screenOptions={{ presentation: 'transparentModal' }}>
+                            <Stack.Screen name="Settings" component={SettingsScreen}/>
+                            <Stack.Screen name="Integration" component={IntegrationStack}/>
+                        </Stack.Group>
                     </>
                   )}
               </>

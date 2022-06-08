@@ -5,10 +5,11 @@ import {Bubble, GiftedChat, IMessage, InputToolbar, Reply, User} from 'react-nat
 import * as cred from '../credentials'
 import * as models from "../models";
 import {showQR} from '../qrcode'
-import {asContactShareable, getContactByAlias, getContactByDid, YOU_ALIAS} from '../relationships'
+import {asContactShareable, getContactByAlias, getContactByDid, showRel, YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
 import {styles} from "../styles/styles";
+import {contactShareable} from "../models";
 
 export default function ChatScreen({route, navigation}) {
     console.log("ChatScreen - route params", route.params)
@@ -25,12 +26,14 @@ export default function ChatScreen({route, navigation}) {
         const chatSession = roots.startChatSession(chat.id, {
             chat: chat,
             onReceivedMessage: (message) => {
-                setMessages((currentMessages) => {
-                    const iMsg = mapMessage(message)
-                    if (iMsg) {
-                        return GiftedChat.append(currentMessages, [iMsg])
-                    }
-                });
+                if(messages && GiftedChat) {
+                    setMessages((currentMessages) => {
+                        const iMsg = mapMessage(message)
+                        if (iMsg) {
+                            return GiftedChat.append(currentMessages, [iMsg])
+                        }
+                    });
+                }
             },
             onReceivedKeystrokes: (keystrokes) => {
                 // handle received typing keystrokes
@@ -132,7 +135,7 @@ export default function ChatScreen({route, navigation}) {
                     console.log("ChatScreen - quick reply view did")
                     const r = roots.getMessageById(reply.messageId)?.data
                     console.log("ChatScreen - View rel", r);
-                    showQR(navigation, asContactShareable(r))
+                    showRel(navigation, asContactShareable(r))
                 } else if (reply.value.startsWith(roots.MessageType.PROMPT_ACCEPT_CREDENTIAL)) {
                     console.log("ChatScreen - process quick reply for accepting credential")
                     const res = await roots.processCredentialResponse(chat, reply)
@@ -163,7 +166,12 @@ export default function ChatScreen({route, navigation}) {
                             navigation.navigate('Credential Details', {cred: vCred})
                         }
                     }
-                } else {
+                } else if (reply.value.startsWith(roots.MessageType.PROMPT_RETRY_PROCESS)) {
+                    console.log("ChatScreen - process quick reply for retry process")
+                    const process = roots.getMessageById(reply.messageId)?.data
+                    process();
+                }
+                else {
                     console.log("ChatScreen - reply value not recognized, was", chat.id, reply.value);
                 }
             }

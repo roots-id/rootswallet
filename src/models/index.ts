@@ -197,7 +197,7 @@ export function createChat(chatAlias: string, fromDidAlias: string,
 }
 
 export function createMessage(idText: string, bodyText: string, statusText: string,
-                              timeInMillis: number, relId: string, system = false, data: object): message {
+                              timeInMillis: number, relId: string, system = false, data: any): message {
     const msg = {
         body: bodyText,
         createdTime: timeInMillis,

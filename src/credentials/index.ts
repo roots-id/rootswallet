@@ -264,19 +264,19 @@ export async function issueCredential(didAlias: string, iCred: models.issuedCred
             console.error("creds - Could not issue credential")
         }
     } catch (error) {
-        console.error("Could not issue credential to", didAlias, iCred, error, error.stack)
+        console.error("creds - Could not issue credential to", didAlias, iCred, error, error.stack)
     }
 
     return result
 }
 
 export async function revokeCredentialByHash(credHash: string, wal: models.wallet): Promise<models.wallet | undefined> {
-    logger("Revoking credential", credHash)
+    logger("creds - Revoking credential", credHash)
     const issuedCred = getIssuedCredByHash(credHash, wal)
     if (issuedCred) {
         return await revokeCredential(issuedCred, wal)
     } else {
-        console.error("could not revoke credential by hash", credHash)
+        console.error("creds - could not revoke credential by hash", credHash)
         return issuedCred
     }
 }

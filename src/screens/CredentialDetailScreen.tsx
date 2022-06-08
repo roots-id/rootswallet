@@ -107,7 +107,7 @@ export default function CredentialDetailScreen({route, navigation}) {
                         icon="qrcode"
                         size={36}
                         color="#e69138"
-                        onPress={() => showQR(navigation, cred)}
+                        onPress={() => showQR(navigation, cred.verifiedCredential)}
                     />
                     <IconButton
                         icon="close-circle"
