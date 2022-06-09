@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Linking, StyleSheet, Text, TextInput, TextProps, View} from 'react-native';
+import {Button, Linking, SafeAreaView, StyleSheet, Text, TextInput, TextProps, View} from 'react-native';
 import {Divider, List, Title} from 'react-native-paper';
 
 import FormButton from '../components/FormButton';
@@ -104,15 +104,21 @@ export default function CreateWalletScreen({navigation}) {
                 }}
             />
             <Text></Text>
-            <View style={{flexDirection: 'row',padding: 10,}}>
-                <Button
-                    title="Need Help?"
-                    onPress={handleOpenWithLinking}
-                />
-                <Button
-                    title="Settings"
-                    onPress={handleSettings}
-                />
+            <View style={{backgroundColor: '#251520',flex:1,flexDirection:"row",
+                justifyContent:'space-between', marginBottom: 10,width: '90%',
+                maxWidth: 400,}}>
+                <View style={{flex:1, marginRight: 10,marginLeft: 10}}>
+                    <Button
+                        title="Need Help?"
+                        onPress={handleOpenWithLinking}
+                    />
+                </View>
+                <View style={{backgroundColor: '#251520',flex:1, marginLeft: 5, marginRight: 10}}>
+                    <Button
+                        title="Settings"
+                        onPress={handleSettings}
+                    />
+                </View>
             </View>
         </View>
     );

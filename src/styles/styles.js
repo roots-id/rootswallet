@@ -10,7 +10,8 @@ export const styles = StyleSheet.create({
         width: 150,
         borderRadius: 10,
         backgroundColor: 'gold',
-        alignSelf: 'center'
+        alignSelf: 'center',
+        marginTop: 10,
     },
     buttonText: {
         marginHorizontal: 10,

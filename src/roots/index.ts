@@ -10,9 +10,7 @@ import * as wallet from '../wallet'
 import { issuedCredential, message, sessionStatus} from "../models";
 import {addImportedCredential, getIssuedCredByHash} from "../credentials";
 import {getContactByDid, hasNewRels} from "../relationships";
-
-//ppp-node-test
-export const DEFAULT_PRISM_HOST = "ppp-node-test.atalaprism.io"
+import {LogBox} from "react-native";
 
 //msg types
 export enum MessageType {
@@ -33,18 +31,14 @@ export enum MessageType {
 export const ACHIEVEMENT_MSG_PREFIX = "You have a new achievement: ";
 export const BLOCKCHAIN_URL_MSG = "*Click to geek out on Cardano blockchain details*";
 export const PUBLISHED_TO_PRISM = "Your DID was added to Prism";
-export const SHOW_CRED_QR_CODE = "Show Cred QR code";
-export const SHOW_DID_QR_CODE = "Show Chat QR code";
 
 //state literals
 export const CRED_ACCEPTED = "credAccepted"
 export const CRED_REJECTED = "credRejected"
 export const CRED_REVOKE = "credRevoke"
-export const CRED_SENT = "credSent"
 export const CRED_VERIFY = "credVerify"
 export const CRED_VIEW = "credView"
 export const PUBLISH_DID = "publishDID"
-export const DO_NOT_PUBLISH_DID = "doNotPublishDID"
 
 const allChatsRegex = new RegExp(models.getStorageKey("", models.ModelType.CHAT) + '*')
 const allCredsRegex = new RegExp(models.getStorageKey("", models.ModelType.CREDENTIAL) + '*')
@@ -53,9 +47,10 @@ const allMsgsRegex = new RegExp(models.getStorageKey("", models.ModelType.MESSAG
 const allSettingsRegex = new RegExp(models.getStorageKey("", models.ModelType.SETTING) + '*')
 
 export const TEST_WALLET_NAME = "Catalyst Fund 7 demo wallet"
-
 export const POLL_TIME = 2000
-
+//ppp-node-test
+export const DEFAULT_PRISM_HOST = "ppp.atalaprism.io"
+LogBox.ignoreAllLogs(true)
 let demo = true;
 
 type process = {
@@ -1002,8 +997,6 @@ export async function issueDemoContactCredential(chat: models.chat, msgId: strin
     const today = new Date(Date.now());
     const content = {
         name: "Added new contact",
-        achievement: "You added a new contact " + chat.id,
-        date: today.toISOString(),
     }
     const contentJson = JSON.stringify(content)
     return issueDemoCredential(chat, msgId, contentJson)
@@ -1084,8 +1077,6 @@ export async function issueDemoPublishDidCredential(chat: models.chat, msgId: st
                 const today = new Date(Date.now());
                 const content = {
                     name: "Prism DID publisher",
-                    achievement: "Published a DID to Cardano - Atala Prism",
-                    date: today.toISOString(),
                 }
                 const contentJson = JSON.stringify(content)
                 return issueDemoCredential(chat, msgId, contentJson)

@@ -26,7 +26,7 @@ export default function ChatScreen({route, navigation}) {
         const chatSession = roots.startChatSession(chat.id, {
             chat: chat,
             onReceivedMessage: (message) => {
-                if(messages && GiftedChat) {
+                if(message && GiftedChat) {
                     setMessages((currentMessages) => {
                         const iMsg = mapMessage(message)
                         if (iMsg) {
