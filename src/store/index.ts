@@ -4,9 +4,6 @@ import * as CachedStore from './CachedStore'
 import * as SecureStore from 'expo-secure-store';
 import { logger } from '../logging'
 import { replaceSpecial } from '../utils'
-import {promisify} from "util";
-
-const quickReplyResults = {}
 
 export async function clearStorage() {
     logger("store - Clearing storage")
@@ -26,7 +23,7 @@ export async function status() {
 
 export function getWallet(walName: string) {
     const walJson = CachedStore.getWallet(walName);
-    if (!walJson || walJson == null) {
+    if (!walJson) {
         logger('store - no cached wallet found')
         return;
     } else {
@@ -57,7 +54,7 @@ export async function restoreWallet(passphrase: string) {
         //TODO use keychain for secrets, etc.
         const walName = await SecureStore.getItemAsync(passphrase);
         logger("restoring",walName,"w/passphrase",passphrase)
-        if(!walName || walName == null) {
+        if(!walName) {
             logger("store - cannot restore wallet w/passphrase", passphrase)
             return false;
         }else {
@@ -151,7 +148,7 @@ export async function hasItem(alias: string) {
 export function getItem(alias: string) {
     alias = replaceSpecial(alias)
     const itemJson = CachedStore.getItem(alias);
-    if (!itemJson || itemJson == null) {
+    if (!itemJson) {
         logger('store - item not found in cache',alias)
         return;
     } else {
@@ -162,7 +159,7 @@ export function getItem(alias: string) {
 
 export function getItems(regex: RegExp) {
     const items = CachedStore.getItems(regex);
-    if (!items || items == null || items.length <= 0) {
+    if (!items || items.length <= 0) {
         logger('store - no cached items found')
         return items;
     } else {
@@ -185,22 +182,22 @@ export async function restoreByRegex(regex: RegExp) {
 }
 
 export async function restoreItems(aliases: string[]) {
-    if(!aliases || aliases == null || aliases.length <= 0) {
+    if(!aliases || aliases.length <= 0) {
         logger("store - No aliases to restore",aliases)
         return true;
     } else {
         try {
-            aliases.forEach(async (alias) => {
+            for (let alias of aliases) {
                 logger("store - restoring", alias);
                 alias = replaceSpecial(alias);
                 const itemJson = await AsyncStore.getItem(alias);
-                if (!itemJson || itemJson == null) {
+                if (!itemJson) {
                     console.error("store - Could not restore, no item found", alias);
                 } else {
                     logger("store - putting restored item in cache", alias, ":", itemJson);
-                    const result = CachedStore.storeItem(alias, itemJson);
+                    CachedStore.storeItem(alias, itemJson);
                 }
-            });
+            }
             return true;
         } catch (error) {
             logger("store - getting items from storage failed",aliases,error)

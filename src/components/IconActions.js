@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { View } from 'react-native';
 import { IconButton } from 'react-native-paper';
 
 import {asContactShareable, getContactByAlias, showRel} from '../relationships';

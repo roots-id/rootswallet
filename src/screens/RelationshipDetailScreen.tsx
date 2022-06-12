@@ -20,8 +20,9 @@ import {
     isShareable
 } from '../relationships'
 import {recursivePrint} from '../utils'
+import {CompositeScreenProps} from "@react-navigation/core/src/types";
 
-export default function RelationshipDetailScreen({route, navigation}) {
+export default function RelationshipDetailScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("RelDetailScreen - route params are", JSON.stringify(route.params))
     const [rel, setRel] = useState<models.contact>(route.params.rel);
     const {current} = useCardAnimation();
@@ -40,31 +41,11 @@ export default function RelationshipDetailScreen({route, navigation}) {
         >
 
             <Pressable
-                style={[
-                    StyleSheet.absoluteFill,
-                    {backgroundColor: 'rgba(0, 0, 0, 0.5)'},
-                ]}
+                style={styles.pressable}
                 onPress={navigation.goBack}
             />
             <Animated.View
-                style={{
-                    padding: 16,
-                    width: '90%',
-                    maxWidth: 500,
-                    borderRadius: 3,
-                    backgroundColor: '#ffffff',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    transform: [
-                        {
-                            scale: current.progress.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [0.9, 1],
-                                extrapolate: 'clamp',
-                            }),
-                        },
-                    ],
-                }}
+                style={styles.viewAnimated}
             >
                 <View style={{flexDirection: 'row',}}>
                     <IconButton

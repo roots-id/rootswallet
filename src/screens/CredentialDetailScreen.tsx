@@ -1,16 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {
     Animated,
-    Button,
     FlatList,
     Image,
     Text,
     Pressable,
-    SafeAreaView,
-    StyleSheet,
     View, ScrollView,
 } from 'react-native';
-import {Divider, IconButton, List, Title, ToggleButton} from 'react-native-paper';
+import {Divider, IconButton} from 'react-native-paper';
 import {useTheme} from '@react-navigation/native';
 import {useCardAnimation} from '@react-navigation/stack';
 
@@ -22,9 +19,10 @@ import * as roots from '../roots'
 import {styles} from "../styles/styles";
 import * as utils from '../utils'
 import * as wallet from '../wallet'
+import {CompositeScreenProps} from "@react-navigation/core/src/types";
 
 
-export default function CredentialDetailScreen({route, navigation}) {
+export default function CredentialDetailScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("cred details - route params are", JSON.stringify(route.params))
     const [cred, setCred] = useState<models.credential>(route.params.cred);
     const [verified, setVerified] = useState("help-circle");
@@ -56,10 +54,6 @@ export default function CredentialDetailScreen({route, navigation}) {
         }
     }
 
-//        <RelRow rel={getShareableRelByAlias(cred.decoded.id)} nav={navigation}/>
-//        <Text style={styles.subText}>Last Verified: "Not verified"</Text>
-//          <Text style={styles.subText}>From: </Text>
-//          <Text style={styles.subText}>To: {cred.decoded.credentialSubject.id}</Text>
     return (
         <View
             style={{
@@ -70,31 +64,11 @@ export default function CredentialDetailScreen({route, navigation}) {
         >
 
             <Pressable
-                style={[
-                    StyleSheet.absoluteFill,
-                    {backgroundColor: 'rgba(0, 0, 0, 0.5)'},
-                ]}
+                style={styles.pressable}
                 onPress={navigation.goBack}
             />
             <Animated.View
-                style={{
-                    padding: 16,
-                    width: '90%',
-                    maxWidth: 500,
-                    borderRadius: 3,
-                    backgroundColor: colors.card,
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                    transform: [
-                        {
-                            scale: current.progress.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [0.9, 1],
-                                extrapolate: 'clamp',
-                            }),
-                        },
-                    ],
-                }}
+                style={styles.viewAnimated}
             >
                 <View style={{flexDirection: 'row',}}>
                     <IconButton

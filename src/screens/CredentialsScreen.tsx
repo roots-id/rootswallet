@@ -13,8 +13,9 @@ import * as roots from '../roots'
 import {styles} from "../styles/styles";
 import * as wallet from '../wallet'
 import {credential} from "../models";
+import {CompositeScreenProps} from "@react-navigation/core/src/types";
 
-const CredentialsScreen = ({route ,navigation}) => {
+const CredentialsScreen = ({route ,navigation}: CompositeScreenProps<any, any>) => {
     console.log("creds screen - params",route.params)
     const {walletName} = route.params
     const [refresh,setRefresh] = useState(true)

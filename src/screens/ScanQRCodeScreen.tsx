@@ -12,13 +12,14 @@ import {useTheme} from '@react-navigation/native';
 import {useCardAnimation} from '@react-navigation/stack';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
-import * as models from "../models"
 import {getDemoRel, YOU_ALIAS} from '../relationships';
 import {getDid, importContact, importVerifiedCredential, isDemo } from '../roots'
-import {styles} from "../styles/styles";
 import React from 'react';
+import {CompositeScreenProps} from "@react-navigation/core/src/types";
+import {BarCodeEvent} from "expo-barcode-scanner/src/BarCodeScanner";
+import {styles} from "../styles/styles";
 
-export default function ScanQRCodeScreen({route, navigation}) {
+export default function ScanQRCodeScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("Scan QR - rout params", route.params)
     const [hasPermission, setHasPermission] = useState<boolean>(false);
     const {colors} = useTheme();
@@ -59,7 +60,7 @@ export default function ScanQRCodeScreen({route, navigation}) {
     }, [])
 
 
-    const handleBarCodeScanned = async ({t, data}) => {
+    const handleBarCodeScanned = async ({data}: BarCodeEvent) => {
         console.log("Scan QR - scanned data",type,data)
         setScanned(true);
         clearInterval(interval)
@@ -76,7 +77,7 @@ export default function ScanQRCodeScreen({route, navigation}) {
     if (hasPermission === null) {
         return <Text>Requesting camera permission</Text>;
     }
-    if (hasPermission === false) {
+    if (!hasPermission) {
         return <Text>No access to camera</Text>;
     }
 
@@ -89,31 +90,11 @@ export default function ScanQRCodeScreen({route, navigation}) {
             }}
         >
             <Pressable
-                style={[
-                    StyleSheet.absoluteFill,
-                    {backgroundColor: 'rgba(0, 0, 0, 0.5)'},
-                ]}
+                style={styles.pressable}
                 onPress={navigation.goBack}
             />
             <Animated.View
-                style={{
-                    padding: 16,
-                    width: '90%',
-                    maxWidth: 400,
-                    borderRadius: 3,
-                    backgroundColor: colors.card,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transform: [
-                        {
-                            scale: current.progress.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [0.9, 1],
-                                extrapolate: 'clamp',
-                            }),
-                        },
-                    ],
-                }}
+                style={styles.viewAnimated}
             >
                 <IconButton
                     icon="close-circle"

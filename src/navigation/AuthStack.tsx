@@ -8,7 +8,6 @@ import LogoTitle from '../components/LogoTitle';
 import CreateRelScreen from '../screens/CreateRelScreen';
 import CredentialsScreen from '../screens/CredentialsScreen';
 import CredentialDetailScreen from "../screens/CredentialDetailScreen";
-import HelpScreen from '../screens/HelpScreen';
 import HomeScreen from "../screens/HomeScreen";
 import RelationshipsScreen from "../screens/RelationshipsScreen";
 import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
@@ -24,7 +23,6 @@ import LoadingScreen from '../screens/LoadingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import ScanQRCodeScreen from '../screens/ScanQRCodeScreen'
 import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
-import * as SplashScreen from 'expo-splash-screen';
 import StartChatScreen from '../screens/StartChatScreen';
 import React from "react";
 import {YOU_ALIAS} from '../relationships'
@@ -41,7 +39,7 @@ export default function AuthStack() {
     const [walletName,setWalletName] = React.useState<string>(TEST_WALLET_NAME)
 
     const [state, dispatch] = React.useReducer(
-      (prevState, action) => {
+      (prevState: any, action: any) => {
         switch (action.type) {
           case 'RESTORE_TOKEN':
             console.log("AuthStack - RESTORE_TOKEN w/ token", action.token)
@@ -243,7 +241,6 @@ export default function AuthStack() {
                               initialParams={{walletName: walletName}}
                 />
                 <Stack.Screen name="Communications" component={CommunicationsScreen}/>
-                <Stack.Screen name="Help" component={HelpScreen}/>
                 <Stack.Screen name="Settings" component={SettingsScreen}/>
                 <Stack.Screen name="Wallet" component={WalletScreen}/>
             </Stack.Group>
@@ -258,8 +255,6 @@ export default function AuthStack() {
     //         </Stack.Group>
     //     </Stack.Navigator>
     // }
-
-    SplashScreen.hideAsync();
 
  //TODO refactor hasWallet call where we capture walletName
   return (
@@ -295,7 +290,6 @@ export default function AuthStack() {
                     <Stack.Screen name="Credential Details" component={CredentialDetailScreen}/>
                     <Stack.Screen name="Create Rel" component={CreateRelScreen}/>
                     <Stack.Screen name="Create Secure Chat" component={StartChatScreen} />
-                    <Stack.Screen name="Help" component={HelpScreen}/>
                     <Stack.Screen name="Relationship Details" component={RelationshipDetailScreen}/>
                     <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen} />
                     <Stack.Screen name="Settings" component={SettingsScreen}/>

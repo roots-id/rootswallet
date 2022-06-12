@@ -1,17 +1,15 @@
 import FormButton from '../components/FormButton';
 import FormInput from '../components/FormInput';
 import React, { useState } from 'react';
-import { NativeModules, StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { IconButton, Title } from 'react-native-paper';
 import * as models from '../models'
 import { YOU_ALIAS } from '../relationships';
 import { initRoot } from '../roots';
 import {displayProblem, styles} from '../styles/styles'
+import {CompositeScreenProps, DefaultNavigatorOptions} from "@react-navigation/core/src/types";
 
-
-const { PrismModule } = NativeModules;
-
-export default function CreateRelScreen({ route, navigation }) {
+export default function CreateRelScreen({ route, navigation }: CompositeScreenProps<any, any>) {
   const [rel, setRel] = useState<models.contact>(route.params.rel);
   const [relName, setRelName] = useState<string>(rel.displayName);
   const [relAvatar, setRelAvatar] = useState<string>(rel.displayPictureUrl);

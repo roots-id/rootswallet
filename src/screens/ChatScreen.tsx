@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Linking, StyleSheet, Text, View} from 'react-native';
-import {Bubble, GiftedChat, IMessage, InputToolbar, Reply, User} from 'react-native-gifted-chat';
+import {Bubble, GiftedChat, IMessage, InputToolbar, InputToolbarProps, Reply, User} from 'react-native-gifted-chat';
 
 import * as cred from '../credentials'
 import * as models from "../models";
@@ -10,8 +10,10 @@ import * as roots from '../roots';
 import Loading from '../components/Loading';
 import {styles} from "../styles/styles";
 import {contactShareable} from "../models";
+import {CompositeScreenProps} from "@react-navigation/core/src/types";
+import {BubbleProps} from "react-native-gifted-chat/lib/Bubble";
 
-export default function ChatScreen({route, navigation}) {
+export default function ChatScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("ChatScreen - route params", route.params)
     const [chat, setChat] = useState<models.chat>(roots.getChatItem(route.params.chatId));
     const [contact, setContact] = useState<models.contact>();
@@ -203,7 +205,7 @@ export default function ChatScreen({route, navigation}) {
     }
 
 //#fad58b
-    function renderBubble(props) {
+    function renderBubble(props: BubbleProps<IMessage>) {
         //console.log("render bubble with props",props.currentMessage)
         return (
             <Bubble
@@ -231,7 +233,7 @@ export default function ChatScreen({route, navigation}) {
     }
 
 
-    function renderInputToolbar(props) {
+    function renderInputToolbar(props: InputToolbarProps<IMessage>) {
         //console.log("renderInputToolbar", props)
         return (
             <InputToolbar

@@ -10,8 +10,9 @@ import {initRootsWallet, isDemo, TEST_WALLET_NAME} from '../roots'
 import {createWallet, getWallet} from '../wallet'
 
 import {displayProblem, styles} from "../styles/styles";
+import {CompositeScreenProps} from "@react-navigation/core/src/types";
 
-export default function CreateWalletScreen({navigation}) {
+export default function CreateWalletScreen({route, navigation}: CompositeScreenProps<any, any>) {
     const [initialized, setInitialized] = useState<boolean>(false);
 //  const [loading, setLoading] = useState(true);
     const [mnemonic, setMnemonic] = useState<string>('');
@@ -111,12 +112,14 @@ export default function CreateWalletScreen({navigation}) {
                     <Button
                         title="Need Help?"
                         onPress={handleOpenWithLinking}
+                        color={'#251520'}
                     />
                 </View>
                 <View style={{backgroundColor: '#251520',flex:1, marginLeft: 5, marginRight: 10}}>
                     <Button
                         title="Settings"
                         onPress={handleSettings}
+                        color={'#251520'}
                     />
                 </View>
             </View>

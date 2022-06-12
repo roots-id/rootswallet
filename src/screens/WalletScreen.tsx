@@ -8,8 +8,9 @@ import { getWallet } from '../wallet'
 import { recursivePrint } from '../utils'
 
 import {styles} from "../styles/styles";
+import {CompositeScreenProps} from "@react-navigation/core/src/types";
 
-export default function WalletScreen({ route, navigation }) {
+export default function WalletScreen({ route, navigation }: CompositeScreenProps<any, any>) {
     const [wallet, setWallet] = useState<models.wallet>();
 
     useEffect(() => {
@@ -41,4 +42,6 @@ export default function WalletScreen({ route, navigation }) {
             </View>
         );
     }
+
+    return (<Text style={styles.problem}>{"No wallet found"}</Text>)
 }

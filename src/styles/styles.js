@@ -7,9 +7,9 @@ export const styles = StyleSheet.create({
         fontSize: 30,
     },
     button: {
-        width: 150,
+        width: 200,
         borderRadius: 10,
-        backgroundColor: 'gold',
+        backgroundColor: '#e69138',
         alignSelf: 'center',
         marginTop: 10,
     },
@@ -86,6 +86,12 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    input: {
+        marginTop: 10,
+        marginBottom: 10,
+        width: 250,
+        height: 70,
+    },
     inputStyle: {
         flex: 1,
         // autoCorrect: false,
@@ -106,7 +112,7 @@ export const styles = StyleSheet.create({
         marginVertical: 8,
         marginHorizontal: 16,
     },
-    leftheader: {
+    leftHeader: {
         color: '#999999',
         fontSize: 20,
         fontWeight: 'bold',
@@ -135,6 +141,11 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         color: '#dddddd',
     },
+    loadingContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     loginButtonLabel: {
         fontSize: 16,
     },
@@ -160,6 +171,10 @@ export const styles = StyleSheet.create({
     phone: {
         color: 'blue',
         textDecorationLine: 'underline',
+    },
+    pressable: {
+        position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     prism: {
         color: '#940000',
@@ -187,7 +202,7 @@ export const styles = StyleSheet.create({
         maxWidth: 350,
         maxHeight: 250,
         borderRadius: 3,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#cfbfca',
     },
     subText: {
         fontSize: 16,
@@ -228,6 +243,15 @@ export const styles = StyleSheet.create({
     username: {
         color: 'green',
         fontWeight: 'bold',
+    },
+    viewAnimated: {
+        padding: 16,
+        width: '90%',
+        maxWidth: 400,
+        borderRadius: 3,
+        backgroundColor: '#cfbfca',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     walletIconStyle: {
         fontSize: 24,

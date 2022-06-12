@@ -97,11 +97,6 @@ export async function initRootsWallet() {
             MessageType.TEXT, contact.PRISM_BOT)
         //intentionally not awaiting
         processPublishResponse(myChat)
-
-        // if (demo) {
-        //     logger("roots - initializing your demos")
-        //     await initDemos(didAlias)
-        // }
     }
 }
 
@@ -683,59 +678,63 @@ export async function processCredentialResponse(chat: models.chat, reply: Reply)
 export async function processPublishResponse(chat: models.chat) {
     logger("roots - started publish DID alias", chat.fromAlias)
     startProcessing(chat.id, chat.fromAlias)
-    const published = await publishPrismDid(chat.fromAlias);
-    if (published) {
-        endProcessing(chat.id, chat.fromAlias)
-        const pubDid = getDid(chat.fromAlias)
-        if (pubDid) {
-            const didPubTx = getDidPubTx(pubDid.alias)
-            const didPubMsg = await sendMessage(chat, PUBLISHED_TO_PRISM,
-                MessageType.PROMPT_OWN_DID, contact.PRISM_BOT,
-                false, getContactByDid(pubDid.uriLongForm))
-            const didLinkMsg = await sendMessage(chat, BLOCKCHAIN_URL_MSG,
-                MessageType.BLOCKCHAIN_URL, contact.PRISM_BOT,
-                false, didPubTx?.url)
-            if (didLinkMsg) {
-                //const didMsg = await sendMessage(chat,JSON.stringify(pubDid),DID_JSON,rel.PRISM_BOT,true);
-                if (demo) {
-                    logger("roots - demo celebrating did publishing credential", pubDid.uriLongForm)
-                    const vcMsg = await sendMessage(chat,
-                        "To celebrate your published DID, a verifiable credential is being created for you.",
-                        MessageType.TEXT, contact.ROOTS_BOT)
-                    if (vcMsg) {
-                        const iCred = await issueDemoPublishDidCredential(chat, vcMsg.id)
-                        if (iCred) {
-                            const credPubTx = getCredPubTx(pubDid.alias, iCred.alias)
-                            const credSuccess = await sendMessage(chat, "You have issued yourself a verifiable credential!",
-                                MessageType.PROMPT_ISSUED_CREDENTIAL, contact.ROOTS_BOT, false, iCred.credentialHash)
+    try {
+        const published = await publishPrismDid(chat.fromAlias);
+        if (published) {
+            endProcessing(chat.id, chat.fromAlias)
+            const pubDid = getDid(chat.fromAlias)
+            if (pubDid) {
+                const didPubTx = getDidPubTx(pubDid.alias)
+                const didPubMsg = await sendMessage(chat, PUBLISHED_TO_PRISM,
+                    MessageType.PROMPT_OWN_DID, contact.PRISM_BOT,
+                    false, getContactByDid(pubDid.uriLongForm))
+                const didLinkMsg = await sendMessage(chat, BLOCKCHAIN_URL_MSG,
+                    MessageType.BLOCKCHAIN_URL, contact.PRISM_BOT,
+                    false, didPubTx?.url)
+                if (didLinkMsg) {
+                    //const didMsg = await sendMessage(chat,JSON.stringify(pubDid),DID_JSON,rel.PRISM_BOT,true);
+                    if (demo) {
+                        logger("roots - demo celebrating did publishing credential", pubDid.uriLongForm)
+                        const vcMsg = await sendMessage(chat,
+                            "To celebrate your published DID, a verifiable credential is being created for you.",
+                            MessageType.TEXT, contact.ROOTS_BOT)
+                        if (vcMsg) {
+                            const iCred = await issueDemoPublishDidCredential(chat, vcMsg.id)
+                            if (iCred) {
+                                const credPubTx = getCredPubTx(pubDid.alias, iCred.alias)
+                                const credSuccess = await sendMessage(chat, "You have issued yourself a verifiable credential!",
+                                    MessageType.PROMPT_ISSUED_CREDENTIAL, contact.ROOTS_BOT, false, iCred.credentialHash)
 
-                            if (credSuccess) {
-                                //TODO create credential acceptance method
-                                logger("roots - demo credential issued", iCred.credentialHash)
-                                const credReqMsg = await sendMessage(chat,
-                                    "Do you want to accept this verifiable credential",
-                                    MessageType.PROMPT_ACCEPT_CREDENTIAL, contact.ROOTS_BOT, false, iCred.credentialHash)
-                                const credJson = JSON.stringify((iCred as models.credential))
-                                logger("roots - saving cred for acceptance", credJson)
-                                await store.saveItem(iCred.credentialHash, credJson)
+                                if (credSuccess) {
+                                    //TODO create credential acceptance method
+                                    logger("roots - demo credential issued", iCred.credentialHash)
+                                    const credReqMsg = await sendMessage(chat,
+                                        "Do you want to accept this verifiable credential",
+                                        MessageType.PROMPT_ACCEPT_CREDENTIAL, contact.ROOTS_BOT, false, iCred.credentialHash)
+                                    const credJson = JSON.stringify((iCred as models.credential))
+                                    logger("roots - saving cred for acceptance", credJson)
+                                    await store.saveItem(iCred.credentialHash, credJson)
+                                }
                             }
+                        } else {
+                            console.error("roots - unable to issue cred", chat, pubDid)
                         }
-                    } else {
-                        console.error("roots - unable to issue cred", chat, pubDid)
                     }
                 }
+            } else {
+                console.error("could not retrieve newly created DID", chat.fromAlias)
             }
-            return chat
         } else {
-            console.error("could not retrieve newly created DID", chat.fromAlias)
+            logger("roots - Could not process publish DID request", chat.id)
+            const credReqMsg = await sendMessage(chat,
+                "DID was already added to Prism",
+                MessageType.TEXT, contact.PRISM_BOT)
         }
-    } else {
-        logger("roots - Could not process publish DID request", chat.id)
-        const credReqMsg = await sendMessage(chat,
-            "DID was already added to Prism",
-            MessageType.TEXT, contact.PRISM_BOT)
-        return chat;
+    } catch(error) {
+        console.error("Unable to publish DID for chat",chat.id,error,error.stack)
     }
+    endProcessing(chat.id, chat.fromAlias)
+    return chat;
 }
 
 // ------------------ Credentials ----------

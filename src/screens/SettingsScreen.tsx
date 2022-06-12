@@ -13,10 +13,11 @@ import {IconButton, ToggleButton} from 'react-native-paper';
 import { styles } from "../styles/styles";
 
 import * as roots from '../roots'
+import {CompositeScreenProps} from "@react-navigation/core/src/types";
 
-export default function SettingsScreen({ route, navigation }) {
+export default function SettingsScreen({ route, navigation }: CompositeScreenProps<any, any>) {
     const [demoMode, setDemoMode] = useState<boolean>(roots.isDemo())
-    const [host, setHost] = useState(roots.getPrismHost());
+    const [host, setHost] = useState<string>(roots.getPrismHost());
     const { current } = useCardAnimation();
 
     useEffect(() => {
@@ -36,30 +37,11 @@ export default function SettingsScreen({ route, navigation }) {
       }}
     >
     <Pressable
-        style={[
-          StyleSheet.absoluteFill,
-          { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
-        ]}
+        style={styles.pressable}
         onPress={navigation.goBack}
     />
     <Animated.View
-    style={{
-      alignItems: 'center',
-      padding: 16,
-      width: '90%',
-      borderRadius: 3,
-      backgroundColor: "#bfafba",
-      justifyContent: 'center',
-      transform: [
-        {
-          scale: current.progress.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0.9, 1],
-            extrapolate: 'clamp',
-          }),
-        },
-      ],
-    }}
+    style={styles.viewAnimated}
     >
       <View style={{flexDirection:'row',}}>
         <IconButton
