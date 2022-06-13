@@ -1,4 +1,10 @@
-export function showQR(navigation, data: string) {
-    console.log("ChatScreen - Showing QR data",data)
-    navigation.navigate('Show QR Code', {qrdata: data})
+import * as models from '../models'
+
+export function showQR(navigation: any, data: models.contactShareable|models.vc|undefined) {
+    if(data) {
+        console.log("QR code - Showing QR data", data)
+        navigation.navigate('Show QR Code', {qrdata: data})
+    } else {
+        console.error("Not showing undefined data",data)
+    }
 }

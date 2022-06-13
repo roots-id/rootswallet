@@ -8,10 +8,11 @@ export function warn(...args: any) {
     console.warn(...samples);
 }
 
-function getSampled(...args: any) {
+function getSampled(...args: any): string[] {
+    let samples: string[] = []
     if(args.length > 0) {
-        const samples = [];
-        args.forEach(arg => {
+        const samples: string[] = [];
+        args.forEach((arg: any) => {
             const splitArgs = String(arg).split(" ");
             splitArgs.forEach(splitArg => {
                 const sampled = splitArg.length > 75;
@@ -22,4 +23,5 @@ function getSampled(...args: any) {
         })
         return (samples);
     }
+    return samples;
 }

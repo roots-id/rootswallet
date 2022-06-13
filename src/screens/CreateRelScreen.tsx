@@ -1,21 +1,20 @@
-import React, { useState } from 'react';
-import { NativeModules, StyleSheet, Text, View } from 'react-native';
-import { IconButton, Title } from 'react-native-paper';
-import { v4 as uuidv4 } from 'uuid';
-
-import { YOU_ALIAS } from '../relationships';
-import { initRoot } from '../roots';
 import FormButton from '../components/FormButton';
 import FormInput from '../components/FormInput';
+import React, { useState } from 'react';
+import { Text, View } from 'react-native';
+import { IconButton, Title } from 'react-native-paper';
+import * as models from '../models'
+import { YOU_ALIAS } from '../relationships';
+import { initRoot } from '../roots';
+import {displayProblem, styles} from '../styles/styles'
+import {CompositeScreenProps, DefaultNavigatorOptions} from "@react-navigation/core/src/types";
 
-const { PrismModule } = NativeModules;
-
-export default function CreateRelScreen({ route, navigation }) {
-  const [rel, setRel] = useState(route.params.rel);
-  const [relName, setRelName] = useState(rel.displayName);
-  const [relAvatar, setRelAvatar] = useState(rel.displayPictureUrl);
-  const [relDid, setRelDid] = useState(rel.did);
-  const [problemDisabled, setProblemDisabled] = useState(true)
+export default function CreateRelScreen({ route, navigation }: CompositeScreenProps<any, any>) {
+  const [rel, setRel] = useState<models.contact>(route.params.rel);
+  const [relName, setRelName] = useState<string>(rel.displayName);
+  const [relAvatar, setRelAvatar] = useState<string>(rel.displayPictureUrl);
+  const [relDid, setRelDid] = useState<string>(rel.did);
+  const [problemDisabled, setProblemDisabled] = useState<boolean>(true)
 
   async function handleButtonPress() {
     if (relName.length > 0) {
@@ -32,7 +31,7 @@ export default function CreateRelScreen({ route, navigation }) {
   }
 
   return (
-      <View style={styles.rootContainer}>
+      <View style={styles.container}>
         <View style={styles.closeButtonContainer}>
           <IconButton
               icon="close-circle"
@@ -42,30 +41,30 @@ export default function CreateRelScreen({ route, navigation }) {
           />
         </View>
         <View style={styles.innerContainer}>
-          <Title style={styles.title}>Create a new relationship</Title>
+          <Title style={styles.titleText}>Create a new relationship</Title>
           <FormInput
               labelName="Relationship Name"
               value={relName}
-              onChangeText={(text) => setRelName(text)}
+              onChangeText={(text: string) => setRelName(text)}
               clearButtonMode="while-editing"
           />
           <FormInput
               labelName="Avatar"
               value={relAvatar}
-              onChangeText={(text) => setRelAvatar(text)}
+              onChangeText={(text: string) => setRelAvatar(text)}
               clearButtonMode="while-editing"
           />
           <FormInput
               labelName="Decentralized ID"
               value={relDid}
-              onChangeText={(text) => setRelDid(text)}
+              onChangeText={(text: string) => setRelDid(text)}
               clearButtonMode="while-editing"
           />
           <Text disable={problemDisabled} style={displayProblem(problemDisabled)}>Could not create relationship</Text>
           <FormButton
               title="Create Relationship"
               modeValue="contained"
-              labelStyle={styles.buttonLabel}
+              labelStyle={styles.buttonText}
               onPress={async () => handleButtonPress()}
               disabled={relName.length <= 0 || relDid.length <=0}
           />
@@ -73,44 +72,3 @@ export default function CreateRelScreen({ route, navigation }) {
       </View>
   );
 }
-
-const styles = StyleSheet.create({
-  rootContainer: {
-    flex: 1,
-    backgroundColor: '#222222',
-  },
-    buttonLabel: {
-      fontSize: 22,
-    },
-  closeButtonContainer: {
-    position: 'absolute',
-    top: 30,
-    right: 0,
-    zIndex: 1,
-  },
-  innerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-    none: {
-        display: 'none'
-    },
-    problem: {
-        color: 'red',
-    },
-  title: {
-    fontSize: 24,
-    marginBottom: 10,
-    color: '#dddddd',
-  },
-});
-
-  function displayProblem(problemDisabled) {
-    if(problemDisabled){
-        return styles.none
-    }
-    else{
-        return styles.problem
-    }
-  }
