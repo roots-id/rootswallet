@@ -19,7 +19,7 @@ export async function getItem(key: string) {
         return item
     }
   } catch(e) {
-    console.error("AsyncStore - Could not get async item",key,error)
+    console.error("AsyncStore - Could not get async item",key,e)
     return null;
   }
   return null;
@@ -49,7 +49,7 @@ export async function getWallet(walName: string) {
         return walJson
     }
   } catch(e) {
-    console.error("AsyncStore - Could not get async wallet,",error)
+    console.error("AsyncStore - Could not get async wallet,",e)
     return null;
   }
   return null;
@@ -81,22 +81,18 @@ export async function hasWallet(walName: string) {
 export async function removeItem(key: string) {
     logger("AsyncStore - removing key",key)
     try {
-        if(await AsyncStorage.removeItem(key)) {
-            logger("AsyncStore - removed",key)
-        } else {
-            console.error("AsyncStore - couldn't remove key",key)
-        }
+        await AsyncStorage.removeItem(key)
     } catch(e) {
-        console.error("Failed to remove value",key,error,error.stack)
+        console.error("Failed to remove value",key,e,e.stack)
     }
 }
 
 export async function status() {
-  let keys = []
+  let keys: string[] = []
   try {
     keys = await AsyncStorage.getAllKeys()
   } catch(e) {
-    console.error("AsyncStore - Could not get async store status,",error)
+    console.error("AsyncStore - Could not get async store status,",e)
   }
 
   logger("AsyncStore - keys:",keys)

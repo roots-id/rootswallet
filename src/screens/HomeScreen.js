@@ -1,10 +1,8 @@
 import React from 'react';
-import {Button, StyleSheet, View, Text} from 'react-native';
-// const { PrismModule } = NativeModules;
+import {Button, View} from 'react-native';
 import * as store from '../store'
 
 const HomeScreen = (props) => {
-    const imageUrl = '../assets/splash.png';
     console.log(props.navigation)
     return (
         <View>
@@ -21,10 +19,6 @@ const HomeScreen = (props) => {
                 onPress={() => props.navigation.navigate("Communications")}
             />
             <Button
-                title={"HelpScreen"}
-                onPress={() => props.navigation.navigate("Help")}
-            />
-            <Button
                 title={"Settings"}
                 onPress={() => props.navigation.navigate("Settings")}
             />
@@ -39,11 +33,5 @@ const HomeScreen = (props) => {
         </View>
     )
 };
-
-const styles = StyleSheet.create({
-    text: {
-        fontSize: 30,
-    },
-})
 
 export default HomeScreen;

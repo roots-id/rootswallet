@@ -22,24 +22,19 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
         return "PrismModule"
     }
 
-    @ReactMethod(isBlockingSynchronousMethod = true)
-    fun setNetwork(host: String = "ppp.atalaprism.io", port: String = "50053") {
-        Log.d("PRISM_TAG","Setting GrpcConfig host "+host+" w/port "+port);
-        GrpcConfig.host = host
-        GrpcConfig.port = port
+    @ReactMethod
+    fun getDidDocument(did: String, promise: Promise) {
+        Log.d("PRISM_TAG","Getting DID doc"+did);
+        thread(start = true) {
+            try {
+                var didDocJson = getDidDocumentJson(did);
+                Log.d("PRISM_TAG","Got did document "+did+" w/ doc"+didDocJson)
+                promise.resolve(didDocJson);
+            } catch (e: Exception) {
+                promise.reject("Publish Error", e);
+            }
+        }
     }
-
-//    @ReactMethod(isBlockingSynchronousMethod = true)
-//    fun test() {Log.d("test","test")}
-//
-//    @ReactMethod(isBlockingSynchronousMethod = true)
-//    fun testNode() {
-//        val wal = newWallet("walletname1", "", "password1")
-//        val didAlias1 = "didAlias1"
-//        val walAfterDid = newDid(wal, didAlias1, true)
-//        Log.d("LANCETAG", "Testing node publish....")
-//        val output = publishDid(walAfterDid, didAlias1).toString()
-//    }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
     fun newDID(walJson: String, didAlias: String): String {
@@ -64,25 +59,6 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
                 var newWalJson = Json.encodeToString(cliWal)
                 Log.d("PRISM_TAG","Published "+didAlias+" from wallet "+newWalJson)
                 promise.resolve(newWalJson);
-            } catch (e: Exception) {
-                promise.reject("Publish Error", e);
-            }
-        }
-    }
-
-    @ReactMethod
-    fun importCred(walJson: String, credAlias: String, credJson: String, promise: Promise) {
-        Log.d("PRISM_TAG","Importing credential for "+credAlias+" from wallet "+walJson);
-        thread(start = true) {
-            try {
-                val importedCredential = ImportedCredential(
-                    credAlias,
-                    Json.decodeFromString<VerifiedCredential>(credJson)
-                )
-                var newWal = Json.decodeFromString<Wallet>(walJson);
-                newWal.importedCredentials.add(importedCredential)
-                //Log.d("PRISM_TAG","Credential imported",walJson)
-                promise.resolve(Json.encodeToString(newWal));
             } catch (e: Exception) {
                 promise.reject("Publish Error", e);
             }
@@ -122,13 +98,25 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
         }
     }
 
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun setNetwork(host: String = "ppp.atalaprism.io", port: String = "50053") {
+        Log.d("PRISM_TAG","Setting GrpcConfig host "+host+" w/port "+port);
+        GrpcConfig.host = host
+        GrpcConfig.port = port
+    }
+
     @ReactMethod
-    fun verifyImportedCred(walJson: String, credAlias: String, promise: Promise) {
+    fun verifyCred(walJson: String, credAlias: String, imported: Boolean, promise: Promise) {
         Log.d("PRISM_TAG","Verifying credential for "+credAlias+" from wallet "+walJson);
         thread(start = true) {
             try {
                 var cliWal = Json.decodeFromString<Wallet>(walJson);
-                var verResult = Json.encodeToString(verifyImportedCredential(cliWal, credAlias))
+                var verResult = ""
+                if(imported) {
+                    verResult = Json.encodeToString(verifyImportedCredential(cliWal, credAlias))
+                } else {
+                    verResult = Json.encodeToString(verifyIssuedCredential(cliWal, credAlias))
+                }
                 Log.d("PRISM_TAG","Credential "+credAlias+" is " + verResult)
                 promise.resolve(verResult);
             } catch (e: Exception) {

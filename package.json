@@ -1,9 +1,10 @@
 {
+  "resolutions": {
+    "@types/react": "17.0.1"
+  },
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",
-    "ios": "expo run:ios",
-    "web": "expo start --web",
     "eject": "expo eject"
   },
   "dependencies": {
@@ -22,12 +23,12 @@
     "@transmute/did-key-ed25519": "^0.3.0-unstable.8",
     "@transmute/did-key-secp256k1": "^0.3.0-unstable.8",
     "@transmute/did-key-x25519": "^0.3.0-unstable.8",
+    "base-64": "^1.0.0",
     "buffer": "^6.0.3",
     "emoji-utils": "^1.0.1",
     "expo": "^44.0.6",
     "expo-barcode-scanner": "^11.2.1",
     "expo-secure-store": "~11.1.0",
-    "expo-splash-screen": "~0.14.1",
     "expo-status-bar": "~1.2.0",
     "expo-updates": "~0.11.7",
     "i18next": "^21.6.4",
@@ -38,7 +39,7 @@
     "react-native": "0.64.3",
     "react-native-base64": "^0.2.1",
     "react-native-gesture-handler": "~2.1.0",
-    "react-native-gifted-chat": "1.0.0-beta-3",
+    "react-native-gifted-chat": "1.0.0",
     "react-native-hyperlink": "^0.0.19",
     "react-native-localize": "^2.1.7",
     "react-native-paper": "^4.12.1",
