@@ -51,6 +51,41 @@ const Communications = (props) => {
         console.log("Bob received " + unpackResultMsg + " from Alice.")
         
     };
+
+    const onPingMediator = async() => {
+      const authKey = await generateKeyPair('ed25519')
+      const agreemKey = await generateKeyPair('x25519')
+      const peerDID = PeerDidModule.createDID(authKey.publicJwk,agreemKey.publicJwk,null,null)
+      console.log("Peer DID: "+ peerDID)
+      console.log("\n")
+      // GET Mediator OOB URL
+      try {
+        const response = await fetch(
+          'http://localhost:8000/oob_url'
+        );
+        
+        const oob_url = await response.text();
+        console.log(oob_url)
+        const encodedMsg = oob_url.split("=")[1]
+        const decodedMsg = JSON.parse(Buffer.from(encodedMsg, 'base64').toString('ascii'))
+        const mediatorDID = decodedMsg.from
+        console.log(mediatorDID)
+
+        const pingMsg = {
+          body: { "response_requested": true },
+          return_route: "all",
+          id: "asdasdasd",
+          type: "https://didcomm.org/trust-ping/2.0/ping",
+          from: peerDID,
+          to: [mediatorDID]
+        }
+
+      } catch (error) {
+        console.error(error);
+      }
+
+
+    }
     return (
         <View>
             <Text>Communications</Text>
@@ -59,7 +94,13 @@ const Communications = (props) => {
                 color='#841584'
                 onPress={onPressHelloWorld}
             />
-        </View>
+        <Text>Communications</Text>
+        <Button
+            title='Ping mediator'
+            color='#841584'
+            onPress={onPingMediator}
+        />
+    </View>
     );
 };
 

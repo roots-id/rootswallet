@@ -22,7 +22,6 @@
     "react-i18next": "^11.15.3",
     "react-native": "0.64.3",
     "react-native-gesture-handler": "~2.1.0",
-    "react-native-http-bridge": "^0.6.1",
     "react-native-localize": "^2.1.7",
     "react-native-randombytes": "^3.6.1",
     "react-native-reanimated": "~2.2.0",
