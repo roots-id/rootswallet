@@ -3,6 +3,7 @@ import {Button, View, Text, NativeModules} from 'react-native';
 import { randomBytes } from 'react-native-randombytes'
 import { X25519KeyPair } from '@transmute/did-key-x25519';
 import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
+import uuid from 'react-native-uuid';
 const { PeerDidModule, DIDCommV2Module } = NativeModules;
 
 
@@ -40,8 +41,18 @@ const Communications = (props) => {
         console.log("Alice generates a new pairwise peer DID for communication with Bob: "+ alicePeerDID)
 
         // 3. Alice sends message to Bob
-        var msg = "Hello Bob!"
-        var packedToBobMsg = DIDCommV2Module.pack(msg, to = bobPeerDID, from = alicePeerDID, agreemKey = aliceAgreemKey, signFrom = null, protectSender = true, messageType = "my-protocol/1.0")
+        var msg = {msg: "Hello Bob!"}
+        var packedToBobMsg = DIDCommV2Module.pack(
+          msg, 
+          id = uuid.v4(), 
+          to = bobPeerDID, 
+          from = alicePeerDID, 
+          messageType = "my-protocol/1.0",
+          // customHeaders = [{return_route: "all"}],
+          agreemKey = aliceAgreemKey, 
+          signFrom = null, 
+          protectSender = true 
+        )
         console.log("Alice sends " +  msg + " to Bob.")
         console.log("The message is authenticated by Alice's peer DID " + alicePeerDID + " and encrypted to Bob's peer DID " )
         console.log("")
@@ -53,10 +64,10 @@ const Communications = (props) => {
     };
 
     const onPingMediator = async() => {
-      const authKey = await generateKeyPair('ed25519')
-      const agreemKey = await generateKeyPair('x25519')
-      const peerDID = PeerDidModule.createDID(authKey.publicJwk,agreemKey.publicJwk,null,null)
-      console.log("Peer DID: "+ peerDID)
+      const myAuthKey = await generateKeyPair('ed25519')
+      const myAgreemKey = await generateKeyPair('x25519')
+      const myPeerDID = PeerDidModule.createDID(myAuthKey.publicJwk,myAgreemKey.publicJwk,"https://www.example.com/bob",null)
+      console.log("Peer DID: "+ myPeerDID)
       console.log("\n")
       // GET Mediator OOB URL
       try {
@@ -69,16 +80,28 @@ const Communications = (props) => {
         const encodedMsg = oob_url.split("=")[1]
         const decodedMsg = JSON.parse(Buffer.from(encodedMsg, 'base64').toString('ascii'))
         const mediatorDID = decodedMsg.from
-        console.log(mediatorDID)
+        console.log("Mediator DID: "+ mediatorDID )
 
-        const pingMsg = {
-          body: { "response_requested": true },
-          return_route: "all",
-          id: "asdasdasd",
-          type: "https://didcomm.org/trust-ping/2.0/ping",
-          from: peerDID,
-          to: [mediatorDID]
-        }
+
+        const pingBody = { response_requested: true }
+        const pingMsgPacked = DIDCommV2Module.pack(
+          pingBody,
+          id = uuid.v4(),
+          to = mediatorDID, 
+          from = myPeerDID, 
+          messageType = "https://didcomm.org/trust-ping/2.0/ping",
+          // customHeaders = [{return_route: "all"}],
+          agreemKey = myAgreemKey, 
+          signFrom = null, 
+          protectSender = false
+        )
+        console.log(pingMsgPacked)
+        const resp2 = fetch('http://127.0.0.1:8000/', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/didcomm-encrypted+json'},
+          body: pingMsgPacked
+        });
+          
 
       } catch (error) {
         console.error(error);
