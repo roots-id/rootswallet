@@ -231,7 +231,6 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         );
     }
 
-
     function renderInputToolbar(props: InputToolbarProps<IMessage>) {
         //console.log("renderInputToolbar", props)
         return (

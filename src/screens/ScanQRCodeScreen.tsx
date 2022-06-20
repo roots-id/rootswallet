@@ -21,15 +21,14 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
     console.log("Scan QR - rout params", route.params)
     const [hasPermission, setHasPermission] = useState<boolean>(false);
     const [scanned, setScanned] = useState<boolean>(false);
+    const [timeOutId, setTimeOutId] = useState<NodeJS.Timeout>();
     const type = route.params.type
 
-    let interval: NodeJS.Timeout;
-
     const handleDemo = async () => {
-        if (isDemo()) {
+        if (!scanned && isDemo()) {
+            setScanned(true)
             console.log("Scan QR - pretending to scan with demo data")
             alert("No data scanned, using demo data instead.");
-            clearInterval(interval)
             if (type === 'contact') {
                 console.log("Scan QR - getting contact demo data")
                 const demoData = getDemoRel()
@@ -42,18 +41,18 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                     await importVerifiedCredential(demoData)
                 }
             }
-            if (navigation.canGoBack()) {
-                navigation.goBack()
-            }
+        } else {
+            console.log("Scan QR - Demo interval triggered, but scanned or not demo",scanned,isDemo())
         }
+        clearAndGoBack()
     }
 
     useEffect(() => {
         const scanFunc = async () => {
             const {status} = await BarCodeScanner.requestPermissionsAsync();
             setHasPermission(status === 'granted');
-            if (status && isDemo()) {
-                interval = setInterval(handleDemo, 10000);
+            if (isDemo()) {
+                setTimeOutId(setTimeout(handleDemo, 10000));
             }
         }
 
@@ -63,17 +62,20 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
 
     const handleBarCodeScanned = async ({data}: BarCodeEvent) => {
         setScanned(true);
-        clearInterval(interval)
         console.log("Scan QR - scanned data", type, data)
         if (type == "credential") {
             await importVerifiedCredential(JSON.parse(data))
         } else if (type == "contact") {
             await importContact(JSON.parse(data))
         }
-        if (navigation.canGoBack()) {
-            navigation.goBack()
-        }
+        clearAndGoBack()
     };
+
+    const clearAndGoBack = () => {
+        setScanned(true)
+        if (timeOutId) clearTimeout(timeOutId)
+        if (navigation.canGoBack()) navigation.goBack()
+    }
 
     if (hasPermission === null) {
         return <Text>Requesting camera permission</Text>;
@@ -92,7 +94,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
         >
             <Pressable
                 style={styles.pressable}
-                onPress={navigation.goBack}
+                onPress={clearAndGoBack}
             />
             <Animated.View
                 style={styles.viewAnimated}
@@ -101,7 +103,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                     icon="close-circle"
                     size={36}
                     color="#e69138"
-                    onPress={navigation.goBack}
+                    onPress={clearAndGoBack}
                 />
                 <View style={{
 
