@@ -1,3 +1,16 @@
+import {displayProblem} from "../styles/styles";
+import {Text} from "react-native";
+import React from "react";
+import {decodeCredential} from "../credentials";
+
+export function getObjectField(obj: object, field: string) {
+    for (const [key, value] of Object.entries(obj)) {
+        if(key === field) {
+            return value;
+        }
+    }
+}
+
 export function replaceSpecial(alias: string) {
     return alias.replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_');
 }
