@@ -41,14 +41,14 @@ const Communications = (props) => {
         console.log("Alice generates a new pairwise peer DID for communication with Bob: "+ alicePeerDID)
 
         // 3. Alice sends message to Bob
-        var msg = {msg: "Hello Bob!"}
+        var msg = {msg: "Hello Bob2!"}
         var packedToBobMsg = DIDCommV2Module.pack(
           msg, 
           id = uuid.v4(), 
           to = bobPeerDID, 
           from = alicePeerDID, 
           messageType = "my-protocol/1.0",
-          // customHeaders = [{return_route: "all"}],
+          customHeaders = [{return_route: "all"}],
           agreemKey = aliceAgreemKey, 
           signFrom = null, 
           protectSender = true 
@@ -59,7 +59,7 @@ const Communications = (props) => {
 
         // 4. Bob unpacks the message
         var unpackResultMsg = DIDCommV2Module.unpack(packedToBobMsg, to = bobPeerDID, agreemKey = bobAgreemKey)
-        console.log("Bob received " + unpackResultMsg + " from Alice.")
+        console.log("Bob received " + JSON.parse(unpackResultMsg).body.msg + " from Alice.")
         
     };
 
@@ -90,18 +90,20 @@ const Communications = (props) => {
           to = mediatorDID, 
           from = myPeerDID, 
           messageType = "https://didcomm.org/trust-ping/2.0/ping",
-          // customHeaders = [{return_route: "all"}],
+          customHeaders = [{return_route: "all"}],
           agreemKey = myAgreemKey, 
           signFrom = null, 
-          protectSender = false
+          protectSender = true
         )
-        console.log(pingMsgPacked)
-        const resp2 = fetch('http://127.0.0.1:8000/', {
+        const resp2 = await fetch('http://127.0.0.1:8000/', {
           method: 'POST',
           headers: {'Content-Type': 'application/didcomm-encrypted+json'},
           body: pingMsgPacked
         });
-          
+        const resp2Packed = await resp2.json();
+        const resp2Unpacked = DIDCommV2Module.unpack(resp2Packed, to = myPeerDID, agreemKey = myAgreemKey)
+        console.log(JSON.parse(resp2Unpacked))
+        
 
       } catch (error) {
         console.error(error);

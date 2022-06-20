@@ -50,7 +50,7 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
         to: String,
         from: String,
         messageType: String = "my-protocol/1.0",
-        // customHeaders: ReadableArray,
+        customHeaders: ReadableArray,
         agreemKey: ReadableMap,
         signFrom: String? = null,
         protectSender: Boolean = false,
@@ -73,7 +73,8 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
         )
             .from(from)
             .to(listOf(to)) 
-            .customHeader("return_route", "all")
+            // .customHeader("return_route", "all")
+            // .customHeader("return_route2", "all")
             .build()
             
         var builder = PackEncryptedParams
@@ -102,9 +103,10 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
         }
         val didComm = DIDComm(DIDDocResolverPeerDID(), secretsResolver)
         val res = didComm.unpack(UnpackParams.Builder(packedMsg).build())
-        val msg = res.message.body["msg"].toString()
-        val eto = res.metadata.encryptedTo?.let { divideDIDFragment(it.first()).first() } ?: ""
-        val efrom = res.metadata.encryptedFrom?.let { divideDIDFragment(it).first() }
-        return msg
+    
+        // val msg = res.message.body["msg"].toString()
+        // val eto = res.metadata.encryptedTo?.let { divideDIDFragment(it.first()).first() } ?: ""
+        // val efrom = res.metadata.encryptedFrom?.let { divideDIDFragment(it).first() }
+        return res.message.toString()
     }
 }
