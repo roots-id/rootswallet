@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { NativeModules, StyleSheet, Text, View } from 'react-native';
 import { IconButton, Title } from 'react-native-paper';
-import { v4 as uuidv4 } from 'uuid';
 import * as rel from '../relationships'
 import { createChat, getDid } from '../roots';
 import FormButton from '../components/FormButton';
 import FormInput from '../components/FormInput';
-
-const { PrismModule } = NativeModules;
 
 export default function CreateChatScreen({ navigation }) {
   const [chatName, setChatName] = useState('');

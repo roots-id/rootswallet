@@ -64,7 +64,7 @@ export function removeItem(key: string) {
         delete cachedItems[key]
         delete cachedWallets[key]
         logger("CacheStore - removed",key)
-    } catch(e) {
+    } catch(e: any) {
         console.error("Failed to remove value",key,e,e.stack)
     }
 }

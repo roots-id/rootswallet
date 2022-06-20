@@ -8,8 +8,6 @@ import {
     StyleSheet,
 } from 'react-native';
 import {IconButton} from 'react-native-paper';
-import {useTheme} from '@react-navigation/native';
-import {useCardAnimation} from '@react-navigation/stack';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
 import {getDemoRel, YOU_ALIAS} from '../relationships';
@@ -22,8 +20,6 @@ import {styles} from "../styles/styles";
 export default function ScanQRCodeScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("Scan QR - rout params", route.params)
     const [hasPermission, setHasPermission] = useState<boolean>(false);
-    const {colors} = useTheme();
-    const {current} = useCardAnimation();
     const [scanned, setScanned] = useState<boolean>(false);
     const type = route.params.type
 
@@ -51,12 +47,16 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
         }
     }
 
-    useEffect(async () => {
-        const {status} = await BarCodeScanner.requestPermissionsAsync();
-        setHasPermission(status === 'granted');
-        if (status && isDemo()) {
-            interval = setInterval(handleDemo, 5000);
+    useEffect(() => {
+        const scanFunc = async () => {
+            const {status} = await BarCodeScanner.requestPermissionsAsync();
+            setHasPermission(status === 'granted');
+            if (status && isDemo()) {
+                interval = setInterval(handleDemo, 5000);
+            }
         }
+
+        scanFunc().catch(console.error)
     }, [])
 
 
@@ -106,8 +106,8 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
 
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: 250,
-                    height: 250,
+                    width: '95%',
+                    height: '95%',
                 }}>
                     <BarCodeScanner
                         onBarCodeScanned={handleBarCodeScanned}

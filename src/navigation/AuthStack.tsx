@@ -28,6 +28,7 @@ import React from "react";
 import {YOU_ALIAS} from '../relationships'
 import { getChatItem, loadSettings, storageStatus,
     TEST_WALLET_NAME } from '../roots'
+import * as utils from '../utils'
 import * as wallet from '../wallet'
 
 const Stack = createStackNavigator();
@@ -160,7 +161,7 @@ export default function AuthStack() {
                     name="Chat"
                     component={ChatScreen}
                     options={ ({ navigation, route }) => ({
-                        headerTitle: (props) => <SimpleTitle {...props} title={getChatItem(route.params?.chatId).title}/>,
+                        headerTitle: (props) => <SimpleTitle {...props} title={getChatItem(utils.getObjectField(route.params,"chatId")).title}/>,
                         headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={YOU_ALIAS} scan='credential' settings='Settings'/>,
                     })}
                 />

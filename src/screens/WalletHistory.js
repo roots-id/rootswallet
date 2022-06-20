@@ -1,13 +1,9 @@
 import { useIsFocused } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { FlatList, NativeModules, SafeAreaView, StyleSheet, View, Text } from 'react-native';
+import { FlatList, SafeAreaView, View } from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import FormButton from '../components/FormButton';
 
-import { getWalletHistory } from '../roots';
 import Loading from '../components/Loading';
-
-import styles from "../styles/styles";
 
 export default function WalletHistoryScreen({navigation}) {
     const [wallets, setWallets] = useState([]);

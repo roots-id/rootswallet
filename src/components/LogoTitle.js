@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
+import {brandLogo} from "../relationships";
 
 function getTitle(title) {
     if(title.length > 12) {
@@ -15,7 +16,7 @@ export default function LogoTitle(...props) {
         <View style={{flexDirection:'row',}}>
             <Image
               style={{ width: 50, height: 50 }}
-              source={require('../assets/LogoOnly1024.png')}
+              source={brandLogo}
             />
             <Text style={{ color: '#eeeeee',fontSize: 22,fontWeight: 'normal',textAlignVertical: "center",textAlign: "center", }}>
                 {getTitle(props[0]["title"])}

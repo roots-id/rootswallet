@@ -17,6 +17,7 @@ export const prismLogo = require('../assets/ATALAPRISM.png');
 export const catalystLogo = require('../assets/catalyst.png');
 export const personLogo = require('../assets/smallBWPerson.png');
 export const rootsLogo = require('../assets/LogoCropped.png');
+export const brandLogo = require('../assets/LogoOnly1024.png');
 
 export const YOU_ALIAS = "You"
 export const ROOTS_BOT = "RootsHelper";
@@ -381,7 +382,7 @@ export async function createRelItem(alias: string, name: string, pic=personLogo,
             logger("rels - created rel",alias,"?",result)
             return result;
         }
-    } catch(error) {
+    } catch(error: any) {
         console.error("Failed to create rel",alias,error,error.stack)
         return false
     }

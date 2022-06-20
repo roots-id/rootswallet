@@ -239,7 +239,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
             <InputToolbar
                 {...props}
                 containerStyle={{
-                    backgroundColor: "#302025",
+                    backgroundColor: "#604050",
                     borderTopColor: "#dddddd",
                     borderTopWidth: 1,
                     padding: 1,
@@ -247,7 +247,6 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
             />
         );
     }
-
 
     if (loading) {
         console.log("ChatScreen - Loading....")
@@ -258,7 +257,8 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         <View style={{backgroundColor: "#251520", flex: 1, display: "flex",}}>
             <GiftedChat
                 isTyping={processing}
-                messages={messages?.sort((a, b) => {return ((b.createdAt as Date).getDate() - (a.createdAt as Date).getDate())})}
+                inverted={false}
+                messages={messages?.sort((a, b) => {return (a.createdAt < b.createdAt) ? -1 : 1})}
                 onPress={ (context, message) => processBubbleClick(context,message)}
                 onQuickReply={reply => handleQuickReply(reply)}
                 onSend={messages => handleSend(messages)}
@@ -335,7 +335,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         const user = getContactByAlias(message.rel)
         const mappedMsg: IMessage = {
             _id: message.id,
-            createdAt: new Date(message.createdTime),
+            createdAt: message.createdTime,
             system: message.system,
             text: message.body,
             user: mapUser(user),

@@ -3,10 +3,8 @@ import {
   Animated,
   Text,
   Pressable,
-  StyleSheet,
   View,
 } from 'react-native';
-import { useTheme } from '@react-navigation/native';
 import {Picker} from '@react-native-picker/picker';
 import { useCardAnimation } from '@react-navigation/stack';
 import {IconButton, ToggleButton} from 'react-native-paper';

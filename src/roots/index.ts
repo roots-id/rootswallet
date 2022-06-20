@@ -62,7 +62,7 @@ type process = {
 const allProcessing: { [processGroup: string]: { [processAlias: string]: process } } = {};
 const sessions: { [chatId: string]: models.session } = {};
 
-export async function initRootsWallet() {
+export async function initRootsWallet(): Promise<boolean> {
     logger("roots - initializing RootsWallet")
 
     logger("roots - initializing your Did")
@@ -96,27 +96,46 @@ export async function initRootsWallet() {
         await sendMessage(myChat, "Your new DID is being added to Prism so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
             MessageType.TEXT, contact.PRISM_BOT)
         //intentionally not awaiting
-        processPublishResponse(myChat)
+        const procPub = async () => await processPublishResponse(myChat)
+        procPub()
+            // make sure to catch any error
+            .catch(console.error);
+        return true;
     }
+
+    return false;
 }
 
-export async function loadAll(walName: string, walPass: string) {
-    const wal = await wallet.loadWallet(walName, walPass);
-    if (wal) {
-        const chats = await loadItems(allChatsRegex)
-        const rels = await loadItems(contact.allRelsRegex);
-        const messages = await loadItems(allMsgsRegex);
-        const credRequests = await loadItems(allCredReqsRegex);
-        const creds = await loadItems(allCredsRegex);
-        if (wal && chats && rels && messages && credRequests) {
-            return wal
+export async function loadAll(walName: string, walPass: string): Promise<string> {
+    try {
+        const wal = await wallet.loadWallet(walName, walPass);
+        if (wal) {
+            const chats = await loadItems(allChatsRegex)
+            const rels = await loadItems(contact.allRelsRegex);
+            const messages = await loadItems(allMsgsRegex);
+            const credRequests = await loadItems(allCredReqsRegex);
+            const creds = await loadItems(allCredsRegex);
+            if (chats && rels && messages && credRequests && creds) {
+                console.log("Successfully loaded wallet",wal)
+                return "";
+            } else {
+                const errorMsg = "roots - Failed to load all items"
+                    + "\n\t loaded chats: " + chats
+                    + "\n\t loaded chats: " + rels
+                    + "\n\t loaded chats: " + messages
+                    + "\n\t loaded chats: " + credRequests
+                    + "\n\t loaded chats: " + creds
+                console.error(errorMsg)
+                return errorMsg;
+            }
         } else {
-            logger("Failed to load all items")
-            return;
+            const errorMsg = "Failed to load wallet " + walName
+            logger("roots -",errorMsg)
+            return errorMsg;
         }
-    } else {
-        logger("Failed to load wallet")
-        return;
+    } catch(error: any) {
+        console.error("Could not load wallet items",error,error.stack)
+        return error.message()
     }
 }
 
@@ -130,7 +149,7 @@ async function loadItems(regex: RegExp) {
             console.error("roots - Failed to load items w/regex", regex)
             return false;
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("roots - Failed to load items w/regex", regex, error, error.stack)
         return false;
     }
@@ -201,7 +220,7 @@ export async function initRoot(alias: string, fromDidAlias: string, toDid: strin
         //intentionally not awaiting
         hasNewRels()
         return true;
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to initRoot", error, error.stack)
         return false;
     }
@@ -252,7 +271,7 @@ async function createDid(didAlias: string): Promise<models.did | undefined> {
                 console.error("roots - Wallet no found", wal)
             }
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to create chat DID", error, error.stack)
         return;
     }
@@ -333,7 +352,7 @@ export async function publishPrismDid(didAlias: string): Promise<boolean> {
                         console.error("roots - DID was NOT published", newWalJson)
                     }
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.error("roots - Error publishing DID", longFormDid, "w/DID alias", didAlias, error, error.stack)
             }
         } else {
@@ -568,7 +587,7 @@ export function getMessagesByRel(relId: string) {
     const chatMsgs = msgItemJsonArray.map(
         (msgItemJson) => {
             logger("parsing msg json", msgItemJson)
-            return JSON.parse(msgItemJson);
+            return JSON.parse(msgItemJson) as models.message;
         }
     )
     chatMsgs.sort((a, b) => (a.createdTime < b.createdTime) ? -1 : 1)
@@ -603,7 +622,7 @@ export async function sendMessage(chat: models.chat, msgText: string, msgType: M
             } else {
                 console.error("roots - couldn't save message, so not sending it", msgJson)
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("roots - Could not save message for rel", relDisplay.id, "w/msg", msgText, "to chat", chat.id, error, error.stack)
             return;
         }
@@ -657,7 +676,7 @@ export async function processCredentialResponse(chat: models.chat, reply: Reply)
                     } else {
                         console.error("creds - Credential not found in storage", credHash)
                     }
-                } catch(error) {
+                } catch(error: any) {
                     endProcessing(chat.id, reply.messageId)
                     console.error("creds - Unable to finish accepting credential",error,error.stack)
                 }
@@ -730,7 +749,7 @@ export async function processPublishResponse(chat: models.chat) {
                 "DID was already added to Prism",
                 MessageType.TEXT, contact.PRISM_BOT)
         }
-    } catch(error) {
+    } catch(error: any) {
         console.error("Unable to publish DID for chat",chat.id,error,error.stack)
     }
     endProcessing(chat.id, chat.fromAlias)
@@ -852,34 +871,38 @@ export async function processRevokeCredential(chat: models.chat, reply: Reply) {
 
 export async function processVerifyCredential(chat: models.chat, credHash: string) {
     startProcessing(chat.id, credHash + CRED_VERIFY)
-    const wal = wallet.getWallet(TEST_WALLET_NAME)
-    if (wal) {
-        const verify = await cred.verifyCredentialByHash(credHash, wal)
-        if (verify) {
-            const vDate = Date.now()
-            logger("roots - verification result", verify, vDate)
-            const verResult = JSON.parse(verify)
-            if (verResult && verResult.length <= 0) {
-                endProcessing(chat.id, credHash + CRED_VERIFY)
-                console.log("roots - credential verification result", verResult)
-                const credVerifiedMsg = await sendMessage(chat, "Credential is valid.",
-                    MessageType.TEXT, contact.ROOTS_BOT, false, vDate)
-            } else if (verResult.length > 0) {
-                endProcessing(chat.id, credHash + CRED_VERIFY)
-                console.log("roots - credential is invalid", verResult)
-                const credVerifiedMsg = await sendMessage(chat, "Credential is invalid w/ messages: " + verResult,
-                    MessageType.TEXT, contact.ROOTS_BOT, false, vDate)
+    try {
+        const wal = wallet.getWallet(TEST_WALLET_NAME)
+        if (wal) {
+            const verify = await cred.verifyCredentialByHash(credHash, wal)
+            if (verify) {
+                const vDate = Date.now()
+                logger("roots - verification result", verify, vDate)
+                const verResult = JSON.parse(verify)
+                if (verResult && verResult.length <= 0) {
+                    endProcessing(chat.id, credHash + CRED_VERIFY)
+                    console.log("roots - credential verification result", verResult)
+                    const credVerifiedMsg = await sendMessage(chat, "Credential is valid.",
+                        MessageType.TEXT, contact.ROOTS_BOT, false, vDate)
+                } else if (verResult.length > 0) {
+                    endProcessing(chat.id, credHash + CRED_VERIFY)
+                    console.log("roots - credential is invalid", verResult)
+                    const credVerifiedMsg = await sendMessage(chat, "Credential is invalid w/ messages: " + verResult,
+                        MessageType.TEXT, contact.ROOTS_BOT, false, vDate)
+                } else {
+                    endProcessing(chat.id, credHash + CRED_VERIFY)
+                    console.log("roots - could not get credential verification result", verResult)
+                    const credVerifiedMsg = await sendMessage(chat, "Could not verify credential at " + vDate,
+                        MessageType.TEXT, contact.ROOTS_BOT)
+                }
             } else {
-                endProcessing(chat.id, credHash + CRED_VERIFY)
-                console.log("roots - could not get credential verification result", verResult)
-                const credVerifiedMsg = await sendMessage(chat, "Could not verify credential at " + vDate,
-                    MessageType.TEXT, contact.ROOTS_BOT)
+                console.error("Couldnt verify credential", credHash)
             }
         } else {
-            console.error("Couldnt verify credential", credHash)
+            console.error("Could not get wallet", TEST_WALLET_NAME, wal)
         }
-    } else {
-        console.error("Could not get wallet", TEST_WALLET_NAME, wal)
+    } catch(error: any) {
+        console.error("Could not verify credential",error,error.stack)
     }
 }
 
@@ -1043,7 +1066,7 @@ export async function issueDemoCredential(chat: models.chat, msgId: string, cont
                         const tryAgain = await sendMessage(chat, "Unable to issue credential at this time",
                             MessageType.PROMPT_RETRY_PROCESS, contact.ROOTS_BOT, false, async ()=>{await processIssueCredential(iCred, chat)})
                     }
-                } catch(error) {
+                } catch(error: any) {
                     console.log("Unable to issue credential",chat.fromAlias,JSON.stringify(iCred))
                     const tryAgain = await sendMessage(chat, "Unable to issue credential at this time",
                         MessageType.PROMPT_RETRY_PROCESS, contact.ROOTS_BOT, false, async ()=>{await processIssueCredential(iCred, chat)})

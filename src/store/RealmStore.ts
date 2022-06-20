@@ -1,3 +1,4 @@
+export {}
 //import {createRealmContext} from '@realm/react';
 //export const WalletRealmContext = createRealmContext({
 //  schema: [Wallet],

@@ -50,13 +50,17 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
                 if (result && result.length <= 0) {
                     setVerified("check-bold")
                 } else if (result && result.length > 0) {
-                    setVerified("alert-octagon")
+                    setVerified("close-octagon-outline")
                 } else {
                     setVerified("help-circle")
                 }
+            } else {
+                console.error("CredDeetsScreen - could not verify", verify)
+                setVerified("alert-octagon")
             }
         } else {
             console.error("CredDeetsScreen - could not get wallet", roots.TEST_WALLET_NAME, wal)
+            setVerified("alert-octagon")
         }
     }
 

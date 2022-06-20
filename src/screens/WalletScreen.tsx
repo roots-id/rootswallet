@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FlatList, SafeAreaView, View, Text } from 'react-native';
-import { Divider, List } from 'react-native-paper';
+import { Divider } from 'react-native-paper';
 
 import * as models from '../models'
 import { TEST_WALLET_NAME } from '../roots'
@@ -17,7 +17,7 @@ export default function WalletScreen({ route, navigation }: CompositeScreenProps
         try {
             setWallet(getWallet(TEST_WALLET_NAME));
             console.log("WalletScreen - set wallet",wallet)
-        } catch(error) {
+        } catch(error: any) {
             console.error("WalletScreen - Could not get roots wallet",TEST_WALLET_NAME,error,error.stack)
         }
     }, []);
