@@ -631,7 +631,8 @@ export async function sendMessage(chat: models.chat, msgText: string, msgType: M
     }
 }
 
-export async function processCredentialResponse(chat: models.chat, reply: Reply) {
+export async function processCredentialResponse(chat: models.chat, reply: Reply): Promise<boolean> {
+    let res = false;
     logger("roots - quick reply credential", chat.id, reply)
     const credReqAlias = getCredRequestAlias(reply.messageId)
     logger("roots - got credential request", credReqAlias)
@@ -641,7 +642,6 @@ export async function processCredentialResponse(chat: models.chat, reply: Reply)
     const status = await store.updateItem(credReqAlias, replyJson)
     if (!status) {
         console.error("roots - Could not save credential request for", credReqAlias)
-        return false;
     } else {
         if (reply.value.endsWith(CRED_ACCEPTED)) {
             logger("roots - quick reply credential accepted", credReqAlias)
@@ -671,13 +671,11 @@ export async function processCredentialResponse(chat: models.chat, reply: Reply)
                         } else {
                             console.error("Couldn't get wallet", TEST_WALLET_NAME, wal)
                         }
-                        endProcessing(chat.id, reply.messageId)
-                        return credHash;
+                        res = credHash;
                     } else {
                         console.error("creds - Credential not found in storage", credHash)
                     }
                 } catch(error: any) {
-                    endProcessing(chat.id, reply.messageId)
                     console.error("creds - Unable to finish accepting credential",error,error.stack)
                 }
             } else {
@@ -685,22 +683,22 @@ export async function processCredentialResponse(chat: models.chat, reply: Reply)
             }
         } else if (reply.value.endsWith(CRED_REJECTED)) {
             logger("roots - quick reply credential rejected", credReqAlias)
-            return true
+            res = true
         } else {
             logger("roots - unknown credential prompt reply", credReqAlias, replyJson)
-            return false
         }
     }
+    endProcessing(chat.id, reply.messageId)
+    return res
 }
 
 //TODO use workflow instead of hardcoding it here
-export async function processPublishResponse(chat: models.chat) {
+export async function processPublishResponse(chat: models.chat): Promise<models.chat> {
     logger("roots - started publish DID alias", chat.fromAlias)
-    startProcessing(chat.id, chat.fromAlias)
     try {
+        startProcessing(chat.id, chat.fromAlias)
         const published = await publishPrismDid(chat.fromAlias);
         if (published) {
-            endProcessing(chat.id, chat.fromAlias)
             const pubDid = getDid(chat.fromAlias)
             if (pubDid) {
                 const didPubTx = getDidPubTx(pubDid.alias)
@@ -711,7 +709,6 @@ export async function processPublishResponse(chat: models.chat) {
                     MessageType.BLOCKCHAIN_URL, contact.PRISM_BOT,
                     false, didPubTx?.url)
                 if (didLinkMsg) {
-                    //const didMsg = await sendMessage(chat,JSON.stringify(pubDid),DID_JSON,rel.PRISM_BOT,true);
                     if (demo) {
                         logger("roots - demo celebrating did publishing credential", pubDid.uriLongForm)
                         const vcMsg = await sendMessage(chat,
@@ -778,34 +775,40 @@ function getCredRequestAlias(msgId: string) {
     return msgId.replace(models.ModelType.MESSAGE, models.ModelType.CRED_REQUEST)
 }
 
-export async function processIssueCredential(iCred: models.issuedCredential, chat: models.chat) {
+export async function processIssueCredential(iCred: models.issuedCredential, chat: models.chat): Promise<models.issuedCredential | undefined> {
     console.log("roots - processing issuing credential", JSON.stringify(iCred))
     const credAlias = iCred.alias
+    let res;
     startProcessing(chat.id, credAlias)
-    const wal = wallet.getWallet(TEST_WALLET_NAME)
-    if (wal) {
-        const newWal = await cred.issueCredential(chat.fromAlias, iCred, wal)
-        logger("roots - issued cred", newWal)
-        if (newWal) {
-            const newWalJson = JSON.stringify(newWal)
-            const savedWal = await wallet.updateWallet(wal._id, wal.passphrase, newWalJson)
-            if (savedWal) {
-                logger("roots - Added issued credential to wallet", newWalJson)
-                endProcessing(chat.id, credAlias)
-                const credPubTx = getCredPubTx(iCred.issuingDidAlias, iCred.alias)
-                const credLinkMsg = await sendMessage(chat, BLOCKCHAIN_URL_MSG,
-                    MessageType.BLOCKCHAIN_URL, contact.PRISM_BOT, false, credPubTx?.url)
-                return cred.getIssuedCredByAlias(credAlias, newWal)
+    try {
+        const wal = wallet.getWallet(TEST_WALLET_NAME)
+        if (wal) {
+            const newWal = await cred.issueCredential(chat.fromAlias, iCred, wal)
+            logger("roots - issued cred", newWal)
+            if (newWal) {
+                const newWalJson = JSON.stringify(newWal)
+                const savedWal = await wallet.updateWallet(wal._id, wal.passphrase, newWalJson)
+                if (savedWal) {
+                    logger("roots - Added issued credential to wallet", newWalJson)
+                    const credPubTx = getCredPubTx(iCred.issuingDidAlias, iCred.alias)
+                    const credLinkMsg = await sendMessage(chat, BLOCKCHAIN_URL_MSG,
+                        MessageType.BLOCKCHAIN_URL, contact.PRISM_BOT, false, credPubTx?.url)
+                    res = cred.getIssuedCredByAlias(credAlias, newWal)
+                } else {
+                    console.error("Could not save issued credential, unable to save wallet", credAlias)
+                }
             } else {
-                console.error("Could not save issued credential, unable to save wallet", credAlias)
+                console.error("Could not import accepted credential", credAlias)
             }
         } else {
-            console.error("Could not import accepted credential", credAlias)
+            console.error("Could not get wallet", TEST_WALLET_NAME, wal)
         }
-    } else {
-        console.error("Could not get wallet", TEST_WALLET_NAME, wal)
+    }catch(error: any) {
+        console.error("Error while processing issue credential",error,error.stack)
     }
+
     endProcessing(chat.id, credAlias)
+    return res
 }
 
 export function processViewCredential(msgId: string): models.credential | undefined {
@@ -829,47 +832,51 @@ export function processViewCredential(msgId: string): models.credential | undefi
     }
 }
 
-export async function processRevokeCredential(chat: models.chat, reply: Reply) {
+export async function processRevokeCredential(chat: models.chat, reply: Reply): Promise<models.issuedCredential | undefined>{
+    let res;
     const msg = getMessageById(reply.messageId)
     if (msg) {
         const credHash = msg.data
         startProcessing(chat.id, credHash + CRED_REVOKE)
-        logger("roots - revoking credential with hash", credHash)
-        const wal = wallet.getWallet(TEST_WALLET_NAME)
-        if (wal) {
-            const newWal = await cred.revokeCredentialByHash(credHash, wal)
-            if (newWal) {
-                const newWalJson = JSON.stringify(newWal)
-                logger("roots - cred revoke result", newWalJson)
-                const savedWal = await wallet.updateWallet(newWal._id, newWal.passphrase, newWalJson)
-                endProcessing(chat.id, credHash + CRED_REVOKE)
-                if (savedWal) {
-                    const iCred = getIssuedCredByHash(credHash, newWal)
-                    if (iCred) {
-                        logger("roots - Revoked credential", iCred.alias)
-                        const credRevokedMsg = await sendMessage(chat, "Credential is revoked.",
-                            MessageType.TEXT, contact.ROOTS_BOT, false, credHash)
-                        return iCred;
+        try {
+            logger("roots - revoking credential with hash", credHash)
+            const wal = wallet.getWallet(TEST_WALLET_NAME)
+            if (wal) {
+                const newWal = await cred.revokeCredentialByHash(credHash, wal)
+                if (newWal) {
+                    const newWalJson = JSON.stringify(newWal)
+                    logger("roots - cred revoke result", newWalJson)
+                    const savedWal = await wallet.updateWallet(newWal._id, newWal.passphrase, newWalJson)
+                    if (savedWal) {
+                        const iCred = getIssuedCredByHash(credHash, newWal)
+                        if (iCred) {
+                            logger("roots - Revoked credential", iCred.alias)
+                            const credRevokedMsg = await sendMessage(chat, "Credential is revoked.",
+                                MessageType.TEXT, contact.ROOTS_BOT, false, credHash)
+                            res = iCred;
+                        }
+                    } else {
+                        console.error("Could not revoke credential, unable to save wallet", newWalJson)
                     }
                 } else {
-                    console.error("Could not revoke credential, unable to save wallet", newWalJson)
-                    return
+                    console.log("roots - could not revoke credential", credHash)
+                    const credRevokedMsg = await sendMessage(chat, "Could not revoke credential " + credHash,
+                        MessageType.TEXT, contact.ROOTS_BOT, false, credHash)
                 }
             } else {
-                endProcessing(chat.id, credHash + CRED_REVOKE)
-                console.log("roots - could not revoke credential", credHash)
-                const credRevokedMsg = await sendMessage(chat, "Could not revoke credential " + credHash,
-                    MessageType.TEXT, contact.ROOTS_BOT, false, credHash)
+                console.error("Could not get wallet", TEST_WALLET_NAME, wal)
             }
-        } else {
-            console.error("Could not get wallet", TEST_WALLET_NAME, wal)
+        }catch(error: any) {
+            console.error("Error while processing revoke credential",error,error.stack)
         }
+        endProcessing(chat.id, credHash + CRED_REVOKE)
     } else {
         console.error("Could not revoke credential, msg not found", reply.messageId)
     }
+    return res;
 }
 
-export async function processVerifyCredential(chat: models.chat, credHash: string) {
+export async function processVerifyCredential(chat: models.chat, credHash: string): Promise<void> {
     startProcessing(chat.id, credHash + CRED_VERIFY)
     try {
         const wal = wallet.getWallet(TEST_WALLET_NAME)
@@ -880,17 +887,14 @@ export async function processVerifyCredential(chat: models.chat, credHash: strin
                 logger("roots - verification result", verify, vDate)
                 const verResult = JSON.parse(verify)
                 if (verResult && verResult.length <= 0) {
-                    endProcessing(chat.id, credHash + CRED_VERIFY)
                     console.log("roots - credential verification result", verResult)
                     const credVerifiedMsg = await sendMessage(chat, "Credential is valid.",
                         MessageType.TEXT, contact.ROOTS_BOT, false, vDate)
                 } else if (verResult.length > 0) {
-                    endProcessing(chat.id, credHash + CRED_VERIFY)
                     console.log("roots - credential is invalid", verResult)
                     const credVerifiedMsg = await sendMessage(chat, "Credential is invalid w/ messages: " + verResult,
                         MessageType.TEXT, contact.ROOTS_BOT, false, vDate)
                 } else {
-                    endProcessing(chat.id, credHash + CRED_VERIFY)
                     console.log("roots - could not get credential verification result", verResult)
                     const credVerifiedMsg = await sendMessage(chat, "Could not verify credential at " + vDate,
                         MessageType.TEXT, contact.ROOTS_BOT)
@@ -904,6 +908,7 @@ export async function processVerifyCredential(chat: models.chat, credHash: strin
     } catch(error: any) {
         console.error("Could not verify credential",error,error.stack)
     }
+    endProcessing(chat.id, credHash + CRED_VERIFY)
 }
 
 export function showCred(navigation: any, credHash: string) {

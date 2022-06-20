@@ -11,7 +11,7 @@ import {IconButton} from 'react-native-paper';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
 import {getDemoRel, YOU_ALIAS} from '../relationships';
-import {getDid, importContact, importVerifiedCredential, isDemo } from '../roots'
+import {getDid, importContact, importVerifiedCredential, isDemo} from '../roots'
 import React from 'react';
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BarCodeEvent} from "expo-barcode-scanner/src/BarCodeScanner";
@@ -28,6 +28,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
     const handleDemo = async () => {
         if (isDemo()) {
             console.log("Scan QR - pretending to scan with demo data")
+            alert("No data scanned, using demo data instead.");
             clearInterval(interval)
             if (type === 'contact') {
                 console.log("Scan QR - getting contact demo data")
@@ -36,7 +37,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
             } else {
                 console.log("Scan QR - getting credential demo data")
                 const did = getDid(YOU_ALIAS)
-                if(did) {
+                if (did) {
                     const demoData = getDemoCred(did).verifiedCredential
                     await importVerifiedCredential(demoData)
                 }
@@ -52,7 +53,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
             const {status} = await BarCodeScanner.requestPermissionsAsync();
             setHasPermission(status === 'granted');
             if (status && isDemo()) {
-                interval = setInterval(handleDemo, 5000);
+                interval = setInterval(handleDemo, 10000);
             }
         }
 
@@ -61,12 +62,12 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
 
 
     const handleBarCodeScanned = async ({data}: BarCodeEvent) => {
-        console.log("Scan QR - scanned data",type,data)
         setScanned(true);
         clearInterval(interval)
-        if(type == "credential") {
+        console.log("Scan QR - scanned data", type, data)
+        if (type == "credential") {
             await importVerifiedCredential(JSON.parse(data))
-        } else if(type == "contact") {
+        } else if (type == "contact") {
             await importContact(JSON.parse(data))
         }
         if (navigation.canGoBack()) {
@@ -110,7 +111,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                     height: '95%',
                 }}>
                     <BarCodeScanner
-                        onBarCodeScanned={handleBarCodeScanned}
+                        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
                         style={StyleSheet.absoluteFillObject}
                     />
                     {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)}/>}

@@ -34,9 +34,11 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
         setLoading(true)
         checkErrors();
         setLoading(false)
-    },[]);
+    }, []);
 
-    useEffect(() => {checkErrors()}, [password, confirmPassword, problemText]);
+    useEffect(() => {
+        checkErrors()
+    }, [password, confirmPassword, problemText]);
 
     function checkErrors() {
         const passNumeric = (/\d/.test(password))
@@ -55,8 +57,8 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
         const passMatch = (password === confirmPassword)
         console.log("passwords do not match", password, confirmPassword);
         setPasswordsMatch(<Text style={displayProblem(!passMatch)}>Passwords do not match</Text>)
-        if(passNumeric && passAlpha && passLength && passMatch) {
-            setCreateWalletButton(            <FormButton
+        if (passNumeric && passAlpha && passLength && passMatch) {
+            setCreateWalletButton(<FormButton
                 disabled={!(passwordsMatch && passwordAlpha && passwordNumeric && passwordLongEnough)}
                 title="Create Wallet"
                 modeValue="contained"
@@ -81,8 +83,8 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
                             console.error("CreateWalletScreen - Creating wallet failed");
                             setProblemText("Wallet creation failed")
                         }
-                    } catch(error: any) {
-                        console.error("CreateWalletScreen - Creating wallet failed",error,error.stack)
+                    } catch (error: any) {
+                        console.error("CreateWalletScreen - Creating wallet failed", error, error.stack)
                         setProblemText(error.message)
                     }
                 }}
@@ -108,8 +110,8 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
         setLoading(false)
     }
 
-    if(loading) {
-        return (<Loading />)
+    if (loading) {
+        return (<Loading/>)
     }
 
     return (

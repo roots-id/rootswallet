@@ -28,7 +28,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         const chatSession = roots.startChatSession(chat.id, {
             chat: chat,
             onReceivedMessage: (message) => {
-                if(message && GiftedChat) {
+                if (message && GiftedChat) {
                     setMessages((currentMessages) => {
                         const iMsg = mapMessage(message)
                         if (iMsg) {
@@ -172,8 +172,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     console.log("ChatScreen - process quick reply for retry process")
                     const process = roots.getMessageById(reply.messageId)?.data
                     process();
-                }
-                else {
+                } else {
                     console.log("ChatScreen - reply value not recognized, was", chat.id, reply.value);
                 }
             }
@@ -185,7 +184,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
     function processBubbleClick(context: any, message: IMessage): void {
         console.log("ChatScreen - bubble pressed", context, message)
         const msg = roots.getMessageById(message._id.toString())
-        if(msg) {
+        if (msg) {
             switch (msg.type) {
                 case roots.MessageType.BLOCKCHAIN_URL:
                     console.log("ChatScreen - Clicked blockchain url msg", msg.data)
@@ -194,8 +193,8 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                 case roots.MessageType.DID:
                     console.log("ChatScreen - Clickable did msg", msg.data)
                     const c = getContactByDid(msg.data)
-                    if(c) {
-                        showQR(navigation,asContactShareable(c))
+                    if (c) {
+                        showQR(navigation, asContactShareable(c))
                     }
                     break;
                 default:
@@ -258,8 +257,10 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
             <GiftedChat
                 isTyping={processing}
                 inverted={false}
-                messages={messages?.sort((a, b) => {return (a.createdAt < b.createdAt) ? -1 : 1})}
-                onPress={ (context, message) => processBubbleClick(context,message)}
+                messages={messages?.sort((a, b) => {
+                    return (a.createdAt < b.createdAt) ? -1 : 1
+                })}
+                onPress={(context, message) => processBubbleClick(context, message)}
                 onQuickReply={reply => handleQuickReply(reply)}
                 onSend={messages => handleSend(messages)}
                 //          onPress: (tag) => setShowSystem(!showSystem),

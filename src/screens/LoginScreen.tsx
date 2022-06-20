@@ -20,12 +20,12 @@ export default function LoginScreen({}) {
     const {signIn} = React.useContext(AuthContext);
 
     useEffect(() => {
-        if(problemText.length > 0) {
+        if (problemText.length > 0) {
             setError(<Text style={displayProblem(true)}>{problemText}</Text>)
         } else {
             setError(<Text/>)
         }
-    },[problemText])
+    }, [problemText])
 
     return (
         <View style={styles.centeredContainer}>

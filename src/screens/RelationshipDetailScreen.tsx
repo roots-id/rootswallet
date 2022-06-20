@@ -7,7 +7,7 @@ import {
     ScrollView,
     View,
 } from 'react-native';
-import {Divider, IconButton } from 'react-native-paper';
+import {Divider, IconButton} from 'react-native-paper';
 import {styles} from "../styles/styles";
 
 import * as models from '../models'

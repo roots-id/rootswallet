@@ -37,7 +37,7 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
     function getCredPart(field: string) {
         const c = decodeCredential(cred.verifiedCredential.encodedSignedCredential)
         const cObj = c.credentialSubject
-        return utils.getObjectField(cObj,field)
+        return utils.getObjectField(cObj, field)
     }
 
     async function updateVerification() {
@@ -110,7 +110,8 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
                     renderItem={({item}) => {
                         const output = utils.recursivePrint(getCredPart(item))
                         console.log(item, ": ", output)
-                        return <ScrollView style={styles.scrollableModal}><Text style={{color: "black"}}>{item + ": " + output}</Text></ScrollView>
+                        return <ScrollView style={styles.scrollableModal}><Text
+                            style={{color: "black"}}>{item + ": " + output}</Text></ScrollView>
                     }}
                 />
             </Animated.View>
