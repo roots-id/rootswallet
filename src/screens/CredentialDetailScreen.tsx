@@ -34,6 +34,12 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
         setCred(route.params.cred)
     }, []);
 
+    function getCredPart(field: string) {
+        const c = decodeCredential(cred.verifiedCredential.encodedSignedCredential)
+        const cObj = c.credentialSubject
+        return utils.getObjectField(cObj,field)
+    }
+
     async function updateVerification() {
         const wal = wallet.getWallet(roots.TEST_WALLET_NAME)
         if (wal) {
@@ -98,7 +104,7 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
                     keyExtractor={(item) => item}
                     ItemSeparatorComponent={() => <Divider/>}
                     renderItem={({item}) => {
-                        const output = utils.recursivePrint(decodeCredential(cred.verifiedCredential.encodedSignedCredential).credentialSubject[item])
+                        const output = utils.recursivePrint(getCredPart(item))
                         console.log(item, ": ", output)
                         return <ScrollView style={styles.scrollableModal}><Text style={{color: "black"}}>{item + ": " + output}</Text></ScrollView>
                     }}
