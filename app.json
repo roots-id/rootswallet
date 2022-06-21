@@ -1,15 +1,20 @@
 {
   "expo": {
     "owner": "rootsid",
-    "name": "rootswallet",
-    "slug": "rootswallet",
+    "name": "rootswallet-alpha",
+    "slug": "rootswallet-alpha",
     "description": "Open Source Identity Wallet for grass roots efforts that matter",
     "privacy": "unlisted",
-    "version": "0.0.1-alpha",
+    "version": "1.0.0-alpha",
     "orientation": "default",
     "platforms": ["android"],
     "githubUrl": "https://github.com/roots-id/rootswallet",
     "icon": "./src/assets/LogoOnly1024.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#322A1D"
+    },
     "updates": {
       "enabled": true,
       "fallbackToCacheTimeout": 10000
@@ -19,7 +24,6 @@
     ],
     "android": {
       "adaptiveIcon": {
-
         "foregroundImage": "./src/assets/LogoOnly1024.png",
         "backgroundColor": "#000000"
       },
