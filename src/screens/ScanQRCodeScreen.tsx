@@ -10,7 +10,7 @@ import {
 import {IconButton} from 'react-native-paper';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
-import {getDemoRel, YOU_ALIAS} from '../relationships';
+import {getDemoRel, getUserId} from '../relationships';
 import {getDid, importContact, importVerifiedCredential, isDemo} from '../roots'
 import React from 'react';
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
@@ -22,20 +22,20 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
     const [hasPermission, setHasPermission] = useState<boolean>(false);
     const [scanned, setScanned] = useState<boolean>(false);
     const [timeOutId, setTimeOutId] = useState<NodeJS.Timeout>();
-    const type = route.params.type
+    const modelType = route.params.type
 
     const handleDemo = async () => {
         if (!scanned && isDemo()) {
             setScanned(true)
             console.log("Scan QR - pretending to scan with demo data")
             alert("No data scanned, using demo data instead.");
-            if (type === 'contact') {
+            if (modelType === 'contact') {
                 console.log("Scan QR - getting contact demo data")
                 const demoData = getDemoRel()
                 await importContact(demoData)
             } else {
                 console.log("Scan QR - getting credential demo data")
-                const did = getDid(YOU_ALIAS)
+                const did = getDid(getUserId())
                 if (did) {
                     const demoData = getDemoCred(did).verifiedCredential
                     await importVerifiedCredential(demoData)
@@ -60,13 +60,16 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
     }, [])
 
 
-    const handleBarCodeScanned = async ({data}: BarCodeEvent) => {
+    const handleBarCodeScanned = async ({type,data}: BarCodeEvent) => {
         setScanned(true);
-        console.log("Scan QR - scanned data", type, data)
-        if (type == "credential") {
-            await importVerifiedCredential(JSON.parse(data))
-        } else if (type == "contact") {
-            await importContact(JSON.parse(data))
+        console.log("Scan QR - scanned data", modelType, type, data)
+        const jsonData = JSON.parse(data)
+        if (modelType == "credential") {
+            console.log("Scan QR - Importing scanned vc",jsonData)
+            await importVerifiedCredential(jsonData)
+        } else if (modelType == "contact") {
+            console.log("Scan QR - Importing scanned contact",jsonData)
+            await importContact(jsonData)
         }
         clearAndGoBack()
     };

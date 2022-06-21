@@ -3,20 +3,26 @@ import {logger} from "../logging";
 import * as store from "../store";
 import * as models from "../models";
 
-export async function createWallet(walName: string, mnemonic: string, walPass: string) {
-    const prismWal = PrismModule.newWal(walName, mnemonic, walPass)
-    logger("wallet - created new wallet, updating stored wallet")
-    const result = await updateWallet(walName, walPass, prismWal)
-    if (result) {
-        logger('Wallet created', getWalletJson(walName))
-        return result;
-    } else {
-        logger('Could not create wallet', walName, walPass)
-        return result;
+const WALLET_NAME_STORAGE_KEY = "primaryRootsWalletNameKey"
+let walletName: string = "Default Wallet Name";
+
+export async function createWallet(walName: string, mnemonic: string, walPass: string): Promise<boolean> {
+    const nameSet = await setWalletName(walName)
+    if(nameSet) {
+        const prismWal = PrismModule.newWal(walName, mnemonic, walPass)
+        logger("wallet - created new wallet, updating stored wallet")
+        const result = await updateWallet(walName, walPass, prismWal)
+        if (result) {
+            logger('Wallet created', getWalletJson(walName))
+            return result;
+        } else {
+            logger('Could not create wallet', walName, walPass)
+        }
     }
+    return false
 }
 
-export function getWallet(walName: string): models.wallet|undefined{
+export function getWallet(walName = getWalletName()): models.wallet|undefined{
     if(walName) {
         const walJson = getWalletJson(walName);
         if (walJson) {
@@ -29,7 +35,25 @@ export function getWallet(walName: string): models.wallet|undefined{
     }
 }
 
-export async function loadWallet(walName: string, walPass: string): Promise<boolean> {
+export function getWalletJson(walName = getWalletName()) {
+    return store.getWallet(walName)
+}
+
+export function getWalletName(): string {
+    if(!walletName || walletName.length <= 0) {
+        const name = store.getItem(WALLET_NAME_STORAGE_KEY)
+        if(name) {
+            walletName = JSON.parse(name)
+        }
+    }
+    if(walletName) {
+        return walletName
+    } else {
+        throw Error("Wallet name not found in storage")
+    }
+}
+
+export async function loadWallet(walName = getWalletName(), walPass: string): Promise<boolean> {
     logger("roots - loading wallet", walName, "with walPass", walPass);
     const restored = await store.restoreWallet(walPass);
     //retrieving wallet pulls the object into memory here
@@ -43,8 +67,9 @@ export async function loadWallet(walName: string, walPass: string): Promise<bool
     }
 }
 
-export async function hasWallet(walName: string) {
-    if (await store.hasWallet(walName)) {
+export async function hasWallet(walName = getWalletName()) {
+    const found = await store.hasWallet(walName)
+    if (found) {
         logger("roots - Has wallet", store.getWallet(walName));
         return true;
     } else {
@@ -53,11 +78,18 @@ export async function hasWallet(walName: string) {
     }
 }
 
-export function getWalletJson(walId: string) {
-    return store.getWallet(walId)
+export async function setWalletName(walName: string): Promise<boolean> {
+    if(walName && walName.length > 0) {
+        const success = await store.updateItem(WALLET_NAME_STORAGE_KEY,JSON.stringify(walName))
+        if(success) {
+            walletName = walName
+            return true
+        }
+    }
+    return false
 }
 
-export async function updateWallet(walName: string, walPass: string, walJson: string) {
+export async function updateWallet(walName = getWalletName(), walPass: string, walJson: string) {
     if (await store.saveWallet(walName, walPass, walJson)) {
         console.log("roots - updated roots wallet", walJson);
         return true;

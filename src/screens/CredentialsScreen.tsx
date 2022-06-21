@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {FlatList, Image, SafeAreaView, View, TouchableOpacity} from 'react-native';
 import {Divider, List} from 'react-native-paper';
 import {
     addRefreshTrigger,
@@ -17,14 +17,13 @@ import * as utils from "../utils";
 
 const CredentialsScreen = ({route, navigation}: CompositeScreenProps<any, any>) => {
     console.log("creds screen - params", route.params)
-    const {walletName} = route.params
     const [refresh, setRefresh] = useState(true)
     const [creds, setCreds] = useState<credential[]>()
 
     useEffect(() => {
         addRefreshTrigger(() => {
             console.log("creds screen - toggling refresh")
-            const wal = wallet.getWallet(walletName)
+            const wal = wallet.getWallet()
             if (wal) {
                 setCreds(getImportedCreds(wal))
                 console.log("creds screen - got imported creds", creds?.length)

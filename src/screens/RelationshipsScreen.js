@@ -10,7 +10,6 @@ import {styles} from "../styles/styles";
 
 const RelationshipsScreen = ({route, navigation}) => {
     console.log("rel screen - params", route.params)
-    const {walletName} = route.params
     const [refresh, setRefresh] = useState(true)
     const [contacts, setContacts] = useState([])
 
@@ -18,7 +17,7 @@ const RelationshipsScreen = ({route, navigation}) => {
         addRefreshTrigger(() => {
             console.log("contacts screen - toggling refresh")
             setContacts(
-                getRelationships(walletName).filter(rel => rel.displayName !== PRISM_BOT && rel.displayName !== ROOTS_BOT)
+                getRelationships().filter(rel => rel.displayName !== PRISM_BOT && rel.displayName !== ROOTS_BOT)
             )
             setRefresh(!refresh)
             console.log("contacts screen - contacts size", contacts.length)

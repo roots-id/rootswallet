@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {Linking, StyleSheet, Text, View} from 'react-native';
+import {Linking, Text, View} from 'react-native';
 import {Bubble, GiftedChat, IMessage, InputToolbar, InputToolbarProps, Reply, User} from 'react-native-gifted-chat';
 
-import * as cred from '../credentials'
+import * as contacts from '../relationships'
 import * as models from "../models";
 import {showQR} from '../qrcode'
-import {asContactShareable, getContactByAlias, getContactByDid, showRel, YOU_ALIAS} from '../relationships'
+import {asContactShareable, getContactByAlias, getContactByDid, showRel} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
 import {styles} from "../styles/styles";
@@ -112,7 +112,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
 
     async function handleSend(pendingMsgs: IMessage[]) {
         console.log("ChatScreen - handle send", pendingMsgs)
-        const result = await roots.sendMessages(chat, pendingMsgs.map(msg => msg.text), roots.MessageType.TEXT, YOU_ALIAS);
+        const result = await roots.sendMessages(chat, pendingMsgs.map(msg => msg.text), roots.MessageType.TEXT, contacts.getUserId());
 //        await setMessages((prevMessages) => GiftedChat.append(prevMessages, pendingMsgs));
     }
 

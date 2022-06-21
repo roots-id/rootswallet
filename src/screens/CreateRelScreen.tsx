@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react';
 import {Text, View} from 'react-native';
 import {IconButton, Title} from 'react-native-paper';
 import * as models from '../models'
-import {YOU_ALIAS} from '../relationships';
+import {generateIdFromName} from '../relationships';
 import {initRoot} from '../roots';
 import {displayProblem, styles} from '../styles/styles'
 import {CompositeScreenProps, DefaultNavigatorOptions} from "@react-navigation/core/src/types";
@@ -19,7 +19,7 @@ export default function CreateRelScreen({route, navigation}: CompositeScreenProp
 
     async function handleButtonPress() {
         if (relName.length > 0) {
-            const root = await initRoot(relName, YOU_ALIAS, relDid, relName, relAvatar)
+            const root = await initRoot(relName, generateIdFromName(relName), relDid, relName, relAvatar)
             if (root) {
                 console.log("Created rel", root)
                 setProblemDisabled(true)

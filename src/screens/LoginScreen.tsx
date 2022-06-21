@@ -7,8 +7,9 @@ import FormInput from '../components/FormInput';
 
 import AuthContext from '../context/AuthenticationContext';
 
-import {loadAll, TEST_WALLET_NAME} from '../roots'
+import {loadAll} from '../roots'
 import {displayProblem, styles} from "../styles/styles";
+import {getWalletName} from "../wallet";
 
 export default function LoginScreen({}) {
     const [password, setPassword] = useState<string>('');
@@ -32,7 +33,7 @@ export default function LoginScreen({}) {
             <Title style={styles.titleText}>Login:</Title>
             <FormInput
                 labelName="Wallet Name"
-                value={TEST_WALLET_NAME}
+                value={getWalletName()}
                 secureTextEntry={false}
                 disabled={true}
             />
@@ -50,11 +51,11 @@ export default function LoginScreen({}) {
                 onPress={async () => {
                     console.log("LoginScreen - Logging in with password", password)
                     //TODO get rid of TEST_WALLET_NAME
-                    const probText = await loadAll(TEST_WALLET_NAME, password)
+                    const probText = await loadAll(getWalletName(), password)
                     setProblemText(probText)
                     if (probText.length <= 0) {
                         console.log("LoginScreen - login with password success")
-                        signIn(TEST_WALLET_NAME);
+                        signIn(getWalletName());
                     } else {
                         console.error("LoginScreen - login with password failed")
                     }

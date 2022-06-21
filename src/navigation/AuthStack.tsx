@@ -25,9 +25,8 @@ import ScanQRCodeScreen from '../screens/ScanQRCodeScreen'
 import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
 import StartChatScreen from '../screens/StartChatScreen';
 import React from "react";
-import {YOU_ALIAS} from '../relationships'
-import { getChatItem, loadSettings, storageStatus,
-    TEST_WALLET_NAME } from '../roots'
+import { getChatItem, loadSettings, storageStatus } from '../roots'
+import * as contact from '../relationships'
 import * as utils from '../utils'
 import * as wallet from '../wallet'
 
@@ -37,7 +36,6 @@ const Tab = createBottomTabNavigator();
 export default function AuthStack() {
     console.log("AuthStack - Determining which auth screen to use.")
     const [walletFound,setWalletFound] = React.useState<boolean>(false)
-    const [walletName,setWalletName] = React.useState<string>(TEST_WALLET_NAME)
 
     const [state, dispatch] = React.useReducer(
       (prevState: any, action: any) => {
@@ -73,14 +71,13 @@ export default function AuthStack() {
           await storageStatus()
           const settingsLoaded = await loadSettings()
           if(settingsLoaded) {
-              //TODO ditch test wallet name
-              const walFound = await wallet.hasWallet(walletName)
+              const walFound = await wallet.hasWallet()
               console.log("AuthStack - wallet found?",walFound)
               setWalletFound(walFound)
               if(walFound) {
                 //TODO ditch test wallet name
                 console.log("AuthStack - since wallet found, getting rootsWallet")
-                userToken = wallet.getWallet(walletName)
+                userToken = wallet.getWallet()
               } else {
                 console.log("AuthStack - since wallet NOT found, auth token not set")
               }
@@ -151,10 +148,9 @@ export default function AuthStack() {
             <Stack.Group>
                 <Stack.Screen name="Relationships"
                       component={RelationshipsScreen}
-                      initialParams={{walletName: walletName}}
                       options={ ({ navigation, route }) => ({
                           headerTitle: (props) => <LogoTitle {...props} title="Contacts"/>,
-                          headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={YOU_ALIAS} scan='contact' settings='Settings'/>,
+                          headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={contact.getUserId()} scan='contact' settings='Settings'/>,
                       })}
                 />
                 <Stack.Screen
@@ -162,7 +158,7 @@ export default function AuthStack() {
                     component={ChatScreen}
                     options={ ({ navigation, route }) => ({
                         headerTitle: (props) => <SimpleTitle {...props} title={getChatItem(utils.getObjectField(route.params,"chatId")).title}/>,
-                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={YOU_ALIAS} scan='credential' settings='Settings'/>,
+                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={contact.getUserId()} scan='credential' settings='Settings'/>,
                     })}
                 />
             </Stack.Group>
@@ -222,10 +218,9 @@ export default function AuthStack() {
             <Stack.Group>
                 <Stack.Screen name="VCs"
                       component={CredentialsScreen}
-                      initialParams={{walletName: walletName}}
                       options={ ({ navigation, route }) => ({
                           headerTitle: (props) => <LogoTitle {...props} title="Credentials"/>,
-                          headerRight: (props) => <IconActions {...props} nav={navigation} person={YOU_ALIAS} scan="credential" settings="Settings"/>,
+                          headerRight: (props) => <IconActions {...props} nav={navigation} person={contact.getUserId()} scan="credential" settings="Settings"/>,
                       })}
                 />
             </Stack.Group>
@@ -239,7 +234,6 @@ export default function AuthStack() {
                 <Stack.Screen name="Home" component={HomeScreen}/>
                 <Stack.Screen name="MyIdentity"
                               component={RelationshipsScreen}
-                              initialParams={{walletName: walletName}}
                 />
                 <Stack.Screen name="Communications" component={CommunicationsScreen}/>
                 <Stack.Screen name="Settings" component={SettingsScreen}/>

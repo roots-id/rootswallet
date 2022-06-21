@@ -3,7 +3,7 @@ import {logger} from '../logging'
 import {contact, contactShareable} from "../models";
 import {getPrismDidDoc} from "../prism";
 import * as store from '../store'
-
+import * as utils from '../utils'
 
 export const butchLogo = require('../assets/butch.png');
 export const darrellLogo = require('../assets/darrell.png');
@@ -19,7 +19,6 @@ export const personLogo = require('../assets/smallBWPerson.png');
 export const rootsLogo = require('../assets/LogoCropped.png');
 export const brandLogo = require('../assets/LogoOnly1024.png');
 
-export const YOU_ALIAS = "You"
 export const ROOTS_BOT = "RootsHelper";
 export const PRISM_BOT = "PrismHelper";
 
@@ -326,6 +325,9 @@ demoRels[BUTCH] = createRel(BUTCH,"Butch Clark",butchLogo,BUTCH);
 demoRels[ESTEBAN] = createRel(ESTEBAN,"Esteban Garcia",estebanLogo,ESTEBAN);
 demoRels[RODO] = createRel(RODO,"Rodolfo Miranda",rodoLogo,RODO);
 
+const USER_NAME_STORAGE_KEY = "primaryUserNameKey"
+let userName: string = "";
+
 export async function addDidDoc(contact: models.contact) {
     logger("roots - getting did doc for contact",contact.did)
     const didDocJson = await getPrismDidDoc(contact.did)
@@ -388,18 +390,8 @@ export async function createRelItem(alias: string, name: string, pic=personLogo,
     }
 }
 
-export async function hasNewRels() {
-    logger("rels - triggering rel refresh",refreshTriggers.length)
-    refreshTriggers.forEach(trigger=>trigger())
-}
-
-export function getRelationships() {
-    logger("rels - getting rel items")
-    const relItemJsonArray = store.getItems(allRelsRegex)
-    logger("rels - got rel items",String(relItemJsonArray))
-    const rels = relItemJsonArray.map(relItemJson => JSON.parse(relItemJson))
-    logger("rels - got # of rels",rels.length)
-    return rels;
+export function generateIdFromName(displayName: string): string {
+    return utils.replaceSpecial(displayName)
 }
 
 export function getContactByAlias(relId: string): models.contact|undefined {
@@ -432,35 +424,6 @@ export function getContactByDid(did: string): models.contact|undefined {
     return;
 }
 
-export function isShareable(rel: models.contact) {
-    if(!rel.id && rel.did) {
-        logger("rels - rel is shareable",rel.did)
-        return true
-    } else {
-        logger("rels - rel NOT shareable",rel.id,rel.did)
-    }
-}
-
-export function getShareableRelByAlias(alias: string): models.contactShareable|undefined {
-    logger("roots - getting shareable rel by alias",alias)
-    const rel = getContactByAlias(alias)
-    if(rel && rel.did) {
-        return asContactShareable(rel)
-    }
-}
-
-export async function updateContact(contact: models.contact): Promise<boolean> {
-    const contactJson = JSON.stringify(contact)
-    logger("rels - updating contact",contactJson)
-    const result = await store.updateItem(models.getStorageKey(contact.id, models.ModelType.CONTACT), contactJson)
-    return result;
-}
-
-export function showRel(navigation: any, rel: contactShareable) {
-    console.log("rel - show rel",rel)
-    navigation.navigate('Relationship Details',{rel: rel})
-}
-
 export function getDemoRel(): models.contactShareable {
     if(currentDemoRel >= (demoRelOrder.length-1)) {
         return getFakeRelItem()
@@ -471,9 +434,81 @@ export function getDemoRel(): models.contactShareable {
 }
 
 function getFakeRelItem(): models.contactShareable {
-   return {
+    return {
         displayPictureUrl: personLogo,
         displayName: "fakePerson"+Date.now(),
         did: "did:roots:fakedid"+Date.now(),
     }
+}
+
+export function getRelationships() {
+    logger("rels - getting rel items")
+    const relItemJsonArray = store.getItems(allRelsRegex)
+    logger("rels - got rel items",String(relItemJsonArray))
+    const rels = relItemJsonArray.map(relItemJson => JSON.parse(relItemJson))
+    logger("rels - got # of rels",rels.length)
+    return rels;
+}
+
+export function getShareableRelByAlias(alias: string): models.contactShareable|undefined {
+    logger("roots - getting shareable rel by alias",alias)
+    const rel = getContactByAlias(alias)
+    if(rel && rel.did) {
+        return asContactShareable(rel)
+    }
+}
+
+export function getUserId(): string {
+    return utils.replaceSpecial(getUserName())
+}
+
+export function getUserName(): string {
+    if(!userName || userName.length <= 0) {
+        const name = store.getItem(USER_NAME_STORAGE_KEY)
+        if(name) {
+            userName = JSON.parse(name)
+        }
+    }
+    if(userName) {
+        return userName
+    } else {
+        throw Error("Wallet name not found in storage")
+    }
+}
+
+export async function hasNewRels() {
+    logger("rels - triggering rel refresh",refreshTriggers.length)
+    refreshTriggers.forEach(trigger=>trigger())
+}
+
+export function isShareable(rel: models.contact) {
+    if(!rel.id && rel.did) {
+        logger("rels - rel is shareable",rel.did)
+        return true
+    } else {
+        logger("rels - rel NOT shareable",rel.id,rel.did)
+    }
+}
+
+export async function setUserName(uName: string): Promise<boolean> {
+    if(uName && uName.length > 0) {
+        const success = await store.updateItem(USER_NAME_STORAGE_KEY,JSON.stringify(uName))
+        if(success) {
+            userName = uName
+            return true
+        }
+    }
+    return false
+}
+
+export function showRel(navigation: any, rel: contactShareable) {
+    console.log("rel - show rel",rel)
+    navigation.navigate('Relationship Details',{rel: rel})
+}
+
+export async function updateContact(contact: models.contact): Promise<boolean> {
+    const contactJson = JSON.stringify(contact)
+    logger("rels - updating contact",contactJson)
+    const result = await store.updateItem(models.getStorageKey(contact.id, models.ModelType.CONTACT), contactJson)
+    return result;
 }

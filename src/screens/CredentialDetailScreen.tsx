@@ -41,7 +41,7 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
     }
 
     async function updateVerification() {
-        const wal = wallet.getWallet(roots.TEST_WALLET_NAME)
+        const wal = wallet.getWallet()
         if (wal) {
             const verify = await verifyCredentialByHash(cred.verifiedCredential.proof.hash, wal)
             if (verify) {
@@ -59,7 +59,7 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
                 setVerified("alert-octagon")
             }
         } else {
-            console.error("CredDeetsScreen - could not get wallet", roots.TEST_WALLET_NAME, wal)
+            console.error("CredDeetsScreen - could not get wallet", wallet.getWalletName(), wal)
             setVerified("alert-octagon")
         }
     }

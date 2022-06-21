@@ -35,9 +35,6 @@ export default function ShowQRCodeScreen({route, navigation}) {
                 setViewOut(<QRCode
                     value={jsonData}
                     size={300}
-                    logoSize={50}
-                    logoBackgroundColor='transparent'
-                    key="{qr}"
                 />)
                 setViewIcon("toggle-switch")
                 break;
