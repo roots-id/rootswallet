@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, SafeAreaView, View, Text} from 'react-native';
 import {Divider} from 'react-native-paper';
+import * as models from '../models'
 import * as wallet from '../wallet'
 import {recursivePrint} from '../utils'
 
@@ -8,14 +9,10 @@ import {styles} from "../styles/styles";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 
 export default function WalletScreen({route, navigation}: CompositeScreenProps<any, any>) {
-    const wal = wallet.getWallet()
+    const [wal,setWal] = useState<models.wallet>()
 
     useEffect(() => {
-        try {
-            console.log("WalletScreen - set wallet", wal)
-        } catch (error: any) {
-            console.error("WalletScreen - Could not get roots wallet", wal, error, error.stack)
-        }
+        setWal(wallet.getWallet())
     }, []);
 
     if (wal) {
@@ -28,7 +25,7 @@ export default function WalletScreen({route, navigation}: CompositeScreenProps<a
                         keyExtractor={(item) => item}
                         ItemSeparatorComponent={() => <Divider/>}
                         renderItem={({item}) => {
-                            const output = recursivePrint((wallet as any)[item])
+                            const output = recursivePrint((wal as any)[item])
                             console.log(item, ": ", output)
                             return <Text style={styles.listItem}>{item + ": " + output}</Text>
                         }

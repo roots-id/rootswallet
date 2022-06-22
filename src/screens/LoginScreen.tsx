@@ -50,7 +50,6 @@ export default function LoginScreen({}) {
                 labelStyle={styles.loginButtonLabel}
                 onPress={async () => {
                     console.log("LoginScreen - Logging in with password", password)
-                    //TODO get rid of TEST_WALLET_NAME
                     const probText = await loadAll(getWalletName(), password)
                     setProblemText(probText)
                     if (probText.length <= 0) {

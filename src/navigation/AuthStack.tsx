@@ -75,7 +75,6 @@ export default function AuthStack() {
               console.log("AuthStack - wallet found?",walFound)
               setWalletFound(walFound)
               if(walFound) {
-                //TODO ditch test wallet name
                 console.log("AuthStack - since wallet found, getting rootsWallet")
                 userToken = wallet.getWallet()
               } else {

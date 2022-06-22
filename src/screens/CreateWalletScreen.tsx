@@ -45,27 +45,27 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
 
     function checkErrors() {
         const passNumeric = (/\d/.test(password))
-        setPasswordNumeric(<Text style={displayProblem(!passNumeric)}>Password does not contain
+        setPasswordNumeric(<Text style={displayProblem(!passNumeric)}>Password must contain
             numbers</Text>)
         const prob = problemText && problemText.length > 0
         console.error("CreateWalletScreen - problem detected", problemText)
         setProblem(<Text style={displayProblem(prob)}>{problem}</Text>)
         const passAlpha = (/[a-zA-Z]/.test(password))
-        console.log("password does not contain letters")
-        setPasswordAlpha(<Text style={displayProblem(!passAlpha)}>Password does not contain letters</Text>)
+        console.log("password must contain letters")
+        setPasswordAlpha(<Text style={displayProblem(!passAlpha)}>Password must contain letters</Text>)
         const passLength = password.length >= 8
         console.log("password not long enough", passLength)
-        setPasswordLongEnough(<Text style={displayProblem(!passLength)}>Password is not at least 8
+        setPasswordLongEnough(<Text style={displayProblem(!passLength)}>Password must be at least 8
             characters</Text>)
         const passMatch = (password === confirmPassword)
-        console.log("passwords do not match", password, confirmPassword);
-        setPasswordsMatch(<Text style={displayProblem(!passMatch)}>Passwords do not match</Text>)
+        console.log("passwords must match", password, confirmPassword);
+        setPasswordsMatch(<Text style={displayProblem(!passMatch)}>Passwords must match</Text>)
         const userValid = (userName && userName.length > 0)
-        console.log("user name is not set", userName);
-        setUserNameValid(<Text style={displayProblem(!userValid)}>User name not set</Text>)
+        console.log("user name must be set", userName);
+        setUserNameValid(<Text style={displayProblem(!userValid)}>User name must be set</Text>)
         const walletValid = (walletName && walletName.length > 0)
-        console.log("wallet name is not set", walletName);
-        setWalletNameValid(<Text style={displayProblem(!walletValid)}>Wallet name not set</Text>)
+        console.log("wallet name must be set", walletName);
+        setWalletNameValid(<Text style={displayProblem(!walletValid)}>Wallet name must be set</Text>)
         if (walletValid && userValid && passNumeric && passAlpha && passLength && passMatch) {
             setCreateWalletButton(<FormButton
                 disabled={!(passwordsMatch && passwordAlpha && passwordNumeric && passwordLongEnough)}

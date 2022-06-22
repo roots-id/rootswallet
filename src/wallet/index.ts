@@ -4,7 +4,7 @@ import * as store from "../store";
 import * as models from "../models";
 
 const WALLET_NAME_STORAGE_KEY = "primaryRootsWalletNameKey"
-let walletName: string = "Default Wallet Name";
+let walletName: string = "";
 
 export async function createWallet(walName: string, mnemonic: string, walPass: string): Promise<boolean> {
     const nameSet = await setWalletName(walName)
@@ -47,6 +47,7 @@ export function getWalletName(): string {
         }
     }
     if(walletName) {
+        console.log("wallet - Got wallet name",walletName)
         return walletName
     } else {
         throw Error("Wallet name not found in storage")
@@ -83,9 +84,11 @@ export async function setWalletName(walName: string): Promise<boolean> {
         const success = await store.updateItem(WALLET_NAME_STORAGE_KEY,JSON.stringify(walName))
         if(success) {
             walletName = walName
+            console.log("wallet - Set wallet name",walletName)
             return true
         }
     }
+    console.error("wallet - Could not set wallet name",walName)
     return false
 }
 
