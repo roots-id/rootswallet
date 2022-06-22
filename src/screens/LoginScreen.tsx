@@ -50,13 +50,16 @@ export default function LoginScreen({}) {
                 labelStyle={styles.loginButtonLabel}
                 onPress={async () => {
                     console.log("LoginScreen - Logging in with password", password)
-                    const probText = await loadAll(getWalletName(), password)
-                    setProblemText(probText)
-                    if (probText.length <= 0) {
-                        console.log("LoginScreen - login with password success")
-                        signIn(getWalletName());
-                    } else {
-                        console.error("LoginScreen - login with password failed")
+                    const walName = getWalletName();
+                    if(walName) {
+                        const probText = await loadAll(walName, password)
+                        setProblemText(probText)
+                        if (probText.length <= 0) {
+                            console.log("LoginScreen - login with password success")
+                            signIn(getWalletName());
+                        } else {
+                            console.error("LoginScreen - login with password failed")
+                        }
                     }
                 }}
             />

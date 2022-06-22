@@ -4,7 +4,6 @@ import * as store from "../store";
 import * as models from "../models";
 
 const WALLET_NAME_STORAGE_KEY = "primaryRootsWalletNameKey"
-let walletName: string = "";
 
 export async function createWallet(walName: string, mnemonic: string, walPass: string): Promise<boolean> {
     const nameSet = await setWalletName(walName)
@@ -35,22 +34,16 @@ export function getWallet(walName = getWalletName()): models.wallet|undefined{
     }
 }
 
-export function getWalletJson(walName = getWalletName()) {
-    return store.getWallet(walName)
+export function getWalletJson(walName = getWalletName()): string|undefined {
+    if(walName) return store.getWallet(walName)
 }
 
-export function getWalletName(): string {
-    if(!walletName || walletName.length <= 0) {
-        const name = store.getItem(WALLET_NAME_STORAGE_KEY)
-        if(name) {
-            walletName = JSON.parse(name)
-        }
-    }
-    if(walletName) {
-        console.log("wallet - Got wallet name",walletName)
-        return walletName
+export function getWalletName(): string | undefined {
+    let walName = store.getItem(WALLET_NAME_STORAGE_KEY)
+    if(walName) {
+        return JSON.parse(walName)
     } else {
-        throw Error("Wallet name not found in storage")
+        return;
     }
 }
 
@@ -68,13 +61,29 @@ export async function loadWallet(walName = getWalletName(), walPass: string): Pr
     }
 }
 
+export async function loadWalletName(): Promise<boolean> {
+    logger("wallet - loading wallet name");
+    const restored = await store.restoreItems([WALLET_NAME_STORAGE_KEY]);
+    //retrieving wallet pulls the object into memory here
+    const rootsWalName = getWalletName()
+    if (restored && rootsWalName) {
+        logger("wallet - loaded wallet name",rootsWalName);
+        return true
+    } else {
+        console.error("wallet - could not load wallet name")
+        return false
+    }
+}
+
 export async function hasWallet(walName = getWalletName()) {
+    if (!walName) return false;
+
     const found = await store.hasWallet(walName)
     if (found) {
-        logger("roots - Has wallet", store.getWallet(walName));
+        logger("wallet - Has wallet", store.getWallet(walName));
         return true;
     } else {
-        logger("roots - Does not have wallet", walName);
+        logger("wallet - Does not have wallet", walName);
         return false;
     }
 }
@@ -83,9 +92,10 @@ export async function setWalletName(walName: string): Promise<boolean> {
     if(walName && walName.length > 0) {
         const success = await store.updateItem(WALLET_NAME_STORAGE_KEY,JSON.stringify(walName))
         if(success) {
-            walletName = walName
-            console.log("wallet - Set wallet name",walletName)
+            console.log("wallet - Set wallet name",getWalletName())
             return true
+        } else {
+            console.error("wallet - Storing new wallet name failed",walName)
         }
     }
     console.error("wallet - Could not set wallet name",walName)
@@ -93,11 +103,13 @@ export async function setWalletName(walName: string): Promise<boolean> {
 }
 
 export async function updateWallet(walName = getWalletName(), walPass: string, walJson: string) {
+    if(!walName) return false;
+
     if (await store.saveWallet(walName, walPass, walJson)) {
-        console.log("roots - updated roots wallet", walJson);
+        console.log("wallet - updated roots wallet", walJson);
         return true;
     } else {
-        console.error("roots - failed to update roots wallet", walJson);
+        console.error("wallet - failed to update roots wallet", walJson);
         return false;
     }
 }

@@ -110,6 +110,7 @@ export async function loadAll(walName: string, walPass: string): Promise<string>
     try {
         const wal = await wallet.loadWallet(walName, walPass);
         if (wal) {
+            const user = await contact.loadUserName();
             const chats = await loadItems(allChatsRegex)
             const rels = await loadItems(contact.allRelsRegex);
             const messages = await loadItems(allMsgsRegex);

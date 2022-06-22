@@ -4,6 +4,7 @@ import {contact, contactShareable} from "../models";
 import {getPrismDidDoc} from "../prism";
 import * as store from '../store'
 import * as utils from '../utils'
+import {getWalletName} from "../wallet";
 
 export const butchLogo = require('../assets/butch.png');
 export const darrellLogo = require('../assets/darrell.png');
@@ -472,7 +473,7 @@ export function getUserName(): string {
     if(userName) {
         return userName
     } else {
-        throw Error("Wallet name not found in storage")
+        throw Error("User name not found in storage")
     }
 }
 
@@ -487,6 +488,20 @@ export function isShareable(rel: models.contact) {
         return true
     } else {
         logger("rels - rel NOT shareable",rel.id,rel.did)
+    }
+}
+
+export async function loadUserName(): Promise<boolean> {
+    logger("rels - loading user name");
+    const restored = await store.restoreItems([USER_NAME_STORAGE_KEY]);
+    //retrieving name pulls the object into memory here
+    const uName = getUserName()
+    if (restored && uName) {
+        logger("rels - loaded user name",uName);
+        return true
+    } else {
+        console.error("rels - could not load wallet name")
+        return false
     }
 }
 

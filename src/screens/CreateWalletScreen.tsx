@@ -68,7 +68,7 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
         setWalletNameValid(<Text style={displayProblem(!walletValid)}>Wallet name must be set</Text>)
         if (walletValid && userValid && passNumeric && passAlpha && passLength && passMatch) {
             setCreateWalletButton(<FormButton
-                disabled={!(passwordsMatch && passwordAlpha && passwordNumeric && passwordLongEnough)}
+                disabled={!(walletValid && userValid && passwordsMatch && passwordAlpha && passwordNumeric && passwordLongEnough)}
                 title="Create Wallet"
                 modeValue="contained"
                 labelStyle={styles.loginButtonLabel}
@@ -78,16 +78,18 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
                         const created = await createWallet(walletName, mnemonic, password);
                         if (created) {
                             console.log("CreateWalletScreen - Wallet created")
-                            const wal = getWallet(walletName)
-                            if (wal) {
-                                console.log("CreateWalletScreen - Got wallet, setting to initialized")
+                            const walName = getWallet(walletName)
+                            if (walName) {
+                                console.log("CreateWalletScreen - Got wallet name, setting to initialized")
                                 setInitialized(true)
                                 setProblemText("")
+                                console.log("CreateWalletScreen - signing in")
+                                //intentionally not awaiting
+                                init(userName).catch(console.error)
+                                signIn(null, true);
+                            } else {
+                                console.error("Created wallet but can't find name",walName)
                             }
-                            console.log("CreateWalletScreen - signing in")
-                            //intentionally not awaiting
-                            init(userName).catch(console.error)
-                            signIn(null, true);
                         } else {
                             console.error("CreateWalletScreen - Creating wallet failed");
                             setProblemText("Wallet creation failed")
