@@ -65,7 +65,7 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
                         selectedValue={host}
                         onValueChange={(itemValue) => setHost(itemValue)}>
                         <Picker.Item label="Local Test Node" value="ppp-node-test.atalaprism.io"/>
-                        <Picker.Item label="Prism Test Net Node" value="ppp.atalaprism.io"/>
+                        <Picker.Item label="Prism Test Node" value="ppp.atalaprism.io"/>
                     </Picker>
                 </View>
                 <View style={{flexDirection: 'row',}}>

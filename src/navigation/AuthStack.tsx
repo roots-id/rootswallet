@@ -72,7 +72,6 @@ export default function AuthStack() {
                 await storageStatus()
                 const settingsLoaded = await loadSettings()
                 if (settingsLoaded) {
-                    await new Promise(r => setTimeout(r, 5000));
                     const walNameLoaded = await loadWalletName()
                     setWalletFound(walNameLoaded)
                     console.log("AuthStack - wallet found?", walletFound)
