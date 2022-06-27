@@ -7,24 +7,24 @@ const HomeScreen = (props) => {
     return (
         <View>
             <Button
-                title={"MyIdentity"}
-                onPress={() => props.navigation.navigate("MyIdentity")}
-            />
-            <Button
-                title={"CredentialsScreen"}
-                onPress={() => props.navigation.navigate("VCs")}
+                title={"Clear Storage"}
+                onPress={() => store.clearStorage()}
             />
             <Button
                 title={"CommunicationsScreen"}
                 onPress={() => props.navigation.navigate("Communications")}
             />
             <Button
-                title={"Settings"}
-                onPress={() => props.navigation.navigate("Settings")}
+                title={"CredentialsScreen"}
+                onPress={() => props.navigation.navigate("VCs")}
             />
             <Button
-                title={"Clear Storage"}
-                onPress={() => store.clearStorage()}
+                title={"MyIdentity"}
+                onPress={() => props.navigation.navigate("MyIdentity")}
+            />
+            <Button
+                title={"Settings"}
+                onPress={() => props.navigation.navigate("Settings")}
             />
             <Button
                 title={"Show Wallet"}

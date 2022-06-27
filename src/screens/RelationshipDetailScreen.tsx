@@ -5,11 +5,9 @@ import {
     Text,
     Pressable,
     ScrollView,
-    StyleSheet,
     View,
 } from 'react-native';
-import {useCardAnimation} from '@react-navigation/stack';
-import {Divider, IconButton } from 'react-native-paper';
+import {Divider, IconButton} from 'react-native-paper';
 import {styles} from "../styles/styles";
 
 import * as models from '../models'
@@ -17,7 +15,6 @@ import {showQR} from '../qrcode'
 import {
     addDidDoc,
     asContactShareable,
-    isShareable
 } from '../relationships'
 import {recursivePrint} from '../utils'
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
@@ -25,7 +22,6 @@ import {CompositeScreenProps} from "@react-navigation/core/src/types";
 export default function RelationshipDetailScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("RelDetailScreen - route params are", JSON.stringify(route.params))
     const [rel, setRel] = useState<models.contact>(route.params.rel);
-    const {current} = useCardAnimation();
 
     useEffect(() => {
         console.log("RelDetailScreen - rel changed", rel)
@@ -81,7 +77,7 @@ export default function RelationshipDetailScreen({route, navigation}: CompositeS
                         onPress={() => navigation.goBack()}
                     />
                 </View>
-                <Image source={rel?.displayPictureUrl}
+                <Image source={rel.displayPictureUrl}
                        style={{
                            width: '30%',
                            height: '30%',

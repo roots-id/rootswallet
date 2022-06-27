@@ -1,56 +1,68 @@
-import React, { useState } from 'react';
-import { Text, View } from 'react-native';
-import { Title } from 'react-native-paper';
+import React, {useEffect, useState} from 'react';
+import {Text, View} from 'react-native';
+import {Title} from 'react-native-paper';
 
 import FormButton from '../components/FormButton';
 import FormInput from '../components/FormInput';
 
 import AuthContext from '../context/AuthenticationContext';
 
-import { loadAll, TEST_WALLET_NAME } from '../roots'
-import { displayProblem, styles } from "../styles/styles";
+import {loadAll} from '../roots'
+import {displayProblem, styles} from "../styles/styles";
+import {getWalletName} from "../wallet";
 
-export default function LoginScreen({ }) {
-  const [password, setPassword] = useState<string>('');
-  const [problemDisabled, setProblemDisabled] = useState<boolean>(true)
-  console.log("LoginScreen - Assuming we have a wallet, trying to login in with password")
+export default function LoginScreen({}) {
+    const [password, setPassword] = useState<string>('');
+    const [problemText, setProblemText] = useState<string>("")
+    const [error, setError] = useState<JSX.Element>(<Text/>)
 
-  const { signIn } = React.useContext(AuthContext);
+    console.log("LoginScreen - Assuming we have a wallet, trying to login in with password")
 
-  return (
-      <View style={styles.modalContainer}>
-        <Title style={styles.titleText}>Login:</Title>
-        <FormInput
-            labelName="Wallet Name"
-            value={TEST_WALLET_NAME}
-            secureTextEntry={false}
-            disabled={true}
-        />
-        <FormInput
-            labelName="Wallet Password"
-            value={password}
-            secureTextEntry={true}
-            onChangeText={(userPassword: string) => setPassword(userPassword)}
-        />
-        <Text disable={problemDisabled} style={displayProblem(problemDisabled)}>Login Failed</Text>
-        <FormButton
-            title="Login"
-            modeValue="contained"
-            labelStyle={styles.loginButtonLabel}
-            onPress={async () => {
-              console.log("LoginScreen - Logging in with password",password)
-              //TODO get rid of TEST_WALLET_NAME
-              const wal = await loadAll(TEST_WALLET_NAME,password)
-              if(wal) {
-                console.log("LoginScreen - login with password success")
-                setProblemDisabled(true)
-                signIn(wal);
-              } else {
-                console.log("LoginScreen - login with password failed")
-                setProblemDisabled(false)
-              }
-            }}
-        />
-      </View>
-  );
+    const {signIn} = React.useContext(AuthContext);
+
+    useEffect(() => {
+        if (problemText.length > 0) {
+            setError(<Text style={displayProblem(true)}>{problemText}</Text>)
+        } else {
+            setError(<Text/>)
+        }
+    }, [problemText])
+
+    return (
+        <View style={styles.centeredContainer}>
+            <Title style={styles.titleText}>Login:</Title>
+            <FormInput
+                labelName="Wallet Name"
+                value={getWalletName()}
+                secureTextEntry={false}
+                disabled={true}
+            />
+            <FormInput
+                labelName="Wallet Password"
+                value={password}
+                secureTextEntry={true}
+                onChangeText={(userPassword: string) => setPassword(userPassword)}
+            />
+            {error}
+            <FormButton
+                title="Login"
+                modeValue="contained"
+                labelStyle={styles.loginButtonLabel}
+                onPress={async () => {
+                    console.log("LoginScreen - Logging in with password", password)
+                    const walName = getWalletName();
+                    if(walName) {
+                        const probText = await loadAll(walName, password)
+                        setProblemText(probText)
+                        if (probText.length <= 0) {
+                            console.log("LoginScreen - login with password success")
+                            signIn(getWalletName());
+                        } else {
+                            console.error("LoginScreen - login with password failed")
+                        }
+                    }
+                }}
+            />
+        </View>
+    );
 }
