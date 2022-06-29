@@ -1,0 +1,10 @@
+#rootswallet
+rm -Rf node_modules;yarn cache clean;yarn install
+yarn android
+npx react-native run-android --variant=release
+adb logcat
+
+# android
+./gradlew clean
+## look in app/build/outputs/apk/release
+./gradlew assembleRelease

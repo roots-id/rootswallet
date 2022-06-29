@@ -8,7 +8,7 @@ import LogoTitle from '../components/LogoTitle';
 import CreateRelScreen from '../screens/CreateRelScreen';
 import CredentialsScreen from '../screens/CredentialsScreen';
 import CredentialDetailScreen from "../screens/CredentialDetailScreen";
-import HomeScreen from "../screens/HomeScreen";
+import DeveloperScreen from "../screens/DeveloperScreen";
 import RelationshipsScreen from "../screens/RelationshipsScreen";
 import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
 import SettingsScreen from "../screens/SettingsScreen";
@@ -231,11 +231,11 @@ export default function AuthStack() {
             </Stack.Navigator>
         )
     }
-    const IntegrationStack = () => {
+    const DeveloperStack = () => {
         return (
             <Stack.Navigator>
                 <Stack.Group>
-                    <Stack.Screen name="Home" component={HomeScreen}/>
+                    <Stack.Screen name="Developer" component={DeveloperScreen}/>
                     <Stack.Screen name="MyIdentity"
                                   component={RelationshipsScreen}
                     />
@@ -274,7 +274,7 @@ export default function AuthStack() {
                                 <Stack.Screen name="Create Wallet" component={CreateWalletScreen}/>
                                 <Stack.Group screenOptions={{presentation: 'transparentModal'}}>
                                     <Stack.Screen name="Settings" component={SettingsScreen}/>
-                                    <Stack.Screen name="Integration" component={IntegrationStack}/>
+                                    <Stack.Screen name="Developer" component={DeveloperStack}/>
                                 </Stack.Group>
                             </>
                         )}
@@ -292,7 +292,7 @@ export default function AuthStack() {
                             <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen}/>
                             <Stack.Screen name="Settings" component={SettingsScreen}/>
                             <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen}/>
-                            <Stack.Screen name="Integration" component={IntegrationStack}/>
+                            <Stack.Screen name="Developer" component={DeveloperStack}/>
                         </Stack.Group>
                     </>
                 )}

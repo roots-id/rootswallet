@@ -32,12 +32,6 @@ export default function LoginScreen({}) {
         <View style={styles.centeredContainer}>
             <Title style={styles.titleText}>Login:</Title>
             <FormInput
-                labelName="Wallet Name"
-                value={getWalletName()}
-                secureTextEntry={false}
-                disabled={true}
-            />
-            <FormInput
                 labelName="Wallet Password"
                 value={password}
                 secureTextEntry={true}

@@ -3,22 +3,16 @@ import {logger} from "../logging";
 import * as store from "../store";
 import * as models from "../models";
 
-const WALLET_NAME_STORAGE_KEY = "primaryRootsWalletNameKey"
+const WALLET_NAME_STORAGE_KEY = "primaryRootsWalletStorageNameKey"
 
-export async function createWallet(walName: string, mnemonic: string, walPass: string): Promise<boolean> {
+export async function createWallet(walName: string, mnemonic: string, walPass: string): Promise<string> {
     const nameSet = await setWalletName(walName)
     if(nameSet) {
         const prismWal = PrismModule.newWal(walName, mnemonic, walPass)
         logger("wallet - created new wallet, updating stored wallet")
-        const result = await updateWallet(walName, walPass, prismWal)
-        if (result) {
-            logger('Wallet created', getWalletJson(walName))
-            return result;
-        } else {
-            logger('Could not create wallet', walName, walPass)
-        }
+        return await updateWallet(walName, walPass, prismWal)
     }
-    return false
+    return "Cannot create wallet, could not set name " + walName
 }
 
 export function getWallet(walName = getWalletName()): models.wallet|undefined{
@@ -102,14 +96,7 @@ export async function setWalletName(walName: string): Promise<boolean> {
     return false
 }
 
-export async function updateWallet(walName = getWalletName(), walPass: string, walJson: string) {
-    if(!walName) return false;
-
-    if (await store.saveWallet(walName, walPass, walJson)) {
-        console.log("wallet - updated roots wallet", walJson);
-        return true;
-    } else {
-        console.error("wallet - failed to update roots wallet", walJson);
-        return false;
-    }
+export async function updateWallet(
+    walName = getWalletName(), walPass: string, walJson: string): Promise<string>{
+    return (walName) ? await store.saveWallet(walName, walPass, walJson) : "Could not update wallet, walName undefined";
 }

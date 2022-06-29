@@ -2,7 +2,7 @@ import React from 'react';
 import {Button, View} from 'react-native';
 import * as store from '../store'
 
-const HomeScreen = (props) => {
+const DeveloperScreen = (props) => {
     console.log(props.navigation)
     return (
         <View>
@@ -34,4 +34,4 @@ const HomeScreen = (props) => {
     )
 };
 
-export default HomeScreen;
+export default DeveloperScreen;
