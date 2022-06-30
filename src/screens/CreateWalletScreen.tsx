@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Linking, Text, View} from 'react-native';
+import {Button, Image, Linking, Text, View} from 'react-native';
 import {Title} from 'react-native-paper';
 import AuthContext from '../context/AuthenticationContext';
 import FormButton from '../components/FormButton';
@@ -11,6 +11,7 @@ import {createWallet, getWallet} from '../wallet'
 import {displayProblem, styles} from "../styles/styles";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {WALLET_LOGIN_SUCCESS} from "../store";
+import {brandLogo} from "../relationships";
 
 export default function CreateWalletScreen({route, navigation}: CompositeScreenProps<any, any>) {
     const [initialized, setInitialized] = useState<boolean>(false);
@@ -144,6 +145,10 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
 
     return (
         <View style={styles.centeredContainer}>
+            <Image
+                style={{ width: 150, height: 150 }}
+                source={brandLogo}
+            />
             <Title style={styles.titleText}>Create wallet password:</Title>
             <FormInput
                 labelName="User Name"

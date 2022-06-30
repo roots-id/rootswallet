@@ -15,18 +15,6 @@ const DeveloperScreen = (props) => {
                 onPress={() => props.navigation.navigate("Communications")}
             />
             <Button
-                title={"CredentialsScreen"}
-                onPress={() => props.navigation.navigate("VCs")}
-            />
-            <Button
-                title={"MyIdentity"}
-                onPress={() => props.navigation.navigate("MyIdentity")}
-            />
-            <Button
-                title={"Settings"}
-                onPress={() => props.navigation.navigate("Settings")}
-            />
-            <Button
                 title={"Show Wallet"}
                 onPress={() => props.navigation.navigate("Wallet")}
             />

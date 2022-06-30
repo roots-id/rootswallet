@@ -236,9 +236,6 @@ export default function AuthStack() {
             <Stack.Navigator>
                 <Stack.Group>
                     <Stack.Screen name="Developer" component={DeveloperScreen}/>
-                    <Stack.Screen name="MyIdentity"
-                                  component={RelationshipsScreen}
-                    />
                     <Stack.Screen name="Communications" component={CommunicationsScreen}/>
                     <Stack.Screen name="Settings" component={SettingsScreen}/>
                     <Stack.Screen name="Wallet" component={WalletScreen}/>
