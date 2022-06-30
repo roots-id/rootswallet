@@ -27,7 +27,6 @@ import CreateWalletScreen from '../screens/CreateWalletScreen';
 import ChatListScreen from '../screens/ChatListScreen';
 import LoadingScreen from '../screens/LoadingScreen';
 import LoginScreen from '../screens/LoginScreen';
-import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
 import StartChatScreen from '../screens/StartChatScreen';
 
 import { getChatItem, getRootsWallet, storageStatus, hasWallet, TEST_WALLET_NAME } from '../roots'
@@ -246,10 +245,9 @@ export default function AuthStack() {
                 <Stack.Group>
                     <Stack.Screen name="relationshipStack" component={Main}/>
                 </Stack.Group>
-                <Stack.Group screenOptions={{ presentation: 'transparentModal' }}>
+                <Stack.Group screenOptions={{ presentation: 'modal' }}>
                     <Stack.Screen name="Help" component={HelpScreen}/>
                     <Stack.Screen name="Create Secure Chat" component={StartChatScreen} />
-                    <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen} />
                 </Stack.Group>
               </>
             )}

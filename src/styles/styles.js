@@ -69,11 +69,6 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 30,
     },
-  titleText: {
-    fontSize: 24,
-    marginBottom: 10,
-    color: '#eeeeee',
-  },
     listItem: {
         fontSize: 18,
         color: '#eeeeee',
@@ -97,18 +92,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold"
     },
-    modalContainer: {
-        backgroundColor: '#251520',
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-    loginButtonLabel: {
-      fontSize: 22,
-    },
-    navButtonText: {
-      fontSize: 16,
-    },
+
 })
 
 export default styles

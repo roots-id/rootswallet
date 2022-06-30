@@ -1,6 +1,5 @@
 import { logger } from '../logging';
 
-//these types must be unique enough to use in regex without conflict
 export const MODEL_TYPE_CHAT = "rootsChatType"
 export const MODEL_TYPE_MESSAGE = "rootsMsgType"
 export const MODEL_TYPE_CREDENTIAL = "rootsCredentialType"
@@ -17,7 +16,7 @@ export function createChat(chatAlias: string, titlePrefix?: string) {
     return chat;
 }
 
-export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,userId: string,system?: boolean=false,cred?: Object=undefined) {
+export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,userId: string,system?: boolean=false) {
     const msg = {
         id: idText,
         body: bodyText,
@@ -25,7 +24,6 @@ export function createMessage(idText: string,bodyText: string,statusText: string
         createdTime: timeInMillis,
         user: userId,
         system: system,
-        cred: cred,
     }
     logger("models - created msg model w/keys",Object.keys(msg))
     return msg;
