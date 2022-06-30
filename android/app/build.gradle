@@ -183,10 +183,7 @@ android {
         }
     }
     packagingOptions {
-        pickFirst "google/protobuf/*.proto"
-        exclude 'META-INF/LICENSE.md'
-        exclude 'google/protobuf/compiler/plugin.proto'
-        exclude 'META-INF/LICENSE-notice.md'
+            pickFirst "google/protobuf/*.proto"
     }
 }
 
@@ -238,16 +235,8 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-    implementation("com.rootsid.wal:wal-library:1.0.2-LANCE") {
-        exclude group: 'io.github.vincenzopalazzo', module: 'material-ui-swing'
-        exclude group: 'javax.annotation', module: 'jsr250-api'
-        exclude group: 'org.didcommx', module: 'didcomm'
-        exclude group: 'org.didcommx', module: 'peerdid'
-        exclude group: 'com.soywiz.korlibs.krypto', module: 'krypto-jvm'
-        exclude group: 'com.google.protobuf', module: 'protobuf-javalite'
-        exclude group: 'io.ipfs.multibase.Base16'
-    }
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    // Atala Prism SDK
+    implementation("io.iohk.atala:prism-api:1.2.0")
 
     // SICPA PEER-DID-JVM
     implementation("org.didcommx:peerdid:0.2.0")

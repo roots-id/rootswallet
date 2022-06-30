@@ -6,7 +6,7 @@ buildscript {
         minSdkVersion = 26
         compileSdkVersion = 30
         targetSdkVersion = 30
-        kotlin_version = '1.6.20'
+        kotlin_version = '1.6.10'
     }
     repositories {
         google()
@@ -15,14 +15,11 @@ buildscript {
     }
     dependencies {
         classpath("com.android.tools.build:gradle:4.1.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
-}
-
-plugins {
-    id "org.jetbrains.kotlin.jvm" version "$kotlin_version"
 }
 
 allprojects {
@@ -47,13 +44,6 @@ allprojects {
                username = "atala-dev"
                password = System.getenv("PRISM_SDK_PASSWORD")
            }
-        }
-        maven {
-            url = uri("https://maven.pkg.github.com/roots-id/wal-library")
-            credentials {
-                username = System.getenv("GITHUB_USER")
-                password = System.getenv("GITHUB_TOKEN")
-            }
-        }
+       }
     }
 }

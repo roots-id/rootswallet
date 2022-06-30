@@ -13,19 +13,19 @@ const HomeScreen = (props) => {
             />
             <Button
                 title={"CredentialsScreen"}
-                onPress={() => props.navigation.navigate("Credentials")}
+                onPress={() => props.navigation.navigate("CredentialsScreen")}
             />
             <Button
                 title={"CommunicationsScreen"}
-                onPress={() => props.navigation.navigate("Communications")}
+                onPress={() => props.navigation.navigate("CommunicationsScreen")}
             />
             <Button
                 title={"HelpScreen"}
-                onPress={() => props.navigation.navigate("Help")}
+                onPress={() => props.navigation.navigate("HelpScreen")}
             />
             <Button
                 title={"Settings"}
-                onPress={() => props.navigation.navigate("Settings")}
+                onPress={() => props.navigation.navigate("SettingsScreen")}
             />
 
 
