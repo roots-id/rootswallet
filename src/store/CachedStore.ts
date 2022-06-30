@@ -3,11 +3,6 @@ import { logger, warn } from '../logging'
 let cachedItems: {[alias: string]: string } = {};
 let cachedWallets: { [walName: string]: string } = {};
 
-export function clear() {
-    cachedItems = {};
-    cachedWallets = {};
-}
-
 export function getItem(alias: string) {
     const itemJson = cachedItems[alias]
     logger("CachedStore - get",alias,"in cache is",itemJson)
@@ -56,17 +51,6 @@ export function hasWallet(walName: string) {
         logger("CachedStore - no wallet found")
     }
     return hasWal;
-}
-
-export function removeItem(key: string) {
-    logger("CacheStore - removing key",key)
-    try {
-        delete cachedItems[key]
-        delete cachedWallets[key]
-        logger("CacheStore - removed",key)
-    } catch(e) {
-        console.error("Failed to remove value",key,error,error.stack)
-    }
 }
 
 export function status() {

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { NativeModules, StyleSheet, Text, View } from 'react-native';
 import { IconButton, Title } from 'react-native-paper';
 import { v4 as uuidv4 } from 'uuid';
-import * as rel from '../relationships'
-import { createChat, getDid } from '../roots';
+
+import { createChat } from '../roots';
 import FormButton from '../components/FormButton';
 import FormInput from '../components/FormInput';
 
@@ -11,12 +11,11 @@ const { PrismModule } = NativeModules;
 
 export default function CreateChatScreen({ navigation }) {
   const [chatName, setChatName] = useState('');
-  const [theirDid, setTheirDid] = useState();
   const [problemDisabled, setProblemDisabled] = useState(true)
 
   async function handleButtonPress() {
-    if (chatName?.length > 0 && theirDid?.length > 0) {
-      const chat = await createChat(chatName,getDid(rel.YOU_ALIAS),theirDid)
+    if (chatName.length > 0) {
+      const chat = await createChat(chatName,"User Created - ")
       if(chat) {
           console.log("Created chat",chat)
           setProblemDisabled(true)

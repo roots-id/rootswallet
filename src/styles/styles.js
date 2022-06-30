@@ -44,10 +44,6 @@ const styles = StyleSheet.create({
         alignSelf: 'center'
 
     },
-    detailTitle: {
-        fontSize: 20,
-        color: '#111111',
-    },
     header: {
             color: '#999999',
         fontSize: 20,
@@ -125,9 +121,6 @@ const styles = StyleSheet.create({
     },
   none: {
       display: 'none'
-  },
-  prism: {
-    color: 'red',
   },
   problem: {
       color: 'red',

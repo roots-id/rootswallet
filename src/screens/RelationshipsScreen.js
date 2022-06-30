@@ -3,7 +3,6 @@ import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity}
 import { Divider, List } from 'react-native-paper';
 import {getRelationships} from '../relationships'
 import Relationship from '../models/relationship'
-import { getChatItem } from '../roots'
 import styles from "../styles/styles";
 
 const RelationshipsScreen = ({route,navigation}) => {
@@ -13,14 +12,25 @@ const RelationshipsScreen = ({route,navigation}) => {
 
     const relationships = getRelationships(walletName).filter(rel => rel.displayName !== 'You')
 
-    const showRel = (rel) => {
-        console.log(`> RelationshipsScr.pressHandler( ${rel})`)
+    const goToRel = (user) => {
+        console.log(`> RelationshipsScr.pressHandler( ${user})`)
         console.log(`executing navigation.navigate() now...`)
         navigation.navigate(
             'Relationship Details',
             {
-                rel: rel
+                user: user
             }
+        )
+    }
+
+    const touchable = (key) => {
+        // return < Text > {key} < /Text>
+        return (
+            <TouchableOpacity
+                onPress={() => onPress(key)}
+            >
+                <Text style={styles.listItem}>{key}</Text>
+            </TouchableOpacity>
         )
     }
 
@@ -35,16 +45,14 @@ const RelationshipsScreen = ({route,navigation}) => {
                     <React.Fragment>
                         <View style={{flex: 1,flexDirection:'row',}}>
                             <SafeAreaView>
-                            <TouchableOpacity onPress={() => showRel(item)}>
-                                <Image source={item.displayPictureUrl}
-                                    style={{
-                                      width:65,
-                                      height:75,
-                                      resizeMode:'contain',
-                                      margin:8
-                                    }}
-                                />
-                            </TouchableOpacity>
+                            <Image source={item.displayPictureUrl}
+                                style={{
+                                  width:65,
+                                  height:75,
+                                  resizeMode:'contain',
+                                  margin:8
+                                }}
+                            />
                             </SafeAreaView>
                             <SafeAreaView style={styles.container}>
                             <List.Item
@@ -53,7 +61,7 @@ const RelationshipsScreen = ({route,navigation}) => {
                               titleStyle={styles.listTitle}
                               descriptionStyle={styles.listDescription}
                               descriptionNumberOfLines={1}
-                              onPress={() => navigation.navigate('Chat', { chatId: getChatItem(item.id).id })}
+                              onPress={() => goToRel(item)}
                             />
                             </SafeAreaView>
                         </View>
