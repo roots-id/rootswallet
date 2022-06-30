@@ -46,7 +46,7 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
                         icon="chemical-weapon"
                         size={36}
                         color="#e69138"
-                        onPress={() => navigation.navigate("Developer")}
+                        onPress={() => navigation.navigate("Integration")}
                     />
                     <IconButton
                         icon="close-circle"

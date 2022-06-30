@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Image, Text, View} from 'react-native';
+import {Text, View} from 'react-native';
 import {Title} from 'react-native-paper';
 
 import FormButton from '../components/FormButton';
@@ -10,7 +10,6 @@ import AuthContext from '../context/AuthenticationContext';
 import {loadAll} from '../roots'
 import {displayProblem, styles} from "../styles/styles";
 import {getWalletName} from "../wallet";
-import {brandLogo} from "../relationships";
 
 export default function LoginScreen({}) {
     const [password, setPassword] = useState<string>('');
@@ -31,11 +30,13 @@ export default function LoginScreen({}) {
 
     return (
         <View style={styles.centeredContainer}>
-            <Image
-                style={{ width: 150, height: 150 }}
-                source={brandLogo}
-            />
             <Title style={styles.titleText}>Login:</Title>
+            <FormInput
+                labelName="Wallet Name"
+                value={getWalletName()}
+                secureTextEntry={false}
+                disabled={true}
+            />
             <FormInput
                 labelName="Wallet Password"
                 value={password}
