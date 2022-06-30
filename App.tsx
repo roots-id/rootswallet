@@ -1,11 +1,19 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-//import * as SplashScreen from 'expo-splash-screen';
+
 import Providers from './src/navigation';
 
 export default function App() {
-  //SplashScreen.hideAsync();
   return (
     <Providers />
   );
 }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: '#fff',
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//   },
+// });

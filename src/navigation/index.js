@@ -1,9 +1,11 @@
+import React from 'react';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 
 import Routes from './Routes';
 
+//<AuthProvider>
+//</AuthProvider>
 export default function Providers() {
-  console.log("navigation - setting up providers")
   return (
       <PaperProvider theme={theme}>
           <Routes />

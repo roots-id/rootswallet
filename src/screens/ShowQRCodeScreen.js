@@ -4,13 +4,17 @@ import {
   View,
   Text,
   Pressable,
+  Button,
+  StyleSheet,
 } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { useCardAnimation } from '@react-navigation/stack';
 
+import {logger} from '../logging';
 import { IconButton, ToggleButton } from 'react-native-paper';
 import QRCode from 'react-native-qrcode-svg';
-import {styles} from "../styles/styles";
+import { prismLogo } from '../roots'
+import styles from "../styles/styles";
 
 export default function ShowQRCodeScreen({ route, navigation }) {
     const data = route.params.qrdata
@@ -35,6 +39,7 @@ export default function ShowQRCodeScreen({ route, navigation }) {
                 setViewOut(<QRCode
                     value={jsonData}
                     size={300}
+                    logo={require('../assets/ATALAPRISM.png')}
                     logoSize={50}
                     logoBackgroundColor='transparent'
                     key="{qr}"
@@ -60,11 +65,31 @@ export default function ShowQRCodeScreen({ route, navigation }) {
       }}
     >
       <Pressable
-        style={styles.pressable}
+        style={[
+          StyleSheet.absoluteFill,
+          { backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+        ]}
         onPress={navigation.goBack}
       />
       <Animated.View
-        style={styles.viewAnimated}
+        style={{
+          padding: 16,
+          width: '90%',
+          maxWidth: 400,
+          borderRadius: 3,
+          backgroundColor: colors.card,
+          alignItems: 'center',
+                  justifyContent: 'center',
+          transform: [
+            {
+              scale: current.progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.9, 1],
+                extrapolate: 'clamp',
+              }),
+            },
+          ],
+        }}
       >
       <View style={{flexDirection:'row',}}>
           <ToggleButton

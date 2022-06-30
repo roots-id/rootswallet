@@ -10,6 +10,11 @@
     "platforms": ["android"],
     "githubUrl": "https://github.com/roots-id/rootswallet",
     "icon": "./src/assets/LogoOnly1024.png",
+    "splash": {
+      "image": "./src/assets/WhiteTextExtraGlow.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
     "updates": {
       "enabled": true,
       "fallbackToCacheTimeout": 10000
