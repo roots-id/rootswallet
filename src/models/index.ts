@@ -39,12 +39,11 @@ export function createMessageId(chatAlias: string,relId: string,msgNum: number) 
     return msgId;
 }
 
-export function createRel(relAlias: string, relName: string, relPicUrl: string, did?: string) {
+export function createRel(relAlias: string, relName: string, relPicUrl: string) {
     const rel = {
         id: relAlias,
         displayName: relName,
         displayPictureUrl: relPicUrl,
-        did: did,
     }
     logger("models - create rel model w/keys",Object.keys(rel))
     return rel;
