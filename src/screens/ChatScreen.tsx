@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {Linking, Text, View} from 'react-native';
+import {Linking, StyleSheet, Text, View} from 'react-native';
 import {Bubble, GiftedChat, IMessage, InputToolbar, InputToolbarProps, Reply, User} from 'react-native-gifted-chat';
 
-import * as contacts from '../relationships'
+import * as cred from '../credentials'
 import * as models from "../models";
 import {showQR} from '../qrcode'
-import {asContactShareable, getContactByAlias, getContactByDid, showRel} from '../relationships'
+import {asContactShareable, getContactByAlias, getContactByDid, showRel, YOU_ALIAS} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
 import {styles} from "../styles/styles";
@@ -28,7 +28,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         const chatSession = roots.startChatSession(chat.id, {
             chat: chat,
             onReceivedMessage: (message) => {
-                if (message && GiftedChat) {
+                if(message && GiftedChat) {
                     setMessages((currentMessages) => {
                         const iMsg = mapMessage(message)
                         if (iMsg) {
@@ -112,7 +112,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
 
     async function handleSend(pendingMsgs: IMessage[]) {
         console.log("ChatScreen - handle send", pendingMsgs)
-        const result = await roots.sendMessages(chat, pendingMsgs.map(msg => msg.text), roots.MessageType.TEXT, contacts.getUserId());
+        const result = await roots.sendMessages(chat, pendingMsgs.map(msg => msg.text), roots.MessageType.TEXT, YOU_ALIAS);
 //        await setMessages((prevMessages) => GiftedChat.append(prevMessages, pendingMsgs));
     }
 
@@ -172,7 +172,8 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     console.log("ChatScreen - process quick reply for retry process")
                     const process = roots.getMessageById(reply.messageId)?.data
                     process();
-                } else {
+                }
+                else {
                     console.log("ChatScreen - reply value not recognized, was", chat.id, reply.value);
                 }
             }
@@ -184,7 +185,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
     function processBubbleClick(context: any, message: IMessage): void {
         console.log("ChatScreen - bubble pressed", context, message)
         const msg = roots.getMessageById(message._id.toString())
-        if (msg) {
+        if(msg) {
             switch (msg.type) {
                 case roots.MessageType.BLOCKCHAIN_URL:
                     console.log("ChatScreen - Clicked blockchain url msg", msg.data)
@@ -193,8 +194,8 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                 case roots.MessageType.DID:
                     console.log("ChatScreen - Clickable did msg", msg.data)
                     const c = getContactByDid(msg.data)
-                    if (c) {
-                        showQR(navigation, asContactShareable(c))
+                    if(c) {
+                        showQR(navigation,asContactShareable(c))
                     }
                     break;
                 default:
@@ -231,13 +232,14 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         );
     }
 
+
     function renderInputToolbar(props: InputToolbarProps<IMessage>) {
         //console.log("renderInputToolbar", props)
         return (
             <InputToolbar
                 {...props}
                 containerStyle={{
-                    backgroundColor: "#604050",
+                    backgroundColor: "#302025",
                     borderTopColor: "#dddddd",
                     borderTopWidth: 1,
                     padding: 1,
@@ -245,6 +247,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
             />
         );
     }
+
 
     if (loading) {
         console.log("ChatScreen - Loading....")
@@ -255,11 +258,8 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         <View style={{backgroundColor: "#251520", flex: 1, display: "flex",}}>
             <GiftedChat
                 isTyping={processing}
-                inverted={false}
-                messages={messages?.sort((a, b) => {
-                    return (a.createdAt < b.createdAt) ? -1 : 1
-                })}
-                onPress={(context, message) => processBubbleClick(context, message)}
+                messages={messages?.sort((a, b) => {return ((b.createdAt as Date).getDate() - (a.createdAt as Date).getDate())})}
+                onPress={ (context, message) => processBubbleClick(context,message)}
                 onQuickReply={reply => handleQuickReply(reply)}
                 onSend={messages => handleSend(messages)}
                 //          onPress: (tag) => setShowSystem(!showSystem),
@@ -335,7 +335,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         const user = getContactByAlias(message.rel)
         const mappedMsg: IMessage = {
             _id: message.id,
-            createdAt: message.createdTime,
+            createdAt: new Date(message.createdTime),
             system: message.system,
             text: message.body,
             user: mapUser(user),

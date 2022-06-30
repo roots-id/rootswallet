@@ -8,7 +8,7 @@ export async function getPrismDidDoc(did: string) {
     try {
         const didDocJson = await PrismModule.getDidDocument(did);
         return didDocJson;
-    } catch (error: any) {
+    } catch (error) {
         console.error("roots - Error getting DID doc for", did,error, error.stack)
     }
     return;

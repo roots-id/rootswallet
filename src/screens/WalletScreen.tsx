@@ -1,22 +1,29 @@
-import React, {useEffect, useState} from 'react';
-import {FlatList, SafeAreaView, View, Text} from 'react-native';
-import {Divider} from 'react-native-paper';
+import React, { useEffect, useState } from 'react';
+import { FlatList, SafeAreaView, View, Text } from 'react-native';
+import { Divider, List } from 'react-native-paper';
+
 import * as models from '../models'
-import * as wallet from '../wallet'
-import {recursivePrint} from '../utils'
+import { TEST_WALLET_NAME } from '../roots'
+import { getWallet } from '../wallet'
+import { recursivePrint } from '../utils'
 
 import {styles} from "../styles/styles";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 
-export default function WalletScreen({route, navigation}: CompositeScreenProps<any, any>) {
-    const [wal,setWal] = useState<models.wallet>()
+export default function WalletScreen({ route, navigation }: CompositeScreenProps<any, any>) {
+    const [wallet, setWallet] = useState<models.wallet>();
 
     useEffect(() => {
-        setWal(wallet.getWallet())
+        try {
+            setWallet(getWallet(TEST_WALLET_NAME));
+            console.log("WalletScreen - set wallet",wallet)
+        } catch(error) {
+            console.error("WalletScreen - Could not get roots wallet",TEST_WALLET_NAME,error,error.stack)
+        }
     }, []);
 
-    if (wal) {
-        const keys = Object.keys(wal)
+    if(wallet) {
+        const keys = Object.keys(wallet)
         return (
             <View style={styles.container}>
                 <SafeAreaView style={styles.container}>
@@ -24,11 +31,11 @@ export default function WalletScreen({route, navigation}: CompositeScreenProps<a
                         data={keys}
                         keyExtractor={(item) => item}
                         ItemSeparatorComponent={() => <Divider/>}
-                        renderItem={({item}) => {
-                            const output = recursivePrint((wal as any)[item])
-                            console.log(item, ": ", output)
-                            return <Text style={styles.listItem}>{item + ": " + output}</Text>
-                        }
+                            renderItem={({item}) => {
+                                const output = recursivePrint((wallet as any)[item])
+                                console.log(item, ": ", output)
+                                return <Text style={styles.listItem}>{item + ": " + output}</Text>
+                            }
                         }
                     />
                 </SafeAreaView>

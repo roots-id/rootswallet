@@ -1,11 +1,14 @@
-import {Buffer} from "buffer";
 import {logger} from '../logging'
 import * as models from '../models'
 import {PrismModule} from "../prism";
-import {credential, issuedCredential} from "../models";
+import {credential, decodedSignedCredential, issuedCredential} from "../models";
+import * as store from "../store";
+import {asContactShareable} from "../relationships";
 import {updateWallet} from "../wallet";
 
 export const credLogo = require('../assets/vc.png');
+
+//export const allCredsRegex = new RegExp(models.getStorageKey("",models.ModelType.CREDENTIAL)+'*')
 
 export const refreshTriggers: { (): void }[] = []
 
@@ -24,10 +27,10 @@ export async function addImportedCredential(iCred: models.credential, wal: model
         }
         wal.importedCredentials.push(importedCred)
         const newWalJson = JSON.stringify(wal)
-        logger("creds -  imported credential into wallet", newWalJson)
+        logger("roots - imported credential into wallet", newWalJson)
         const savedWal = await updateWallet(wal._id, wal.passphrase, newWalJson)
         if (savedWal) {
-            logger("creds - imported credential", credHash)
+            logger("roots - imported credential", credHash)
         } else {
             console.error("Could not import credential, unable to save wallet", credHash)
         }
@@ -44,11 +47,11 @@ export function addRefreshTrigger(trigger: { (): void }) {
 }
 
 function atob(data: string) {
-    return Buffer.from(data, "base64").toString("binary");
+    return new Buffer(data, "base64").toString("binary");
 }
 
 function btoa(data: string) {
-    return Buffer.from(data, "binary").toString("base64");
+    return new Buffer(data, "binary").toString("base64");
 }
 
 export function decodeCredential(encodedSignedCredential: string): models.decodedSignedCredential {
@@ -158,20 +161,20 @@ export function getImportedCredByHash(credHash: string, wal: models.wallet): mod
 }
 
 export function getImportedCreds(wal: models.wallet): models.credential[] {
-    logger("creds - Getting imported credentials")
+    logger("roots - Getting imported credentials")
     let result: credential[] = []
-    logger("creds - current wal has keys", Object.keys(wal))
+    logger("roots - current wal has keys", Object.keys(wal))
     if (wal["importedCredentials"]) {
         const creds = wal["importedCredentials"];
         if (creds && creds.length > 0) {
-            logger("creds - getting imported creds", creds.length)
-            creds.forEach(cred => logger("creds - imported cred", JSON.stringify(cred)))
+            logger("roots - getting imported creds", creds.length)
+            creds.forEach(cred => logger("roots - imported cred", JSON.stringify(cred)))
             result = creds
         } else {
-            logger("creds - no imported creds found")
+            logger("roots - no imported creds found")
         }
     } else {
-        logger("creds - No imported credentials")
+        logger("roots - No imported credentials")
     }
     return result;
 }
@@ -260,7 +263,7 @@ export async function issueCredential(didAlias: string, iCred: models.issuedCred
         } else {
             console.error("creds - Could not issue credential")
         }
-    } catch (error: any) {
+    } catch (error) {
         console.error("creds - Could not issue credential to", didAlias, iCred, error, error.stack)
     }
 
@@ -293,19 +296,15 @@ export async function revokeCredential(issuedCred: models.issuedCredential, wal:
 
 export async function verifyCredentialByHash(credHash: string, wal: models.wallet): Promise<string | undefined> {
     logger("Verifying credential", credHash)
-    try {
-        const cred = getCredByHash(credHash, wal)
-        if (cred) {
-            console.log("creds - Got cred for verification", JSON.stringify(cred));
-            const issued = isIssuedCred(cred)
-            logger("creds - is cred issued?", issued)
-            const messageArray = await PrismModule.verifyCred(JSON.stringify(wal), cred.alias, !issued)
-            return messageArray
-        } else {
-            console.error("creds - could not verify credential by hash, no cred found", credHash)
-        }
-    } catch (error: any) {
-        console.error("creds - Could not verify credential by hash", credHash, error, error.stack)
+    const cred = getCredByHash(credHash, wal)
+    if (cred) {
+        console.log("creds - Got cred for verification", JSON.stringify(cred));
+        const issued = isIssuedCred(cred)
+        logger("creds - is cred issued?", issued)
+        const messageArray = await PrismModule.verifyCred(JSON.stringify(wal), cred.alias, !issued)
+        return messageArray
+    } else {
+        console.error("could not verify credential by hash, no cred found", credHash)
     }
 }
 

@@ -82,7 +82,7 @@ export async function removeItem(key: string) {
     logger("AsyncStore - removing key",key)
     try {
         await AsyncStorage.removeItem(key)
-    } catch(e: any) {
+    } catch(e) {
         console.error("Failed to remove value",key,e,e.stack)
     }
 }

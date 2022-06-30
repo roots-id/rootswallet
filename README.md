@@ -4,8 +4,3 @@ www.rootswallet.com
 
 ## Wiki
 https://github.com/roots-id/rootswallet/wiki
-
-## Developers
-### Releasing
-#### Android
-See https://reactnative.dev/docs/signed-apk-android

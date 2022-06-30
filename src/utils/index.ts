@@ -1,9 +1,12 @@
-export function getObjectField(obj: object|undefined|Readonly<object|undefined>, field: string) {
-    if(obj) {
-        for (const [key, value] of Object.entries(obj)) {
-            if (key === field) {
-                return value;
-            }
+import {displayProblem} from "../styles/styles";
+import {Text} from "react-native";
+import React from "react";
+import {decodeCredential} from "../credentials";
+
+export function getObjectField(obj: object, field: string) {
+    for (const [key, value] of Object.entries(obj)) {
+        if(key === field) {
+            return value;
         }
     }
 }

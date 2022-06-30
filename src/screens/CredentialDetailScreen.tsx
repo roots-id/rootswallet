@@ -37,11 +37,11 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
     function getCredPart(field: string) {
         const c = decodeCredential(cred.verifiedCredential.encodedSignedCredential)
         const cObj = c.credentialSubject
-        return utils.getObjectField(cObj, field)
+        return utils.getObjectField(cObj,field)
     }
 
     async function updateVerification() {
-        const wal = wallet.getWallet()
+        const wal = wallet.getWallet(roots.TEST_WALLET_NAME)
         if (wal) {
             const verify = await verifyCredentialByHash(cred.verifiedCredential.proof.hash, wal)
             if (verify) {
@@ -50,17 +50,13 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
                 if (result && result.length <= 0) {
                     setVerified("check-bold")
                 } else if (result && result.length > 0) {
-                    setVerified("close-octagon-outline")
+                    setVerified("alert-octagon")
                 } else {
                     setVerified("help-circle")
                 }
-            } else {
-                console.error("CredDeetsScreen - could not verify", verify)
-                setVerified("alert-octagon")
             }
         } else {
-            console.error("CredDeetsScreen - could not get wallet", wallet.getWalletName(), wal)
-            setVerified("alert-octagon")
+            console.error("CredDeetsScreen - could not get wallet", roots.TEST_WALLET_NAME, wal)
         }
     }
 
@@ -110,8 +106,7 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
                     renderItem={({item}) => {
                         const output = utils.recursivePrint(getCredPart(item))
                         console.log(item, ": ", output)
-                        return <ScrollView style={styles.scrollableModal}><Text
-                            style={{color: "black"}}>{item + ": " + output}</Text></ScrollView>
+                        return <ScrollView style={styles.scrollableModal}><Text style={{color: "black"}}>{item + ": " + output}</Text></ScrollView>
                     }}
                 />
             </Animated.View>
