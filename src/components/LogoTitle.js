@@ -10,7 +10,7 @@ export default function LogoTitle(...props) {
               source={require('../assets/LogoOnly1024.png')}
             />
             <Text style={{ color: '#eeeeee',fontSize: 22,fontWeight: 'normal',textAlignVertical: "center",textAlign: "center", }}>
-                {props[0]["title"].substring(0,11)+"..."}
+                {props[0]["title"]}
             </Text>
         </View>
   );
