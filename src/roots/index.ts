@@ -8,25 +8,23 @@ import { replaceSpecial } from '../utils'
 import * as walletSchema from '../schemas/WalletSchema'
 
 //msg types
-export const BLOCKCHAIN_URL_MSG_TYPE = "blockchainUrlMsgType";
+export const BLOCKCHAIN_URI_MSG_TYPE = "blockchainUri";
 export const CREDENTIAL_JSON_MSG_TYPE = "jsonCredential";
 export const DID_JSON_MSG_TYPE = "jsonDid";
-export const DID_MSG_TYPE = "didMsgType";
 export const PENDING_STATUS_MESSAGE = "rootsPendingStatus";
-export const PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE = "rootsAcceptCredentialMsgType"
-export const PROMPT_OWN_CREDENTIAL_MSG_TYPE = "rootsOwnCredentialMsgType"
-export const PROMPT_PUBLISH_MSG_TYPE = "rootsPromptPublishMsgType";
+export const PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE = "rootsAcceptCredential"
+export const PROMPT_OWN_CREDENTIAL_MSG_TYPE = "rootsOwnCredential"
+export const PROMPT_PUBLISH_MSG_TYPE = "rootsPromptPublish";
+export const PRISM_LINK_MSG_TYPE = "rootsPrismLink"
 export const QR_CODE_MSG_TYPE = "rootsQRCodeMsgType"
-export const STATUS_MSG_TYPE = "statusMsgType";
-export const TEXT_MSG_TYPE = "textMsgType"
-export const LINK_MSG_TYPE = "linkMsgType"
+export const STATUS_MSG_TYPE = "status";
+export const TEXT_MSG_TYPE = "text"
 
 //meaningful literals
 export const ACHIEVEMENT_MSG_PREFIX = "You have a new achievement: ";
-export const BLOCKCHAIN_URL_MSG = "*Click to see the blockchain details*";
-export const PUBLISHED_TO_PRISM = "*Your DID was added to Prism*";
-export const SHOW_CRED_QR_CODE = "Show Cred QR code";
-export const SHOW_DID_QR_CODE = "Show Chat QR code";
+export const PUBLISHED_TO_PRISM = "Published to Prism"
+export const SHOW_CRED_QR_CODE = "Show Cred QR code"
+export const SHOW_DID_QR_CODE = "Show Chat QR code"
 
 //state literals
 export const CRED_ACCEPTED = "credAccepted"
@@ -41,7 +39,6 @@ const allChatsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CHAT)
 const allCredsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CREDENTIAL)+'*')
 const allCredReqsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CRED_REQUEST)+'*')
 const allMsgsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_MESSAGE)+'*')
-const allSettingsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_SETTING)+'*')
 
 export const TEST_WALLET_NAME = "testWalletName"
 const demo = true;
@@ -53,7 +50,6 @@ const allProcessing = [];
 
 export async function initRootsWallet() {
     logger("roots - initializing RootsWallet")
-
     logger("roots - initializing your Did")
     const createdDid = await createDid(rel.YOU_ALIAS)
     const relCreated = await rel.createRelItem(rel.YOU_ALIAS,rel.YOU_ALIAS, rel.catalystLogo, createdDid);
@@ -61,8 +57,8 @@ export async function initRootsWallet() {
     const myRel = rel.getRelItem(rel.YOU_ALIAS)
 
     logger("roots - initializing your narrator bots roots")
-    const prism = await initRoot(rel.PRISM_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.PRISM_BOT), rel.PRISM_BOT, rel.prismLogo)
-    const rw = await initRoot(rel.ROOTS_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.ROOTS_BOT), rel.ROOTS_BOT, rel.rootsLogo)
+    const prism = await initRoot(rel.PRISM_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.PRISM_BOT), "Prism", rel.prismLogo)
+    const rw = await initRoot(rel.ROOTS_BOT, createdDid[walletSchema.DID_ALIAS], rootsDid(rel.ROOTS_BOT), "RootsWallet", rel.rootsLogo)
 
     logger("roots - initializing your achievements root")
     const achRootAlias = "achievementsRoot"
@@ -76,9 +72,9 @@ export async function initRootsWallet() {
     const createdWalletMsg = await sendMessage(achChat,
         "You created your wallet: "+currentWal._id,TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
     const createdDidMsg = await sendMessage(achChat,
-        "You created your first decentralized ID!",
+        "You created your first decentralized ID! This DID is in your wallet under the alias \""+getDid(rel.YOU_ALIAS).alias+"\" with a value of "+createdDid[walletSchema.DID_URI_CANONICAL_FORM],
         TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-    await sendMessage(achChat,"Add your DID to PRISM so that you can receive verifiable credentials (called VCs) from other users and organizations like the library, your school, rental companies, etc.",
+    await sendMessage(achChat,"Lets add your DID to PRISM so that you can receive verifiable credentials (called VCs) from places like the library, your school, rental companies, etc.",
         PROMPT_PUBLISH_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
 
     if(demo) {
@@ -122,34 +118,6 @@ async function loadItems(regex: RegExp) {
         console.error("roots - Failed to load items w/regex",regex,error,error.stack)
         return false;
     }
-}
-
-//----------------- Prism ----------------------
-export function setPrismHost(host="ppp.atalaprism.io", port="50053") {
-    logger("roots - setting Prism host and port",host,port)
-    PrismModule.setNetwork(host,port)
-    store.updateItem(getSettingAlias("prismNodePort"),port)
-    store.updateItem(getSettingAlias("prismNodeHost"),host)
-}
-
-export function getPrismHost() {
-    const host = store.getItem(getSettingAlias("prismNodeHost"))
-    return (host) ? host :  "ppp.atalaprism.io";
-}
-
-//---------------- Settings -----------------------
-function applyAppSettings() {
-    setPrismHost(store.getItem(getSettingAlias("prismNodeHost")),
-        store.getItem(getSettingAlias("prismNodePort")));
-}
-
-function getSettingAlias(key) {
-    return models.getStorageKey(key,models.MODEL_TYPE_SETTING)
-}
-
-export async function loadSettings() {
-    const settings = await loadItems(allSettingsRegex)
-    return settings;
 }
 
 //----------------- Wallet ---------------------
@@ -269,36 +237,32 @@ export function getDid(didAlias) {
 
 }
 
-function getDidPubTx(didAlias: string) {
-    logger("roots - getting DID pub tx",didAlias)
-    const txLogs = currentWal[walletSchema.WALLET_TX_LOGS]
-    logger("roots - got tx logs",txLogs)
-    didPublishTxLog = txLogs?.find(txLog => (txLog.action === walletSchema.DID_PUBLISH_TX && txLog.description === didAlias))
-    logger("roots - got DID publish tx log",didPublishTxLog)
-    return didPublishTxLog;
-}
-
 function hasLongForm(did: Object) {
     console.log("roots - checking DID has long form", did[walletSchema.DID_URI_LONG_FORM]);
     const hasLong = did[walletSchema.DID_URI_LONG_FORM] && did[walletSchema.DID_URI_LONG_FORM].length > 0;
     if(hasLong) {
-        logger("roots - DID has long form",did[walletSchema.DID_URI_LONG_FORM]);
+        logger("roots - DID already published",did[walletSchema.DID_URI_LONG_FORM]);
         return true;
     } else {
-        logger("roots - DID does not have long form",did[walletSchema.DID_URI_CANONICAL_FORM]);
+        logger("roots - DID not published",did[walletSchema.DID_URI_CANONICAL_FORM]);
         return false;
     }
 }
 
 function isDidPublished(did: Object) {
-    const didAlias = did[walletSchema.DID_ALIAS]
-    console.log("roots - checking DID has been published",didAlias);
-    didPubTxLog = getDidPubTx(didAlias)
-    if(didPubTxLog) {
-        logger("roots - DID was published",didPubTxLog)
-        return true;
+    console.log("roots - checking DID has been published", did[walletSchema.DID_URI_LONG_FORM]);
+    const txLogs = currentWal[walletSchema.WALLET_TX_LOGS]
+    if(txLogs) {
+        didPublishedTxLog = txLogs.find(txLog => (txLog.action === "PUBLISH_DID"))
+        if(didPublishedTxLog) {
+            logger("roots - DID was published",didPublishedTxLog)
+            return true;
+        } else {
+            logger("roots - DID not published",txLogs)
+            return false;
+        }
     } else {
-        logger("roots - DID not published",didAlias)
+        logger("roots - no wallet transactions, DID not published")
         return false;
     }
 }
@@ -448,7 +412,7 @@ export async function publishChatDid(chat: Object) {
             console.error("roots - Error publishing chat DID",longFormDid,"w/DID alias",chat.fromAlias,error,error.stack)
         }
     } else {
-        logger("roots - ",PUBLISHED_TO_PRISM,did.alias)
+        logger("roots - ",did.alias,"is already",PUBLISHED_TO_PRISM)
         return chat;
     }
 }
@@ -552,11 +516,11 @@ export async function sendMessages(chat,msgs,msgType,relDisplay) {
 }
 
 //TODO unify aliases and storageKeys?
-export async function sendMessage(chat,msgText,msgType,relDisplay,system=false,data=undefined) {
+export async function sendMessage(chat,msgText,msgType,relDisplay,system=false,cred=undefined) {
     const msgTime = Date.now()
     logger("roots - rel",relDisplay.id,"sending\"",msgText,"\"to chat:",chat.id);
     const msgId = models.createMessageId(chat.id,relDisplay.id,msgTime);
-    let msg = models.createMessage(msgId, msgText, msgType, msgTime, relDisplay.id, system, data);
+    let msg = models.createMessage(msgId, msgText, msgType, msgTime, relDisplay.id, system, cred);
     msg = addMessageExtensions(msg);
     try {
         const msgJson = JSON.stringify(msg)
@@ -612,7 +576,7 @@ function addQuickReply(msg) {
             keepIt: true,
             values: [
             {
-                title: 'Show QR code',
+                title: 'View',
                 value: PROMPT_OWN_CREDENTIAL_MSG_TYPE+CRED_VIEW,
                 messageId: msg.id,
             }]
@@ -657,41 +621,33 @@ export async function processPublishResponse(chat: Object, reply: Reply) {
     const pubChat = await publishChatDid(chat);
     isProcessing(false)
     if(pubChat) {
-        const pubDid = getDid(chat.fromAlias)
-        const didPubTx = getDidPubTx(pubDid[walletSchema.DID_ALIAS])
-        const didPubMsg = await sendMessage(pubChat,PUBLISHED_TO_PRISM,
-                DID_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,pubDid[walletSchema.DID_URI_LONG_FORM])
-        const didLinkMsg = await sendMessage(pubChat,BLOCKCHAIN_URL_MSG,
-                BLOCKCHAIN_URL_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,didPubTx.url)
-        if(didLinkMsg) {
+        //TODO retrieve real url
+        const linkMsg = await sendMessage(pubChat,"Your chat DID has been"
+                +"\t\t"+PUBLISHED_TO_PRISM+"\t\t"+SHOW_DID_QR_CODE
+                +"\nhttps://explorer.cardano-testnet.iohkdev.io/en/transaction?id=0ce00bc602ef54dfc52b4106bebcafb72c2447bdf666cd609d50fd3a7e9d2474",
+                TEXT_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
+
+        if(linkMsg) {
+            const pubDid = getDid(chat.fromAlias)
             const didMsg = await sendMessage(chat,JSON.stringify(pubDid),DID_JSON_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),true);
             if(demo && didMsg) {
                 logger("roots - quick reply demo celebrating did publishing credential",pubDid[walletSchema.DID_URI_LONG_FORM])
                 await sendMessage(chat,
                     "To celebrate your publishing achievement a verifiable credential is being created for you.",
                     TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-                const credIssueAlias = await issueDemoCredential(chat, reply)
-                if(credIssueAlias) {
-                    const credPubTx = getCredPubTx(pubDid[walletSchema.DID_ALIAS],credIssueAlias)
-                    const credSuccess = await sendMessage(pubChat,"You have issued yourself a verifiable credential!",
-                                     TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-                    const credLinkMsg = await sendMessage(pubChat,BLOCKCHAIN_URL_MSG,
-                                    BLOCKCHAIN_URL_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),false,credPubTx.url)
-
-                    if(credLinkMsg) {
-                        logger("roots - quick reply demo credential issued",credIssueAlias)
-                        const credReqMsg = await sendMessage(chat,
-                            "Do you want to accept this verifiable credential",
-                            PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-                        if(credReqMsg) {
-                            const credAcceptAlias = getCredentialAlias(credReqMsg.id)
-                            const cred = getIssuedCredential(credIssueAlias);
-                            const credJson = JSON.stringify(cred.verifiedCredential)
-                            logger("roots - cred request prepared",credAcceptAlias,credJson)
-                            const savedCredReq = await store.saveItem(credAcceptAlias, credJson);
-                            if(savedCredReq) {
-                                logger("Successfully submitted demo cred req",credAcceptAlias,credJson)
-                            }
+                const cred = await issueDemoCredential(chat, reply)
+                if(cred) {
+                    logger("roots - quick reply demo credential issued",cred)
+                    const credReqMsg = await sendMessage(chat,
+                        "Do you want to accept this verifiable credential",
+                        PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
+                    if(credReqMsg) {
+                        const credAlias = getCredentialAlias(credReqMsg.id)
+                        const credJson = JSON.stringify(cred.verifiedCredential)
+                        logger("roots - cred request prepared",credAlias,credJson)
+                        const savedCredReq = await store.saveItem(credAlias, credJson);
+                        if(savedCredReq) {
+                            logger("Successfully submitted demo cred req",credAlias,credJson)
                         }
                     }
                 } else {
@@ -800,16 +756,6 @@ function getCredentialAlias(msgId) {
 
 export async function getCredentialByMsgId(msgId) {
     return await store.getItem(getCredentialAlias(msgId))
-}
-
-function getCredPubTx (didAlias: string, credAlias: string) {
-    logger("roots - getting cred pub tx",didAlias)
-    const txLogs = currentWal[walletSchema.WALLET_TX_LOGS]
-    const txName = didAlias+"/"+credAlias
-    logger("roots - got tx logs",txLogs,"searching for",txName)
-    credPubTxLog = txLogs?.find(txLog => (txLog.action === walletSchema.CRED_ISSUE_TX && txLog.description === txName))
-    logger("roots - got cred publish tx log",credPubTxLog)
-    return credPubTxLog;
 }
 
 function getCredRequestAlias(msgId) {
@@ -943,8 +889,8 @@ export async function issueDemoCredential(chat: Object,reply: Object) {
     const credAlias = getCredentialAlias(reply.messageId)
     const alreadyIssued = getIssuedCredential(credAlias)
     const did = getDid(chat.fromAlias)
-    const didPub = isDidPublished(did)
-    if(didPub && !alreadyIssued) {
+    const didPublished = isDidPublished(did)
+    if(didPublished && !alreadyIssued) {
         logger("roots - Chat is published and credential not found, creating....")
         const didLong = did[walletSchema.DID_URI_LONG_FORM]
         logger("roots - Creating demo credential for chat",chat.id,"w/long form did",didLong)
@@ -973,10 +919,10 @@ export async function issueDemoCredential(chat: Object,reply: Object) {
         const issuedCred = await issueCredential(chat.fromAlias, credAlias, cred)
         isProcessing(false)
         logger("Prism issued credential",issuedCred)
-        return credAlias;
+        return issuedCred;
     } else {
         logger("roots - Couldn't issue demo credential, is the chat published",
-            didPub,"was the credential already found",alreadyIssued)
+            didPublished,"was the credential already found",alreadyIssued)
         return false
     }
 //        sendMessage(chat,"Valid credential",
@@ -1002,10 +948,9 @@ export async function issueDemoCredential(chat: Object,reply: Object) {
 }
 
 async function initDemos(fromDidAlias) {
-    //const libraryRoot = await initRoot("libraryRoot", fromDidAlias, rootsDid("library"), "Library")
-    //const rentalRoot = await initRoot("rentalRoot", fromDidAlias, rootsDid("vacationRental"), "Vacation Rental")
-    //return libraryRoot && rentalRoot;
-    return true;
+    const libraryRoot = await initRoot("libraryRoot", fromDidAlias, rootsDid("library"), "Library")
+    const rentalRoot = await initRoot("rentalRoot", fromDidAlias, rootsDid("vacationRental"), "Vacation Rental")
+    return libraryRoot && rentalRoot;
 }
 
 async function initDemoAchievements(chat: Object) {
@@ -1025,7 +970,7 @@ async function initDemoAchievements(chat: Object) {
       rel.getRelItem(rel.ROOTS_BOT))
 }
 
-export async function initRoot(alias: string, fromDidAlias: string, toDid: string, display=alias, avatar=rel.personLogo) {
+async function initRoot(alias: string, fromDidAlias: string, toDid: string, display=alias, avatar=rel.personLogo) {
     logger("roots - creating root",alias,fromDidAlias,toDid,display,avatar)
     try {
         const relCreated = await rel.createRelItem(alias,display, avatar, toDid);

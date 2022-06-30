@@ -5,11 +5,10 @@ const ID_SEPARATOR = "_"
 
 //these types must be unique enough to use in regex without conflict
 export const MODEL_TYPE_CHAT = "rootsChatType"
+export const MODEL_TYPE_MESSAGE = "rootsMsgType"
 export const MODEL_TYPE_CREDENTIAL = "rootsCredentialType"
 export const MODEL_TYPE_CRED_REQUEST = "rootsCredRequestType"
-export const MODEL_TYPE_MESSAGE = "rootsMsgType"
 export const MODEL_TYPE_REL = "rootsRelType"
-export const MODEL_TYPE_SETTING = "rootsSettingType"
 
 //TODO refactor away this general file to specific files, like 'chat'
 
@@ -25,7 +24,7 @@ export function createChat(chatAlias: string, fromDidAlias: string, toIds: strin
     return chat;
 }
 
-export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,relId: string,system?: boolean=false,data?: Object=undefined) {
+export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,relId: string,system?: boolean=false,cred?: Object=undefined) {
     const msg = {
         id: idText,
         body: bodyText,
@@ -33,7 +32,7 @@ export function createMessage(idText: string,bodyText: string,statusText: string
         createdTime: timeInMillis,
         rel: relId,
         system: system,
-        data: data,
+        cred: cred,
     }
     logger("models - created msg model w/keys",Object.keys(msg))
     return msg;

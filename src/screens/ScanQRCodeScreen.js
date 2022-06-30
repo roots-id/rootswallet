@@ -7,7 +7,6 @@ import {
   Button,
   StyleSheet,
 } from 'react-native';
-import { IconButton } from 'react-native-paper';
 import { useTheme } from '@react-navigation/native';
 import { useCardAnimation } from '@react-navigation/stack';
 import { BarCodeScanner } from 'expo-barcode-scanner';
@@ -36,7 +35,7 @@ export default function ScanQRCodeScreen({ route, navigation }) {
   };
 
   if (hasPermission === null) {
-    return <Text>Requesting camera permission</Text>;
+    return <Text>Requesting for camera permission</Text>;
   }
   if (hasPermission === false) {
     return <Text>No access to camera</Text>;
@@ -57,32 +56,6 @@ export default function ScanQRCodeScreen({ route, navigation }) {
         ]}
         onPress={navigation.goBack}
       />
-    <Animated.View
-      style={{
-        padding: 16,
-        width: '90%',
-        maxWidth: 400,
-        borderRadius: 3,
-        backgroundColor: colors.card,
-        alignItems: 'center',
-                justifyContent: 'center',
-        transform: [
-          {
-            scale: current.progress.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0.9, 1],
-              extrapolate: 'clamp',
-            }),
-          },
-        ],
-      }}
-    >
-        <IconButton
-            icon="close-circle"
-            size={36}
-            color="#5b3a70"
-            onPress={() => navigation.goBack()}
-        />
         <View style={{
 
         alignItems: 'center',
@@ -90,13 +63,12 @@ export default function ScanQRCodeScreen({ route, navigation }) {
                           width: 250,
                           height: 250,
                         }}>
-          <BarCodeScanner
-            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-            style={StyleSheet.absoluteFillObject}
-          />
-          {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />}
-         </View>
-        </Animated.View>
+      <BarCodeScanner
+        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+        style={StyleSheet.absoluteFillObject}
+      />
+      {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />}
+    </View>
     </View>
   );
 }

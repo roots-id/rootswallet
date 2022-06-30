@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Linking, NativeModules, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, NativeModules, StyleSheet, Text, View } from 'react-native';
 import { Actions, ActionsProps, Bubble, ChatInput,
     Composer, GiftedChat, InputToolbar, Message, SendButton } from 'react-native-gifted-chat';
 
@@ -219,21 +219,6 @@ export default function ChatScreen({ route, navigation }) {
 //    )
 //  }
 
-    function processBubbleClick(context,message) {
-        console.log("bubble pressed",context,message)
-        switch(message.type) {
-            case roots.BLOCKCHAIN_URL_MSG_TYPE:
-                console.log("Clicked blockchain url msg",message.data)
-                Linking.openURL(message.data)
-                break;
-            case roots.DID_MSG_TYPE:
-                console.log("Clickable did msg",message.data)
-                showQR(message.data)
-            default:
-                console.log("Clicked non-active message type",message.type)
-        }
-    }
-
 //#fad58b
   function renderBubble(props) {
     //console.log("render bubble with props",props.currentMessage)
@@ -390,12 +375,12 @@ export default function ChatScreen({ route, navigation }) {
       <GiftedChat
           isTyping={processing}
           messages={messages.sort((a, b) => b.createdAt - a.createdAt)}
-          onPress={ (context, message) => processBubbleClick(context,message)}
+          onPress={ (context, message) => console.log("bubble pressed",context,message)}
           onQuickReply={reply => handleQuickReply(reply)}
           onSend={messages => handleSend(messages)}
           parsePatterns={(linkStyle) => [
                   {
-                      pattern: /Your DID was added to Prism/,
+                      pattern: /Published to Prism/,
                       style: styles.prism,
                       onPress: (tag) => setShowSystem(!showSystem),
                   },
@@ -405,28 +390,18 @@ export default function ChatScreen({ route, navigation }) {
                       onPress: (tag) => showQR(roots.getDid(chat.fromAlias).uriLongForm),
                   },
                  {
-                     pattern: /did:prism:[\S]*/,
+                     pattern: /did:prism:*/,
                      style: styles.prism,
                      onPress: (tag) => showQR(tag),
                  },
-                 {
-                    type: 'url',
-                    style: styles.clickableListTitle,
-                    onPress: (tag) => Linking.openURL(tag),
-                },
-                {
-                    pattern: /Click to see the blockchain details/,
-                    style: styles.prism,
-                }
-          ]}
-          //quickReplyStyle={{backgroundColor: '#e69138',borderColor: '#e69138',elevation: 3}}
-          placeholder={"Make a note..."}
+                  //{type: 'url', style: styles.url, onPress: onUrlPress},
+                ]}
+          //placeholder={"Type your message"}
           renderInputToolbar={props => renderInputToolbar(props)}
           //renderActions={renderActions}
           renderAllAvatars={true}
           renderAvatarOnTop={true}
           renderBubble={renderBubble}
-          renderQuickReplySend={() => <Text style={{color: '#e69138',fontSize: 18}}>Confirm</Text>}
           renderUsernameOnMessage={true}
           showAvatarForEveryMessage={true}
           user={mapUser(getRelItem(chat.id))}
@@ -434,7 +409,7 @@ export default function ChatScreen({ route, navigation }) {
     </View>
   );
   //      {
-    //        Platform.OS === 'android' && <KeyboardAoidingView behavior="padding" />
+    //        Platform.OS === 'android' && <KeyboardAvoidingView behavior="padding" />
     //      }
 
   //,      ...(message.type === BLOCKCHAIN_URI_MSG_TYPE) && {system: true}
@@ -459,8 +434,8 @@ export default function ChatScreen({ route, navigation }) {
             mappedMsg["text"] = "more details available"
         }
       }
-      if(message["data"]) {
-        mappedMsg["data"] = message["data"]
+      if(message["cred"]) {
+        mappedMsg["cred"] = message["cred"]
       }
       //image: 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_light_color_272x92dp.png',
       // You can also add a video prop:

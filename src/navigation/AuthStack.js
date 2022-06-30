@@ -33,8 +33,7 @@ import ScanQRCodeScreen from '../screens/ScanQRCodeScreen'
 import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
 import StartChatScreen from '../screens/StartChatScreen';
 
-import { getChatItem, getRootsWallet, storageStatus,
-    hasWallet, loadSettings, TEST_WALLET_NAME } from '../roots'
+import { getChatItem, getRootsWallet, storageStatus, hasWallet, TEST_WALLET_NAME } from '../roots'
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator()
@@ -76,19 +75,16 @@ export default function AuthStack() {
         try {
           console.log("AuthStack - getting RootsWallet")
           await storageStatus()
-          const settingsLoaded = await loadSettings()
-          if(settingsLoaded) {
-              //TODO ditch test wallet name
-              const walFound = await hasWallet(walletName)
-              console.log("AuthStack - wallet found?",walFound)
-              setWalletFound(walFound)
-              if(walFound) {
-                //TODO ditch test wallet name
-                console.log("AuthStack - since wallet found, getting rootsWallet")
-                userToken = getRootsWallet(walletName)
-              } else {
-                console.log("AuthStack - since wallet NOT found, auth token not set")
-              }
+          //TODO ditch test wallet name
+          const walFound = await hasWallet(walletName)
+          console.log("AuthStack - wallet found?",walFound)
+          setWalletFound(walFound)
+          if(walFound) {
+            //TODO ditch test wallet name
+            console.log("AuthStack - since wallet found, getting rootsWallet")
+            userToken = getRootsWallet(walletName)
+          } else {
+            console.log("AuthStack - since wallet NOT found, auth token not set")
           }
         } catch (e) {
           // Restoring token failed
@@ -147,7 +143,7 @@ export default function AuthStack() {
                       initialParams={{walletName: walletName}}
                       options={ ({ navigation, route }) => ({
                           headerTitle: (props) => <LogoTitle {...props} title="Relationships:"/>,
-                          headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" scan='Scan QR Code' settings='Settings'/>,
+                          headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" scan='Scan QR Code'/>,
                       })}
                 />
                 <Stack.Screen
@@ -155,7 +151,7 @@ export default function AuthStack() {
                     component={ChatScreen}
                     options={ ({ navigation, route }) => ({
                         headerTitle: (props) => <LogoTitle {...props} title={getChatItem(route.params.chatId).title}/>,
-                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code' settings='Settings'/>,
+                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Add Rel" scan='Scan QR Code'/>,
                     })}
                 />
             </Stack.Group>
@@ -259,7 +255,6 @@ export default function AuthStack() {
                     <Stack.Screen name="Help" component={HelpScreen}/>
                     <Stack.Screen name="Create Rel" component={CreateRelScreen}/>
                     <Stack.Screen name="Create Secure Chat" component={StartChatScreen} />
-                    <Stack.Screen name="Settings" component={SettingsScreen}/>
                     <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen} />
                     <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen} />
                     <Stack.Screen name="Relationship Details" component={RelationshipDetailScreen}/>
