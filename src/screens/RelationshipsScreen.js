@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
 import {getRelationships} from '../relationships'
+import {getCredentials} from '../utils/credentialsRetriever'
 import Relationship from '../models/relationship'
 import styles from "../styles/styles";
 
@@ -12,13 +13,15 @@ const RelationshipsScreen = ({route,navigation}) => {
 
     const relationships = getRelationships(walletName).filter(rel => rel.displayName !== 'You')
 
-    const goToRel = (user) => {
-        console.log(`> RelationshipsScr.pressHandler( ${user})`)
+    const goToRel = (key) => {
+        console.log(`> RelationshipsScr.pressHandler( ${key})`)
         console.log(`executing navigation.navigate() now...`)
+        const creds = getCredentials(key)
         navigation.navigate(
-            'Relationship Details',
+            'Credentials',
             {
-                user: user
+                key: key,
+                creds: creds
             }
         )
     }
