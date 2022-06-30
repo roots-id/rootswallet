@@ -1,36 +1,37 @@
 import RelRow from '../components/RelRow'
 import React, {useEffect, useState} from 'react';
-import {FlatList, SafeAreaView, View} from 'react-native';
-import { Divider } from 'react-native-paper';
-import {
-    getRelationships, addRefreshTrigger,
-    PRISM_BOT, ROOTS_BOT, hasNewRels
-} from '../relationships'
-import {styles} from "../styles/styles";
+import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import { Divider, List } from 'react-native-paper';
+import {getRelationships, getViewableRelRow, addRefreshTrigger, showRel, YOU_ALIAS,
+    PRISM_BOT, ROOTS_BOT} from '../relationships'
+import Relationship from '../models/relationship'
+import { getChatItem } from '../roots'
+import styles from "../styles/styles";
 
 const RelationshipsScreen = ({route,navigation}) => {
     console.log("rel screen - params",route.params)
     const {walletName} = route.params
     const [refresh,setRefresh] = useState(true)
-    const [contacts,setContacts] = useState([])
+    const [rels,setRels] = useState([])
 
     useEffect(() => {
+        setRels(
+            getRelationships(walletName).filter(rel => rel.displayName !== PRISM_BOT && rel.displayName !== ROOTS_BOT)
+        )
         addRefreshTrigger(()=>{
-            console.log("contacts screen - toggling refresh")
-            setContacts(
+            console.log("toggling refresh")
+            setRefresh(!refresh)
+            setRels(
                 getRelationships(walletName).filter(rel => rel.displayName !== PRISM_BOT && rel.displayName !== ROOTS_BOT)
             )
-            setRefresh(!refresh)
-            console.log("contacts screen - contacts size",contacts.length)
         })
-        hasNewRels()
     },[])
 
     return (
         <View style={styles.container}>
             <SafeAreaView style={styles.container}>
                 <FlatList
-                    data={contacts}
+                    data={rels}
                     extraData={refresh}
                     keyExtractor={(item) => item.id}
                     ItemSeparatorComponent={() => <Divider />}

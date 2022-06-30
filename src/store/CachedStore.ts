@@ -17,7 +17,7 @@ export function getItem(alias: string) {
 export function getItems(regex: RegExp) {
     const keys = Object.keys(cachedItems).filter((key) => regex.test(key))
     logger("CachedStore - getting items",keys,"w/regex",regex)
-    let items: string[] = []
+    let items = []
     if(!keys || keys == null || keys.length <= 0) {
         logger("CachedStore - No items found w/regex",regex);
         return items;
@@ -65,7 +65,7 @@ export function removeItem(key: string) {
         delete cachedWallets[key]
         logger("CacheStore - removed",key)
     } catch(e) {
-        console.error("Failed to remove value",key,e,e.stack)
+        console.error("Failed to remove value",key,error,error.stack)
     }
 }
 

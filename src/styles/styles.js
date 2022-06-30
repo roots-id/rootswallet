@@ -1,21 +1,15 @@
 import {StyleSheet} from "react-native";
 
-export const styles = StyleSheet.create({
-    bigBlue: {
-        color: 'blue',
-        fontWeight: 'bold',
-        fontSize: 30,
-    },
-    button: {
-        width: 200,
+const styles = StyleSheet.create({
+    button:{
+        width: 150,
         borderRadius: 10,
-        backgroundColor: '#e69138',
-        alignSelf: 'center',
-        marginTop: 10,
+        backgroundColor: 'gold',
+        alignSelf: 'center'
     },
-    buttonText: {
+    buttonText:{
         marginHorizontal: 10,
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: "bold",
         flex: 1,
         alignSelf: 'center'
@@ -25,44 +19,20 @@ export const styles = StyleSheet.create({
         color: '#1c04ba'
     },
     clickableListTitle: {
-        fontSize: 22,
-        color: '#e69138',
-    },
-    closeButtonContainer: {
-        position: 'absolute',
-        top: 30,
-        right: 0,
-        zIndex: 1,
+      fontSize: 22,
+      color: '#e69138',
     },
     container: {
         backgroundColor: '#251520',
         flex: 1,
         justifyContent: 'center',
     },
-    containerCenter: {
-        backgroundColor: '#251520',
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    credLogoStyle: {
-        width:65,
-            height:75,
-        resizeMode:'contain',
-        margin:8
-    },
     detailTitle: {
         fontSize: 20,
         color: '#111111',
     },
-    email: {
-        textDecorationLine: 'underline',
-    },
-    hashTag: {
-        fontStyle: 'italic',
-    },
     header: {
-        color: '#999999',
+            color: '#999999',
         fontSize: 20,
         fontWeight: 'bold',
         marginHorizontal: 15,
@@ -81,17 +51,6 @@ export const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold"
     },
-    innerContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    input: {
-        marginTop: 10,
-        marginBottom: 10,
-        width: 250,
-        height: 70,
-    },
     inputStyle: {
         flex: 1,
         // autoCorrect: false,
@@ -107,12 +66,12 @@ export const styles = StyleSheet.create({
         alignSelf: 'center'
     },
     item: {
-        backgroundColor: '#20190e',
-        padding: 20,
-        marginVertical: 8,
-        marginHorizontal: 16,
+      backgroundColor: '#20190e',
+      padding: 20,
+      marginVertical: 8,
+      marginHorizontal: 16,
     },
-    leftHeader: {
+    leftheader: {
         color: '#999999',
         fontSize: 20,
         fontWeight: 'bold',
@@ -125,96 +84,53 @@ export const styles = StyleSheet.create({
         fontSize: 18,
         color: '#eeeeee',
     },
-    listItemCenteredBlack: {
-        fontSize: 18,
-        marginBottom: 10,
-        color: '#111111',
-        fontWeight: 'normal',
-        textAlignVertical: "center",
-        textAlign: "center",
-    },
-    listTitle: {
+      listTitle: {
         fontSize: 22,
         color: '#dddddd',
-    },
-    listDescription: {
+      },
+      listDescription: {
         fontSize: 16,
         color: '#dddddd',
-    },
-    loadingContainer: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
+      },
     loginButtonLabel: {
-        fontSize: 16,
-    },
-    magicNumber: {
-        fontSize: 42,
-        color: 'pink',
+      fontSize: 18,
     },
     modalContainer: {
         backgroundColor: '#251520',
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    name: {
-        color: 'red',
-    },
+      },
     navButtonText: {
-        fontSize: 16,
+      fontSize: 16,
     },
-    none: {
-        display: 'none'
+  none: {
+      display: 'none'
+  },
+  prism: {
+    color: '#940000',
+    textDecorationLine: 'underline',
+  },
+  problem: {
+      color: 'red',
+  },
+  rootsWallet: {
+    color: '#e69138'
+  },
+  row: {
+      flexDirection: "row",
+      flexWrap: "wrap",
     },
-    phone: {
-        color: 'blue',
-        textDecorationLine: 'underline',
-    },
-    pressable: {
-        position: 'absolute', left: 0, right: 0, top: 0, bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    prism: {
-        color: '#940000',
-        textDecorationLine: 'underline',
-    },
-    problem: {
-        color: 'red',
-    },
-    qr: {
-        color: 'orange',
-    },
-    red: {
-        color: 'red',
-    },
-    rootsWallet: {
-        color: '#e69138'
-    },
-    row: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-    },
-    scrollableModal: {
-        padding: 16,
-        width: '90%',
-        maxWidth: 350,
-        maxHeight: 250,
-        borderRadius: 3,
-        backgroundColor: '#cfbfca',
-    },
-    subText: {
-        fontSize: 16,
-        marginBottom: 10,
-        color: '#111111',
-        fontWeight: 'normal',
-        alignSelf: "flex-start",
-        justifyContent: "flex-start"
-    },
+  subText: {
+      fontSize: 16,
+      marginBottom: 10,
+      color: '#111111',
+      fontWeight: 'normal',
+      alignSelf: "flex-start",
+      justifyContent: "flex-start"
+  },
     text: {
-        color: 'blue',
-        fontSize: 15,
+        fontSize: 30,
     },
     titleText: {
         fontSize: 24,
@@ -223,35 +139,6 @@ export const styles = StyleSheet.create({
         fontWeight: 'normal',
         textAlignVertical: "center",
         textAlign: "center",
-    },
-    titleTextOrange: {
-        fontSize: 24,
-        marginBottom: 10,
-        color: '#ff9138',
-    },
-    videoContainer: {
-        marginTop: 50,
-    },
-    urlBlue: {
-        color: 'blue',
-        textDecorationLine: 'underline',
-    },
-    urlRed: {
-        color: 'red',
-        textDecorationLine: 'underline',
-    },
-    username: {
-        color: 'green',
-        fontWeight: 'bold',
-    },
-    viewAnimated: {
-        padding: 16,
-        width: '90%',
-        maxWidth: 400,
-        borderRadius: 3,
-        backgroundColor: '#cfbfca',
-        alignItems: 'center',
-        justifyContent: 'center',
     },
     walletIconStyle: {
         fontSize: 24,
@@ -269,11 +156,4 @@ export const styles = StyleSheet.create({
     },
 })
 
-export function displayProblem(problemDisabled) {
-    if(problemDisabled){
-        return styles.none
-    }
-    else{
-        return styles.problem
-    }
-}
+export default styles
