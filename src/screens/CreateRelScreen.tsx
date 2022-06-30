@@ -1,6 +1,6 @@
 import FormButton from '../components/FormButton';
 import FormInput from '../components/FormInput';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 import { IconButton, Title } from 'react-native-paper';
 import * as models from '../models'
@@ -15,7 +15,6 @@ export default function CreateRelScreen({ route, navigation }: CompositeScreenPr
   const [relAvatar, setRelAvatar] = useState<string>(rel.displayPictureUrl);
   const [relDid, setRelDid] = useState<string>(rel.did);
   const [problemDisabled, setProblemDisabled] = useState<boolean>(true)
-  const [errorText, setErrorText] = useState(<View/>)
 
   async function handleButtonPress() {
     if (relName.length > 0) {
@@ -30,14 +29,6 @@ export default function CreateRelScreen({ route, navigation }: CompositeScreenPr
       }
     }
   }
-
-  useEffect(() => {
-      if(!problemDisabled) {
-          setErrorText(<View><Text style={displayProblem(problemDisabled)}>Could not create relationship</Text></View>)
-      } else {
-          setErrorText(<View></View>)
-      }
-  },[problemDisabled])
 
   return (
       <View style={styles.container}>
@@ -69,7 +60,7 @@ export default function CreateRelScreen({ route, navigation }: CompositeScreenPr
               onChangeText={(text: string) => setRelDid(text)}
               clearButtonMode="while-editing"
           />
-        {errorText}
+          <Text disable={problemDisabled} style={displayProblem(problemDisabled)}>Could not create relationship</Text>
           <FormButton
               title="Create Relationship"
               modeValue="contained"
