@@ -244,6 +244,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     borderTopWidth: 1,
                     padding: 1,
                 }}
+                textInputStyle={{color: "white"}}
             />
         );
     }
@@ -258,7 +259,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         <View style={{backgroundColor: "#251520", flex: 1, display: "flex",}}>
             <GiftedChat
                 isTyping={processing}
-                messages={messages?.sort((a, b) => {return ((b.createdAt as Date).getDate() - (a.createdAt as Date).getDate())})}
+                messages={messages?.sort((a, b) => b.createdAt - a.createdAt)}
                 onPress={ (context, message) => processBubbleClick(context,message)}
                 onQuickReply={reply => handleQuickReply(reply)}
                 onSend={messages => handleSend(messages)}
@@ -316,6 +317,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                 placeholder={"Make a note..."}
                 renderInputToolbar={props => renderInputToolbar(props)}
                 //renderActions={renderActions}
+                renderAllAvatars={true}
                 renderAvatarOnTop={true}
                 renderBubble={renderBubble}
                 renderQuickReplySend={() => <Text style={{color: '#e69138', fontSize: 18}}>Confirm</Text>}

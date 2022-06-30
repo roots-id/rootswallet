@@ -88,12 +88,14 @@ export async function removeItem(key: string) {
 }
 
 export async function status() {
+  let keys: string[] = []
   try {
-    const keys = await AsyncStorage.getAllKeys()
-    logger("AsyncStore - keys:",keys)
+    keys = await AsyncStorage.getAllKeys()
   } catch(e) {
     console.error("AsyncStore - Could not get async store status,",e)
   }
+
+  logger("AsyncStore - keys:",keys)
 }
 
 export async function storeItem(alias: string, item: string, saveHistory: boolean=false) {

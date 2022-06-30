@@ -24,8 +24,6 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
     const [passwordAlpha, setPasswordAlpha] = useState<boolean>(false)
     const [passwordNumeric, setPasswordNumeric] = useState<boolean>(false)
     const [passwordLongEnough, setPasswordLongEnough] = useState<boolean>(false)
-    const [errorText, setErrorText] = useState(<View/>)
-
     console.log("CreateWalletScreen - start")
 
     const {signIn} = React.useContext(AuthContext);
@@ -42,24 +40,6 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
             console.log("password long enough?", passwordLongEnough)
         }, [password, confirmPassword]
     );
-
-    useEffect(() => {
-        if(!problemDisabled) {
-            setErrorText(<View><Text style={displayProblem(problemDisabled)}>Could not create relationship</Text></View>)
-        } else if(!passwordLongEnough) {
-            setErrorText(<Text style={displayProblem(passwordLongEnough)}>Password is not at least 8
-                characters</Text>)
-        } else if(!passwordAlpha) {
-            setErrorText(<Text style={displayProblem(passwordAlpha)}>Password does not contain letters</Text>)
-        } else if(!passwordNumeric) {
-            setErrorText(<Text style={displayProblem(passwordNumeric)}>Password does not contain
-                numbers</Text>);
-        } else if(!passwordsMatch) {
-            setErrorText(<Text style={displayProblem(passwordsMatch)}>Passwords do not match</Text>)
-        } else {
-            setErrorText(<View/>)
-        }
-    },[problemDisabled,passwordsMatch,passwordNumeric,passwordLongEnough,passwordAlpha])
 
     function handleOpenWithLinking() {
         Linking.openURL('https://www.rootsid.com/projects/rootswallet/help');
@@ -91,7 +71,13 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
                 secureTextEntry={true}
                 onChangeText={(userPassword: React.SetStateAction<string>) => setConfirmPassword(userPassword)}
             />
-            {errorText}
+            <Text disable={problemDisabled} style={displayProblem(problemDisabled)}>Could not create wallet</Text>
+            <Text disable={passwordsMatch} style={displayProblem(passwordsMatch)}>Passwords do not match</Text>
+            <Text disable={passwordAlpha} style={displayProblem(passwordAlpha)}>Password does not contain letters</Text>
+            <Text disable={passwordNumeric} style={displayProblem(passwordNumeric)}>Password does not contain
+                numbers</Text>
+            <Text disable={passwordLongEnough} style={displayProblem(passwordLongEnough)}>Password is not at least 8
+                characters</Text>
             <FormButton
                 disabled={!(passwordsMatch && passwordAlpha && passwordNumeric && passwordLongEnough)}
                 title="Create Wallet"
