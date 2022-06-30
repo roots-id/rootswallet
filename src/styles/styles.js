@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
         color: '#dddddd',
       },
     loginButtonLabel: {
-      fontSize: 18,
+      fontSize: 22,
     },
     modalContainer: {
         backgroundColor: '#251520',

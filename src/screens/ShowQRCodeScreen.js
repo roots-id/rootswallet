@@ -17,10 +17,7 @@ import { prismLogo } from '../roots'
 import styles from "../styles/styles";
 
 export default function ShowQRCodeScreen({ route, navigation }) {
-    const data = route.params.qrdata
-    console.log("raw qr data", data)
-    const jsonData = JSON.stringify(data)
-    console.log("json qr data", jsonData)
+    logger("get qr code for", route.params.qrdata)
     const qrView = 1
     const textView = 2
     const [viewSelection, setViewSelection] = useState(qrView)
@@ -37,7 +34,7 @@ export default function ShowQRCodeScreen({ route, navigation }) {
         switch(viewSelection) {
             case qrView:
                 setViewOut(<QRCode
-                    value={jsonData}
+                    value={ route.params.qrdata }
                     size={300}
                     logo={require('../assets/ATALAPRISM.png')}
                     logoSize={50}
@@ -47,7 +44,7 @@ export default function ShowQRCodeScreen({ route, navigation }) {
                 setViewIcon("toggle-switch")
                 break;
             case textView:
-                setViewOut(<Text>{jsonData}</Text>)
+                setViewOut(<Text>{ route.params.qrdata }</Text>)
                 setViewIcon("toggle-switch-off-outline")
                 break;
             default:
@@ -91,22 +88,18 @@ export default function ShowQRCodeScreen({ route, navigation }) {
           ],
         }}
       >
-      <View style={{flexDirection:'row',}}>
-          <ToggleButton
-                icon={viewIcon}
-                size={26}
-                color="#e69138"
-                value="toggle view switch"
-                status={viewSelection}
-                onPress={onButtonToggle}
-              />
-          <IconButton
-              icon="close-circle"
-              size={26}
-              color="#e69138"
-              onPress={() => navigation.goBack()}
+      <IconButton
+          icon="close-circle"
+          size={36}
+          color="#5b3a70"
+          onPress={() => navigation.goBack()}
+      />
+      <ToggleButton
+            icon={viewIcon}
+            value="toggle view switch"
+            status={viewSelection}
+            onPress={onButtonToggle}
           />
-      </View>
       {viewOut}
       </Animated.View>
     </View>
