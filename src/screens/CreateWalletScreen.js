@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
-import Hyperlink from 'react-native-hyperlink'
 import { Title } from 'react-native-paper';
 
 import FormButton from '../components/FormButton';
@@ -19,7 +18,6 @@ export default function CreateWalletScreen({ navigation }) {
 //  const [loading, setLoading] = useState(true);
   const [mnemonic, setMnemonic] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [walletName, setWalletName] = useState(TEST_WALLET_NAME);
   const [problemDisabled, setProblemDisabled] = useState(true)
   console.log("CreateWalletScreen - start")
@@ -51,7 +49,7 @@ export default function CreateWalletScreen({ navigation }) {
   while(!initialized) {
       return (
           <View style={styles.modalContainer}>
-            <Title style={styles.titleText}>Create wallet password:</Title>
+            <Title style={styles.titleText}>Creating new wallet with password:</Title>
             <FormInput
                 labelName="Wallet Name"
                 value={walletName}
@@ -63,12 +61,6 @@ export default function CreateWalletScreen({ navigation }) {
                 value={password}
                 secureTextEntry={true}
                 onChangeText={(userPassword) => setPassword(userPassword)}
-            />
-            <FormInput
-                labelName="Confirm Password"
-                value={confirmPassword}
-                secureTextEntry={true}
-                onChangeText={(userPassword) => setConfirmPassword(userPassword)}
             />
             <Text disable={problemDisabled} style={displayProblem(problemDisabled)}>Could not create wallet</Text>
             <FormButton
@@ -88,14 +80,6 @@ export default function CreateWalletScreen({ navigation }) {
                   }
                 }}
             />
-            <View>
-              <Hyperlink linkStyle={ { color: '#2980b9', fontSize: 20 } }
-                linkText={ url => url === 'https://rootswallet.com/help' ? 'Need help?' : url }>
-                <Text style={ { fontSize: 15 } }>
-                    https://rootswallet.com/help
-                </Text>
-              </Hyperlink>
-            </View>
           </View>
       );
    }
