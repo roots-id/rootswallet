@@ -34,7 +34,7 @@ export default function CreateChatScreen({ navigation }) {
           <IconButton
               icon="close-circle"
               size={36}
-              color="#e69138"
+              color="#5b3a70"
               onPress={() => navigation.goBack()}
           />
         </View>

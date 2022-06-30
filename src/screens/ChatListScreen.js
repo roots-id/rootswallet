@@ -4,7 +4,6 @@ import { FlatList, NativeModules, SafeAreaView, StyleSheet, View, Text } from 'r
 import { Divider, List } from 'react-native-paper';
 import FormButton from '../components/FormButton';
 
-import { YOU_ALIAS } from '../relationships'
 import { getAllChats } from '../roots';
 import Loading from '../components/Loading';
 

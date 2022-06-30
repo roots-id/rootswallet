@@ -6,7 +6,7 @@ export default function SimpleTitle(...props) {
   return (
         <View style={{flexDirection:'row',}}>
             <Text style={{ color: '#eeeeee',fontSize: 22,fontWeight: 'normal',textAlignVertical: "center",textAlign: "center", }}>
-                {props[0]["title"]}
+                {props[0]["title"].substring(0,11)+"..."}
             </Text>
         </View>
   );

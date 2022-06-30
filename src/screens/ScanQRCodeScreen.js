@@ -13,51 +13,28 @@ import { useCardAnimation } from '@react-navigation/stack';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 
 import {logger} from '../logging';
-import { getDemoRel, personLogo, prismLogo} from '../relationships';
-import { isDemo, handleNewData } from '../roots'
-
+import { prismLogo } from '../roots'
 //import styles from "../styles/styles";
 
 export default function ScanQRCodeScreen({ route, navigation }) {
+  logger("scan qr code - ")
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const { colors } = useTheme();
   const { current } = useCardAnimation();
-  let interval;
 
-    const handleDemo = () => {
-      if(isDemo()) {
-        console.log("scan qr - pretending to scan with demo data")
-        clearInterval(interval)
-        setScanned(true)
-        const demoData = getDemoRel()
-        console.log("scan qr - pretend object has keys",Object.keys(demoData))
-        const jsonData = JSON.stringify(demoData)
-        console.log("scan qr - pretend data is",jsonData)
-        handleNewData(jsonData)
-        if(navigation.canGoBack()) {
-            navigation.goBack()
-        }
-      }
-    }
+  useEffect(() => {
+    (async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
 
-    useEffect(async () => {
-        const { status } = await BarCodeScanner.requestPermissionsAsync();
-        setHasPermission(status === 'granted');
-        if(status && isDemo()) {
-            interval = setInterval(handleDemo, 5000);
-        }
-    },[])
-
-
-    const handleBarCodeScanned = ({ type, data }) => {
-        setScanned(true);
-        clearInterval(interval)
-        handleNewData(data)
-        if(navigation.canGoBack()) {
-            navigation.goBack()
-        }
-    };
+  const handleBarCodeScanned = ({ type, data }) => {
+    setScanned(true);
+    navigation.navigate('Create Rel', { did: data })
+    //alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+  };
 
   if (hasPermission === null) {
     return <Text>Requesting camera permission</Text>;
@@ -104,8 +81,8 @@ export default function ScanQRCodeScreen({ route, navigation }) {
         <IconButton
             icon="close-circle"
             size={36}
-            color="#e69138"
-            onPress={navigation.goBack}
+            color="#5b3a70"
+            onPress={() => navigation.goBack()}
         />
         <View style={{
 

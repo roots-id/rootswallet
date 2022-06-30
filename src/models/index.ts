@@ -15,7 +15,6 @@ export const MODEL_TYPE_SETTING = "rootsSettingType"
 
 export function createChat(chatAlias: string, fromDidAlias: string, toIds: string[], title=chatAlias) {
     const chat = {
-        dataType: MODEL_TYPE_CHAT,
         id: chatAlias,
         toDids: toIds,
         fromAlias: fromDidAlias,
@@ -28,7 +27,6 @@ export function createChat(chatAlias: string, fromDidAlias: string, toIds: strin
 
 export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,relId: string,system?: boolean=false,data?: Object=undefined) {
     const msg = {
-        dataType: MODEL_TYPE_MESSAGE,
         id: idText,
         body: bodyText,
         type: statusText,
@@ -42,15 +40,13 @@ export function createMessage(idText: string,bodyText: string,statusText: string
 }
 
 export function createMessageId(chatAlias: string,relId: string,msgNum: number) {
-    logger("model - creating message id",chatAlias,relId,msgNum)
     let msgId = getStorageKey(chatAlias,MODEL_TYPE_MESSAGE)+ID_SEPARATOR+relId+ID_SEPARATOR+String(msgNum);
-    logger("model - Generated msg id",msgId);
+    logger("roots - Generated msg id",msgId);
     return msgId;
 }
 
 export function createRel(relAlias: string, relName: string, relPicUrl: string, did?: string) {
     const rel = {
-        dataType: MODEL_TYPE_REL,
         id: relAlias,
         displayName: relName,
         displayPictureUrl: relPicUrl,

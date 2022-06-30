@@ -14,7 +14,7 @@ const HomeScreen = (props) => {
             />
             <Button
                 title={"CredentialsScreen"}
-                onPress={() => props.navigation.navigate("VCs")}
+                onPress={() => props.navigation.navigate("Credentials")}
             />
             <Button
                 title={"CommunicationsScreen"}
