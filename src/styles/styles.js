@@ -183,7 +183,7 @@ export const styles = StyleSheet.create({
         textDecorationLine: 'underline',
     },
     problem: {
-        color: 'red',
+        color: '#ff5521',
     },
     qr: {
         color: 'orange',

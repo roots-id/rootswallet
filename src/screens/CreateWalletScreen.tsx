@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Linking, SafeAreaView, StyleSheet, Text, TextInput, TextProps, View} from 'react-native';
-import {Divider, List, Title} from 'react-native-paper';
+import {Button, Image, Linking, Text, View} from 'react-native';
+import {Title} from 'react-native-paper';
 import AuthContext from '../context/AuthenticationContext';
 import FormButton from '../components/FormButton';
 import FormInput from '../components/FormInput';
@@ -10,6 +10,8 @@ import {createWallet, getWallet} from '../wallet'
 
 import {displayProblem, styles} from "../styles/styles";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
+import {WALLET_LOGIN_SUCCESS} from "../store";
+import {brandLogo} from "../relationships";
 
 export default function CreateWalletScreen({route, navigation}: CompositeScreenProps<any, any>) {
     const [initialized, setInitialized] = useState<boolean>(false);
@@ -23,10 +25,11 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
     const [passwordsMatch, setPasswordsMatch] = useState<JSX.Element>(<Text/>)
     const [passwordAlpha, setPasswordAlpha] = useState<JSX.Element>(<Text/>)
     const [passwordNumeric, setPasswordNumeric] = useState<JSX.Element>(<Text/>)
+    const [passwordAlphaNumericOnly, setPasswordAlphaNumericOnly] = useState<JSX.Element>(<Text/>)
     const [passwordLongEnough, setPasswordLongEnough] = useState<JSX.Element>(<Text/>)
     const [userName, setUserName] = useState<string>('');
     const [userNameValid, setUserNameValid] = useState<JSX.Element>(<Text/>)
-    const [walletName, setWalletName] = useState<string>('');
+    const [walletName, setWalletName] = useState<string>("RootsWalletName_"+ Date.now());
     const [walletNameValid, setWalletNameValid] = useState<JSX.Element>(<Text/>)
 
     console.log("CreateWalletScreen - start")
@@ -45,38 +48,53 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
 
     function checkErrors() {
         const passNumeric = (/\d/.test(password))
+        console.error("CreateWalletScreen - password must contain numbers",passNumeric)
         setPasswordNumeric(<Text style={displayProblem(!passNumeric)}>Password must contain
             numbers</Text>)
+
         const prob = problemText && problemText.length > 0
         console.error("CreateWalletScreen - problem detected", problemText)
-        setProblem(<Text style={displayProblem(prob)}>{problem}</Text>)
+        setProblem(<Text style={displayProblem(prob)}>{problemText}</Text>)
+
         const passAlpha = (/[a-zA-Z]/.test(password))
-        console.log("password must contain letters")
+        console.log("password must contain letters",passAlpha)
         setPasswordAlpha(<Text style={displayProblem(!passAlpha)}>Password must contain letters</Text>)
+
+        const passAlphaNumOnly = (/^[\da-zA-Z]+$/).test(password)
+        console.log("password can only contain numbers and letters",passAlphaNumOnly)
+        setPasswordAlphaNumericOnly(<Text style={displayProblem(!passAlphaNumOnly)}>Password can only contain numbers and letters</Text>)
+
         const passLength = password.length >= 8
         console.log("password not long enough", passLength)
         setPasswordLongEnough(<Text style={displayProblem(!passLength)}>Password must be at least 8
             characters</Text>)
+
         const passMatch = (password === confirmPassword)
         console.log("passwords must match", password, confirmPassword);
         setPasswordsMatch(<Text style={displayProblem(!passMatch)}>Passwords must match</Text>)
+
         const userValid = (userName && userName.length > 0)
         console.log("user name must be set", userName);
         setUserNameValid(<Text style={displayProblem(!userValid)}>User name must be set</Text>)
+
         const walletValid = (walletName && walletName.length > 0)
         console.log("wallet name must be set", walletName);
         setWalletNameValid(<Text style={displayProblem(!walletValid)}>Wallet name must be set</Text>)
-        if (walletValid && userValid && passNumeric && passAlpha && passLength && passMatch) {
+
+        if (walletValid && userValid && passNumeric && passAlpha &&
+            passLength && passMatch && passAlphaNumOnly) {
             setCreateWalletButton(<FormButton
-                disabled={!(walletValid && userValid && passwordsMatch && passwordAlpha && passwordNumeric && passwordLongEnough)}
+                disabled={!(walletValid && userValid && passwordsMatch &&
+                    passwordAlpha && passwordNumeric && passwordAlphaNumericOnly &&
+                    passwordLongEnough && passAlphaNumOnly)}
                 title="Create Wallet"
                 modeValue="contained"
                 labelStyle={styles.loginButtonLabel}
                 onPress={async () => {
                     console.log("creating wallet", walletName, mnemonic, password)
                     try {
-                        const created = await createWallet(walletName, mnemonic, password);
-                        if (created) {
+                        const msg = await createWallet(walletName, mnemonic, password);
+                        if (msg === WALLET_LOGIN_SUCCESS) {
                             console.log("CreateWalletScreen - Wallet created")
                             const walName = getWallet(walletName)
                             if (walName) {
@@ -91,8 +109,8 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
                                 console.error("Created wallet but can't find name",walName)
                             }
                         } else {
-                            console.error("CreateWalletScreen - Creating wallet failed");
-                            setProblemText("Wallet creation failed")
+                            console.error("CreateWalletScreen - Creating wallet failed",msg);
+                            setProblemText(msg)
                         }
                     } catch (error: any) {
                         console.error("CreateWalletScreen - Creating wallet failed", error, error.stack)
@@ -127,14 +145,11 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
 
     return (
         <View style={styles.centeredContainer}>
-            <Title style={styles.titleText}>Create wallet password:</Title>
-            <FormInput
-                labelName="Wallet Name"
-                onChangeText={(wName: React.SetStateAction<string>) => setWalletName(wName)}
-                placeholder={"Name your wallet"}
-                secureTextEntry={false}
-                value={walletName}
+            <Image
+                style={{ width: 150, height: 150 }}
+                source={brandLogo}
             />
+            <Title style={styles.titleText}>Create wallet password:</Title>
             <FormInput
                 labelName="User Name"
                 onChangeText={(uName: React.SetStateAction<string>) => setUserName(uName)}
@@ -158,6 +173,7 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
             />
             {walletNameValid}
             {userNameValid}
+            {passwordAlphaNumericOnly}
             {passwordAlpha}
             {passwordNumeric}
             {passwordLongEnough}
