@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: '#251520',
         flex: 1,
-        justifyContent: 'center',
+
     },
     text: {
         fontSize: 30,
@@ -73,13 +73,11 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 10,
     color: '#eeeeee',
-    fontWeight: 'normal',
-    textAlignVertical: "center",
-    textAlign: "center",
   },
     listItem: {
         fontSize: 18,
         color: '#eeeeee',
+
     },
       listTitle: {
         fontSize: 22,

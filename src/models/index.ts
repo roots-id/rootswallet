@@ -1,13 +1,11 @@
 import { logger } from '../logging';
 
-const ID_SEPARATOR = "_"
-
 //these types must be unique enough to use in regex without conflict
 export const MODEL_TYPE_CHAT = "rootsChatType"
 export const MODEL_TYPE_MESSAGE = "rootsMsgType"
 export const MODEL_TYPE_CREDENTIAL = "rootsCredentialType"
 export const MODEL_TYPE_CRED_REQUEST = "rootsCredRequestType"
-export const MODEL_TYPE_REL = "rootsRelType"
+export const MODEL_TYPE_USER = "rootsUserType"
 
 export function createChat(chatAlias: string, titlePrefix?: string) {
     const chat = {
@@ -19,13 +17,13 @@ export function createChat(chatAlias: string, titlePrefix?: string) {
     return chat;
 }
 
-export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,relId: string,system?: boolean=false,cred?: Object=undefined) {
+export function createMessage(idText: string,bodyText: string,statusText: string,timeInMillis: number,userId: string,system?: boolean=false,cred?: Object=undefined) {
     const msg = {
         id: idText,
         body: bodyText,
         type: statusText,
         createdTime: timeInMillis,
-        rel: relId,
+        user: userId,
         system: system,
         cred: cred,
     }
@@ -33,27 +31,12 @@ export function createMessage(idText: string,bodyText: string,statusText: string
     return msg;
 }
 
-export function createMessageId(chatAlias: string,relId: string,msgNum: number) {
-    let msgId = getStorageKey(chatAlias,MODEL_TYPE_MESSAGE)+ID_SEPARATOR+relId+ID_SEPARATOR+String(msgNum);
-    logger("roots - Generated msg id",msgId);
-    return msgId;
-}
-
-export function createRel(relAlias: string, relName: string, relPicUrl: string) {
-    const rel = {
-        id: relAlias,
-        displayName: relName,
-        displayPictureUrl: relPicUrl,
+export function createUser(userAlias: string, userName: string, userPicUrl: string) {
+    const user = {
+        id: userAlias,
+        displayName: userName,
+        displayPictureUrl: userPicUrl,
     }
-    logger("models - create rel model w/keys",Object.keys(rel))
-    return rel;
-}
-
-//---------------- Keys -----------------------
-export function getStorageKey(alias: string,type: string) {
-    return alias+ID_SEPARATOR+type
-}
-
-export function getStorageKeys(aliases: string[], type: string) {
-    return aliases.map(alias => getStorageKey(alias,type))
+    logger("models - create user model w/keys",Object.keys(user))
+    return user;
 }

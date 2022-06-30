@@ -7,7 +7,6 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.rootsid.wal.library.*
-//import io.iohk.atala.prism.api.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
@@ -66,25 +65,6 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     }
 
     @ReactMethod
-    fun importCred(walJson: String, credAlias: String, credJson: String, promise: Promise) {
-        Log.d("PRISM_TAG","Importing credential for "+credAlias+" from wallet "+walJson);
-        thread(start = true) {
-            try {
-                val importedCredential = ImportedCredential(
-                    credAlias,
-                    Json.decodeFromString<VerifiedCredential>(credJson)
-                )
-                var newWal = Json.decodeFromString<Wallet>(walJson);
-                newWal.importedCredentials.add(importedCredential)
-                //Log.d("PRISM_TAG","Credential imported",walJson)
-                promise.resolve(Json.encodeToString(newWal));
-            } catch (e: Exception) {
-                promise.reject("Publish Error", e);
-            }
-        }
-    }
-
-    @ReactMethod
     fun issueCred(walJson: String, didAlias: String, credJson: String, promise: Promise) {
         Log.d("PRISM_TAG","Issuing credential for "+didAlias+" from wallet "+walJson);
         thread(start = true) {
@@ -101,21 +81,6 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
         }
     }
 
-    //TODO deal with build errors regarding iog.api
-//    @ReactMethod
-//    fun verifyCred(walJson: String, credAlias: String, promise: Promise) {
-//        Log.d("PRISM_TAG","Verifying credential for "+credAlias+" from wallet "+walJson);
-//        thread(start = true) {
-//            try {
-//                var cliWal = Json.decodeFromString<Wallet>(walJson);
-//                var verResult = Json.encodeToString(verifyIssuedCredential(cliWal, credAlias))
-//                Log.d("PRISM_TAG","Credential "+credAlias+" is " + verResult)
-//                promise.resolve(verResult);
-//            } catch (e: Exception) {
-//                promise.reject("Publish Error", e);
-//            }
-//        }
-//    }
 //    @ReactMethod
 //    public void fetch(final String path, final Promise promise) {
 //        new Thread(new Runnable() {
