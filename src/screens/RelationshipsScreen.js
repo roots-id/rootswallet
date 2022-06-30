@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import {FlatList, Image, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {FlatList, SafeAreaView, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import { Divider, List } from 'react-native-paper';
-import {getRelationships} from '../relationships'
+import {getRelationships} from '../utils/relationshipsManager'
 import {getCredentials} from '../utils/credentialsRetriever'
 import Relationship from '../models/relationship'
 import styles from "../styles/styles";
@@ -11,7 +11,7 @@ const RelationshipsScreen = ({route,navigation}) => {
     const {walletName} = route.params
     console.log(`walletName: ${walletName}`)
 
-    const relationships = getRelationships(walletName).filter(rel => rel.displayName !== 'You')
+    const relationships = getRelationships(walletName)
 
     const goToRel = (key) => {
         console.log(`> RelationshipsScr.pressHandler( ${key})`)
@@ -42,33 +42,17 @@ const RelationshipsScreen = ({route,navigation}) => {
             <SafeAreaView style={styles.container}>
                 <FlatList
                     data={relationships}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item.key}
                     ItemSeparatorComponent={() => <Divider />}
                     renderItem={({ item }) => (
-                    <React.Fragment>
-                        <View style={{flex: 1,flexDirection:'row',}}>
-                            <SafeAreaView>
-                            <Image source={item.displayPictureUrl}
-                                style={{
-                                  width:65,
-                                  height:75,
-                                  resizeMode:'contain',
-                                  margin:8
-                                }}
-                            />
-                            </SafeAreaView>
-                            <SafeAreaView style={styles.container}>
-                            <List.Item
-                              title={item.displayName}
-                              titleNumberOfLines={1}
-                              titleStyle={styles.listTitle}
-                              descriptionStyle={styles.listDescription}
-                              descriptionNumberOfLines={1}
-                              onPress={() => goToRel(item)}
-                            />
-                            </SafeAreaView>
-                        </View>
-                    </React.Fragment>
+                    <List.Item
+                      title={item.key}
+                      titleNumberOfLines={1}
+                      titleStyle={styles.listTitle}
+                      descriptionStyle={styles.listDescription}
+                      descriptionNumberOfLines={1}
+                      onPress={() => goToRel(item)}
+                    />
                     )}
                 />
             </SafeAreaView>

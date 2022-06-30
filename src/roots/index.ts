@@ -3,8 +3,14 @@ import { logger } from '../logging'
 import PrismModule from '../prism'
 import { Reply } from 'react-native-gifted-chat';
 import * as store from '../store'
-import * as rel from '../relationships'
 import * as walletSchema from '../schemas/WalletSchema'
+
+import rwLogo from '../assets/LogoOnly1024.png'
+import perLogo from '../assets/smallBWPerson.png'
+import apLogo from '../assets/ATALAPRISM.png'
+export const rootsLogo = rwLogo;
+export const personLogo = perLogo;
+export const prismLogo = apLogo;
 
 //msg types
 export const BLOCKCHAIN_URI_MSG_TYPE = "blockchainUri";
@@ -12,9 +18,8 @@ export const CREDENTIAL_JSON_MSG_TYPE = "jsonCredential";
 export const DID_JSON_MSG_TYPE = "jsonDid";
 export const PENDING_STATUS_MESSAGE = "rootsPendingStatus";
 export const PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE = "rootsAcceptCredential"
-export const PROMPT_OWN_CREDENTIAL_MSG_TYPE = "rootsOwnCredential"
-export const PROMPT_PUBLISH_MSG_TYPE = "rootsPromptPublish";
-export const PRISM_LINK_MSG_TYPE = "rootsPrismLink"
+export const PROMPT_PUBLISH_MSG_TYPE = "promptPublish";
+export const PRISM_LINK_MSG_TYPE = "prismLink"
 export const QR_CODE_MSG_TYPE = "rootsQRCodeMsgType"
 export const STATUS_MSG_TYPE = "status";
 export const TEXT_MSG_TYPE = "text"
@@ -22,22 +27,25 @@ export const TEXT_MSG_TYPE = "text"
 //meaningful literals
 export const ACHIEVEMENT_MSG_PREFIX = "You have a new achievement: ";
 export const PUBLISHED_TO_PRISM = "Published to Prism"
-export const SHOW_CRED_QR_CODE = "Show Cred QR code"
+export const SHOW_CRED_QR_CODES = "Show Cred QR codes"
 export const SHOW_DID_QR_CODE = "Show Chat QR code"
 
 //state literals
 export const CRED_ACCEPTED = "credAccepted"
 export const CRED_REJECTED = "credRejected"
 export const CRED_SENT = "credSent"
-export const CRED_VERIFY = "credVerify"
-export const CRED_VIEW = "credView"
-export const PUBLISH_DID = "publishDID"
-export const DO_NOT_PUBLISH_DID = "doNotPublishDID"
 
-const allChatsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CHAT)+'*')
-const allCredsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CREDENTIAL)+'*')
-const allCredReqsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_CRED_REQUEST)+'*')
-const allMsgsRegex = new RegExp(models.getStorageKey("",models.MODEL_TYPE_MESSAGE)+'*')
+const ID_SEPARATOR = "_"
+
+const allChatsRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_CHAT)+'*')
+//const allCredsRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_CREDENTIAL)+'*')
+const allCredReqsRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_CRED_REQUEST)+'*')
+const allMsgsRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_MESSAGE)+'*')
+const allUsersRegex = new RegExp(getStorageKey("",models.MODEL_TYPE_USER)+'*')
+
+const ROOTS_BOT = "RootsWalletBot1"
+const PRISM_BOT = "PrismBot1"
+const LIBRARY_BOT = "LibraryBot1"
 
 export const TEST_WALLET_NAME = "testWalletName"
 const demo = true;
@@ -51,11 +59,11 @@ export async function loadAll(walName: string,walPass: string) {
     const wallet = await loadWallet(walName, walPass);
     if(wallet) {
         const chats = await loadItems(allChatsRegex)
-        const rels = await loadItems(rel.allRelsRegex);
+        const users = await loadItems(allUsersRegex);
         const messages = await loadItems(allMsgsRegex);
         const credRequests = await loadItems(allCredReqsRegex);
-        const creds = await loadItems(allCredsRegex);
-        if(wallet && chats && rels && messages && credRequests) {
+        //const creds = await loadItems(allCredsRegex);
+        if(wallet && chats && users && messages && credRequests) {
             return wallet
         } else {
             logger("Failed to load all items")
@@ -67,16 +75,70 @@ export async function loadAll(walName: string,walPass: string) {
     }
 }
 
+//----------------- User -----------------
+//TODO unify aliases and storageKeys?
+async function createUserItem(alias: string, name: string, pic: string) {
+    try {
+        if(getUserItem(alias)) {
+            logger("roots - user already exists",alias)
+            return true;
+        } else {
+            logger("roots - user did not exist",alias)
+            const userItem = models.createUser(alias, name, pic)
+            const userItemJson = JSON.stringify(userItem)
+            logger("generated user",userItemJson)
+            const result = await store.saveItem(getStorageKey(alias, models.MODEL_TYPE_USER), userItemJson)
+            logger("roots - created user",alias,"?",result)
+            return result;
+        }
+    } catch(error) {
+        console.error("Failed to create user",alias,error,error.stack)
+        return false
+    }
+}
+
+export function getUserItem(userId) {
+    logger("roots - Getting user",userId)
+    if(userId) {
+        const userItemJson = store.getItem(getStorageKey(userId,models.MODEL_TYPE_USER));
+        logger("roots - Got user json",userItemJson)
+        if(userItemJson) {
+            const userItem = JSON.parse(userItemJson)
+            logger("roots - user w/keys",Object.keys(userItem))
+            return userItem
+        } else {
+            logger("roots - user not found",userId)
+            return userItemJson
+        }
+    } else {
+        logger("roots - can't get user for undefined userId",userId)
+    }
+}
+
+async function loadUsers() {
+    try {
+        const aliases = getAllDidAliases(currentWal);
+        const result = await store.restoreItems(getStorageKeys(aliases,models.MODEL_TYPE_USER));
+        if(result) {
+            logger("roots - successfully loaded chat items",aliases)
+            return true;
+        }
+        else {
+            console.error("roots - Failed to load chat items",aliases)
+            return false;
+        }
+    } catch(error) {
+        console.error("roots - Failed to load chat items",error,error.stack)
+        return false;
+    }
+}
+
 //----------------- Wallet ---------------------
 export async function createWallet(walName,mnemonic,walPass) {
     const prismWal = PrismModule.newWal(walName,mnemonic,walPass)
     const result = await updateWallet(walName,walPass,prismWal)
     if(result) {
         logger('Wallet created',store.getWallet(currentWal._id))
-        if(demo) {
-            logger("roots - initializing demo")
-            await initDemo()
-        }
         return result;
     } else {
         logger('Could not create wallet',walName,walPass)
@@ -197,16 +259,16 @@ export async function createChat (chatAlias, titlePrefix) {
     logger("roots - chat item created/existed?",chatItemCreated)
     const chatItem = getChatItem(chatDidAlias)
     logger("roots - chat item",chatItem)
-    //TODO what should the rel defaults be?
-    const chatRelCreated = await rel.createRelItem(chatDidAlias,"You",rel.personLogo)
-    logger("roots - chat rel created/existed?",chatRelCreated)
-    const chatRel = rel.getRelItem(chatDidAlias)
+    //TODO what should the user defaults be?
+    const chatUserCreated = await createUserItem(chatDidAlias,"You",personLogo)
+    logger("roots - chat user created/existed?",chatUserCreated)
+    const chatUser = getUserItem(chatDidAlias)
 
-    if(chatDidCreated && chatItemCreated && chatRelCreated) {
-        const sentWelcome = await sendMessage(chatItem,"Welcome to *"+chatAlias+"*",TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
+    if(chatDidCreated && chatItemCreated && chatUserCreated) {
+        const sentWelcome = await sendMessage(chatItem,"Welcome to *"+chatAlias+"*",TEXT_MSG_TYPE,getUserItem(ROOTS_BOT))
         if(sentWelcome) {
             await sendMessage(chatItem,"Would you like to publish this chat to Prism?",
-                PROMPT_PUBLISH_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
+                PROMPT_PUBLISH_MSG_TYPE,getUserItem(PRISM_BOT))
             logger("Created chat and added welcome to chat",chatAlias,"with chatDid",chatDidAlias)
         }
         return true;
@@ -224,7 +286,7 @@ async function createChatItem(chatAlias: string, titlePrefix: string) {
         return true
     } else {
         const chatItem = models.createChat(chatAlias, [], titlePrefix)
-        const savedChat = await store.saveItem(models.getStorageKey(chatAlias, models.MODEL_TYPE_CHAT), JSON.stringify(chatItem))
+        const savedChat = await store.saveItem(getStorageKey(chatAlias, models.MODEL_TYPE_CHAT), JSON.stringify(chatItem))
         if(savedChat) {
             logger('roots - new chat saved',chatAlias)
             return true
@@ -238,7 +300,10 @@ async function createChatItem(chatAlias: string, titlePrefix: string) {
 //TODO iterate to verify DID connections if cache is expired
 export async function getAllChats () {
     const allChats = getChatItems();
-
+    if(allChats.length == 0 && demo) {
+        logger("roots - adding demo to chats")
+        await initDemo()
+    }
     const result = {paginator: {items: allChats}};
     result.paginator.items.forEach(function (item, index) {
         logger("roots - getting chats",index+".",item.id);
@@ -248,7 +313,7 @@ export async function getAllChats () {
 
 export function getChatItem(chatAlias: string) {
     logger("roots - getting chat item",chatAlias)
-    const chatJson = store.getItem(models.getStorageKey(chatAlias,models.MODEL_TYPE_CHAT))
+    const chatJson = store.getItem(getStorageKey(chatAlias,models.MODEL_TYPE_CHAT))
     logger("roots - got chat",chatJson)
     if(chatJson) {
         const chat = JSON.parse(chatJson)
@@ -283,7 +348,7 @@ function getAllDidAliases(wallet) {
 async function loadChats() {
     try {
         const aliases = getAllDidAliases(currentWal);
-        const result = await store.restoreItems(models.getStorageKeys(aliases,models.MODEL_TYPE_CHAT));
+        const result = await store.restoreItems(getStorageKeys(aliases,models.MODEL_TYPE_CHAT));
         if(result) {
             logger("roots - successfully loaded chat items",aliases)
             return true;
@@ -302,6 +367,7 @@ async function loadChats() {
 export async function publishChat(chat: Object) {
     if(!chat["published"]) {
         logger("roots - Publishing DID",chat.id,"to Prism")
+        isProcessing(true)
         try {
             const newWalJson = await PrismModule.publishDid(store.getWallet(currentWal._id), chat.id)
             const result = await updateWallet(currentWal._id,currentWal.passphrase,newWalJson)
@@ -312,18 +378,22 @@ export async function publishChat(chat: Object) {
                 const savedChat = await updateChat(chat);
                 if(savedChat) {
                     logger("Chat for published DID saved",chat.id)
+                    isProcessing(false)
                     return chat
                 } else {
                     //TODO since wallet is updated, should try to save chat again and again until successful
                     logger("Could not save chat for published DID",chat.id)
+                    isProcessing(false)
                     return;
                 }
             } else {
                 logger("roots - During publish, could not update wallet")
+                isProcessing(false)
                 return;
             }
         } catch(error) {
             logger("roots - Error publishing chat/DID",chat.id,error,error.stack)
+            isProcessing(false)
         }
     } else {
         logger("roots - ",chat.id,"is already",PUBLISHED_TO_PRISM)
@@ -332,7 +402,7 @@ export async function publishChat(chat: Object) {
 }
 
 async function updateChat(chat: Object) {
-    const chatStoreId = models.getStorageKey(chat.id,models.MODEL_TYPE_CHAT);
+    const chatStoreId = getStorageKey(chat.id,models.MODEL_TYPE_CHAT);
     const updated = await store.updateItem(chatStoreId,JSON.stringify(chat));
     if(updated) {
         logger("Updated chat storage",chatStoreId);
@@ -366,6 +436,12 @@ function addMessageExtensions(msg) {
     return msg
 }
 
+function createMessageId(chatAlias: string,userId: string,msgNum: number) {
+    let msgId = getStorageKey(chatAlias,models.MODEL_TYPE_MESSAGE)+ID_SEPARATOR+userId+ID_SEPARATOR+String(msgNum);
+    logger("roots - Generated msg id",msgId);
+    return msgId;
+}
+
 export function getMessages(chatAlias: string, startFromMsgId?: string) {
     const chMsgs = getMessageItems(chatAlias)
     logger("roots - Getting chat",chatAlias,chMsgs.length,"messages")
@@ -395,7 +471,7 @@ export function getMessages(chatAlias: string, startFromMsgId?: string) {
 
 export function getMessageItems(chatAlias: string) {
     logger("roots - getting message items for chat",chatAlias)
-    const msgRegex = new RegExp('^'+models.getStorageKey(chatAlias,models.MODEL_TYPE_MESSAGE)+'*')
+    const msgRegex = new RegExp('^'+getStorageKey(chatAlias,models.MODEL_TYPE_MESSAGE)+'*')
     const msgItemJsonArray = store.getItems(msgRegex)
     logger("roots - got msg items",msgItemJsonArray.length)
     const chatMsgs = msgItemJsonArray.map(
@@ -425,27 +501,25 @@ async function loadItems(regex: RegExp) {
     }
 }
 
-export async function sendMessages(chat,msgs,msgType,relDisplay) {
-    msgs.map(async (msg) => await sendMessage(chat,msg.text,msgType,relDisplay))
+export async function sendMessages(chat,msgs,msgType,userDisplay) {
+    msgs.map(async (msg) => await sendMessage(chat,msg.text,msgType,userDisplay))
 }
 
 //TODO unify aliases and storageKeys?
-export async function sendMessage(chat,msgText,msgType,relDisplay,system=false,cred=undefined) {
+export async function sendMessage(chat,msgText,msgType,userDisplay,system=false,cred=undefined) {
     const msgTime = Date.now()
-    logger("roots - rel",relDisplay.id,"sending\"",msgText,"\"to chat:",chat.id);
-    const msgId = models.createMessageId(chat.id,relDisplay.id,msgTime);
-    let msg = models.createMessage(msgId, msgText, msgType, msgTime, relDisplay.id, system, cred);
+    logger("roots - user",userDisplay.id,"sending",msgText,"to chat",chat.id);
+    const msgId = createMessageId(chat.id,userDisplay.id,msgTime);
+    let msg = models.createMessage(msgId, msgText, msgType, msgTime, userDisplay.id, system, cred);
     msg = addMessageExtensions(msg);
     try {
-        const msgJson = JSON.stringify(msg)
-        const result = await store.saveItem(msg.id,msgJson)
+        const result = await store.saveItem(msg.id,JSON.stringify(msg))
         if(handlers["onReceivedMessage"]) {
             handlers["onReceivedMessage"](msg)
         }
-        logger("Sent/Stored message",msgJson)
         return msg
     } catch(error) {
-        console.error("Could not save message for rel",relDisplay.id,"w/msg",msgText,"to chat",chat.id,error,error.stack)
+        console.error("Could not save message for user",userDisplay.id,"w/msg",msgText,"to chat",chat.id,error,error.stack)
         return;
     }
 }
@@ -453,18 +527,11 @@ export async function sendMessage(chat,msgText,msgType,relDisplay,system=false,c
 function addQuickReply(msg) {
     if(msg.type === PROMPT_PUBLISH_MSG_TYPE) {
         msg["quickReplies"] = {type: 'checkbox',keepIt: true,
-            values: [
-            {
-                title: 'Add to Prism',
-                value: PROMPT_PUBLISH_MSG_TYPE+PUBLISH_DID,
+            values: [{
+                title: 'Yes',
+                value: PROMPT_PUBLISH_MSG_TYPE,
                 messageId: msg.id,
-            },
-            {
-                title: 'Keep private',
-                value: PROMPT_PUBLISH_MSG_TYPE+DO_NOT_PUBLISH_DID,
-                messageId: msg.id,
-            }
-            ],
+            }],
         }
     }
     if(msg.type === PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE) {
@@ -472,35 +539,21 @@ function addQuickReply(msg) {
             type: 'checkbox',
             keepIt: true,
             values: [{
-                title: 'Accept',
+                title: 'Yes',
                 value: PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE+CRED_ACCEPTED,
-                messageId: msg.id,
-            },
+                messageId: msg.id,},
             {
-                title: 'Reject',
+                title: 'No Thx!',
                 value: PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE+CRED_REJECTED,
                 messageId: msg.id,
-            }
-            ],
-        }
-    }
-    if(msg.type === PROMPT_OWN_CREDENTIAL_MSG_TYPE) {
-        msg["quickReplies"] = {
-            type: 'checkbox',
-            keepIt: true,
-            values: [
-            {
-                title: 'View',
-                value: PROMPT_OWN_CREDENTIAL_MSG_TYPE+CRED_VIEW,
-                messageId: msg.id,
-            }]
+            }],
         }
     }
     return msg
 }
 
-export async function processCredentialResponse(chat: Object, reply: Object) {
-    logger("roots - quick reply credential",chat.id,reply)
+async function processCredentialResponse(chat: Object, reply: Object) {
+    logger("roots - Quick reply credential",chat.id,reply)
     const credReqAlias = getCredRequestAlias(reply.messageId)
     const replyJson = JSON.stringify(reply)
     //TODO should we allow updates to previous credRequest response?
@@ -511,13 +564,7 @@ export async function processCredentialResponse(chat: Object, reply: Object) {
     } else {
         if(reply.value.endsWith(CRED_ACCEPTED)) {
             logger("roots - quick reply credential accepted",credReqAlias)
-            isProcessing(true)
             const accepted = await acceptCredential(chat, reply)
-            if(accepted) {
-                const credOwnMsg = await sendMessage(chat,"Credential accepted.",PROMPT_OWN_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-                store.saveItem(getCredentialAlias(credOwnMsg.id),await getCredentialByMsgId(reply.messageId))
-            }
-            isProcessing(false)
             return accepted;
         } else if (reply.value.endsWith(CRED_REJECTED)) {
             logger("roots - quick reply credential rejected",credReqAlias)
@@ -529,38 +576,21 @@ export async function processCredentialResponse(chat: Object, reply: Object) {
     }
 }
 
-export async function processPublishResponse(chat: Object, reply: Reply) {
+async function processPublishResponse(chat: Object, reply: Reply) {
     logger("roots - Quick reply, started publsih chat",chat.id)
-    isProcessing(true)
     const pubChat = await publishChat(chat);
-    isProcessing(false)
     if(pubChat) {
         const linkMsg = await sendMessage(pubChat,"Your chat \""+pubChat.id+"\" has been"
                 +"\t\t"+PUBLISHED_TO_PRISM+"\t\t"+SHOW_DID_QR_CODE
                 +"\nhttps://explorer.cardano-testnet.iohkdev.io/en/transaction?id=0ce00bc602ef54dfc52b4106bebcafb72c2447bdf666cd609d50fd3a7e9d2474",
-                TEXT_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT))
+                TEXT_MSG_TYPE,getUserItem(PRISM_BOT))
 
         if(linkMsg) {
-            const didMsg = await sendMessage(chat,JSON.stringify(getDid(chat.id)),DID_JSON_MSG_TYPE,rel.getRelItem(rel.PRISM_BOT),true);
+            const didMsg = await sendMessage(chat,JSON.stringify(getDid(chat.id)),DID_JSON_MSG_TYPE,getUserItem(PRISM_BOT),true);
             if(demo && didMsg) {
-                logger("roots - quick reply demo celebrating with credential",chat.id)
                 await sendMessage(chat,
-                    "To celebrate your publishing achievement a verifiable credential is being created for you.",
-                    TEXT_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-                const cred = await issueDemoCredential(chat, reply)
-                logger("roots - quick reply demo credential issued",cred)
-                const credReqMsg = await sendMessage(chat,
-                    "Do you want to accept this verifiable credential",
-                    PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE,rel.getRelItem(rel.ROOTS_BOT))
-                if(credReqMsg) {
-                    const credAlias = getCredentialAlias(credReqMsg.id)
-                    const credJson = JSON.stringify(cred.verifiedCredential)
-                    logger("roots - cred request prepared",credAlias,credJson)
-                    const savedCredReq = await store.saveItem(credAlias, credJson);
-                    if(savedCredReq) {
-                        logger("Successfully submitted demo cred req",credAlias,credJson)
-                    }
-                }
+                    "To celebrate your publishing achievement, can we send you a verifiable credential?",
+                    PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE,getUserItem(ROOTS_BOT))
             }
         }
         return pubChat
@@ -576,19 +606,14 @@ export async function processQuickReply(chat: Object,replies: Object[]) {
         replies.forEach(async (reply) =>
         {
             logger("roots - processing quick reply",chat.id,reply)
-            if(reply.value.startsWith(PROMPT_PUBLISH_MSG_TYPE)) {
+            if(reply.value === PROMPT_PUBLISH_MSG_TYPE) {
                 logger("roots - process quick reply to publish DID")
-                if(reply.value.endsWith(PUBLISH_DID)) {
-                    logger("roots - publishing DID")
-                    return await processPublishResponse(chat,reply)
-                } else {
-                    logger("roots - not publishing DID")
-                    return;
-                }
+                return await processPublishResponse(chat,reply)
             } else if(reply.value.startsWith(PROMPT_ACCEPT_CREDENTIAL_MSG_TYPE)) {
-                logger("roots - process quick reply for accepting credential")
+                logger("roots - process quick reply for credential")
                 return await processCredentialResponse(chat,reply)
-            } else {
+            }
+             else {
                 logger("roots - reply value not recognized, was",chat.id,reply.value)
                 return;
             }
@@ -602,95 +627,52 @@ export async function processQuickReply(chat: Object,replies: Object[]) {
 // ------------------ Credentials ----------
 
 async function acceptCredential(chat: Object, reply: Object) {
-    const credAlias = getCredentialAlias(reply.messageId);
-    const verCredJson = await store.getItem(credAlias);
-    const verCred = JSON.parse(verCredJson)
-    const credHash = verCred.proof.hash
-    if (!getCredByHash(credHash)) {
-        logger("roots - accepting credential",credAlias,verCredJson)
-        const newWalJson = await PrismModule.importCred(store.getWallet(currentWal._id), credAlias, verCredJson);
-        if(newWalJson) {
-            const savedWal = await updateWallet(currentWal._id,currentWal.passphrase,newWalJson)
-            if(savedWal) {
-                const newCred = await getCredentialByMsgId(reply.messageId)
-                logger("Accepted credential",newCred.alias)
+    if(demo) {
+        await createDemoCredential(chat, reply)
+    } else {
+        //TODO accept non-demo credentials
+    }
+}
+
+async function createCredential(chat: Object,credAlias: string,cred: Object) {
+    const credJson = JSON.stringify(cred)
+    logger("roots - issuing credential", credJson)
+    isProcessing(true)
+    const newWalJson = await PrismModule.issueCred(store.getWallet(currentWal._id), chat.id, credJson);
+    if(newWalJson) {
+        const savedWal = await updateWallet(currentWal._id,currentWal.passphrase,newWalJson)
+        if(savedWal) {
+            const newCred = getCredential(cred.alias)
+            //const saveCred = await saveCred(cred.alias)
+            const credIssuedMsg = await sendMessage(chat,"Here is your new credential that we\t\t" + PUBLISHED_TO_PRISM+"\t\t"+SHOW_CRED_QR_CODES+"\nhttps://explorer.cardano-testnet.iohkdev.io/en/transaction?id=0ce00bc602ef54dfc52b4106bebcafb72c2447bdf666cd609d50fd3a7e9d2474",
+                  STATUS_MSG_TYPE,
+                  getUserItem(ROOTS_BOT),false,newCred)
+            //const code = await QRCode.toDataURL()
+            if(credIssuedMsg) {
+                const credJsonMsg = await sendMessage(chat,JSON.stringify(newCred),
+                    CREDENTIAL_JSON_MSG_TYPE,
+                    getUserItem(PRISM_BOT),true)
+                isProcessing(false)
                 return true
             } else {
-                console.error("Could not accept credential, unable to save wallet",credAlias,credHash)
-                return false
+                console.warn("Unable to send confirmation msg after issuing cred")
+                isProcessing(false)
+                return true
             }
         } else {
-            console.error("Could not import accepted credential",credAlias,credHash)
+            console.error("Could not create/issue credential, unable to save wallet")
+            isProcessing(false)
             return false
         }
     } else {
-        console.error("Credential alias already in use",credAlias,credHash)
+        console.error("Could not create/issue credential")
+        isProcessing(false)
         return false
     }
 }
 
-export function getCredByHash(credHash: string) {
-    logger("roots - Getting imported credential",credHash)
-
-    if(currentWal["importedCredentials"]) {
-        const cred = currentWal["importedCredentials"].find(cred => {
-            const curCredHash = cred.verifiedCredential.proof.hash
-            if(curCredHash === credHash) {
-                logger("roots - Found cred hash",curCredHash)
-                return true
-            }
-            else {
-                logger("roots - cred hash",curCredHash,"does not match",credHash)
-                return false
-            }
-        })
-        if(cred) {
-            return cred
-        }
-    } else {
-        logger("roots - No imported credential hash",credHash)
-        return;
-    }
-}
-
-function getCredentialAlias(msgId) {
-    return msgId.replace(models.MODEL_TYPE_MESSAGE,models.MODEL_TYPE_CREDENTIAL)
-}
-
-export async function getCredentialByMsgId(msgId) {
-    return await store.getItem(getCredentialAlias(msgId))
-}
-
-function getCredRequestAlias(msgId) {
-    return msgId.replace(models.MODEL_TYPE_MESSAGE,models.MODEL_TYPE_CRED_REQUEST)
-}
-
-export function getIssuedCredential(credAlias) {
-    logger("roots - getting issued credential",credAlias)
-
-    if(currentWal["issuedCredentials"]) {
-        const cred = currentWal["issuedCredentials"].find(cred => {
-            if(cred["alias"] === credAlias) {
-                logger("roots - Found alias",cred["alias"])
-                return true
-            }
-            else {
-                logger("roots - Alias",cred["alias"],"does not match",credAlias)
-                return false
-            }
-        })
-        if(cred) {
-            logger("roots - got issued cred",cred)
-            return cred
-        }
-    } else {
-        logger("roots - No issued credential for",credAlias)
-        return;
-    }
-}
-
-export function getIssuedCredentials(chatAlias: string) {
-    logger("roots - Getting issued credentials",chatAlias)
+export function getCredentials(chatAlias: string) {
+    logger("roots - Getting credentials",chatAlias)
     const longDid = getDid(chatAlias).uriLongForm
     if(currentWal["issuedCredentials"]) {
         const creds = currentWal["issuedCredentials"].filter(cred => {
@@ -699,7 +681,7 @@ export function getIssuedCredentials(chatAlias: string) {
                 return true
             }
             else {
-                logger("roots - Alias",cred.claim.subjectDid,"does not match",longDid)
+                logger("roots - Alias",cred.claim.subjectDid,"is not",longDid)
                 return false
             }
         })
@@ -712,31 +694,49 @@ export function getIssuedCredentials(chatAlias: string) {
     return;
 }
 
-async function issueCredential(chat: Object,credAlias: string,cred: Object) {
-    const credJson = JSON.stringify(cred)
-    logger("roots - issuing credential", credJson)
-    const newWalJson = await PrismModule.issueCred(store.getWallet(currentWal._id), chat.id, credJson);
-    if(newWalJson) {
-        const savedWal = await updateWallet(currentWal._id,currentWal.passphrase,newWalJson)
-        if(savedWal) {
-            const newCred = getIssuedCredential(cred.alias)
-            logger("roots - Issued credential",newCred.alias)
-            return newCred
-        } else {
-            console.error("roots - Could not issue credential, unable to save wallet")
-            return;
+export function getCredential(credAlias) {
+    logger("roots - Getting credential",credAlias)
+
+    if(currentWal["issuedCredentials"]) {
+        const creds = currentWal["issuedCredentials"].filter(cred => {
+            if(cred["alias"] === credAlias) {
+                logger("roots - Found alias",cred["alias"])
+                return true
+            }
+            else {
+                logger("roots - Alias",cred["alias"],"is not",credAlias)
+                return false
+            }
+        })
+        if(creds && creds.length > 0) {
+            return creds[0]
         }
     } else {
-        console.error("roots - Could not issue credential")
-        return;
+        logger("roots - No issued credentials")
     }
+    return;
 }
 
-function verifyCredential(credAlias: string) {
-    //TODO fix gradle build problems so that we can verify.
-    logger("Verifying credential not implemented yet",credAlias)
-    //const errorArray = JSON.parse(PrismModule.verifyCred(credAlias))
-//     logger("Credential verification not implemented yet",credAlias,errorArray)
+function getCredentialAlias(msgId) {
+    return msgId.replace(models.MODEL_TYPE_MESSAGE,models.MODEL_TYPE_CREDENTIAL)
+}
+
+export function getCredentialByMsgId(msgId) {
+    return getCredential(getCredentialAlias(msgId))
+}
+
+function getCredRequestAlias(msgId) {
+    return msgId.replace(models.MODEL_TYPE_MESSAGE,models.MODEL_TYPE_CRED_REQUEST)
+}
+
+//---------------- Keys -----------------------
+
+function getStorageKey(alias: string,type: string) {
+    return alias+ID_SEPARATOR+type
+}
+
+function getStorageKeys(aliases: string[], type: string) {
+    return aliases.map(alias => getStorageKey(alias,type))
 }
 
 // ------------------ Session ---------------
@@ -780,11 +780,11 @@ export function isProcessing(processing=false) {
 
 //----------- DEMO Stuff --------------------
 
-export async function issueDemoCredential(chat: Object,reply: Object) {
+export async function createDemoCredential(chat: Object,reply: Object) {
     logger("roots - Trying to create demo credential for chat",chat.id,reply)
     const credMsgs = []
     const credAlias = getCredentialAlias(reply.messageId)
-    if(chat["published"] && !getIssuedCredential(credAlias)) {
+    if(chat["published"] && !getCredential(credAlias)) {
         logger("roots - Chat is published and credential not found, creating....")
         const didLong = getDid(chat.id)[walletSchema.DID_URI_LONG_FORM]
         logger("roots - Creating demo credential for chat",chat.id,"w/long form did",didLong)
@@ -808,44 +808,40 @@ export async function issueDemoCredential(chat: Object,reply: Object) {
             operationHash: "",
             revoked: false,
         }
-        logger("roots - issuing demo credential",cred)
-        isProcessing(true)
-        const issuedCred = await issueCredential(chat, credAlias, cred)
-        isProcessing(false)
-        return issuedCred;
+        return await createCredential(chat, credAlias, cred)
     } else {
-        logger("roots - Couldn't issue demo credential, is the chat published",chat["published"],"was the credential already found",getIssuedCredential(credAlias))
-        return false
+        logger("roots - Couldn't create demo credential, is the chat published",chat["published"],"was the credential already found",getCredential(credAlias))
+        return false;
     }
 //        sendMessage(chat,"Valid credential",
 //                      STATUS_MSG_TYPE,
-//                      rel.getRelDisplay(rel.ROOTS_BOT))
+//                      getUserDisplay(ROOTS_BOT))
 //
 //
-//        sendMessage(chat,"Credential imported"
+//        sendMessage(chat,"Credential imported",
 //                    STATUS_MSG_TYPE,
-//                    rel.getRelDisplay(rel.ROOTS_BOT))
+//                    getUserDisplay(ROOTS_BOT))
 //        sendMessage(chat,"Valid credential.",
 //                      STATUS_MSG_TYPE,
-//                      rel.getRelDisplay(rel.ROOTS_BOT))
+//                      getUserDisplay(ROOTS_BOT))
     //    sendMessage(chat,"https://explorer.cardano-testnet.iohkdev.io/en/transaction?id=0ce00bc602ef54dfc52b4106bebcafb72c2447bdf666cd609d50fd3a7e9d2474",
     //                 BLOCKCHAIN_URI_MSG_TYPE,
-    //                 rel.getRelDisplay(rel.PRISM_BOT))
+    //                 getUserDisplay(PRISM_BOT))
 //        sendMessage(chat,"Credential revoked",
 //                      STATUS_MSG_TYPE,
-//                      rel.getRelDisplay(rel.ROOTS_BOT))
+//                      getUserDisplay(ROOTS_BOT))
 //        sendMessage(chat,"Invalid credential.",
 //                    STATUS_MSG_TYPE,
-//                    rel.getRelDisplay(rel.ROOTS_BOT))
+//                    getUserDisplay(ROOTS_BOT))
 }
 
 async function initDemo() {
-    const rels = await rel.initDemoRels()
+    const users = await initDemoUserDisplays()
     const intro = await initDemoIntro()
 //    const achievements = await initDemoAchievements()
 //    const library = await initDemoLibrary()
 //    const resume = await initDemoResume()
-    const result = (rels && intro)
+    const result = (users && intro)
     return result;
 }
 
@@ -854,16 +850,16 @@ async function initDemoAchievements() {
 
     await sendMessage(achieveCh,ACHIEVEMENT_MSG_PREFIX+"Opened RootsWallet!",
       STATUS_MSG_TYPE,
-      rel.getRelItem(rel.ROOTS_BOT))
+      getUserItem(ROOTS_BOT))
     await sendMessage(achieveCh,"{subject: you,issuer: RootsWallet,credential: Opened RootsWallet}",
       CREDENTIAL_JSON_MSG_TYPE,
-      rel.getRelItem(rel.ROOTS_BOT))
+      getUserItem(ROOTS_BOT))
     await sendMessage(achieveCh,ACHIEVEMENT_MSG_PREFIX+"Clicked Example!",
       STATUS_MSG_TYPE,
-      rel.getRelItem(rel.ROOTS_BOT))
+      getUserItem(ROOTS_BOT))
     await sendMessage(achieveCh,"{subject: you,issuer: RootsWallet,credential: Clicked Example}",
       CREDENTIAL_JSON_MSG_TYPE,
-      rel.getRelItem(rel.ROOTS_BOT))
+      getUserItem(ROOTS_BOT))
 }
 
 async function initDemoIntro() {
@@ -877,6 +873,19 @@ async function initDemoLibrary() {
 
 async function initDemoResume() {
     const resumeCh = await createChat("Resume/CV Chat","Coming Soon - ")
+}
+
+async function initDemoUserDisplays() {
+    await createUserItem(ROOTS_BOT,
+                  "RootsWallet",
+                  rootsLogo)
+    await createUserItem(PRISM_BOT,
+                  "Atala Prism",
+                  prismLogo)
+    await createUserItem(
+                  LIBRARY_BOT,
+                  "Library",
+                  personLogo)
 }
 
 export function isDemo() {
