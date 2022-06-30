@@ -10,8 +10,8 @@ import FormInput from '../components/FormInput';
 
 const { PrismModule } = NativeModules;
 
-export default function CreateRelScreen({ route, navigation }) {
-  const [relDid, setRelDid] = useState(route.params.did);
+export default function CreateRelScreen({ navigation }) {
+  const [relDid, setRelDid] = useState('did:prism:'+Date.now());
   const [relName, setRelName] = useState('');
   const [problemDisabled, setProblemDisabled] = useState(true)
 
