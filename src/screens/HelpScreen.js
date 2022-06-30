@@ -2,7 +2,7 @@ import React from 'react';
 import {Button, StyleSheet, View, Text} from 'react-native';
 // const { PrismModule } = NativeModules;
 
-const HelpScreen = (props) => {
+const Help = (props) => {
     console.log(`Entering Help screen`);
     return (
         <View>
@@ -11,4 +11,4 @@ const HelpScreen = (props) => {
     );
 };
 
-export default HelpScreen
+export default Help
