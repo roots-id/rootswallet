@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "rootswallet",
-  "version": "0.1.0-alpha",
+  "version": "0.0.1-alpha",
   "resolutions": {
     "@types/react": "17.0.1"
   },

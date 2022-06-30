@@ -136,8 +136,8 @@ android {
         applicationId 'com.rootswallet'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "0.1.0-alpha"
+        versionCode 1
+        versionName "1.0.0"
     }
     splits {
         abi {

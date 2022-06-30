@@ -1,10 +1,9 @@
 import * as AsyncStore from './AsyncStore'
 import * as CachedStore from './CachedStore'
+//TODO move this into AsyncStore so they can work together?
 import * as SecureStore from 'expo-secure-store';
 import { logger } from '../logging'
 import { replaceSpecial } from '../utils'
-
-export const WALLET_LOGIN_SUCCESS = "rootsWalletLoginSuccessful"
 
 export async function clearStorage() {
     logger("store - Clearing storage")
@@ -75,26 +74,31 @@ export async function restoreWallet(passphrase: string) {
     }
 }
 
-export async function saveWallet(walName: string, walPass: string, walJson: string): Promise<string> {
+export async function saveWallet(walName: string, walPass: string, walJson: string) {
     logger("store - Saving wallet",walName,":",walJson)
-    const errMsg = "store - could not save wallet "+ walName+": "+walJson
     if(walJson && walJson.length > 0) {
         try {
             logger("store - Saving wallet to storage",walName,":",walJson)
             //TODO use keychain to encrypt values
             const result = await storeWallet(walName,walPass,walJson)
-            return result
+            if(result) {
+                logger("store - successfully saved wallet",walName,":",result)
+                return true;
+            } else {
+                logger("store - failed to save wallet", walName,":",result)
+                return false;
+            }
         } catch(error) {
-            logger(errMsg,error)
-            return errMsg+" "+error;
+            logger("store - could not save wallet",walName,":",walJson,error)
+            return false;
         }
     } else {
-        logger(errMsg)
-        return errMsg;
+        logger("store - Could not save wallet",walName,":",walJson)
+        return false;
     }
 }
 
-async function storeWallet(walName: string, walPass: string, walJson: string): Promise<string> {
+async function storeWallet(walName: string, walPass: string, walJson: string) {
     const errMsgs = [];
     errMsgs.push("store - can't store wallet "+walName);
     errMsgs.push("wallet "+walJson);
@@ -107,20 +111,19 @@ async function storeWallet(walName: string, walPass: string, walJson: string): P
             if(asyncStored) {
                 CachedStore.storeWallet(walName,walJson)
                 logger('store - secure stored wallet')
-                return WALLET_LOGIN_SUCCESS
+                return true
             } else {
-                errMsgs.push("AsyncStore could not save wallet")
-                logger(...errMsgs)
-                return "Could not store wallet in AsyncStore";
+                logger('store - could not store in async store')
+                return false
             }
         } catch(error: any) {
             errMsgs.push(error.message)
             logger(...errMsgs)
-            return "Error while storing wallet " + error.message;
+            return false;
         }
     } else {
         logger(...errMsgs)
-        return "Could not save wallet, no data found";
+        return false;
     }
 }
 

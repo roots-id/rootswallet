@@ -87,8 +87,8 @@ export async function initRootsWallet(userName: string): Promise<boolean> {
             const achMsg = await sendMessage(myChat,
                 "We'll post new wallet events here.",
                 MessageType.TEXT, contact.ROOTS_BOT)
-            // const createdWalletMsg = await sendMessage(myChat,
-            //     "You created your wallet: " + wallet.getWallet()?._id, MessageType.TEXT, contact.ROOTS_BOT)
+            const createdWalletMsg = await sendMessage(myChat,
+                "You created your wallet: " + wallet.getWallet()?._id, MessageType.TEXT, contact.ROOTS_BOT)
             const createdDidMsg = await sendMessage(myChat,
                 "You created your first decentralized ID (called a DID)!",
                 MessageType.TEXT, contact.ROOTS_BOT)
