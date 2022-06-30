@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
-import {Avatar} from 'react-native-paper';
-import {CardStyleInterpolators, createStackNavigator} from '@react-navigation/stack';
+import { Avatar } from 'react-native-paper';
+import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
 import CommunicationsScreen from '../screens/CommunicationsScreen';
 import IconActions from '../components/IconActions';
@@ -24,102 +24,107 @@ import LoginScreen from '../screens/LoginScreen';
 import ScanQRCodeScreen from '../screens/ScanQRCodeScreen'
 import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
 import StartChatScreen from '../screens/StartChatScreen';
-import React, {useState} from "react";
-import {getChatItem, loadSettings, storageStatus} from '../roots'
-import * as contact from '../relationships'
-import * as utils from '../utils'
+import React from "react";
+import {YOU_ALIAS} from '../relationships'
+import { getChatItem, loadSettings, storageStatus,
+    TEST_WALLET_NAME } from '../roots'
 import * as wallet from '../wallet'
-import {loadWalletName} from "../wallet";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 export default function AuthStack() {
     console.log("AuthStack - Determining which auth screen to use.")
-    const [walletFound, setWalletFound] = useState<boolean>(false);
+    const [walletFound,setWalletFound] = React.useState<boolean>(false)
+    const [walletName,setWalletName] = React.useState<string>(TEST_WALLET_NAME)
 
-    const [state, updateState] = React.useReducer(
-        (prevState: any, action: any) => {
-            switch (action.type) {
-                case 'RESTORE_TOKEN':
-                    console.log("AuthStack - RESTORE_TOKEN w/ token", action.token)
-                    return {
-                        ...prevState,
-                        userToken: action.token,
-                        isLoading: false,
-                    };
-                case 'SIGN_IN':
-                    console.log("AuthStack - SIGN_IN w/ token", action.token)
-                    return {
-                        ...prevState,
-                        userToken: action.token,
-                    };
-            }
-        },
-        {
-            isLoading: true,
-            userToken: null,
+    const [state, dispatch] = React.useReducer(
+      (prevState: any, action: any) => {
+        switch (action.type) {
+          case 'RESTORE_TOKEN':
+            console.log("AuthStack - RESTORE_TOKEN w/ token", action.token)
+            return {
+              ...prevState,
+              userToken: action.token,
+              isLoading: false,
+            };
+          case 'SIGN_IN':
+            console.log("AuthStack - SIGN_IN w/ token", action.token)
+            return {
+              ...prevState,
+              userToken: action.token,
+            };
         }
+      },
+      {
+        isLoading: true,
+        userToken: null,
+      }
     );
 
     React.useEffect(() => {
-        // Fetch the token from storage then navigate to our appropriate place
-        const bootstrapAsync = async () => {
-            let userToken;
+      // Fetch the token from storage then navigate to our appropriate place
+      const bootstrapAsync = async () => {
+        let userToken;
 
-            try {
-                console.log("AuthStack - getting RootsWallet")
-                await storageStatus()
-                const settingsLoaded = await loadSettings()
-                if (settingsLoaded) {
-                    const walNameLoaded = await loadWalletName()
-                    setWalletFound(walNameLoaded)
-                    console.log("AuthStack - wallet found?", walletFound)
-                }
-            } catch (e) {
-                // Restoring token failed
-                console.log("AuthStack - Failed to restore wallet from storage", e)
-            }
-            console.log("AuthStack - dispatching with userToken", userToken)
-            updateState({type: 'RESTORE_TOKEN', token: userToken});
-        };
+        try {
+          console.log("AuthStack - getting RootsWallet")
+          await storageStatus()
+          const settingsLoaded = await loadSettings()
+          if(settingsLoaded) {
+              //TODO ditch test wallet name
+              const walFound = await wallet.hasWallet(walletName)
+              console.log("AuthStack - wallet found?",walFound)
+              setWalletFound(walFound)
+              if(walFound) {
+                //TODO ditch test wallet name
+                console.log("AuthStack - since wallet found, getting rootsWallet")
+                userToken = wallet.getWallet(walletName)
+              } else {
+                console.log("AuthStack - since wallet NOT found, auth token not set")
+              }
+          }
+        } catch (e) {
+          // Restoring token failed
+          console.log("AuthStack - Failed to restore wallet from storage",e)
+        }
 
-        bootstrapAsync().then(r => {
-            console.log("AuthStack - Bootstrap complete", r)
-        });
+        dispatch({ type: 'RESTORE_TOKEN', token: userToken });
+      };
+
+      bootstrapAsync().then(r => {console.log("AuthStack - Bootstrap complete",r)});
     }, []);
 
     let authContext = React.useMemo(
         () => ({
-            signIn: (data: string, created = false) => {
-                console.log("AuthStack - signIn memo", data, created)
-                updateState({type: 'SIGN_IN', token: data});
-                setWalletFound(created)
-            }
+          signIn: (data: string,created=false) => {
+            setWalletFound(created)
+            dispatch({ type: 'SIGN_IN', token: data});
+          }
         }),
         []
     );
 
     if (state.isLoading) {
         // We haven't finished checking for the token yet
-        return <LoadingScreen/>;
+        return <LoadingScreen />;
     }
 
     const Main = () => {
         return (
             <Tab.Navigator screenOptions={{
-                headerShown: false,
-                tabBarIcon: ({focused, color, size}) => {
-                    const iconName = focused ? 'check-bold' : 'checkbox-blank-circle-outline';
-                    // You can return any component that you like here!
-                    return <Avatar.Icon size={20} icon={iconName}/>
-                },
-                tabBarActiveBackgroundColor: '#362631',
-                tabBarInactiveBackgroundColor: '#150510',
-                tabBarActiveTintColor: 'orange',
-                tabBarInactiveTintColor: 'grey',
-                tabBarLabelStyle: {fontSize: 22},
-            }}>
+                 headerShown:false,
+                 tabBarIcon: ({ focused, color, size }) => {
+                     const iconName = focused ? 'check-bold' : 'checkbox-blank-circle-outline';
+                     // You can return any component that you like here!
+                     return <Avatar.Icon size={20} icon={iconName} />
+                 },
+                 tabBarActiveBackgroundColor: '#362631',
+                 tabBarInactiveBackgroundColor: '#150510',
+                 tabBarActiveTintColor: 'orange',
+                 tabBarInactiveTintColor: 'grey',
+                 tabBarLabelStyle: {fontSize: 22},
+                 }}>
                 <Tab.Screen name="Contacts" component={RelationshipsStack}/>
                 <Tab.Screen name="Credentials" component={CredentialsStack}/>
             </Tab.Navigator>
@@ -127,44 +132,40 @@ export default function AuthStack() {
     }
     const RelationshipsStack = () => {
         return (
-            <Stack.Navigator
-                screenOptions={{
-                    headerStyle: {
-                        backgroundColor: '#150510',
-                    },
-                    headerTintColor: '#eeeeee',
-                    headerTitleStyle: {
-                        fontSize: 22,
-                    },
-                    gestureEnabled: true,
-                    gestureDirection: "horizontal",
-                    cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-                    animationEnabled: true,
-                }}
-            >
-                <Stack.Group>
-                    <Stack.Screen name="Relationships"
-                                  component={RelationshipsScreen}
-                                  options={({navigation, route}) => ({
-                                      headerTitle: (props) => <LogoTitle {...props} title="Contacts"/>,
-                                      headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel"
-                                                                           person={contact.getUserId()} scan='contact'
-                                                                           settings='Settings'/>,
-                                  })}
-                    />
-                    <Stack.Screen
-                        name="Chat"
-                        component={ChatScreen}
-                        options={({navigation, route}) => ({
-                            headerTitle: (props) => <SimpleTitle {...props}
-                                                                 title={getChatItem(utils.getObjectField(route.params, "chatId")).title}/>,
-                            headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel"
-                                                                 person={contact.getUserId()} scan='credential'
-                                                                 settings='Settings'/>,
-                        })}
-                    />
-                </Stack.Group>
-            </Stack.Navigator>
+        <Stack.Navigator
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: '#150510',
+              },
+              headerTintColor: '#eeeeee',
+              headerTitleStyle: {
+                fontSize: 22,
+              },
+              gestureEnabled: true,
+              gestureDirection: "horizontal",
+              cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
+              animationEnabled: true,
+              }}
+        >
+            <Stack.Group>
+                <Stack.Screen name="Relationships"
+                      component={RelationshipsScreen}
+                      initialParams={{walletName: walletName}}
+                      options={ ({ navigation, route }) => ({
+                          headerTitle: (props) => <LogoTitle {...props} title="Contacts"/>,
+                          headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={YOU_ALIAS} scan='contact' settings='Settings'/>,
+                      })}
+                />
+                <Stack.Screen
+                    name="Chat"
+                    component={ChatScreen}
+                    options={ ({ navigation, route }) => ({
+                        headerTitle: (props) => <SimpleTitle {...props} title={getChatItem(route.params?.chatId).title}/>,
+                        headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel" person={YOU_ALIAS} scan='credential' settings='Settings'/>,
+                    })}
+                />
+            </Stack.Group>
+        </Stack.Navigator>
         )
     }
     // const YouStack = () => {
@@ -202,48 +203,48 @@ export default function AuthStack() {
     // }
     const CredentialsStack = () => {
         return (
-            <Stack.Navigator
-                screenOptions={{
-                    headerStyle: {
-                        backgroundColor: '#150510',
-                    },
-                    headerTintColor: '#eeeeee',
-                    headerTitleStyle: {
-                        fontSize: 22,
-                    },
-                    gestureEnabled: true,
-                    gestureDirection: "horizontal",
-                    cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
-                    animationEnabled: true,
-                }}
-            >
-                <Stack.Group>
-                    <Stack.Screen name="VCs"
-                                  component={CredentialsScreen}
-                                  options={({navigation, route}) => ({
-                                      headerTitle: (props) => <LogoTitle {...props} title="Credentials"/>,
-                                      headerRight: (props) => <IconActions {...props} nav={navigation}
-                                                                           person={contact.getUserId()}
-                                                                           scan="credential" settings="Settings"/>,
-                                  })}
-                    />
-                </Stack.Group>
-            </Stack.Navigator>
+        <Stack.Navigator
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: '#150510',
+              },
+              headerTintColor: '#eeeeee',
+              headerTitleStyle: {
+                fontSize: 22,
+              },
+              gestureEnabled: true,
+              gestureDirection: "horizontal",
+              cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
+              animationEnabled: true,
+              }}
+        >
+            <Stack.Group>
+                <Stack.Screen name="VCs"
+                      component={CredentialsScreen}
+                      initialParams={{walletName: walletName}}
+                      options={ ({ navigation, route }) => ({
+                          headerTitle: (props) => <LogoTitle {...props} title="Credentials"/>,
+                          headerRight: (props) => <IconActions {...props} nav={navigation} person={YOU_ALIAS} scan="credential" settings="Settings"/>,
+                      })}
+                />
+            </Stack.Group>
+        </Stack.Navigator>
         )
     }
     const IntegrationStack = () => {
         return (
-            <Stack.Navigator>
-                <Stack.Group>
-                    <Stack.Screen name="Home" component={HomeScreen}/>
-                    <Stack.Screen name="MyIdentity"
-                                  component={RelationshipsScreen}
-                    />
-                    <Stack.Screen name="Communications" component={CommunicationsScreen}/>
-                    <Stack.Screen name="Settings" component={SettingsScreen}/>
-                    <Stack.Screen name="Wallet" component={WalletScreen}/>
-                </Stack.Group>
-            </Stack.Navigator>
+        <Stack.Navigator>
+            <Stack.Group>
+                <Stack.Screen name="Home" component={HomeScreen}/>
+                <Stack.Screen name="MyIdentity"
+                              component={RelationshipsScreen}
+                              initialParams={{walletName: walletName}}
+                />
+                <Stack.Screen name="Communications" component={CommunicationsScreen}/>
+                <Stack.Screen name="Settings" component={SettingsScreen}/>
+                <Stack.Screen name="Wallet" component={WalletScreen}/>
+            </Stack.Group>
+        </Stack.Navigator>
         )
     }
 
@@ -255,49 +256,50 @@ export default function AuthStack() {
     //     </Stack.Navigator>
     // }
 
-    return (
-        <AuthContext.Provider value={authContext}>
-            <Stack.Navigator
-                screenOptions={{
-                    headerShown: false
-                }}
+ //TODO refactor hasWallet call where we capture walletName
+  return (
+    <AuthContext.Provider value={authContext}>
+        <Stack.Navigator
+                    screenOptions={{
+                        headerShown: false
+                    }}
 
-            >
-                {!state.userToken || state.userToken == null ? (
+                >
+            {!state.userToken || state.userToken == null ? (
+              <>
+                {walletFound ? (
                     <>
-                        {walletFound ? (
-                            <>
-                                <Stack.Screen name="Login" component={LoginScreen}/>
-                            </>
-                        ) : (
-                            <>
-                                <Stack.Screen name="Create Wallet" component={CreateWalletScreen}/>
-                                <Stack.Group screenOptions={{presentation: 'transparentModal'}}>
-                                    <Stack.Screen name="Settings" component={SettingsScreen}/>
-                                    <Stack.Screen name="Integration" component={IntegrationStack}/>
-                                </Stack.Group>
-                            </>
-                        )}
+                        <Stack.Screen name="Login" component={LoginScreen} />
                     </>
-                ) : (
+                    ) : (
                     <>
-                        <Stack.Group>
-                            <Stack.Screen name="mainTabs" component={Main}/>
-                        </Stack.Group>
-                        <Stack.Group screenOptions={{presentation: 'transparentModal'}}>
-                            <Stack.Screen name="Credential Details" component={CredentialDetailScreen}/>
-                            <Stack.Screen name="Create Rel" component={CreateRelScreen}/>
-                            <Stack.Screen name="Create Secure Chat" component={StartChatScreen}/>
-                            <Stack.Screen name="Relationship Details" component={RelationshipDetailScreen}/>
-                            <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen}/>
+                        <Stack.Screen name="Create Wallet" component={CreateWalletScreen} />
+                        <Stack.Group screenOptions={{ presentation: 'transparentModal' }}>
                             <Stack.Screen name="Settings" component={SettingsScreen}/>
-                            <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen}/>
                             <Stack.Screen name="Integration" component={IntegrationStack}/>
                         </Stack.Group>
                     </>
-                )}
-            </Stack.Navigator>
-        </AuthContext.Provider>
-    );
+                  )}
+              </>
+            ) : (
+              <>
+                <Stack.Group>
+                    <Stack.Screen name="mainTabs" component={Main}/>
+                </Stack.Group>
+                <Stack.Group screenOptions={{ presentation: 'transparentModal' }}>
+                    <Stack.Screen name="Credential Details" component={CredentialDetailScreen}/>
+                    <Stack.Screen name="Create Rel" component={CreateRelScreen}/>
+                    <Stack.Screen name="Create Secure Chat" component={StartChatScreen} />
+                    <Stack.Screen name="Relationship Details" component={RelationshipDetailScreen}/>
+                    <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen} />
+                    <Stack.Screen name="Settings" component={SettingsScreen}/>
+                    <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen} />
+                    <Stack.Screen name="Integration" component={IntegrationStack}/>
+                </Stack.Group>
+              </>
+            )}
+        </Stack.Navigator>
+    </AuthContext.Provider>
+  );
 
 }

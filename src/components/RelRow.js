@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, SafeAreaView, TouchableOpacity} from 'react-native';
 import { List } from 'react-native-paper';
-import {asContactShareable, getCurrentUserContact, showRel} from '../relationships'
+import {asContactShareable, showRel} from '../relationships'
 import { getChatItem } from '../roots'
 import {styles} from "../styles/styles";
 

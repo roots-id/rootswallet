@@ -47,7 +47,7 @@ export const styles = StyleSheet.create({
     },
     credLogoStyle: {
         width:65,
-        height:75,
+            height:75,
         resizeMode:'contain',
         margin:8
     },
@@ -153,11 +153,9 @@ export const styles = StyleSheet.create({
         fontSize: 42,
         color: 'pink',
     },
-    centeredContainer: {
+    modalContainer: {
         backgroundColor: '#251520',
         flex: 1,
-        padding: 16,
-        borderRadius: 3,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -248,8 +246,7 @@ export const styles = StyleSheet.create({
     },
     viewAnimated: {
         padding: 16,
-        width: '80%',
-        height: '80%',
+        width: '90%',
         maxWidth: 400,
         borderRadius: 3,
         backgroundColor: '#cfbfca',
@@ -272,8 +269,8 @@ export const styles = StyleSheet.create({
     },
 })
 
-export function displayProblem(displayIt) {
-    if(!displayIt){
+export function displayProblem(problemDisabled) {
+    if(problemDisabled){
         return styles.none
     }
     else{

@@ -10,7 +10,7 @@ export async function clearStorage() {
     try {
         CachedStore.clear()
         await AsyncStore.clear()
-    } catch(error: any) {
+    } catch(error) {
         console.error("Failed to clear storage",error,error.stack)
     }
 }
@@ -116,7 +116,7 @@ async function storeWallet(walName: string, walPass: string, walJson: string) {
                 logger('store - could not store in async store')
                 return false
             }
-        } catch(error: any) {
+        } catch(error) {
             errMsgs.push(error.message)
             logger(...errMsgs)
             return false;
@@ -229,7 +229,7 @@ async function storeItem(alias: string, itemJson: string) {
                 console.error('store - could not store in async store',alias,itemJson)
                 return false
             }
-        } catch(error: any) {
+        } catch(error) {
             console.error("Error storing item",alias,itemJson,error,error.stack)
             return false;
         }
