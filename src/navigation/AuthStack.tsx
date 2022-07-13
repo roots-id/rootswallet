@@ -30,6 +30,7 @@ import * as contact from '../relationships'
 import * as utils from '../utils'
 import * as wallet from '../wallet'
 import {loadWalletName} from "../wallet";
+import ExportScreen from '../screens/ExportScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -231,12 +232,13 @@ export default function AuthStack() {
             </Stack.Navigator>
         )
     }
-    const DeveloperStack = () => {
+    const DevStack = () => {
         return (
             <Stack.Navigator>
                 <Stack.Group>
                     <Stack.Screen name="Developer" component={DeveloperScreen}/>
                     <Stack.Screen name="Communications" component={CommunicationsScreen}/>
+                    <Stack.Screen name="Export" component={ExportScreen}/>
                     <Stack.Screen name="Settings" component={SettingsScreen}/>
                     <Stack.Screen name="Wallet" component={WalletScreen}/>
                 </Stack.Group>
@@ -271,7 +273,7 @@ export default function AuthStack() {
                                 <Stack.Screen name="Create Wallet" component={CreateWalletScreen}/>
                                 <Stack.Group screenOptions={{presentation: 'transparentModal'}}>
                                     <Stack.Screen name="Settings" component={SettingsScreen}/>
-                                    <Stack.Screen name="Developer" component={DeveloperStack}/>
+                                    <Stack.Screen name="Developer" component={DevStack}/>
                                 </Stack.Group>
                             </>
                         )}
@@ -289,7 +291,7 @@ export default function AuthStack() {
                             <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen}/>
                             <Stack.Screen name="Settings" component={SettingsScreen}/>
                             <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen}/>
-                            <Stack.Screen name="Developer" component={DeveloperStack}/>
+                            <Stack.Screen name="Developer" component={DevStack}/>
                         </Stack.Group>
                     </>
                 )}
