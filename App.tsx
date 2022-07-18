@@ -4,11 +4,8 @@ import {Text, View} from 'react-native';
 import {styles} from "./src/styles/styles";
 import Providers from './src/navigation';
 
+import AgentProvider from '@aries-framework/react-hooks'
+
 export default function App() {
-  //   return (
-  //       <View style={styles.container}>
-  //         <Text>Open up App.tsx to start working on your app!</Text>
-  //       </View>
-  // );
     return (<Providers/>)
 }
