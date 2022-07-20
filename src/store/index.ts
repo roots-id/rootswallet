@@ -1,6 +1,6 @@
 import * as AsyncStore from './AsyncStore'
 import * as CachedStore from './CachedStore'
-import * as SecureStore from 'expo-secure-store';
+
 import { logger } from '../logging'
 import { replaceSpecial } from '../utils'
 
