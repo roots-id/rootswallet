@@ -1,8 +1,9 @@
 import * as AsyncStore from './AsyncStore'
 import * as CachedStore from './CachedStore'
+import * as SecureStore from 'expo-secure-store';
 
-import { logger } from '../logging'
-import { replaceSpecial } from '../utils'
+import {logger} from '../logging'
+import {replaceSpecial} from '../utils'
 
 export const WALLET_LOGIN_SUCCESS = "rootsWalletLoginSuccessful"
 
@@ -82,8 +83,7 @@ export async function saveWallet(walName: string, walPass: string, walJson: stri
         try {
             logger("store - Saving wallet to storage",walName,":",walJson)
             //TODO use keychain to encrypt values
-            const result = await storeWallet(walName,walPass,walJson)
-            return result
+            return await storeWallet(walName, walPass, walJson)
         } catch(error) {
             logger(errMsg,error)
             return errMsg+" "+error;

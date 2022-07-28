@@ -267,6 +267,10 @@ export default function AuthStack() {
                         {walletFound ? (
                             <>
                                 <Stack.Screen name="Login" component={LoginScreen}/>
+                                <Stack.Group screenOptions={{presentation: 'transparentModal'}}>
+                                    <Stack.Screen name="Settings" component={SettingsScreen}/>
+                                    <Stack.Screen name="Developer" component={DevStack}/>
+                                </Stack.Group>
                             </>
                         ) : (
                             <>
