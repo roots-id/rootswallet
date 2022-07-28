@@ -5,6 +5,8 @@ import android.app.backup.BackupAgent.FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED
 import android.app.backup.BackupDataInput
 import android.app.backup.BackupDataOutput
 import android.app.backup.FullBackupDataOutput
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import java.io.File
@@ -22,23 +24,28 @@ class CustomBackupAgent : BackupAgent() {
 
     override fun onBackup(oldState: ParcelFileDescriptor?,
                           data: BackupDataOutput?, newState: ParcelFileDescriptor?) {
+        Log.d("ROOTS_BACKUP_TAG","onDestroy - Backup Agent oldState: $oldState data: $data newState: $newState");
         if (data != null) {
             if ((data.transportFlags and
                         FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED) != 0) {
-                TODO("Not yet implemented")
                 Log.d("ROOTS_BACKUP_TAG","client side encryption enabled");
             }
 
             if ((data.transportFlags and FLAG_DEVICE_TO_DEVICE_TRANSFER) != 0) {
-                TODO("Not yet implemented")
                 Log.d("ROOTS_BACKUP_TAG","local device-to-device transfer enabled");
             }
         }
     }
 
     override fun onRestore(data: BackupDataInput?, appVersionCode: Int, newState: ParcelFileDescriptor?) {
-        TODO("Not yet implemented")
-        Log.d("ROOTS_BACKUP_TAG","onRestore int from backup");
+        Log.d("ROOTS_BACKUP_TAG", "onRestore int from backup data: $data appVer: $appVersionCode newState: $newState");
+        val info: PackageInfo? = try {
+            packageManager.getPackageInfo(packageName, 0)
+        } catch (e: PackageManager.NameNotFoundException) {
+            null
+        }
+
+        val version: Int = info?.versionCode ?: 0
     }
 
     override fun onRestore(data: BackupDataInput?, appVersionCode: Long, newState: ParcelFileDescriptor?) {
