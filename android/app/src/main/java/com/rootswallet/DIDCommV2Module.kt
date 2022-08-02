@@ -8,6 +8,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.bridge.ReadableArray
 import java.util.*
 import org.didcommx.didcomm.DIDComm
 import org.didcommx.didcomm.message.Message
@@ -44,13 +45,16 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
 
     @ReactMethod(isBlockingSynchronousMethod = true)
     fun pack(
-        data: String,
+        body: ReadableMap,
+        id: String,
         to: String,
         from: String,
+        messageType: String = "my-protocol/1.0",
+        customHeaders: ReadableArray,
         agreemKey: ReadableMap,
         signFrom: String? = null,
-        protectSender: Boolean = true,
-        messageType: String = "my-protocol/1.0"
+        protectSender: Boolean = false,
+        
     ): String {
         val secretsResolver = SecretResolverInMemoryMock()
         val didDoc = DIDDocPeerDID.fromJson(resolvePeerDID(from, VerificationMaterialFormatPeerDID.JWK))
@@ -63,12 +67,19 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
 
         val didComm = DIDComm(DIDDocResolverPeerDID(), secretsResolver)
         val message = Message.builder(
-            id = UUID.randomUUID().toString(),
-            body = mapOf("msg" to data),
-            type = messageType
-        ).build()
+            id = id,
+            body = body.toHashMap(),
+            type = messageType,
+        )
+            .from(from)
+            .to(listOf(to)) 
+            // .customHeader("return_route", "all")
+            // .customHeader("return_route2", "all")
+            .build()
+            
         var builder = PackEncryptedParams
             .builder(message, to)
+            // .from(from)
             .forward(false)
             .protectSenderId(protectSender)
         builder = from?.let { builder.from(it) } ?: builder
@@ -92,9 +103,10 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
         }
         val didComm = DIDComm(DIDDocResolverPeerDID(), secretsResolver)
         val res = didComm.unpack(UnpackParams.Builder(packedMsg).build())
-        val msg = res.message.body["msg"].toString()
-        val eto = res.metadata.encryptedTo?.let { divideDIDFragment(it.first()).first() } ?: ""
-        val efrom = res.metadata.encryptedFrom?.let { divideDIDFragment(it).first() }
-        return msg
+    
+        // val msg = res.message.body["msg"].toString()
+        // val eto = res.metadata.encryptedTo?.let { divideDIDFragment(it.first()).first() } ?: ""
+        // val efrom = res.metadata.encryptedFrom?.let { divideDIDFragment(it).first() }
+        return res.message.toString()
     }
 }
