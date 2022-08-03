@@ -6,6 +6,9 @@ www.rootswallet.com
 https://github.com/roots-id/rootswallet/wiki
 
 ## Developers
+### Setup
+Most of the setup is straight forward react-native and yarn.
+You will also need to install the indy-lib per your environment https://aries.js.org/guides/getting-started/installation
 ### Releasing
 #### Android
 See https://reactnative.dev/docs/signed-apk-android

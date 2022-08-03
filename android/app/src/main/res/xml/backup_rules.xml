@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
-    <cloud-backup disableIfNoEncryptionCapabilities="true">
+    <cloud-backup disableIfNoEncryptionCapabilities="false">
         <include domain="sharedpref" path="."/>
         <exclude domain="sharedpref" path="device.xml"/>
     </cloud-backup>
