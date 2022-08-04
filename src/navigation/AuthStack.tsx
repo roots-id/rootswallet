@@ -3,6 +3,7 @@ import {Avatar} from 'react-native-paper';
 import {CardStyleInterpolators, createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
 import CommunicationsScreen from '../screens/CommunicationsScreen';
+import MediatorScreen from '../screens/MediatorScreen';
 import IconActions from '../components/IconActions';
 import LogoTitle from '../components/LogoTitle';
 import CreateRelScreen from '../screens/CreateRelScreen';
@@ -241,6 +242,7 @@ export default function AuthStack() {
                     <Stack.Screen name="Export" component={ExportScreen}/>
                     <Stack.Screen name="Settings" component={SettingsScreen}/>
                     <Stack.Screen name="Wallet" component={WalletScreen}/>
+                    <Stack.Screen name="Mediator" component={MediatorScreen}/>
                 </Stack.Group>
             </Stack.Navigator>
         )

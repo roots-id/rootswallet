@@ -15,6 +15,10 @@ const DeveloperScreen = (props) => {
                 onPress={() => props.navigation.navigate("Communications")}
             />
             <Button
+                title={"Mediator Screen"}
+                onPress={() => props.navigation.navigate("Mediator")}
+            />
+            <Button
                 title={"Current Wallet"}
                 onPress={() => props.navigation.navigate("Wallet")}
             />

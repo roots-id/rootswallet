@@ -12,6 +12,7 @@ import com.facebook.react.bridge.ReadableArray
 import java.util.*
 import org.didcommx.didcomm.DIDComm
 import org.didcommx.didcomm.message.Message
+import org.didcommx.didcomm.message.Attachment
 import org.didcommx.didcomm.model.PackEncryptedParams
 import org.didcommx.didcomm.model.PackEncryptedResult
 import org.didcommx.didcomm.model.UnpackParams
@@ -19,6 +20,7 @@ import org.didcommx.didcomm.secret.*
 import org.didcommx.peerdid.*
 import org.didcommx.didcomm.utils.divideDIDFragment
 import org.didcommx.didcomm.utils.toJson
+import org.didcommx.didcomm.utils.didcommIdGeneratorDefault
 import org.didcommx.didcomm.common.VerificationMaterial
 import org.didcommx.didcomm.common.VerificationMaterialFormat
 import org.didcommx.didcomm.common.VerificationMethodType
@@ -31,6 +33,7 @@ import org.didcommx.peerdid.DIDCommServicePeerDID
 import org.didcommx.peerdid.DIDDocPeerDID
 import org.didcommx.peerdid.VerificationMaterialFormatPeerDID
 import org.didcommx.peerdid.resolvePeerDID
+
 
 class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -54,7 +57,7 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
         agreemKey: ReadableMap,
         signFrom: String? = null,
         protectSender: Boolean = false,
-        
+        attachments: ReadableArray? = null
     ): String {
         val secretsResolver = SecretResolverInMemoryMock()
         val didDoc = DIDDocPeerDID.fromJson(resolvePeerDID(from, VerificationMaterialFormatPeerDID.JWK))
@@ -64,6 +67,17 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
             secretsResolver.addKey(jwkToSecret(privateKey))
             println(jwkToSecret(privateKey))
         }
+        if (attachments != null) {
+            var didcommAttachments = emptyList<Attachment>()
+            for (attachment in attachments) {
+                didcommAttachments.add(Attachment.builder(didcommIdGeneratorDefault(), Attachment.Data.Json(attachment)
+                ).build())
+            }
+        } else {
+            didcommAttachments = null
+        }
+
+        
 
         val didComm = DIDComm(DIDDocResolverPeerDID(), secretsResolver)
         val message = Message.builder(
@@ -73,6 +87,7 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
         )
             .from(from)
             .to(listOf(to)) 
+            .attachments(didcommAttachments)
             // .customHeader("return_route", "all")
             // .customHeader("return_route2", "all")
             .build()
