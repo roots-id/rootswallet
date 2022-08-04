@@ -4,6 +4,7 @@ import { randomBytes } from 'react-native-randombytes'
 import { X25519KeyPair } from '@transmute/did-key-x25519';
 import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
 import uuid from 'react-native-uuid';
+import {Buffer} from "buffer";
 const { PeerDidModule, DIDCommV2Module } = NativeModules;
 
 
@@ -77,7 +78,8 @@ const Mediator = (props) => {
                 customHeaders = [{ return_route: "all" }],
                 agreemKey = myAgreemKey,
                 signFrom = null,
-                protectSender = true
+                protectSender = true,
+                attachments = null
             )
             const resp = await fetch('https://mediator.rootsid.cloud/', {
                 method: 'POST',
@@ -132,7 +134,8 @@ const Mediator = (props) => {
                 customHeaders = [{ return_route: "all" }],
                 agreemKey = keyToMediator,
                 signFrom = null,
-                protectSender = true
+                protectSender = true,
+                attachments = null
             )
             const resp = await fetch('https://mediator.rootsid.cloud/', {
                 method: 'POST',
@@ -168,7 +171,8 @@ const Mediator = (props) => {
                 customHeaders = [{ return_route: "all" }],
                 agreemKey = keyToMediator,
                 signFrom = null,
-                protectSender = true
+                protectSender = true,
+                attachments = null
             )
             const resp = await fetch('https://mediator.rootsid.cloud/', {
                 method: 'POST',
@@ -194,7 +198,8 @@ const Mediator = (props) => {
                     customHeaders = [{ return_route: "all" }],
                     agreemKey = keyToMediator,
                     signFrom = null,
-                    protectSender = true
+                    protectSender = true,
+                    attachments = null
                 )
                 const resp2 = await fetch('https://mediator.rootsid.cloud/', {
                     method: 'POST',
@@ -223,7 +228,9 @@ const Mediator = (props) => {
                     customHeaders = [{ return_route: "all" }],
                     agreemKey = keyToMediator,
                     signFrom = null,
-                    protectSender = true
+                    protectSender = true,
+                    attachments = null,
+                    attachments = null
                 )
                 const resp3 = await fetch('https://mediator.rootsid.cloud/', {
                     method: 'POST',
@@ -265,7 +272,8 @@ const Mediator = (props) => {
                 customHeaders = [{ created_time: Math.floor(new Date().getTime()/1000)}],
                 agreemKey = keyTofriend,
                 signFrom = null,
-                protectSender = true
+                protectSender = true,
+                attachments = null
             )
             // wrap in a forward message
             const fwBody = { next: friendDID }
@@ -275,10 +283,11 @@ const Mediator = (props) => {
                 to = friendServiceEndpoint,
                 from = didToMediator,  //this assume we are using same mediator, if not a new did should be created
                 messageType = "https://didcomm.org/routing/2.0/forward",
+                customHeaders = [{ return_route: "all" }],
                 agreemKey = keyToMediator,
                 signFrom = null,
                 protectSender = true,
-                attachments = {data: {json: myMsgPacked}}
+                attachments = [JSON.parse(myMsgPacked)]
             )
 
             const resp = await fetch(friendMediatorServiceEndpoint, {

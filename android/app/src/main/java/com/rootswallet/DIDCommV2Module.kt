@@ -20,7 +20,6 @@ import org.didcommx.didcomm.secret.*
 import org.didcommx.peerdid.*
 import org.didcommx.didcomm.utils.divideDIDFragment
 import org.didcommx.didcomm.utils.toJson
-import org.didcommx.didcomm.utils.didcommIdGeneratorDefault
 import org.didcommx.didcomm.common.VerificationMaterial
 import org.didcommx.didcomm.common.VerificationMaterialFormat
 import org.didcommx.didcomm.common.VerificationMethodType
@@ -67,14 +66,13 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
             secretsResolver.addKey(jwkToSecret(privateKey))
             println(jwkToSecret(privateKey))
         }
+        var didcommAttachments: MutableList<Attachment>? = null
         if (attachments != null) {
-            var didcommAttachments = emptyList<Attachment>()
-            for (attachment in attachments) {
-                didcommAttachments.add(Attachment.builder(didcommIdGeneratorDefault(), Attachment.Data.Json(attachment)
+            didcommAttachments = mutableListOf<Attachment>()
+            for (i in 0..attachments.size()-1) {
+                didcommAttachments.add(Attachment.builder("123", Attachment.Data.Json(attachments.getMap(i).toHashMap())
                 ).build())
             }
-        } else {
-            didcommAttachments = null
         }
 
         
