@@ -56,7 +56,8 @@ const Communications = (props) => {
           customHeaders = [{return_route: "all"}],
           agreemKey = aliceAgreemKey, 
           signFrom = null, 
-          protectSender = true 
+          protectSender = true ,
+          attachments = null
         )
         console.log("Alice sends " +  msg + " to Bob.")
         console.log("The message is authenticated by Alice's peer DID " + alicePeerDID + " and encrypted to Bob's peer DID " )
@@ -107,7 +108,8 @@ const Communications = (props) => {
             customHeaders = [{return_route: "all"}],
             agreemKey = agreemmentKey, 
             signFrom = null, 
-            protectSender = true
+            protectSender = true,
+            attachments = null
             )
             const resp2 = await fetch('https://mediator.rootsid.cloud/', {
                 method: 'POST',
@@ -140,7 +142,8 @@ const Communications = (props) => {
             customHeaders = [{return_route: "all"}, {created_time: Math.floor(new Date().getTime()/1000)}],
             agreemKey = agreemmentKey, 
             signFrom = null, 
-            protectSender = true
+            protectSender = true,
+            attachments = null
             )
             const resp2 = await fetch('https://mediator.rootsid.cloud/', {
                 method: 'POST',
