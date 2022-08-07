@@ -1,11 +1,16 @@
 import React from 'react';
-import {Button, View} from 'react-native';
+import {Button, NativeModules, View} from 'react-native';
 import * as store from '../store'
+const {CustomBackup} = NativeModules;
 
 const DeveloperScreen = (props) => {
     console.log(props.navigation)
     return (
         <View>
+            <Button
+                title={"Backup Storage"}
+                onPress={() => CustomBackup.backup()}
+            />
             <Button
                 title={"Clear Storage"}
                 onPress={() => store.clearStorage()}

@@ -23,7 +23,8 @@ class CustomBackupAgent : BackupAgent() {
      * some arbitrary tag to use.
      */
     val APP_DATA_KEY = "alldata"
-    val HUGE_DATA_KEY = "colossus"
+
+    val DATA_FILE_NAME = "saved_data";
 
     /** The app's current data, read from the live disk file  */
 //    var mAddMayo = false
@@ -36,8 +37,11 @@ class CustomBackupAgent : BackupAgent() {
     /** For convenience, we set up the File object for the app's data on creation  */
     override fun onCreate() {
         Log.d("ROOTS_BACKUP_TAG","onCreate - Backup Agent");
-        mDataFile = File(getFilesDir(), CustomBackupActivity.DATA_FILE_NAME)
+        val fileDir = getFilesDir()
+        Log.d("ROOTS_BACKUP_TAG","onCreate - Looking for saved data at $fileDir, $DATA_FILE_NAME");
+        mDataFile = File(fileDir, DATA_FILE_NAME)
         if(!mDataFile!!.exists()) {
+            Log.d("ROOTS_BACKUP_TAG","onCreate - creating new file $fileDir, $DATA_FILE_NAME");
             mDataFile!!.createNewFile()
         }
     }
@@ -70,8 +74,9 @@ class CustomBackupAgent : BackupAgent() {
         // to back up garbage data.  If we just let the exception go, the
         // Backup Manager will handle it and simply skip the current
         // backup operation.
-        synchronized(CustomBackupActivity.sDataLock) {
+        synchronized(CustomBackupModule.sDataLock) {
             val file = RandomAccessFile(mDataFile, "r")
+            Log.d("ROOTS_BACKUP_TAG","onBackup - backup file opened ${mDataFile?.absolutePath}");
 //            mFilling = file.readInt()
 //            mAddMayo = file.readBoolean()
 //            mAddTomato = file.readBoolean()
@@ -85,6 +90,7 @@ class CustomBackupAgent : BackupAgent() {
         // data to the storage backend.
         var doBackup = oldState == null
         if (!doBackup) {
+            Log.d("ROOTS_BACKUP_TAG","onBackup - comparing state file to determine if we should backup");
             doBackup = compareStateFile(oldState)
         }
 
@@ -93,11 +99,15 @@ class CustomBackupAgent : BackupAgent() {
         // flatten it into a single buffer, then write that to the backup
         // transport under the single key string.
         if (doBackup) {
+            Log.d("ROOTS_BACKUP_TAG","onBackup - doing backup");
             val bufStream = ByteArrayOutputStream()
 
             // We use a DataOutputStream to write structured data into
             // the buffering stream
             val outWriter = DataOutputStream(bufStream)
+            Log.d("ROOTS_BACKUP_TAG","onBackup - writing key/value");
+            outWriter.writeUTF(("key"+System.currentTimeMillis()))
+            outWriter.writeUTF(("value"+System.currentTimeMillis()))
 //            outWriter.writeInt(mFilling)
 //            outWriter.writeBoolean(mAddMayo)
 //            outWriter.writeBoolean(mAddTomato)
@@ -108,6 +118,7 @@ class CustomBackupAgent : BackupAgent() {
             val len = buffer.size
             data.writeEntityHeader(APP_DATA_KEY, len)
             data.writeEntityData(buffer, len)
+            Log.d("ROOTS_BACKUP_TAG","onBackup - wrote app data");
 
             // ***** pathological behavior *****
             // Now, in order to incur deliberate too-much-data failures,
@@ -122,6 +133,7 @@ class CustomBackupAgent : BackupAgent() {
         }
 
         // Finally, in all cases, we need to write the new state blob
+        Log.w("ROOTS_BACKUP_TAG", "onBackup - wrote state file");
         writeStateFile(newState)
     }
 
@@ -144,8 +156,10 @@ class CustomBackupAgent : BackupAgent() {
                 // version -- the user has downgraded.  That's problematic.
                 // In this implementation, we recover by simply rewriting
                 // the backup.
+                Log.d("ROOTS_BACKUP_TAG","compareStateFile - stateVersion greater than AGENT_VERSION");
                 return true
             }
+            Log.d("ROOTS_BACKUP_TAG","compareStateFile - stateVersion less than AGENT_VERSION");
             return true
 
             // The state data we store is just a mirror of the app's data;
@@ -158,6 +172,8 @@ class CustomBackupAgent : BackupAgent() {
         } catch (e: IOException) {
             // If something went wrong reading the state file, be safe
             // and back up the data again.
+            e.printStackTrace()
+            Log.d("ROOTS_BACKUP_TAG","compareStateFile - exception comparing state");
             true
         }
     }
@@ -172,6 +188,7 @@ class CustomBackupAgent : BackupAgent() {
         val outstream = FileOutputStream(stateFile.fileDescriptor)
         val out = DataOutputStream(outstream)
         out.writeInt(AGENT_VERSION)
+        Log.d("ROOTS_BACKUP_TAG","writeSateFile - wrote agent version");
 //        out.writeInt(mFilling)
 //        out.writeBoolean(mAddMayo)
 //        out.writeBoolean(mAddTomato)
@@ -204,6 +221,7 @@ class CustomBackupAgent : BackupAgent() {
         // way to consume it is using a while() loop
         while (data.readNextHeader()) {
             val key = data.key
+            Log.d("ROOTS_BACKUP_TAG", "onRestore - read data $key");
             val dataSize = data.dataSize
             if (APP_DATA_KEY == key) {
                 // It's our saved data, a flattened chunk of data all in
@@ -211,17 +229,26 @@ class CustomBackupAgent : BackupAgent() {
                 // extract it.
                 val dataBuf = ByteArray(dataSize)
                 data.readEntityData(dataBuf, 0, dataSize)
+                Log.d("ROOTS_BACKUP_TAG", "onRestore - read data entity key ${data.key}");
                 val baStream = ByteArrayInputStream(dataBuf)
-                val `in` = DataInputStream(baStream)
+                val readMe = DataInputStream(baStream)
+                var allRead = ""
+                while(readMe.available() > 0) {
+                    val rMe = readMe.readUTF()
+                    Log.d("ROOTS_BACKUP_TAG", "onRestore - read data $rMe");
+                    allRead += rMe;
 //                mFilling = `in`.readInt()
 //                mAddMayo = `in`.readBoolean()
 //                mAddTomato = `in`.readBoolean()
 
                 // Now we are ready to construct the app's data file based
                 // on the data we are restoring from.
-                synchronized(CustomBackupActivity.sDataLock) {
+                }
+                synchronized(CustomBackupModule.sDataLock) {
                     val file = RandomAccessFile(mDataFile, "rw")
                     file.setLength(0L)
+                    file.write(allRead.encodeToByteArray())
+                    Log.d("ROOTS_BACKUP_TAG", "onRestore - writing data to new state ${allRead.encodeToByteArray()}");
 //                    file.writeInt(mFilling)
 //                    file.writeBoolean(mAddMayo)
 //                    file.writeBoolean(mAddTomato)
@@ -229,12 +256,14 @@ class CustomBackupAgent : BackupAgent() {
             } else {
                 // Curious!  This entity is data under a key we do not
                 // understand how to process.  Just skip it.
+                Log.w("ROOTS_BACKUP_TAG", "onRestore - skipping backup data");
                 data.skipEntityData()
             }
         }
 
         // The last thing to do is write the state blob that describes the
         // app's data as restored from backup.
+        Log.w("ROOTS_BACKUP_TAG", "onRestore - writing state file");
         writeStateFile(newState)
     }
 
