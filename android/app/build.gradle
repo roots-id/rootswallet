@@ -125,6 +125,7 @@ def jscFlavor = 'org.webkit:android-jsc:+'
 def enableHermes = project.ext.react.get("enableHermes", false);
 
 android {
+
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     compileOptions {
@@ -270,6 +271,8 @@ dependencies {
     implementation("org.didcommx:didcomm:0.1.0", {
         exclude group: 'com.google.protobuf'
     })
+
+    implementation project(':react-native-fs')
 }
 
 // Run this once to be able to run the application with BUCK

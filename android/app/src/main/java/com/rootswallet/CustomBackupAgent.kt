@@ -24,7 +24,7 @@ class CustomBackupAgent : BackupAgent() {
      */
     val APP_DATA_KEY = "alldata"
 
-    val DATA_FILE_NAME = "saved_data";
+    val DATA_FILE_NAME = "rootswallet_backup.zip";
 
     /** The app's current data, read from the live disk file  */
 //    var mAddMayo = false
@@ -37,24 +37,23 @@ class CustomBackupAgent : BackupAgent() {
     /** For convenience, we set up the File object for the app's data on creation  */
     override fun onCreate() {
         Log.d("ROOTS_BACKUP_TAG","onCreate - Backup Agent");
-        val fileDir = getFilesDir()
-        Log.d("ROOTS_BACKUP_TAG","onCreate - Looking for saved data at $fileDir, $DATA_FILE_NAME");
-        mDataFile = File(fileDir, DATA_FILE_NAME)
+        val fDir = filesDir
+        val fileFilter = FileFilter { file ->
+            !file.isDirectory && file.name.endsWith(DATA_FILE_NAME)
+        }
+        val fileItr = fDir.listFiles(fileFilter).iterator()
+        while(fileItr.hasNext()) {
+            Log.d("ROOTS_BACKUP_TAG","file to backup " + fileItr.next().name);
+        }
+        Log.d("ROOTS_BACKUP_TAG","onCreate - Looking for saved data at $fDir/$DATA_FILE_NAME");
+        mDataFile = File(fDir, DATA_FILE_NAME)
         if(!mDataFile!!.exists()) {
-            Log.d("ROOTS_BACKUP_TAG","onCreate - creating new file $fileDir, $DATA_FILE_NAME");
+            Log.d("ROOTS_BACKUP_TAG","onCreate - creating new file $fDir, $DATA_FILE_NAME");
             mDataFile!!.createNewFile()
         }
     }
 
     /**
-     * The set of data backed up by this application is very small: just
-     * two booleans and an integer.  With such a simple dataset, it's
-     * easiest to simply store a copy of the backed-up data as the state
-     * blob describing the last dataset backed up.  The state file
-     * contents can be anything; it is private to the agent class, and
-     * is never stored off-device.
-     *
-     *
      * One thing that an application may wish to do is tag the state
      * blob contents with a version number.  This is so that if the
      * application is upgraded, the next time it attempts to do a backup,

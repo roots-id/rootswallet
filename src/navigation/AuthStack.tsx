@@ -31,7 +31,7 @@ import * as contact from '../relationships'
 import * as utils from '../utils'
 import * as wallet from '../wallet'
 import {loadWalletName} from "../wallet";
-import ExportScreen from '../screens/ExportScreen';
+import SaveScreen from '../screens/SaveScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -239,7 +239,7 @@ export default function AuthStack() {
                 <Stack.Group>
                     <Stack.Screen name="Developers" component={DeveloperScreen}/>
                     <Stack.Screen name="Communications" component={CommunicationsScreen}/>
-                    <Stack.Screen name="Export" component={ExportScreen}/>
+                    <Stack.Screen name="Save" component={SaveScreen}/>
                     <Stack.Screen name="Settings" component={SettingsScreen}/>
                     <Stack.Screen name="Wallet" component={WalletScreen}/>
                     <Stack.Screen name="Mediator" component={MediatorScreen}/>

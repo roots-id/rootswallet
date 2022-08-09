@@ -1,16 +1,13 @@
 import React from 'react';
 import {Button, NativeModules, View} from 'react-native';
 import * as store from '../store'
-const {CustomBackup} = NativeModules;
+import {initRoot} from "../roots";
+import {generateIdFromName} from "../relationships";
 
 const DeveloperScreen = (props) => {
     console.log(props.navigation)
     return (
         <View>
-            <Button
-                title={"Backup Storage"}
-                onPress={() => CustomBackup.backup()}
-            />
             <Button
                 title={"Clear Storage"}
                 onPress={() => store.clearStorage()}
@@ -28,8 +25,8 @@ const DeveloperScreen = (props) => {
                 onPress={() => props.navigation.navigate("Wallet")}
             />
             <Button
-                title={"Export Wallet"}
-                onPress={() => props.navigation.navigate("Export")}
+                title={"Save Wallet"}
+                onPress={() => props.navigation.navigate("Save")}
             />
         </View>
     )
