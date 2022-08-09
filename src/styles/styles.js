@@ -24,6 +24,10 @@ export const styles = StyleSheet.create({
     cardano: {
         color: '#1c04ba'
     },
+    clickableListArchive: {
+        fontSize: 16,
+        color: '#c66108',
+    },
     clickableListTitle: {
         fontSize: 22,
         color: '#e69138',
@@ -200,7 +204,7 @@ export const styles = StyleSheet.create({
     },
     scrollableModal: {
         padding: 16,
-        width: '90%',
+        width: '95%',
         maxWidth: 350,
         maxHeight: 250,
         borderRadius: 3,
@@ -248,8 +252,8 @@ export const styles = StyleSheet.create({
     },
     viewAnimated: {
         padding: 16,
-        width: '80%',
-        height: '80%',
+        width: '90%',
+        height: '95%',
         maxWidth: 400,
         borderRadius: 3,
         backgroundColor: '#cfbfca',
