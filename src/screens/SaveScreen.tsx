@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {
     Animated,
     Pressable,
-    View, NativeModules, FlatList, ScrollView,
+    View, NativeModules, FlatList, ScrollView, Text,
 } from 'react-native';
 import {useCardAnimation} from '@react-navigation/stack';
 import {Divider, IconButton, List} from 'react-native-paper';
@@ -29,13 +29,14 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
     const [selection, setSelection] = useState<ReadDirItem>()
 
     useEffect(() => {
+        console.log("save screen - use effect")
         const fetchData = async () => {
             await refreshItems()
         }
 
         // call the function
         fetchData()
-    }, [,selection])
+    }, [])
 
     async function refreshItems(item?: ReadDirItem) {
         console.log("save screen - toggling refresh")
@@ -43,20 +44,27 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
             await getArchiveItems()
         )
         setRefresh(!refresh)
-        console.log("save screen - contacts size", archives.length)
+        console.log("save screen - saved backups size", archives.length)
 
-        if(item) {
+        if(item && item != null) {
+            console.log("save screen - setting selection to item",item.name)
             setSelection(item)
+        } else if(archives && archives.length > 0) {
+            console.log("save screen - setting selection to latest",archives[archives.length-1].name)
+            setSelection(archives[archives.length-1])
         }
     }
 
     async function getArchiveItems() {
+        console.log("save screen - Getting archived items")
         const dirItems: ReadDirItem[] = await RNFS.readDir(RNFS.DocumentDirectoryPath) // On Android, use "RNFS.DocumentDirectoryPath" (MainBundlePath is not defined
         const archiveItems = dirItems.filter(item => {
             console.log("is an archive item?", item.name, "is file?", item.isFile(), "is match?", item.name.match("^" + RW_BACKUP + ".*\.zip") != null)
-            return item.isFile() && item.name.match("^" + RW_BACKUP + ".+\\.zip") != null
+            return item.isFile() && item.name.match("^" + RW_BACKUP + ".*\\.zip") != null
         })
+        console.log("save screen - Found archived items:",archiveItems.length)
         const sortedArchives = archiveItems.sort((a, b) => a.name.localeCompare(b.name))
+        console.log("save screen - Sorted archived items:",sortedArchives.map(item=>item.name))
         return sortedArchives;
     }
 
@@ -146,19 +154,22 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
                     modeValue="contained"
                     labelStyle={styles.loginButtonLabel}
                     onPress={async () => saveWallet()}/>
-
+                <Text style={styles.subText}></Text>
+                <Text style={styles.subText}></Text>
+                <Text style={styles.subText}>Saved Wallet History:</Text>
                 <ScrollView style={styles.scrollableModal} persistentScrollbar={true}>
 
                     <FlatList
+                        keyExtractor={(item) => item.name}
                         inverted={true}
                         data={archives}
                         extraData={refresh}
-                        ItemSeparatorComponent={() => <Divider/>}
                         renderItem={({item}) => (
                             <List.Item
                                 title={getTitle(item)}
                                 titleNumberOfLines={1}
-                                titleStyle={styles.clickableListArchive}
+                                titleStyle={
+                                    (selection && item.name.match(selection.name)) ? styles.highlightedItem : styles.clickableListArchive}
                                 descriptionStyle={styles.listDescription}
                                 descriptionNumberOfLines={1}
                                 onPress={() => refreshItems(item)}
