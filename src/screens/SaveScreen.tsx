@@ -21,6 +21,8 @@ import {zip} from 'react-native-zip-archive'
 export default function SaveScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("save screen - params", route.params)
 
+    const MAX_ARCHIVES = 3;
+
     const {current} = useCardAnimation();
     const RW_BACKUP = "rootswallet_backup";
 
@@ -40,18 +42,22 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
 
     async function refreshItems(item?: ReadDirItem) {
         console.log("save screen - toggling refresh")
-        setArchives(
-            await getArchiveItems()
-        )
-        setRefresh(!refresh)
-        console.log("save screen - saved backups size", archives.length)
+        const sortedArchives = await getArchiveItems()
+        if(sortedArchives && sortedArchives.length > 0) {
+            setArchives(sortedArchives)
+            setRefresh(!refresh)
+            console.log("save screen - saved backups size", sortedArchives.length)
 
-        if(item && item != null) {
-            console.log("save screen - setting selection to item",item.name)
-            setSelection(item)
-        } else if(archives && archives.length > 0) {
-            console.log("save screen - setting selection to latest",archives[archives.length-1].name)
-            setSelection(archives[archives.length-1])
+            if (item && item != null) {
+                console.log("save screen - setting selection to item", item.name)
+                setSelection(item)
+            } else if (sortedArchives && sortedArchives.length > 0) {
+                const latest = sortedArchives[sortedArchives.length-1]
+                console.log("save screen - setting selection to latest", latest.name)
+                setSelection(latest)
+            }
+        } else {
+            console.log("save screen - no backups found during refresh")
         }
     }
 
@@ -74,12 +80,12 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
         // require the module
         const RNFS = require('react-native-fs');
 
-        const zipPath = RNFS.DocumentDirectoryPath + '/' + RW_BACKUP + '.zip';
+        const zipPath = RNFS.DocumentDirectoryPath + '/' + RW_BACKUP + '_current.zip';
         const sourcePath = RNFS.DocumentDirectoryPath + '/' + RW_BACKUP;
 
         if (await RNFS.exists(zipPath)) {
             console.log("Previous backup zip exists", zipPath)
-            const archivePath = RNFS.DocumentDirectoryPath + '/' + RW_BACKUP + Date.now() + '.zip';
+            const archivePath = RNFS.DocumentDirectoryPath + '/' + RW_BACKUP + '_' + Date.now() + '.zip';
             console.log("Archiving backup zip at", archivePath)
             await RNFS.moveFile(zipPath, archivePath)
             console.log("Created archiving backup zip ", archivePath)
@@ -99,10 +105,10 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
 
         //cleanup archived zips
         console.log("Cleaning archived backup dirs in", RNFS.DocumentDirectoryPath)
-        console.log("Pruning archived zips if there are more than 5", archives)
+        console.log("Pruning archived zips if there are more than",MAX_ARCHIVES, archives)
         for (const archiveItem of archives) {
             const count = archives.indexOf(archiveItem);
-            if ((archives.length - count) > 5) {
+            if ((archives.length - count) > MAX_ARCHIVES) {
                 await RNFS.unlink(archiveItem.path)
                 console.log("Deleted archived backup ", archiveItem.path)
             } else {
@@ -157,26 +163,25 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
                 <Text style={styles.subText}></Text>
                 <Text style={styles.subText}></Text>
                 <Text style={styles.subText}>Saved Wallet History:</Text>
-                <ScrollView style={styles.scrollableModal} persistentScrollbar={true}>
-
-                    <FlatList
-                        keyExtractor={(item) => item.name}
-                        inverted={true}
-                        data={archives}
-                        extraData={refresh}
-                        renderItem={({item}) => (
-                            <List.Item
-                                title={getTitle(item)}
-                                titleNumberOfLines={1}
-                                titleStyle={
-                                    (selection && item.name.match(selection.name)) ? styles.highlightedItem : styles.clickableListArchive}
-                                descriptionStyle={styles.listDescription}
-                                descriptionNumberOfLines={1}
-                                onPress={() => refreshItems(item)}
-                            />
-                        )}
-                    />
-                </ScrollView>
+                <FlatList
+                    persistentScrollbar={true}
+                    keyExtractor={(item) => item.name}
+                    inverted={true}
+                    style={styles.scrollableModal}
+                    data={archives}
+                    extraData={refresh}
+                    renderItem={({item}) => (
+                        <List.Item
+                            title={getTitle(item)}
+                            titleNumberOfLines={1}
+                            titleStyle={
+                                (selection && item.name.match(selection.name)) ? styles.highlightedItem : styles.clickableListArchive}
+                            descriptionStyle={styles.listDescription}
+                            descriptionNumberOfLines={1}
+                            onPress={() => refreshItems(item)}
+                        />
+                    )}
+                />
             </Animated.View>
         </View>
     );
