@@ -93,22 +93,41 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
         return true
     }
 
-    async function loadWallet() {
-        console.log("Save - Load wallet")
+    async function loadWallet() : Promise<boolean>{
+        console.log("SaveScreen - Load wallet")
 
         if(selection) {
             // require the module
             if (await initBackupDir(backupPath)) {
-                console.log("Reading selection path", selection.path)
+                console.log("SaveScreen - Reading selection path", selection.path)
                 const unzipResult = await unzip(selection.path, backupPath)
                 if (unzipResult) {
                     const input = await RNFS.readFile(backupPath + "/rootswallet_export.txt", 'utf8')
-                    console.log("read input", input)
+                    console.log("SaveScreen - read input", input)
+
+                    const allExports: exportAll = JSON.parse(input)
+                    if (allExports.exportStorage) {
+                        const result = await store.importStorage(allExports.exportStorage)
+                        if(result) {
+                            if(result.length > 0) {
+                                console.error("SaveScreen - Failed to load keys",result)
+                            } else {
+                                console.log("SaveScreen - Import succeeded",result)
+                                return true;
+                            }
+                        } else {
+                            console.error("SaveScreen - Import failed", result)
+                        }
+                    } else {
+                        console.error("SaveScreen - couldn't load storage")
+                    }
                 }
             }
         } else {
             console.error("Can't import wallet, nothing selected")
         }
+
+        return false
     }
 
     async function saveWallet() {

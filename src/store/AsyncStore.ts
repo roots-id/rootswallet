@@ -92,6 +92,28 @@ export async function hasWallet(walName: string) {
     }
 }
 
+export async function loadStorage(importAll: Map<string, string>) : Promise<string[]>{
+    logger("AsyncStorage - importing",importAll)
+    const failed: string[] = [];
+    const entries = importAll.entries()
+    for (const entry of entries) {
+        const key = entry[0]
+        const value = entry[1]
+        logger("AsyncStorage - importing",key,value)
+        const result: boolean = await storeItem(key,value)
+        logger("AsyncStorage - imported",key,value,result)
+        if(!result) {
+            failed.push(key)
+        }
+    }
+    if(failed.length == 0) {
+        logger("AsyncStorage - import complete")
+    } else {
+        console.error("AsyncStorage - failed to import",failed)
+    }
+    return failed;
+}
+
 export async function removeItem(key: string) {
     logger("AsyncStore - removing key",key)
     try {

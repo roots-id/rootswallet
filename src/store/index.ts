@@ -3,7 +3,8 @@ import * as CachedStore from './CachedStore'
 import * as SecureStore from 'expo-secure-store';
 
 import {logger} from '../logging'
-import {getJsonFromMap, replaceSpecial} from '../utils'
+import {getJsonFromMap, getMapFromJson, replaceSpecial} from '../utils'
+import {loadStorage} from "./AsyncStore";
 
 export const WALLET_LOGIN_SUCCESS = "rootsWalletLoginSuccessful"
 
@@ -24,6 +25,18 @@ export async function exportStorage() : Promise<string|undefined>{
         const storeExportJson = getJsonFromMap(asyncStoreExport)
         logger("store - exported storage:",storeExportJson)
         return storeExportJson
+    } catch(error: any) {
+        console.error("Failed to export storage",error,error.stack)
+    }
+    return undefined
+}
+
+export async function importStorage(importJson: string) : Promise<string[]|undefined>{
+    logger("store - loading storage",importJson)
+    try {
+        const storeImportMap = getMapFromJson(importJson)
+        const result: string[] = await AsyncStore.loadStorage(storeImportMap)
+        return result
     } catch(error: any) {
         console.error("Failed to export storage",error,error.stack)
     }
