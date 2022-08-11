@@ -3,11 +3,11 @@ import * as CachedStore from './CachedStore'
 import * as SecureStore from 'expo-secure-store';
 
 import {logger} from '../logging'
-import {replaceSpecial} from '../utils'
+import {getJsonFromMap, replaceSpecial} from '../utils'
 
 export const WALLET_LOGIN_SUCCESS = "rootsWalletLoginSuccessful"
 
-export async function clearStorage() {
+export async function clearStorage() : Promise<void>{
     logger("store - Clearing storage")
     try {
         CachedStore.clear()
@@ -15,6 +15,19 @@ export async function clearStorage() {
     } catch(error: any) {
         console.error("Failed to clear storage",error,error.stack)
     }
+}
+
+export async function exportStorage() : Promise<string|undefined>{
+    logger("store - exporting storage")
+    try {
+        const asyncStoreExport: Map<string,string> = await AsyncStore.exportStorage()
+        const storeExportJson = getJsonFromMap(asyncStoreExport)
+        logger("store - exported storage:",storeExportJson)
+        return storeExportJson
+    } catch(error: any) {
+        console.error("Failed to export storage",error,error.stack)
+    }
+    return undefined
 }
 
 export async function status() {

@@ -1,11 +1,25 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logger } from '../logging'
+import {exportKeyValue} from "../models";
 
 export async function clear() {
     logger("AsyncStorage - cleaning")
     const keys = await AsyncStorage.getAllKeys()
     keys.forEach(async (key) => await removeItem(key))
     logger("AsyncStorage - cleaned")
+}
+
+export async function exportStorage() : Promise<Map<string, string>>{
+    logger("AsyncStorage - exporting")
+    const keys = await AsyncStorage.getAllKeys()
+    const all: Map<string, string> = new Map<string,string>()
+    for (const key of keys) {
+        const value: string = <string>await AsyncStorage.getItem(key)
+        logger("AsyncStorage - exporting",key,value)
+        all.set(key,value)
+    }
+    logger("AsyncStorage - export complete")
+    return all;
 }
 
 export async function getItem(key: string) {

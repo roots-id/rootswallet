@@ -55,6 +55,10 @@ export const styles = StyleSheet.create({
         resizeMode:'contain',
         margin:8
     },
+    descriptionOrange: {
+        fontSize: 16,
+        color: '#aa4004',
+    },
     detailTitle: {
         fontSize: 20,
         color: '#111111',
@@ -80,10 +84,6 @@ export const styles = StyleSheet.create({
         fontWeight: 'normal',
         alignSelf: "flex-start",
         justifyContent: "flex-start"
-    },
-    highlightedItem: {
-        fontSize: 18,
-        fontWeight: "bold"
     },
     innerContainer: {
         flex: 1,
@@ -115,6 +115,10 @@ export const styles = StyleSheet.create({
         padding: 20,
         marginVertical: 8,
         marginHorizontal: 16,
+    },
+    itemHighlighted: {
+        fontSize: 18,
+        fontWeight: "bold"
     },
     leftHeader: {
         color: '#999999',
@@ -174,6 +178,8 @@ export const styles = StyleSheet.create({
     none: {
         display: 'none'
     },
+    orange: {color: '#b65100'},
+    orangeHighlight: {color: '#c67150'},
     phone: {
         color: 'blue',
         textDecorationLine: 'underline',
@@ -201,6 +207,13 @@ export const styles = StyleSheet.create({
     row: {
         flexDirection: "row",
         flexWrap: "wrap",
+    },
+    scrollableCompact: {
+        padding:0,
+        width: '100%',
+        maxHeight: 250,
+        borderRadius: 6,
+        backgroundColor: '#baaab6',
     },
     scrollableModal: {
         padding: 16,
@@ -274,6 +287,9 @@ export const styles = StyleSheet.create({
         height: 50,
         backgroundColor: '#F0EEEE'
     },
+    white: {
+        color: "#eeeeee"
+    }
 })
 
 export function displayProblem(displayIt) {

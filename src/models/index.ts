@@ -17,6 +17,10 @@ export enum ModelType {
     SETTING = "rootsSettingType",
 }
 
+export enum ExportType {
+    ASYNC_STORE = "rootsExportAsyncStoreType",
+}
+
 //TODO refactor away this general file to specific files, like 'chat'
 
 export type addOn = {
@@ -96,6 +100,16 @@ export type did = {
 
 export type didDocument = {
     publicKeys: publicKey[]
+}
+
+export type exportAll = {
+    exportStorage: string,
+    exportWallet: string,
+}
+
+export type exportKeyValue = {
+    key: string,
+    value: Object,
 }
 
 export interface issuedCredential extends credential {

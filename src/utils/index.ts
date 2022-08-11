@@ -1,3 +1,13 @@
+export function getJsonFromMap(map: Map<string,string>) : string {
+    const entryArray = Array.from(map.entries()).reduce((o,[key,value]) => {
+        o[key] = value;
+        return o;
+    },{})
+    const jsonStr = JSON.stringify(entryArray)
+    console.log("utils - got json from map",jsonStr)
+    return jsonStr
+}
+
 export function getObjectField(obj: object|undefined|Readonly<object|undefined>, field: string) {
     if(obj) {
         for (const [key, value] of Object.entries(obj)) {
