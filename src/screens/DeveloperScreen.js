@@ -24,10 +24,6 @@ const DeveloperScreen = (props) => {
                 title={"Current Wallet"}
                 onPress={() => props.navigation.navigate("Wallet")}
             />
-            <Button
-                title={"Save Wallet"}
-                onPress={() => props.navigation.navigate("Save")}
-            />
         </View>
     )
 };

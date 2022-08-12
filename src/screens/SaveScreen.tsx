@@ -1,29 +1,33 @@
 import React, {useEffect, useState} from 'react';
 import {
+    Alert,
     Animated,
     Pressable,
     View, NativeModules, FlatList, ScrollView, Text,
 } from 'react-native';
-import {useCardAnimation} from '@react-navigation/stack';
+import RNFS, {ReadDirItem} from "react-native-fs";
 import {Divider, IconButton, List} from 'react-native-paper';
+import {unzip, zip} from 'react-native-zip-archive'
+import {CompositeScreenProps} from "@react-navigation/core/src/types";
+import {useCardAnimation} from '@react-navigation/stack';
+
+import FormButton from "../components/FormButton";
+import AuthContext from '../context/AuthenticationContext';
+import {exportAll, ExportType} from "../models";
+import * as store from "../store";
 import {styles} from "../styles/styles";
+import {CommonActions, StackActions} from "@react-navigation/routers";
+import {getWalletName, loadWalletName} from "../wallet";
+
 
 const {CustomBackup} = NativeModules;
-
-import * as roots from '../roots'
-import {CompositeScreenProps} from "@react-navigation/core/src/types";
-import * as store from "../store";
-import FormButton from "../components/FormButton";
-import RNFS, {ReadDirItem} from "react-native-fs";
-import {unzip, zip} from 'react-native-zip-archive'
-import {exportAll, ExportType} from "../models";
-
 
 export default function SaveScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("save screen - params", route.params)
 
     const MAX_ARCHIVES = 4;
 
+    const {signIn} = React.useContext(AuthContext);
     const {current} = useCardAnimation();
     const RW_BACKUP = "rootswallet_backup";
     const RNFS = require('react-native-fs');
@@ -97,37 +101,80 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
         console.log("SaveScreen - Load wallet")
 
         if(selection) {
-            // require the module
-            if (await initBackupDir(backupPath)) {
-                console.log("SaveScreen - Reading selection path", selection.path)
-                const unzipResult = await unzip(selection.path, backupPath)
-                if (unzipResult) {
-                    const input = await RNFS.readFile(backupPath + "/rootswallet_export.txt", 'utf8')
-                    console.log("SaveScreen - read input", input)
-
-                    const allExports: exportAll = JSON.parse(input)
-                    if (allExports.exportStorage) {
-                        const result = await store.importStorage(allExports.exportStorage)
-                        if(result) {
-                            if(result.length > 0) {
-                                console.error("SaveScreen - Failed to load keys",result)
-                            } else {
-                                console.log("SaveScreen - Import succeeded",result)
-                                return true;
-                            }
-                        } else {
-                            console.error("SaveScreen - Import failed", result)
+            Alert.alert(
+                "Warning!!!",
+                "Your current wallet will be replaced by this backup",
+                [
+                    {
+                        text: "Load",
+                        onPress: () => {
+                            console.log("SaveScreen - Load accepted")
+                            store.clearStorage()
+                            restoreFromBackup()
+                            resetSession()
+                            navigation.dispatch(
+                                StackActions.popToTop()
+                            );
+                            // navigation.dispatch(
+                            //     CommonActions.reset({
+                            //         index: 1,
+                            //         routes: [
+                            //             { name: 'Login' },
+                            //         ],
+                            //     })
+                            // );
                         }
-                    } else {
-                        console.error("SaveScreen - couldn't load storage")
+                    },
+                    {
+                        text: "Cancel",
+                        onPress: () => console.log("SaveScreen - Load cancelled"),
+                        style: "cancel"
                     }
-                }
-            }
+                ]
+            );
         } else {
             console.error("Can't import wallet, nothing selected")
         }
 
         return false
+    }
+
+    async function restoreFromBackup() {
+        if (selection && await initBackupDir(backupPath)) {
+            console.log("SaveScreen - Reading selection path", selection.path)
+            const unzipResult = await unzip(selection.path, backupPath)
+            if (unzipResult) {
+                const input = await RNFS.readFile(backupPath + "/rootswallet_export.txt", 'utf8')
+                console.log("SaveScreen - read input", input)
+
+                const allExports: exportAll = JSON.parse(input)
+                if (allExports.exportStorage) {
+                    const result = await store.importStorage(allExports.exportStorage)
+                    if(result) {
+                        if(result.length > 0) {
+                            console.error("SaveScreen - Failed to load keys",result)
+                        } else {
+                            console.log("SaveScreen - Import succeeded",result)
+                            return true;
+                        }
+                    } else {
+                        console.error("SaveScreen - Import failed", result)
+                    }
+                } else {
+                    console.error("SaveScreen - couldn't load storage")
+                }
+            }
+        }
+    }
+
+    async function resetSession() {
+        const walName = null
+        const created = true
+        console.info("SaveScreen - resetting session",walName,created)
+        const walNameLoaded = await loadWalletName()
+        setWalletFound(walNameLoaded)
+        console.log("AuthStack - wallet found?", walletFound)
+        signIn(walName,created);
     }
 
     async function saveWallet() {
@@ -192,7 +239,7 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
 
     function getTitle(item: ReadDirItem) {
         if(item.name.endsWith("current.zip")) {
-            return "Current Wallet"
+            return "Latest Wallet"
         } else {
             return "Previous Wallet"
         }

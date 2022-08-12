@@ -3,7 +3,7 @@ import {
     Animated,
     Text,
     Pressable,
-    View,
+    View, Button,
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import {useCardAnimation} from '@react-navigation/stack';
@@ -12,6 +12,7 @@ import {styles} from "../styles/styles";
 
 import * as roots from '../roots'
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
+import FormButton from "../components/FormButton";
 
 export default function SettingsScreen({route, navigation}: CompositeScreenProps<any, any>) {
     const [demoMode, setDemoMode] = useState<boolean>(roots.isDemo())
@@ -38,44 +39,62 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
                 style={styles.pressable}
                 onPress={navigation.goBack}
             />
+            <View style={{flexDirection: 'row',}}>
+                <IconButton
+                    icon="close-circle"
+                    size={36}
+                    color="#e69138"
+                    onPress={() => navigation.goBack()}
+                />
+            </View>
             <Animated.View
                 style={styles.viewAnimated}
             >
-                <View style={{flexDirection: 'row',}}>
-                    <IconButton
-                        icon="chemical-weapon"
-                        size={36}
-                        color="#e69138"
-                        onPress={() => navigation.navigate("Developer")}
-                    />
-                    <IconButton
-                        icon="close-circle"
-                        size={36}
-                        color="#e69138"
-                        onPress={() => navigation.goBack()}
-                    />
+                <Text/>
+                <View style={{flexDirection: 'row'}}>
+                    <Text style={styles.listItemCenteredBlack}>Server: </Text>
+                    <View style={{backgroundColor: '#251520', width: "80%"}}>
+                        <Picker
+                            style={styles.clickableListTitle}
+                            mode="dropdown"
+                            dropdownIconColor="#e69138"
+                            numberOfLines={5}
+                            selectedValue={host}
+                            onValueChange={(itemValue) => setHost(itemValue)}>
+                            <Picker.Item label="Local Test Node" value="ppp-node-test.atalaprism.io"/>
+                            <Picker.Item label="Prism Test Node" value="ppp.atalaprism.io"/>
+                        </Picker>
+                    </View>
                 </View>
-                <Text style={styles.listItemCenteredBlack}>Select Prism Node:</Text>
-                <View style={{backgroundColor: '#251520', width: "80%"}}>
-                    <Picker
-                        style={styles.clickableListTitle}
-                        mode="dropdown"
-                        dropdownIconColor="#e69138"
-                        numberOfLines={5}
-                        selectedValue={host}
-                        onValueChange={(itemValue) => setHost(itemValue)}>
-                        <Picker.Item label="Local Test Node" value="ppp-node-test.atalaprism.io"/>
-                        <Picker.Item label="Prism Test Node" value="ppp.atalaprism.io"/>
-                    </Picker>
-                </View>
+                <Text/>
                 <View style={{flexDirection: 'row',}}>
-                    <Text style={styles.listItemCenteredBlack}>Toggle Demo Mode:</Text>
+                    <Text style={styles.listItemCenteredBlack}>Demo Mode ON/OFF: </Text>
                     <ToggleButton
                         icon={demoMode ? "toggle-switch" : "toggle-switch-off-outline"}
                         size={26}
                         color="#e69138"
                         value="toggle demo switch"
                         onPress={() => setDemoMode(!roots.isDemo())}
+                    />
+                </View>
+                <Text/>
+                <View style={{flexDirection: 'row',}}>
+                    <Text style={styles.listItemCenteredBlack}>Save/Restore Wallet: </Text>
+                    <IconButton
+                        icon="file-restore"
+                        size={36}
+                        color="#e69138"
+                        onPress={() => navigation.navigate("Save")}
+                    />
+                </View>
+                <Text/>
+                <View style={{flexDirection: 'row',}}>
+                    <Text style={styles.listItemCenteredBlack}>Go to Developer Page: </Text>
+                    <IconButton
+                        icon="skull-crossbones"
+                        size={36}
+                        color="#e69138"
+                        onPress={() => navigation.navigate("Developers")}
                     />
                 </View>
             </Animated.View>

@@ -211,7 +211,7 @@ export const styles = StyleSheet.create({
     scrollableCompact: {
         padding:0,
         width: '100%',
-        maxHeight: 250,
+        maxHeight: 275,
         borderRadius: 6,
         backgroundColor: '#baaab6',
     },
@@ -266,11 +266,10 @@ export const styles = StyleSheet.create({
     viewAnimated: {
         padding: 16,
         width: '90%',
-        height: '95%',
-        maxWidth: 400,
+        height: '80%',
         borderRadius: 3,
         backgroundColor: '#cfbfca',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
     },
     walletIconStyle: {

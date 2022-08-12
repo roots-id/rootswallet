@@ -65,7 +65,7 @@ export default function LoginScreen({route, navigation}: CompositeScreenProps<an
                         setProblemText(probText)
                         if (probText.length <= 0) {
                             console.log("LoginScreen - login with password success")
-                            signIn(getWalletName());
+                            signIn(getWalletName(),true);
                         } else {
                             console.error("LoginScreen - login with password failed")
                         }
