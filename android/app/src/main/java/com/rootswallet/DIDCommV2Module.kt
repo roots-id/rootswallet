@@ -44,7 +44,7 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
     override fun getName(): String {
         return "DIDCommV2Module"
     }
-
+    // TODO MAKE IN SYNCHRONOUS
     @ReactMethod(isBlockingSynchronousMethod = true)
     fun pack(
         body: ReadableMap,
