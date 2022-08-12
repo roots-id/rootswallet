@@ -62,14 +62,14 @@ const Mediator = (props) => {
             // DID and key generated must be persisted
             const myAuthKey = await generateKeyPair('ed25519')
             const myAgreemKey = await generateKeyPair('x25519')
-            const  myDid = PeerDidModule.createDID(myAuthKey.publicJwk,myAgreemKey.publicJwk,null,null)
+            const  myDid = await PeerDidModule.createDID(myAuthKey.publicJwk,myAgreemKey.publicJwk,null,null)
             setKeyToMediator(myAgreemKey)
             setDidToMediator(myDid)
 
             
             // Mediate request message
             const msgBody = {}
-            const mediateRequestPacked = DIDCommV2Module.pack(
+            const mediateRequestPacked = await DIDCommV2Module.pack(
                 msgBody,
                 id = uuid.v4(),
                 to = mediatorDID,
@@ -87,7 +87,7 @@ const Mediator = (props) => {
                 body: mediateRequestPacked
             });
             const respPacked = await resp.json();
-            const respUnpacked = DIDCommV2Module.unpack(respPacked, to = myDid, agreemKey = myAgreemKey)
+            const respUnpacked = await DIDCommV2Module.unpack(respPacked, to = myDid, agreemKey = myAgreemKey)
             const respJson = JSON.parse(respUnpacked)
             console.log(respJson)
             setRoutingKey(respJson.body.routing_keys[0])
@@ -111,7 +111,7 @@ const Mediator = (props) => {
             // DID and key generated must be persisted
             const myAuthKey = await generateKeyPair('ed25519')
             const myAgreemKey = await generateKeyPair('x25519')
-            const  myDid = PeerDidModule.createDID(myAuthKey.publicJwk,myAgreemKey.publicJwk,routingKey,null)
+            const  myDid = await PeerDidModule.createDID(myAuthKey.publicJwk,myAgreemKey.publicJwk,routingKey,null)
             setKeyToFriend(myAgreemKey)
             setDidToFriend(myDid)
 
@@ -125,7 +125,7 @@ const Mediator = (props) => {
                     }
                 ]
             }
-            const keyListUpdatePacked = DIDCommV2Module.pack(
+            const keyListUpdatePacked = await DIDCommV2Module.pack(
                 msgBody,
                 id = uuid.v4(),
                 to = mediatorDID,
@@ -143,7 +143,7 @@ const Mediator = (props) => {
                 body: keyListUpdatePacked
             });
             const respPacked = await resp.json();
-            const respUnpacked = DIDCommV2Module.unpack(respPacked, to = didToMediator, agreemKey = keyToMediator)
+            const respUnpacked = await DIDCommV2Module.unpack(respPacked, to = didToMediator, agreemKey = keyToMediator)
             const respJson = JSON.parse(respUnpacked)
             console.log(respJson)
 
@@ -162,7 +162,7 @@ const Mediator = (props) => {
         try {
             // Status Request
             const msgBody = {}
-            const statusRequestPacked = DIDCommV2Module.pack(
+            const statusRequestPacked = await DIDCommV2Module.pack(
                 msgBody,
                 id = uuid.v4(),
                 to = mediatorDID,
@@ -180,7 +180,7 @@ const Mediator = (props) => {
                 body: statusRequestPacked
             });
             const respPacked = await resp.json();
-            const respUnpacked = DIDCommV2Module.unpack(respPacked, to = didToMediator, agreemKey = keyToMediator)
+            const respUnpacked = await DIDCommV2Module.unpack(respPacked, to = didToMediator, agreemKey = keyToMediator)
             const respJson = JSON.parse(respUnpacked)
             const messageCount = respJson.body.message_count
             console.log(messageCount)
@@ -189,7 +189,7 @@ const Mediator = (props) => {
             } else {
                 // Get one message from queue
                 const msg2Body = {limit: 1}
-                const deliveryRequestPacked = DIDCommV2Module.pack(
+                const deliveryRequestPacked = await DIDCommV2Module.pack(
                     msg2Body,
                     id = uuid.v4(),
                     to = mediatorDID,
@@ -208,18 +208,18 @@ const Mediator = (props) => {
                 });
                 
                 const resp2Packed = await resp2.json();
-                const resp2Unpacked = DIDCommV2Module.unpack(resp2Packed, to = didToMediator, agreemKey = keyToMediator)
+                const resp2Unpacked = await DIDCommV2Module.unpack(resp2Packed, to = didToMediator, agreemKey = keyToMediator)
                 const resp2UnpackedJson = JSON.parse(resp2Unpacked)
                 // Unpack friend message
                 const friendMsgPacked = resp2UnpackedJson.attachments[0].data.json
                 const friendMsgPackedId = resp2UnpackedJson.attachments[0].id
-                const friendMsgUnPacked = DIDCommV2Module.unpack(JSON. stringify(friendMsgPacked), to = didTofriend, agreemKey = keyTofriend)
+                const friendMsgUnPacked = await DIDCommV2Module.unpack(JSON. stringify(friendMsgPacked), to = didTofriend, agreemKey = keyTofriend)
 
                 setFriendMessage(JSON.parse(friendMsgUnPacked).body.content)
 
                 // Acknowledge receipt
                 const msg3Body = {"message_id_list": [friendMsgPackedId]}
-                const ackPacked = DIDCommV2Module.pack(
+                const ackPacked = await DIDCommV2Module.pack(
                     msg3Body,
                     id = uuid.v4(),
                     to = mediatorDID,
@@ -252,10 +252,10 @@ const Mediator = (props) => {
 
     const sendMessage = async () => {
         // Send Message to DID via routing
-        const friendDIDDoc = JSON.parse(PeerDidModule.resolveDID(friendDID))
+        const friendDIDDoc = JSON.parse(await PeerDidModule.resolveDID(friendDID))
         const friendServiceEndpoint = friendDIDDoc.service[0].serviceEndpoint
         console.log(friendServiceEndpoint)
-        const friendMediatorDIDDoc = JSON.parse(PeerDidModule.resolveDID(friendServiceEndpoint))
+        const friendMediatorDIDDoc = JSON.parse(await PeerDidModule.resolveDID(friendServiceEndpoint))
         const friendMediatorServiceEndpoint = friendMediatorDIDDoc.service[0].serviceEndpoint
         console.log()
         try {
@@ -263,7 +263,7 @@ const Mediator = (props) => {
             
             // Basic Message to friend
             const msgBody = { content: myMessage }
-            const myMsgPacked = DIDCommV2Module.pack(
+            const myMsgPacked = await DIDCommV2Module.pack(
                 msgBody,
                 id = uuid.v4(),
                 to = friendDID,
@@ -277,7 +277,7 @@ const Mediator = (props) => {
             )
             // wrap in a forward message
             const fwBody = { next: friendDID }
-            const fwPacked = DIDCommV2Module.pack(
+            const fwPacked = await DIDCommV2Module.pack(
                 fwBody,
                 id = uuid.v4(),
                 to = friendServiceEndpoint,
