@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import RNFS, {ReadDirItem} from "react-native-fs";
 import {Divider, IconButton, List} from 'react-native-paper';
+import RNRestart from 'react-native-restart';
 import {unzip, zip} from 'react-native-zip-archive'
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {useCardAnimation} from '@react-navigation/stack';
@@ -58,7 +59,7 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
                 console.log("save screen - setting selection to item", item.name)
                 setSelection(item)
             } else if (sortedArchives && sortedArchives.length > 0) {
-                const latest = sortedArchives[sortedArchives.length-1]
+                const latest = sortedArchives[0]
                 console.log("save screen - setting selection to latest", latest.name)
                 setSelection(latest)
             }
@@ -76,7 +77,7 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
             return item.isFile() && item.name.match("^" + RW_BACKUP + ".*\\.zip") != null
         })
         console.log("save screen - Found archived items:",archiveItems.length)
-        const sortedArchives = archiveItems.sort((a, b) => a.name.localeCompare(b.name))
+        const sortedArchives = archiveItems.sort((a, b) => -1*(a.name.localeCompare(b.name)))
         console.log("save screen - Sorted archived items:",sortedArchives.map(item=>item.name))
         return sortedArchives;
     }
@@ -112,17 +113,29 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
                             store.clearStorage()
                             restoreFromBackup()
                             resetSession()
-                            navigation.dispatch(
-                                StackActions.popToTop()
+                            Alert.alert(
+                                "Load Successful",
+                                "Restarting RootsWallet",
+                                [
+                                    {
+                                        text: "Restart",
+                                        onPress: () => {
+                                            // navigation.dispatch(
+                                            //     StackActions.popToTop()
+                                            // );
+                                            // navigation.dispatch(
+                                            //     CommonActions.reset({
+                                            //         index: 1,
+                                            //         routes: [
+                                            //             { name: 'Login' },
+                                            //         ],
+                                            //     })
+                                            // );
+                                            RNRestart.Restart()
+                                        }
+                                    },
+                                ]
                             );
-                            // navigation.dispatch(
-                            //     CommonActions.reset({
-                            //         index: 1,
-                            //         routes: [
-                            //             { name: 'Login' },
-                            //         ],
-                            //     })
-                            // );
                         }
                     },
                     {
@@ -204,6 +217,7 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
             for (const archiveItem of archives) {
                 const count = archives.indexOf(archiveItem);
                 if ((archives.length - count) >= MAX_ARCHIVES) {
+                    console.log("Deleting archived backup ", archiveItem.path)
                     await RNFS.unlink(archiveItem.path)
                     console.log("Deleted archived backup ", archiveItem.path)
                 } else {
@@ -269,12 +283,14 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
             <Animated.View
                 style={styles.viewAnimated}
             >
-                <IconButton
-                    icon="close-circle"
-                    size={36}
-                    color="#e69138"
-                    onPress={() => navigation.goBack()}
-                />
+                <View style={styles.closeButtonContainer}>
+                    <IconButton
+                        icon="close-circle"
+                        size={36}
+                        color="#e69138"
+                        onPress={() => navigation.goBack()}
+                    />
+                </View>
                 <Text style={styles.subText}>Save Current Wallet:</Text>
                 <FormButton
                     title="Save Wallet"
@@ -287,10 +303,11 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
                 <FlatList
                     persistentScrollbar={true}
                     keyExtractor={(item) => item.name}
-                    inverted={true}
+                    inverted={false}
                     style={styles.scrollableCompact}
                     data={archives}
                     extraData={refresh}
+                    ListEmptyComponent={<Text style={[styles.itemHighlighted,{alignContent:"flex-start"}]}>No Saved Wallets</Text>}
                     renderItem={({item}) => (
                         <List.Item
                             title={getTitle(item)}

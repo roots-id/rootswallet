@@ -99,12 +99,14 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                 style={styles.pressable}
                 onPress={clearAndGoBack}
             />
-            <IconButton
-                icon="close-circle"
-                size={36}
-                color="#e69138"
-                onPress={clearAndGoBack}
-            />
+            <View style={styles.closeButtonContainer}>
+                <IconButton
+                    icon="close-circle"
+                    size={36}
+                    color="#e69138"
+                    onPress={() => navigation.goBack()}
+                />
+            </View>
             <Animated.View
                 style={styles.viewAnimated}
             >

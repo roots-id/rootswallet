@@ -36,10 +36,9 @@ export const styles = StyleSheet.create({
         color: '#e69138',
     },
     closeButtonContainer: {
-        position: 'absolute',
-        top: 30,
-        right: 0,
-        zIndex: 1,
+        flexDirection: "row",
+        width: "100%",
+        justifyContent: "flex-end"
     },
     container: {
         backgroundColor: '#251520',
@@ -53,10 +52,10 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
     },
     credLogoStyle: {
-        width:65,
-        height:75,
-        resizeMode:'contain',
-        margin:8
+        width: 65,
+        height: 75,
+        resizeMode: 'contain',
+        margin: 8
     },
     descriptionOrange: {
         fontSize: 16,
@@ -212,9 +211,9 @@ export const styles = StyleSheet.create({
         flexWrap: "wrap",
     },
     scrollableCompact: {
-        padding:0,
+        padding: 0,
         width: '100%',
-        maxHeight: 275,
+        maxHeight: 290,
         borderRadius: 6,
         backgroundColor: '#baaab6',
     },
@@ -304,10 +303,9 @@ export const styles = StyleSheet.create({
 })
 
 export function displayProblem(displayIt) {
-    if(!displayIt){
+    if (!displayIt) {
         return styles.none
-    }
-    else{
+    } else {
         return styles.problem
     }
 }

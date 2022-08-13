@@ -39,7 +39,7 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
                 style={styles.pressable}
                 onPress={navigation.goBack}
             />
-            <View style={{flexDirection: 'row',}}>
+            <View style={styles.closeButtonContainer}>
                 <IconButton
                     icon="close-circle"
                     size={36}
