@@ -40,6 +40,12 @@ export default function RelationshipDetailScreen({route, navigation}: CompositeS
                 style={styles.pressable}
                 onPress={navigation.goBack}
             />
+            <IconButton
+                icon="close-circle"
+                size={36}
+                color="#e69138"
+                onPress={() => navigation.goBack()}
+            />
             <Animated.View
                 style={styles.viewAnimated}
             >
@@ -69,12 +75,6 @@ export default function RelationshipDetailScreen({route, navigation}: CompositeS
                                 console.error("RelDetailScreen - cant show qr, rel not set", rel)
                             }
                         }}
-                    />
-                    <IconButton
-                        icon="close-circle"
-                        size={36}
-                        color="#e69138"
-                        onPress={() => navigation.goBack()}
                     />
                 </View>
                 <Image source={rel.displayPictureUrl}

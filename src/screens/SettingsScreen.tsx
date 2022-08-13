@@ -48,9 +48,10 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
                 />
             </View>
             <Animated.View
-                style={styles.viewAnimated}
+                style={styles.viewAnimatedStart}
             >
-                <Text/>
+                <Text style={[styles.titleText,styles.black]}>Settings:</Text>
+                <Text />
                 <View style={{flexDirection: 'row'}}>
                     <Text style={styles.listItemCenteredBlack}>Server: </Text>
                     <View style={{backgroundColor: '#251520', width: "80%"}}>

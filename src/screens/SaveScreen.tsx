@@ -172,9 +172,12 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
         const created = true
         console.info("SaveScreen - resetting session",walName,created)
         const walNameLoaded = await loadWalletName()
-        setWalletFound(walNameLoaded)
-        console.log("AuthStack - wallet found?", walletFound)
-        signIn(walName,created);
+        if(walNameLoaded) {
+            console.log("AuthStack - wallet found", created)
+            signIn(walName, created);
+        } else {
+            console.error("AuthStack - wallet not found",walNameLoaded)
+        }
     }
 
     async function saveWallet() {

@@ -6,6 +6,9 @@ export const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 30,
     },
+    black: {
+        color: "#111111",
+    },
     button: {
         width: 200,
         borderRadius: 10,
@@ -269,6 +272,15 @@ export const styles = StyleSheet.create({
         height: '80%',
         borderRadius: 3,
         backgroundColor: '#cfbfca',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    viewAnimatedStart: {
+        padding: 16,
+        width: '90%',
+        height: '80%',
+        borderRadius: 3,
+        backgroundColor: '#cfbfca',
         alignItems: 'flex-start',
         justifyContent: 'center',
     },
@@ -288,7 +300,7 @@ export const styles = StyleSheet.create({
     },
     white: {
         color: "#eeeeee"
-    }
+    },
 })
 
 export function displayProblem(displayIt) {
