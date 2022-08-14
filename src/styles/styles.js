@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
         color: "#111111",
     },
     button: {
-        width: 200,
+        maxWidth: 200,
         borderRadius: 10,
         backgroundColor: '#e69138',
         alignSelf: 'center',
@@ -50,6 +50,11 @@ export const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    containerRowCentered: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        width: "100%",
     },
     credLogoStyle: {
         width: 65,

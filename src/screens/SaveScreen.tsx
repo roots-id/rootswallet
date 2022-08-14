@@ -12,6 +12,7 @@ import {unzip, zip} from 'react-native-zip-archive'
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {useCardAnimation} from '@react-navigation/stack';
 
+
 import FormButton from "../components/FormButton";
 import AuthContext from '../context/AuthenticationContext';
 import {exportAll, ExportType} from "../models";
@@ -24,7 +25,7 @@ import {getWalletName, loadWalletName} from "../wallet";
 const {CustomBackup} = NativeModules;
 
 export default function SaveScreen({route, navigation}: CompositeScreenProps<any, any>) {
-    console.log("save screen - params", route.params)
+    console.log("SaveScreen - params", route.params)
 
     const MAX_ARCHIVES = 4;
 
@@ -39,7 +40,7 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
     const [selection, setSelection] = useState<ReadDirItem>()
 
     useEffect(() => {
-        console.log("save screen - use effect")
+        console.log("SaveScreen - use effect")
         const fetchData = async () => {
             await refreshItems()
         }
@@ -49,37 +50,63 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
     }, [])
 
     async function refreshItems(item?: ReadDirItem) {
-        console.log("save screen - toggling refresh")
+        console.log("SaveScreen - toggling refresh")
         const sortedArchives = await getArchiveItems()
         if(sortedArchives && sortedArchives.length > 0) {
             setArchives(sortedArchives)
-            console.log("save screen - saved backups size", sortedArchives.length)
+            console.log("SaveScreen - saved backups size", sortedArchives.length)
 
             if (item) {
-                console.log("save screen - setting selection to item", item.name)
+                console.log("SaveScreen - setting selection to item", item.name)
                 setSelection(item)
             } else if (sortedArchives && sortedArchives.length > 0) {
                 const latest = sortedArchives[0]
-                console.log("save screen - setting selection to latest", latest.name)
+                console.log("SaveScreen - setting selection to latest", latest.name)
                 setSelection(latest)
             }
         } else {
-            console.log("save screen - no backups found during refresh")
+            console.log("SaveScreen - no backups found during refresh")
         }
         setRefresh(!refresh)
     }
 
+    async function exportWallet() : Promise<boolean> {
+        if(selection) {
+            console.log("SaveScreen - export backup", selection.path)
+        }
+
+        //     const perm = await Permissions.askAsync(Permissions.MEDIA_LIBRARY);
+        //     if (perm.status != 'granted') {
+        //         return false;
+        //     }
+        //     const asset = await MediaLibrary.createAssetAsync(selection.path);
+        //     const album = await MediaLibrary.getAlbumAsync('Download');
+        //     if (album == null) {
+        //         await MediaLibrary.createAlbumAsync('Download', asset, false);
+        //     } else {
+        //         await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+        //     }
+        //     return true
+        // }
+        return false
+    }
+
     async function getArchiveItems() {
-        console.log("save screen - Getting archived items")
+        console.log("SaveScreen - Getting archived items")
         const dirItems: ReadDirItem[] = await RNFS.readDir(RNFS.DocumentDirectoryPath) // On Android, use "RNFS.DocumentDirectoryPath" (MainBundlePath is not defined
         const archiveItems = dirItems.filter(item => {
             console.log("is an archive item?", item.name, "is file?", item.isFile(), "is match?", item.name.match("^" + RW_BACKUP + ".*\.zip") != null)
             return item.isFile() && item.name.match("^" + RW_BACKUP + ".*\\.zip") != null
         })
-        console.log("save screen - Found archived items:",archiveItems.length)
+        console.log("SaveScreen - Found archived items:",archiveItems.length)
         const sortedArchives = archiveItems.sort((a, b) => -1*(a.name.localeCompare(b.name)))
-        console.log("save screen - Sorted archived items:",sortedArchives.map(item=>item.name))
+        console.log("SaveScreen - Sorted archived items:",sortedArchives.map(item=>item.name))
         return sortedArchives;
+    }
+
+    async function importWallet() : Promise<boolean> {
+        //TODO implement me
+        return false
     }
 
     async function initBackupDir(initPath: string) : Promise<boolean>{
@@ -280,26 +307,34 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
                 style={styles.pressable}
                 onPress={navigation.goBack}
             />
+            <View style={styles.closeButtonContainer}>
+                <IconButton
+                    icon="close-circle"
+                    size={36}
+                    color="#e69138"
+                    onPress={() => navigation.goBack()}
+                />
+            </View>
             <Animated.View
                 style={styles.viewAnimated}
             >
-                <View style={styles.closeButtonContainer}>
-                    <IconButton
-                        icon="close-circle"
-                        size={36}
-                        color="#e69138"
-                        onPress={() => navigation.goBack()}
-                    />
-                </View>
-                <Text style={styles.subText}>Save Current Wallet:</Text>
+                <Text style={styles.subText}>Save/Import Wallet:</Text>
+                <View style={styles.containerRowCentered}>
                 <FormButton
-                    title="Save Wallet"
+                    disabled={!(getWalletName())}
+                    title="Save Current"
                     modeValue="contained"
                     labelStyle={styles.loginButtonLabel}
                     onPress={async () => saveWallet()}/>
-
+                    <FormButton
+                        title="Import"
+                        modeValue="contained"
+                        labelStyle={styles.loginButtonLabel}
+                        onPress={async () => importWallet()}/>
+                </View>
                 <Text style={styles.subText}></Text>
-                <Text style={styles.subText}>Saved Wallets:</Text>
+
+                <Text style={styles.subText}>Saved/Imported Wallets:</Text>
                 <FlatList
                     persistentScrollbar={true}
                     keyExtractor={(item) => item.name}
@@ -321,11 +356,18 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
                         />
                     )}
                 />
-                <FormButton
-                    title="Load Saved"
-                    modeValue="contained"
-                    labelStyle={styles.loginButtonLabel}
-                    onPress={async () => loadWallet()}/>
+                <View style={styles.containerRowCentered}>
+                    <FormButton
+                        title="Load"
+                        modeValue="contained"
+                        labelStyle={styles.loginButtonLabel}
+                        onPress={async () => loadWallet()}/>
+                    <FormButton
+                        title="Export"
+                        modeValue="contained"
+                        labelStyle={styles.loginButtonLabel}
+                        onPress={async () => exportWallet()}/>
+                </View>
             </Animated.View>
         </View>
     );

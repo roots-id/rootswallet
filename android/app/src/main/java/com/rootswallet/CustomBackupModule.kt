@@ -1,10 +1,18 @@
 package com.rootswallet
 
 import android.app.backup.BackupManager
+import android.content.Intent
+import android.net.Uri
+import android.os.Environment
 import android.util.Log
+import androidx.core.content.FileProvider
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import java.io.File
+
+// Request code for creating a PDF document.
+const val CREATE_FILE = 1
 
 public class CustomBackupModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -137,6 +145,52 @@ public class CustomBackupModule(reactContext: ReactApplicationContext) : ReactCo
         return error
     }
 
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    private fun createFile(filePath: String) : Boolean{
+        // video is some file in internal storage
+//        val from = File(filePath)
+        val to = File(Environment.getExternalStorageDirectory().absolutePath + "/rootswallet_export.zip")
+//        from.copyTo(to, true)
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/zip"
+            putExtra(Intent.EXTRA_TITLE, "rootswallet_export.zip")
+
+            // Optionally, specify a URI for the directory that should be opened in
+            // the system file picker before your app creates the document.
+            //putExtra(DocumentsContract.EXTRA_INITIAL_URI,to)
+        }
+
+        // Caller
+//        val intent = Intent(context, Activity1::class.java)
+//        getResult.launch(intent)
+//// Receiver
+//        private val getResult =
+//            registerForActivityResult(
+//                ActivityResultContracts.StartActivityForResult()) {
+//                if(it.resultCode == Activity.RESULT_OK){
+//                    val value = it.data?.getStringExtra("input")
+//                }
+//            }
+
+//        intent.type = "application/json"
+//
+//        val uri: Uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID, fileItem)
+//        intent.putExtra(Intent.EXTRA_STREAM, uri)
+//
+//        context.startActivity(Intent.createChooser(intent, "Exportar arquivo de Log de Auditoria"))
+        return true;
+    }
+
+//    private var getDataFromFile =
+//        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+//            if (result.resultCode == RESULT_OK) {
+//                val uri = result.data?.data
+//                val fileContents = readTextFromUri(uri!!)
+//                Toast.makeText(this@MainActivity, fileContents, Toast.LENGTH_SHORT).show()
+//            }
+//        }
+
     //     * Another helper; this one reads the current UI state and writes that
     //     * to the persistent store, then tells the backup manager that we need
     //     * a backup.
@@ -191,7 +245,7 @@ public class CustomBackupModule(reactContext: ReactApplicationContext) : ReactCo
         val sDataLock = arrayOfNulls<Any>(0)
 
         /** Also supply a global standard file name for everyone to use  */
-        const val DATA_FILE_NAME = "saved_data"
+        const val DATA_FILE_NAME = "rootswallet_export"
     }
 
     override fun getName(): String {
