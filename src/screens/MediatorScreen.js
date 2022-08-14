@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Button, View, Text, NativeModules, TextInput } from 'react-native';
-import { randomBytes } from 'react-native-randombytes'
-import { X25519KeyPair } from '@transmute/did-key-x25519';
-import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
 import uuid from 'react-native-uuid';
 import {Buffer} from "buffer";
+import {generateKeyPair} from '../didpeer'
 const { PeerDidModule, DIDCommV2Module } = NativeModules;
+
 
 
 const Mediator = (props) => {
@@ -20,22 +19,6 @@ const Mediator = (props) => {
     const [myMessage, setMyMessage] = useState('')
     const [friendMessage, setFriendMessage] = useState('')
 
-    const generateKeyPair = async (type) => {
-        let keyGenerator = Ed25519KeyPair;
-        if (type == 'x25519') { keyGenerator = X25519KeyPair }
-        const keyPair = await keyGenerator.generate({
-            secureRandom: () => randomBytes(32)
-        });
-        const { publicKeyJwk, privateKeyJwk } = await keyPair.export({
-            type: 'JsonWebKey2020',
-            privateKey: true,
-        });
-        return {
-            publicJwk: publicKeyJwk,
-            privateJwk: privateKeyJwk
-        };
-    }
-
 
     const getMediator = async () => {
         // GET Mediator OOB URL and decode mediator public DID. Can also be a QR scan (code in https://mediator.rootsid.cloud/oob_qrcode)
@@ -45,8 +28,7 @@ const Mediator = (props) => {
             );
 
             const oob_url = await response.text();
-            const encodedMsg = oob_url.split("=")[1]
-            const decodedMsg = JSON.parse(Buffer.from(encodedMsg, 'base64').toString('ascii'))
+            const decodedMsg = await decodeOOBURL(oob_url)
             setMediatorDID(decodedMsg.from)
 
         } catch (error) {

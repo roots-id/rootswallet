@@ -33,7 +33,7 @@ import org.didcommx.didcomm.utils.toJson
 import org.didcommx.peerdid.DIDCommServicePeerDID
 import org.didcommx.peerdid.DIDDocPeerDID
 import org.didcommx.peerdid.VerificationMaterialFormatPeerDID
-import org.didcommx.peerdid.resolvePeerDID
+// import org.didcommx.peerdid.resolvePeerDID
 
 class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -62,13 +62,7 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
     ) {
         try {
             val secretsResolver = SecretResolverInMemoryMock()
-            val didDoc = DIDDocPeerDID.fromJson(resolvePeerDID(from, VerificationMaterialFormatPeerDID.JWK))
-            didDoc.agreementKids.zip(listOf(KeyPair(public = agreemKey.toHashMap()["publicJwk"] as Map<String, Any>, private = agreemKey.toHashMap()["privateJwk"] as Map<String, Any> ))).forEach {
-                val privateKey = it.second.private.toMutableMap()
-                privateKey["kid"] = it.first
-                secretsResolver.addKey(jwkToSecret(privateKey))
-                println(jwkToSecret(privateKey))
-            }
+            secretsResolver.addKey(jwkToSecret(agreemKey.toHashMap()))
             var didcommAttachments: MutableList<Attachment>? = null
             if (attachments != null) {
                 didcommAttachments = mutableListOf<Attachment>()
@@ -108,30 +102,19 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
     @ReactMethod
     fun unpack(
             packedMsg: String, 
-            to: String,
             agreemKey: ReadableMap,
             promise: Promise
         ) {
             try{
-                val didDoc = DIDDocPeerDID.fromJson(resolvePeerDID(to, VerificationMaterialFormatPeerDID.JWK))
                 val secretsResolver = SecretResolverInMemoryMock()
-                didDoc.agreementKids.zip(listOf(KeyPair(public = agreemKey.toHashMap()["publicJwk"] as Map<String, Any>, private = agreemKey.toHashMap()["privateJwk"] as Map<String, Any> ))).forEach {
-                    val privateKey = it.second.private.toMutableMap()
-                    privateKey["kid"] = it.first
-                    secretsResolver.addKey(jwkToSecret(privateKey))
-                }
+                secretsResolver.addKey(jwkToSecret(agreemKey.toHashMap()))
                 val didComm = DIDComm(DIDDocResolverPeerDID(), secretsResolver)
                 val res = didComm.unpack(UnpackParams.Builder(packedMsg).build())
-            
-                // val msg = res.message.body["msg"].toString()
-                // val eto = res.metadata.encryptedTo?.let { divideDIDFragment(it.first()).first() } ?: ""
-                // val efrom = res.metadata.encryptedFrom?.let { divideDIDFragment(it).first() }
-                //promise.resolve(res.message.toString())
                 val map = Arguments.createMap();
-
                 map.putString("message", res.message.toString());
                 map.putString("fromPrior", res.message.fromPrior?.sub);
-
+                map.putString("to", res.metadata.encryptedTo?.let { divideDIDFragment(it.first()).first() } ?: "")
+                map.putString("from", res.metadata.encryptedFrom?.let { divideDIDFragment(it).first() })
                 promise.resolve(map)
             } catch (e: Throwable) {
                 promise.reject("Error", e)
