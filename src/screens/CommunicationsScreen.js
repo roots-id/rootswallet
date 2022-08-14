@@ -65,7 +65,8 @@ const Communications = (props) => {
 
         // 4. Bob unpacks the message
         var unpackResultMsg = await DIDCommV2Module.unpack(packedToBobMsg, to = bobPeerDID, agreemKey = bobAgreemKey)
-        console.log("Bob received " + JSON.parse(unpackResultMsg).body.msg + " from Alice.")
+        console.log(unpackResultMsg)
+        console.log("Bob received " + JSON.parse(unpackResultMsg.message).body.msg + " from Alice.")
         
     };
 
@@ -118,7 +119,7 @@ const Communications = (props) => {
             });
             const resp2Packed = await resp2.json();
             const resp2Unpacked = await DIDCommV2Module.unpack(resp2Packed, to = myPeerDID, agreemKey = agreemmentKey)
-            console.log(JSON.parse(resp2Unpacked))
+            console.log(resp2Unpacked)
           
   
         } catch (error) {
@@ -153,7 +154,7 @@ const Communications = (props) => {
             const resp2Packed = await resp2.json();
             const resp2Unpacked = await DIDCommV2Module.unpack(resp2Packed, to = myPeerDID, agreemKey = agreemmentKey)
             
-            const answer = JSON.parse(resp2Unpacked)
+            const answer = JSON.parse(resp2Unpacked.message)
             console.log(answer.body.content)
             setAnswer(answer.body.content)
           

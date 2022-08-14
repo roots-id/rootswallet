@@ -9,6 +9,8 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Arguments;
 import java.util.*
 import org.didcommx.didcomm.DIDComm
 import org.didcommx.didcomm.message.Message
@@ -124,7 +126,13 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
                 // val msg = res.message.body["msg"].toString()
                 // val eto = res.metadata.encryptedTo?.let { divideDIDFragment(it.first()).first() } ?: ""
                 // val efrom = res.metadata.encryptedFrom?.let { divideDIDFragment(it).first() }
-                promise.resolve(res.message.toString())
+                //promise.resolve(res.message.toString())
+                val map = Arguments.createMap();
+
+                map.putString("message", res.message.toString());
+                map.putString("fromPrior", res.message.fromPrior?.sub);
+
+                promise.resolve(map)
             } catch (e: Throwable) {
                 promise.reject("Error", e)
             }

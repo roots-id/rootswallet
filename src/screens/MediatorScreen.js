@@ -88,11 +88,10 @@ const Mediator = (props) => {
             });
             const respPacked = await resp.json();
             const respUnpacked = await DIDCommV2Module.unpack(respPacked, to = myDid, agreemKey = myAgreemKey)
-            const respJson = JSON.parse(respUnpacked)
+            const respJson = JSON.parse(respUnpacked.message)
             console.log(respJson)
             setRoutingKey(respJson.body.routing_keys[0])
-            // TODO GET ROTATED DID
-            //setMediatorDID(respJson.from_prior.sub)
+            setMediatorDID(respUnpacked.fromPrior)
 
 
         } catch (error) {
@@ -144,7 +143,7 @@ const Mediator = (props) => {
             });
             const respPacked = await resp.json();
             const respUnpacked = await DIDCommV2Module.unpack(respPacked, to = didToMediator, agreemKey = keyToMediator)
-            const respJson = JSON.parse(respUnpacked)
+            const respJson = JSON.parse(respUnpacked.message)
             console.log(respJson)
 
 
@@ -181,7 +180,7 @@ const Mediator = (props) => {
             });
             const respPacked = await resp.json();
             const respUnpacked = await DIDCommV2Module.unpack(respPacked, to = didToMediator, agreemKey = keyToMediator)
-            const respJson = JSON.parse(respUnpacked)
+            const respJson = JSON.parse(respUnpacked.message)
             const messageCount = respJson.body.message_count
             console.log(messageCount)
             if (messageCount === 0) {
@@ -209,13 +208,13 @@ const Mediator = (props) => {
                 
                 const resp2Packed = await resp2.json();
                 const resp2Unpacked = await DIDCommV2Module.unpack(resp2Packed, to = didToMediator, agreemKey = keyToMediator)
-                const resp2UnpackedJson = JSON.parse(resp2Unpacked)
+                const resp2UnpackedJson = JSON.parse(resp2Unpacked.message)
                 // Unpack friend message
                 const friendMsgPacked = resp2UnpackedJson.attachments[0].data.json
                 const friendMsgPackedId = resp2UnpackedJson.attachments[0].id
                 const friendMsgUnPacked = await DIDCommV2Module.unpack(JSON. stringify(friendMsgPacked), to = didTofriend, agreemKey = keyTofriend)
 
-                setFriendMessage(JSON.parse(friendMsgUnPacked).body.content)
+                setFriendMessage(JSON.parse(friendMsgUnPacked.message).body.content)
 
                 // Acknowledge receipt
                 const msg3Body = {"message_id_list": [friendMsgPackedId]}
