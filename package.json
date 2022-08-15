@@ -71,6 +71,7 @@
     "react-native-localize": "^2.1.7",
     "react-native-paper": "^4.12.1",
     "react-native-parsed-text": "0.0.22",
+    "react-native-document-picker": "^8.1.1",
     "react-native-qrcode-svg": "^6.1.2",
     "react-native-randombytes": "^3.6.1",
     "react-native-reanimated": "~2.3.1",

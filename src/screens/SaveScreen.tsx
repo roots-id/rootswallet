@@ -7,6 +7,12 @@ import {
 } from 'react-native';
 import RNFS, {ReadDirItem} from "react-native-fs";
 import {Divider, IconButton, List} from 'react-native-paper';
+import DocumentPicker, {
+    DirectoryPickerResponse,
+    DocumentPickerResponse,
+    isInProgress,
+    types,
+} from 'react-native-document-picker';
 import RNRestart from 'react-native-restart';
 import {unzip, zip} from 'react-native-zip-archive'
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
@@ -35,6 +41,9 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
     const RNFS = require('react-native-fs');
     const backupPath = RNFS.DocumentDirectoryPath + '/' + RW_BACKUP;
 
+    const [picked, setPicked] = React.useState<
+        Array<DocumentPickerResponse> | DirectoryPickerResponse | undefined | null
+        >()
     const [refresh, setRefresh] = useState(true)
     const [archives, setArchives] = useState<ReadDirItem[]>([])
     const [selection, setSelection] = useState<ReadDirItem>()
@@ -48,6 +57,17 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
         // call the function
         fetchData()
     }, [])
+
+    const handleError = (err: unknown) => {
+        if (DocumentPicker.isCancel(err)) {
+            console.warn('cancelled')
+            // User cancelled the picker, exit any dialogs or menus and move on
+        } else if (isInProgress(err)) {
+            console.warn('multiple pickers were opened, only the last will be considered')
+        } else {
+            throw err
+        }
+    }
 
     async function refreshItems(item?: ReadDirItem) {
         console.log("SaveScreen - toggling refresh")
@@ -73,6 +93,9 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
     async function exportWallet() : Promise<boolean> {
         if(selection) {
             console.log("SaveScreen - export backup", selection.path)
+            await RNFS.copyFile(selection.path,RNFS.DownloadDirectoryPath+"/rootswallet_export.zip")
+            //await RNFS.copyFileAssets(selection.path,RNFS.DownloadDirectoryPath+"/rootswallet_export.zip")
+            //CustomBackup.createFile(selection.path)
         }
 
         //     const perm = await Permissions.askAsync(Permissions.MEDIA_LIBRARY);
@@ -105,7 +128,27 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
     }
 
     async function importWallet() : Promise<boolean> {
-        //TODO implement me
+        console.log("SaveScreen - import backup")
+        try {
+            const pickerResult = await DocumentPicker.pickSingle({
+                presentationStyle: 'fullScreen',
+                type: 'application/zip',
+            })
+            if(pickerResult) {
+                console.log("SaveScreen - picker result",pickerResult)
+                setPicked([pickerResult])
+                console.log("SaveScreen - importing from picked",pickerResult["uri"])
+                const zipPath = await prepareForNewZip()
+                console.log("SaveScreen - importing to zipPath", zipPath)
+                await RNFS.copyFile(pickerResult["uri"], zipPath)
+                await signalBackup()
+                await refreshItems()
+                return true
+            }
+        } catch (e) {
+            handleError(e)
+        }
+        console.error("SaveScreen - import failed")
         return false
     }
 
@@ -179,6 +222,20 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
         return false
     }
 
+    async function prepareForNewZip() {
+        const zipPath = RNFS.DocumentDirectoryPath + '/' + RW_BACKUP + '_current.zip';
+
+        if (await RNFS.exists(zipPath)) {
+            console.log("Previous backup zip exists", zipPath)
+            const archivePath = RNFS.DocumentDirectoryPath + '/' + RW_BACKUP + '_' + Date.now() + '.zip';
+            console.log("Archiving backup zip at", archivePath)
+            await RNFS.moveFile(zipPath, archivePath)
+            console.log("Created archiving backup zip ", archivePath)
+        }
+
+        return zipPath
+    }
+
     async function restoreFromBackup() {
         if (selection && await initBackupDir(backupPath)) {
             console.log("SaveScreen - Reading selection path", selection.path)
@@ -223,18 +280,7 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
     async function saveWallet() {
         console.log("Save wallet")
 
-        // require the module
-        const RNFS = require('react-native-fs');
-
-        const zipPath = RNFS.DocumentDirectoryPath + '/' + RW_BACKUP + '_current.zip';
-
-        if (await RNFS.exists(zipPath)) {
-            console.log("Previous backup zip exists", zipPath)
-            const archivePath = RNFS.DocumentDirectoryPath + '/' + RW_BACKUP + '_' + Date.now() + '.zip';
-            console.log("Archiving backup zip at", archivePath)
-            await RNFS.moveFile(zipPath, archivePath)
-            console.log("Created archiving backup zip ", archivePath)
-        }
+        const zipPath = await prepareForNewZip()
 
         if (await initBackupDir(backupPath)) {
 
@@ -275,10 +321,14 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
             const zipResult = await zip(backupPath, zipPath)
             console.log("SaveScreen - zip completed", zipResult)
 
-            console.log("Marking wallet for backup")
-            CustomBackup.backup()
+            await signalBackup()
             await refreshItems()
         }
+    }
+
+    async function signalBackup() {
+        console.log("Marking wallet for scheduled backup")
+        CustomBackup.backup()
     }
 
     function getTitle(item: ReadDirItem) {

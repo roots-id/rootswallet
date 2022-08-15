@@ -4,6 +4,7 @@ import android.app.backup.BackupManager
 import android.content.Intent
 import android.net.Uri
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import androidx.core.content.FileProvider
 import com.facebook.react.bridge.ReactApplicationContext
@@ -147,19 +148,21 @@ public class CustomBackupModule(reactContext: ReactApplicationContext) : ReactCo
 
     @ReactMethod(isBlockingSynchronousMethod = true)
     private fun createFile(filePath: String) : Boolean{
-        // video is some file in internal storage
+//        // video is some file in internal storage
 //        val from = File(filePath)
-        val to = File(Environment.getExternalStorageDirectory().absolutePath + "/rootswallet_export.zip")
+//        Log.d("ROOTS_BACKUP_TAG", "createFile() - writing from ${from.absolutePath}")
+//        val to = MediaStore.ACTIONFile(Environment.getExternalStorageDirectory().absolutePath + "/rootswallet_export.zip")
+//        Log.d("ROOTS_BACKUP_TAG", "createFile() - writing to ${to.absolutePath}")
 //        from.copyTo(to, true)
-        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            type = "application/zip"
-            putExtra(Intent.EXTRA_TITLE, "rootswallet_export.zip")
-
-            // Optionally, specify a URI for the directory that should be opened in
-            // the system file picker before your app creates the document.
-            //putExtra(DocumentsContract.EXTRA_INITIAL_URI,to)
-        }
+//        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+//            addCategory(Intent.CATEGORY_OPENABLE)
+//            type = "application/zip"
+//            putExtra(Intent.EXTRA_TITLE, "rootswallet_export.zip")
+//
+//            // Optionally, specify a URI for the directory that should be opened in
+//            // the system file picker before your app creates the document.
+//            //putExtra(DocumentsContract.EXTRA_INITIAL_URI,to)
+//        }
 
         // Caller
 //        val intent = Intent(context, Activity1::class.java)
@@ -179,7 +182,7 @@ public class CustomBackupModule(reactContext: ReactApplicationContext) : ReactCo
 //        intent.putExtra(Intent.EXTRA_STREAM, uri)
 //
 //        context.startActivity(Intent.createChooser(intent, "Exportar arquivo de Log de Auditoria"))
-        return true;
+        return false;
     }
 
 //    private var getDataFromFile =
