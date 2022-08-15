@@ -1,4 +1,3 @@
-import { NativeModules } from "react-native";
 import {logger} from "../logging";
 import { sendMessage, pack } from "../didcommv2";
 

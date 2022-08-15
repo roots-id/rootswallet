@@ -5,7 +5,7 @@ import { sendMessage, pack } from "../didcommv2";
 export async function sendBasicMessage(content: string, from: string, to: string) {
     try {
         const body = { content: content }
-
+        //FIXME Created time is not custom header yn python, check in JVM
         const packedMsg = await pack(
             body, 
             from, 
@@ -23,5 +23,7 @@ export async function sendBasicMessage(content: string, from: string, to: string
 }
 
 export async function receiveBasicMessage(msg: any) {
-    return msg
+    const content = JSON.parse(msg.message).body.content
+    logger("Basic Message received:", content)
+    return content
 }

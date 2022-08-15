@@ -1,22 +1,42 @@
-import { NativeModules } from "react-native";
 import {logger} from "../logging";
 import { receiveMessage } from "./MessageReceiver";
-const { PeerDidModule, DIDCommV2Module } = NativeModules;
+import {createDIDPeer, resolveDIDPeer} from "../didpeer"
+import { pack } from "./PackUnpack";
 
 export async function sendMessage(packMsg: any, to: string) {
     try {
-        const didDoc = JSON.parse(await PeerDidModule.resolveDID(to))
-        const serviceEndpoint = didDoc.service[0].serviceEndpoint
-        console.log(serviceEndpoint)
-        //TODO validate if URL or DID. If URL, get transport type. If DID, forward
-        const resp = await fetch(serviceEndpoint, {
+        const didDoc = await resolveDIDPeer(to)
+        var serviceEndpoint = didDoc.service[0].serviceEndpoint
+        var packed = packMsg
+        var endpoint = serviceEndpoint
+        // Validate if URL and repack in forward msg
+        if (serviceEndpoint.startsWith("did:")) {
+            const didDocNext = await resolveDIDPeer(serviceEndpoint)
+            endpoint = didDocNext.service[0].serviceEndpoint
+            const newDID = await createDIDPeer(null,null)
+            const fwBody = { next: to }
+            packed = await pack(
+                { next: to },
+                newDID,
+                serviceEndpoint,
+                "https://didcomm.org/routing/2.0/forward",
+                [],
+                null,
+                true,
+                [JSON.parse(packMsg)]
+            )
+        }
+        console.log("ServiceEndpoint:",endpoint)
+        const resp = await fetch(endpoint, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/didcomm-encrypted+json'},
-                    body: packMsg
+                    body: packed
                 });
-        // TODO VALIDATE IF THERE'S A RESPONSE
         const respmsg = await resp.json()
-        return await receiveMessage(respmsg)
+        if (respmsg !== null) {
+            return await receiveMessage(respmsg)
+        }
+        
     } catch (error: any) {
         logger("mesageSender - Error", error)
     }

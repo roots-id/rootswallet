@@ -9,6 +9,7 @@ const { PeerDidModule, DIDCommV2Module } = NativeModules;
 export async function pack(msg: any, from: string, to: string, messageType: string, customHeaders: any, signFrom: any, protectSender: boolean, attachments: any) {
     try {
         // search from agreement key in did doc
+        // TODO pthid, thid
         const didDoc = await resolveDIDPeer(from)
         const kid = didDoc.keyAgreement[0].id
         const key = JSON.parse(await getItem(kid)!)

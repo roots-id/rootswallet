@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
 import { Button, View, Text, NativeModules, TextInput } from 'react-native';
-import uuid from 'react-native-uuid';
-import {Buffer} from "buffer";
-import {generateKeyPair} from '../didpeer'
+import { createDIDPeer} from '../didpeer'
+import { decodeOOBURL, generateOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages } from '../protocols';
+
 const { PeerDidModule, DIDCommV2Module } = NativeModules;
-
-
 
 const Mediator = (props) => {
 
     const [didToMediator, setDidToMediator] = useState('')
-    const [keyToMediator, setKeyToMediator] = useState('')
+    //const [keyToMediator, setKeyToMediator] = useState('')
     const [didTofriend, setDidToFriend] = useState('')
     const [keyTofriend, setKeyToFriend] = useState('')
     const [mediatorDID, setMediatorDID] = useState('')
@@ -19,266 +17,81 @@ const Mediator = (props) => {
     const [myMessage, setMyMessage] = useState('')
     const [friendMessage, setFriendMessage] = useState('')
 
-
     const getMediator = async () => {
         // GET Mediator OOB URL and decode mediator public DID. Can also be a QR scan (code in https://mediator.rootsid.cloud/oob_qrcode)
         try {
             const response = await fetch(
                 'https://mediator.rootsid.cloud/oob_url'
             );
-
             const oob_url = await response.text();
             const decodedMsg = await decodeOOBURL(oob_url)
             setMediatorDID(decodedMsg.from)
+            
+            // Create DID to communicate with Mediator
+            const  myDid = await createDIDPeer(null,null)
+            setDidToMediator(myDid)
 
         } catch (error) {
             console.error(error);
         }
-
-
     }
 
     const requestMediate = async () => {
         try {
-            // Create a DID Peer to connect to the mediator
-            // DID and key generated must be persisted
-            const myAuthKey = await generateKeyPair('ed25519')
-            const myAgreemKey = await generateKeyPair('x25519')
-            const  myDid = await PeerDidModule.createDID(myAuthKey.publicJwk,myAgreemKey.publicJwk,null,null)
-            setKeyToMediator(myAgreemKey)
-            setDidToMediator(myDid)
-
-            
-            // Mediate request message
-            const msgBody = {}
-            const mediateRequestPacked = await DIDCommV2Module.pack(
-                msgBody,
-                id = uuid.v4(),
-                to = mediatorDID,
-                from = myDid,
-                messageType = "https://didcomm.org/coordinate-mediation/2.0/mediate-request",
-                customHeaders = [{ return_route: "all" }],
-                agreemKey = myAgreemKey,
-                signFrom = null,
-                protectSender = true,
-                attachments = null
-            )
-            const resp = await fetch('https://mediator.rootsid.cloud/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/didcomm-encrypted+json' },
-                body: mediateRequestPacked
-            });
-            const respPacked = await resp.json();
-            const respUnpacked = await DIDCommV2Module.unpack(respPacked, to = myDid, agreemKey = myAgreemKey)
-            const respJson = JSON.parse(respUnpacked.message)
-            console.log(respJson)
-            setRoutingKey(respJson.body.routing_keys[0])
-            setMediatorDID(respUnpacked.fromPrior)
-
-
+            // Request mediate service and store routing key
+            resp = await mediateRequest(didToMediator, mediatorDID)
+            console.log(resp)
+            setRoutingKey(resp)
         } catch (error) {
             console.error(error);
         }
-
-
     }
 
     const generateDIDtoFriend = async () => {
         // 1- Create a new DID with mediator routing DID to show to friend
         // 2- Update DID in mediator
+        // 3- Generate OOB invitation to friend
         
         try {
-            // Create a DID Peer to connect to a friend
-            // DID and key generated must be persisted
-            const myAuthKey = await generateKeyPair('ed25519')
-            const myAgreemKey = await generateKeyPair('x25519')
-            const  myDid = await PeerDidModule.createDID(myAuthKey.publicJwk,myAgreemKey.publicJwk,routingKey,null)
-            setKeyToFriend(myAgreemKey)
+            // 1- Create a DID Peer to connect to a friend
+            const  myDid = await createDIDPeer(routingKey,null)
             setDidToFriend(myDid)
 
-            
-            // KeyList update message
-            const msgBody = {
-                updates: [
+            // 2- KeyList update message
+            const updates = [
                     {
                         recipient_key: myDid,
                         action: "add"
                     }
                 ]
-            }
-            const keyListUpdatePacked = await DIDCommV2Module.pack(
-                msgBody,
-                id = uuid.v4(),
-                to = mediatorDID,
-                from = didToMediator,
-                messageType = "https://didcomm.org/coordinate-mediation/2.0/keylist-update",
-                customHeaders = [{ return_route: "all" }],
-                agreemKey = keyToMediator,
-                signFrom = null,
-                protectSender = true,
-                attachments = null
-            )
-            const resp = await fetch('https://mediator.rootsid.cloud/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/didcomm-encrypted+json' },
-                body: keyListUpdatePacked
-            });
-            const respPacked = await resp.json();
-            const respUnpacked = await DIDCommV2Module.unpack(respPacked, to = didToMediator, agreemKey = keyToMediator)
-            const respJson = JSON.parse(respUnpacked.message)
-            console.log(respJson)
-
+            const resp = await keylistUpdate(updates, didToMediator, mediatorDID)
+            console.log(resp)
+            
+            //3- create OOB URL
+            const ooburl = await generateOOBURL(myDid)
 
         } catch (error) {
             console.error(error);
         }
-
-
     }
 
     const getMessages = async () => {
-        // 1- Check message queue (status-request)
-        // 2- get messages if any (delivery-request)
-        
         try {
-            // Status Request
-            const msgBody = {}
-            const statusRequestPacked = await DIDCommV2Module.pack(
-                msgBody,
-                id = uuid.v4(),
-                to = mediatorDID,
-                from = didToMediator,
-                messageType = "https://didcomm.org/messagepickup/3.0/status-request",
-                customHeaders = [{ return_route: "all" }],
-                agreemKey = keyToMediator,
-                signFrom = null,
-                protectSender = true,
-                attachments = null
-            )
-            const resp = await fetch('https://mediator.rootsid.cloud/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/didcomm-encrypted+json' },
-                body: statusRequestPacked
-            });
-            const respPacked = await resp.json();
-            const respUnpacked = await DIDCommV2Module.unpack(respPacked, to = didToMediator, agreemKey = keyToMediator)
-            const respJson = JSON.parse(respUnpacked.message)
-            const messageCount = respJson.body.message_count
-            console.log(messageCount)
-            if (messageCount === 0) {
+            const resp = await retrieveMessages(didToMediator, mediatorDID)
+           
+            if (resp === 0) {
                 setFriendMessage("No Messages")
             } else {
-                // Get one message from queue
-                const msg2Body = {limit: 1}
-                const deliveryRequestPacked = await DIDCommV2Module.pack(
-                    msg2Body,
-                    id = uuid.v4(),
-                    to = mediatorDID,
-                    from = didToMediator,
-                    messageType = "https://didcomm.org/messagepickup/3.0/delivery-request",
-                    customHeaders = [{ return_route: "all" }],
-                    agreemKey = keyToMediator,
-                    signFrom = null,
-                    protectSender = true,
-                    attachments = null
-                )
-                const resp2 = await fetch('https://mediator.rootsid.cloud/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/didcomm-encrypted+json' },
-                    body: deliveryRequestPacked
-                });
-                
-                const resp2Packed = await resp2.json();
-                const resp2Unpacked = await DIDCommV2Module.unpack(resp2Packed, to = didToMediator, agreemKey = keyToMediator)
-                const resp2UnpackedJson = JSON.parse(resp2Unpacked.message)
-                // Unpack friend message
-                const friendMsgPacked = resp2UnpackedJson.attachments[0].data.json
-                const friendMsgPackedId = resp2UnpackedJson.attachments[0].id
-                const friendMsgUnPacked = await DIDCommV2Module.unpack(JSON. stringify(friendMsgPacked), to = didTofriend, agreemKey = keyTofriend)
-
-                setFriendMessage(JSON.parse(friendMsgUnPacked.message).body.content)
-
-                // Acknowledge receipt
-                const msg3Body = {"message_id_list": [friendMsgPackedId]}
-                const ackPacked = await DIDCommV2Module.pack(
-                    msg3Body,
-                    id = uuid.v4(),
-                    to = mediatorDID,
-                    from = didToMediator,
-                    messageType = "https://didcomm.org/messagepickup/3.0/messages-received",
-                    customHeaders = [{ return_route: "all" }],
-                    agreemKey = keyToMediator,
-                    signFrom = null,
-                    protectSender = true,
-                    attachments = null,
-                    attachments = null
-                )
-                const resp3 = await fetch('https://mediator.rootsid.cloud/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/didcomm-encrypted+json' },
-                    body: ackPacked
-                });
-
+                setFriendMessage(resp)
             }
-
-            
-
-
         } catch (error) {
             console.error(error);
         }
-
-
     }
 
     const sendMessage = async () => {
-        // Send Message to DID via routing
-        const friendDIDDoc = JSON.parse(await PeerDidModule.resolveDID(friendDID))
-        const friendServiceEndpoint = friendDIDDoc.service[0].serviceEndpoint
-        console.log(friendServiceEndpoint)
-        const friendMediatorDIDDoc = JSON.parse(await PeerDidModule.resolveDID(friendServiceEndpoint))
-        const friendMediatorServiceEndpoint = friendMediatorDIDDoc.service[0].serviceEndpoint
-        console.log()
-        try {
-
-            
-            // Basic Message to friend
-            const msgBody = { content: myMessage }
-            const myMsgPacked = await DIDCommV2Module.pack(
-                msgBody,
-                id = uuid.v4(),
-                to = friendDID,
-                from = didTofriend,
-                messageType = "https://didcomm.org/basicmessage/2.0/message",
-                customHeaders = [{ created_time: Math.floor(new Date().getTime()/1000)}],
-                agreemKey = keyTofriend,
-                signFrom = null,
-                protectSender = true,
-                attachments = null
-            )
-            // wrap in a forward message
-            const fwBody = { next: friendDID }
-            const fwPacked = await DIDCommV2Module.pack(
-                fwBody,
-                id = uuid.v4(),
-                to = friendServiceEndpoint,
-                from = didToMediator,  //this assume we are using same mediator, if not a new did should be created
-                messageType = "https://didcomm.org/routing/2.0/forward",
-                customHeaders = [{ return_route: "all" }],
-                agreemKey = keyToMediator,
-                signFrom = null,
-                protectSender = true,
-                attachments = [JSON.parse(myMsgPacked)]
-            )
-
-            const resp = await fetch(friendMediatorServiceEndpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/didcomm-encrypted+json' },
-                body: fwPacked
-            });
-            console.log(resp.ok)
-
-
+        try {    
+            await sendBasicMessage(myMessage, didTofriend, friendDID)
         } catch (error) {
             console.error(error);
         }

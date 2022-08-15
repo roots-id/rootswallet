@@ -21,7 +21,7 @@ const Communications = (props) => {
         console.log("Alice generates a new pairwise peer DID for communication with Bob: "+ alicePeerDID)
 
         // 3. Alice sends message to Bob
-        var msg = {msg: "Hello Bob2!"}
+        var msg = {msg: "Hello Bob!"}
         const packedToBobMsg = await pack(
           msg, 
           alicePeerDID, 
@@ -73,8 +73,7 @@ const Communications = (props) => {
       const askMediator = async() => {
         try{
             console.log(question)
-            const resp = await sendBasicMessage(question, myPeerDID, mediatorDID)
-            const answer = JSON.parse(resp.message).body.content
+            const answer = await sendBasicMessage(question, myPeerDID, mediatorDID)
             console.log(answer)
             setAnswer(answer)          
   
