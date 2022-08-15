@@ -4,7 +4,6 @@ import { sendMessage, pack } from "../didcommv2";
 export async function sendPing(from: string, to: string) {
     try {
         const pingBody = { response_requested: true }
-
         const pingMsgPacked = await pack(
             pingBody, 
             from, 
@@ -54,7 +53,6 @@ export async function receivePing(msg: any) {
                     const to = msg.to
                     await sendPingResponse(from, to)
                 }
-                
                 break;           
             default:
                 break;
@@ -63,5 +61,4 @@ export async function receivePing(msg: any) {
     } catch (error: any) {
         logger("trust-ping - Error", error)
     }
-    
 }

@@ -3,7 +3,6 @@ import { sendMessage, pack } from "../didcommv2";
 
 export async function mediateRequest(from: string, to: string) {
     try {
-
         const msgPacked = await pack(
             {}, 
             from, 
@@ -21,7 +20,6 @@ export async function mediateRequest(from: string, to: string) {
 }
 
 export async function keylistUpdate(updates: any[], from: string, to: string) {
-    
     try {
         const msgPacked = await pack(
             {updates: updates}, 
@@ -53,9 +51,7 @@ export async function receiveMediate(msg: any) {
             default:
                 break;
         }
-
     } catch (error: any) {
         logger("coordinate-mediation - Error", error)
     }
-    
 }

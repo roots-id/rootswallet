@@ -9,7 +9,7 @@ export async function sendMessage(packMsg: any, to: string) {
         var serviceEndpoint = didDoc.service[0].serviceEndpoint
         var packed = packMsg
         var endpoint = serviceEndpoint
-        // Validate if URL and repack in forward msg
+        // TODO case when there are several nested forwards
         if (serviceEndpoint.startsWith("did:")) {
             const didDocNext = await resolveDIDPeer(serviceEndpoint)
             endpoint = didDocNext.service[0].serviceEndpoint
@@ -27,6 +27,7 @@ export async function sendMessage(packMsg: any, to: string) {
             )
         }
         console.log("ServiceEndpoint:",endpoint)
+        // TODO add WebSocket transport
         const resp = await fetch(endpoint, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/didcomm-encrypted+json'},
@@ -36,9 +37,7 @@ export async function sendMessage(packMsg: any, to: string) {
         if (respmsg !== null) {
             return await receiveMessage(respmsg)
         }
-        
     } catch (error: any) {
         logger("mesageSender - Error", error)
     }
-    
 }

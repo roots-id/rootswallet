@@ -11,6 +11,7 @@ const Communications = (props) => {
     const [mediatorDID, setMediatorDID] = useState('')
 
     const onPressHelloWorld = async() => {
+        // TODO This Hello World should be moved to tests
         // 1. Bob creates a pairwise peer DID for the connection
         const bobPeerDID = await createDIDPeer(null, null)
         console.log("Bob generates a new pairwise peer DID for communication with Alice: "+ bobPeerDID)
@@ -40,7 +41,7 @@ const Communications = (props) => {
         var unpackResultMsg = await unpack(packedToBobMsg)
         console.log(unpackResultMsg)
         console.log("Bob received " + JSON.parse(unpackResultMsg.message).body.msg + " from Alice.")
-    };
+    }
 
     const getMediator = async() => {
       // Create a DID Peer to connect to the mediator (for use later)
@@ -51,7 +52,6 @@ const Communications = (props) => {
         const response = await fetch(
           'https://mediator.rootsid.cloud/oob_url'
         );
-        
         const oob_url = await response.text()
         const decodedMsg = await decodeOOBURL(oob_url)
         setMediatorDID(decodedMsg.from)
@@ -72,11 +72,8 @@ const Communications = (props) => {
 
       const askMediator = async() => {
         try{
-            console.log(question)
             const answer = await sendBasicMessage(question, myPeerDID, mediatorDID)
-            console.log(answer)
             setAnswer(answer)          
-  
         } catch (error) {
             console.error(error);
         }

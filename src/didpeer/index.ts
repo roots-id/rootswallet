@@ -7,7 +7,7 @@ import {logger} from "../logging";
 
 const { PeerDidModule } = NativeModules;
 
-export async function generateKeyPair(type) {
+export async function generateKeyPair(type: string) {
     try {
         let keyGenerator = Ed25519KeyPair;
         if (type == 'x25519') { keyGenerator = X25519KeyPair }
@@ -18,7 +18,6 @@ export async function generateKeyPair(type) {
             type: 'JsonWebKey2020',
             privateKey: true,
         });
-
         return {
             publicJwk: publicKeyJwk,
             privateJwk: privateKeyJwk
@@ -26,20 +25,18 @@ export async function generateKeyPair(type) {
     } catch (error: any) {
         logger("didpeer - Error", error)
     }
-    
 }
 
-export async function createDIDPeer(serviceEndpoint, serviceRoutingKeys) {
+export async function createDIDPeer(serviceEndpoint: string, serviceRoutingKeys: string[]) {
     try {
         const authKey = await generateKeyPair('ed25519')
         const agreemKey = await generateKeyPair('x25519')
-        const peerDID = await PeerDidModule.createDID(authKey.publicJwk,agreemKey.publicJwk,serviceEndpoint,serviceRoutingKeys)
+        const peerDID = await PeerDidModule.createDID(authKey!.publicJwk,agreemKey!.publicJwk,serviceEndpoint,serviceRoutingKeys)
         
         const didDoc = await resolveDIDPeer(peerDID)
         // Store Authentication and Agreement Keys
         await saveItem(didDoc.authentication[0].id, JSON.stringify(authKey))
         await saveItem(didDoc.keyAgreement[0].id, JSON.stringify(agreemKey))
-        
         return peerDID
     } catch (error: any) {
         logger("didpeer - Error", error)

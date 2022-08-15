@@ -1,11 +1,10 @@
-import { NativeModules } from "react-native";
 import {logger} from "../logging";
 import { sendMessage, pack } from "../didcommv2";
 
 export async function sendBasicMessage(content: string, from: string, to: string) {
     try {
         const body = { content: content }
-        //FIXME Created time is not custom header yn python, check in JVM
+        //FIXME created_time is not custom header in python, check in JVM
         const packedMsg = await pack(
             body, 
             from, 

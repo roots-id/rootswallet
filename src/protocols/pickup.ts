@@ -7,15 +7,12 @@ export async function retrieveMessages(from: string, to: string){
         logger("Pickup message count: "+messageCount)
         if (messageCount>0){
             const attachments = await deliveryRequest(1,from, to)
-            return processDelivery(attachments, from, to)
-        } else {
-            return 0
-        }
-        
+            await processDelivery(attachments, from, to)
+        } 
+        return messageCount
     } catch (error: any) {
         logger("pickup - Error", error)
     }
-
 }
 
 export async function statusRequest(from: string, to: string) {
@@ -37,7 +34,6 @@ export async function statusRequest(from: string, to: string) {
 }
 
 export async function deliveryRequest(limit: number, from: string, to: string) {
-    
     try {
         const msgPacked = await pack(
             {limit: parseInt(limit.toString())}, 
@@ -56,7 +52,6 @@ export async function deliveryRequest(limit: number, from: string, to: string) {
 }
 
 export async function messageReceived(ids: string[], from: string, to: string) {
-    
     try {
         const msgPacked = await pack(
             {message_id_list: ids}, 
@@ -75,21 +70,17 @@ export async function messageReceived(ids: string[], from: string, to: string) {
 }
 
  async function processDelivery(attachments: any[], from: string, to: string) {
-    
     try {
         attachments.forEach(async function (attachment) {
             const msgPacked = attachment.data.json
             const msgId = attachment.id
-            //await messageReceived([msgId], from, to)
-            // This return is a hack for the demo in Mediator screen
-            return receiveMessage(JSON.stringify(msgPacked))
+            await messageReceived([msgId], from, to)
+            receiveMessage(JSON.stringify(msgPacked))
         })
-
     } catch (error: any) {
         logger("pickup - Error", error)
     }
 }
-
 
 export async function receivePickup(msg: any) {
     try {
@@ -106,5 +97,4 @@ export async function receivePickup(msg: any) {
     } catch (error: any) {
         logger("pickup - Error", error)
     }
-    
 }

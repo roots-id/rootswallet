@@ -1,25 +1,26 @@
 import React, { useState } from 'react';
 import { Button, View, Text, NativeModules, TextInput } from 'react-native';
 import { createDIDPeer} from '../didpeer'
-import { decodeOOBURL, generateOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages } from '../protocols';
+import { decodeOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages } from '../protocols';
+import QRCode from 'react-native-qrcode-svg'
 
 const { PeerDidModule, DIDCommV2Module } = NativeModules;
 
 const Mediator = (props) => {
 
     const [didToMediator, setDidToMediator] = useState('')
-    //const [keyToMediator, setKeyToMediator] = useState('')
     const [didTofriend, setDidToFriend] = useState('')
-    const [keyTofriend, setKeyToFriend] = useState('')
     const [mediatorDID, setMediatorDID] = useState('')
     const [routingKey, setRoutingKey] = useState('')
     const [friendDID, setFriendDID] = useState('')
     const [myMessage, setMyMessage] = useState('')
     const [friendMessage, setFriendMessage] = useState('')
+    const [qrcode, setQRCode] = useState('')
 
     const getMediator = async () => {
-        // GET Mediator OOB URL and decode mediator public DID. Can also be a QR scan (code in https://mediator.rootsid.cloud/oob_qrcode)
         try {
+            // GET Mediator OOB URL and decode mediator public DID. 
+            // It can also be a QR scan (qrcode image in https://mediator.rootsid.cloud/oob_qrcode)
             const response = await fetch(
                 'https://mediator.rootsid.cloud/oob_url'
             );
@@ -39,8 +40,7 @@ const Mediator = (props) => {
     const requestMediate = async () => {
         try {
             // Request mediate service and store routing key
-            resp = await mediateRequest(didToMediator, mediatorDID)
-            console.log(resp)
+            const resp = await mediateRequest(didToMediator, mediatorDID)
             setRoutingKey(resp)
         } catch (error) {
             console.error(error);
@@ -48,7 +48,7 @@ const Mediator = (props) => {
     }
 
     const generateDIDtoFriend = async () => {
-        // 1- Create a new DID with mediator routing DID to show to friend
+        // 1- Create a new DID with the mediator's routing keys
         // 2- Update DID in mediator
         // 3- Generate OOB invitation to friend
         
@@ -69,6 +69,9 @@ const Mediator = (props) => {
             
             //3- create OOB URL
             const ooburl = await generateOOBURL(myDid)
+            console.log("OOB URL: "+ ooburl)
+            // QR Code too big. Need short url
+            setQRCode(ooburl)
 
         } catch (error) {
             console.error(error);
@@ -78,12 +81,8 @@ const Mediator = (props) => {
     const getMessages = async () => {
         try {
             const resp = await retrieveMessages(didToMediator, mediatorDID)
-           
-            if (resp === 0) {
-                setFriendMessage("No Messages")
-            } else {
-                setFriendMessage(resp)
-            }
+            setFriendMessage("Messages: " + resp)
+
         } catch (error) {
             console.error(error);
         }
@@ -95,8 +94,6 @@ const Mediator = (props) => {
         } catch (error) {
             console.error(error);
         }
-
-
     }
 
     return (
@@ -123,6 +120,10 @@ const Mediator = (props) => {
             <Text>
                 {didTofriend}
             </Text>
+            { qrcode !==''?
+            <QRCode
+                value={qrcode}
+            /> : null}
             <Button
                 title='Check Messages'
                 color='#239B56'
