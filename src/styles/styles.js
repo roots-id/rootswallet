@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
         color: "#111111",
     },
     button: {
-        maxWidth: 200,
+        maxWidth: "80%",
         borderRadius: 10,
         backgroundColor: '#e69138',
         alignSelf: 'center',
@@ -51,7 +51,11 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    containerRowCentered: {
+    containerRow: {
+        flexDirection: "row",
+        width: "100%",
+    },
+    containerRowSpaced: {
         flexDirection: "row",
         justifyContent: "space-around",
         width: "100%",
@@ -201,6 +205,8 @@ export const styles = StyleSheet.create({
     },
     problem: {
         color: '#ff5521',
+        flexWrap: 'wrap',
+        flex: 1,
     },
     qr: {
         color: 'orange',
@@ -238,9 +244,11 @@ export const styles = StyleSheet.create({
         alignSelf: "flex-start",
         justifyContent: "flex-start"
     },
-    text: {
-        color: 'blue',
+    textOrange: {
+        color: '#aa4004',
         fontSize: 15,
+        flexWrap: 'wrap',
+        flex: 1,
     },
     titleText: {
         fontSize: 24,
@@ -272,17 +280,16 @@ export const styles = StyleSheet.create({
     },
     viewAnimated: {
         padding: 16,
-        width: '90%',
-        height: '80%',
+        maxWidth: '90%',
+        maxHeight: '85%',
         borderRadius: 3,
         backgroundColor: '#cfbfca',
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: 'space-around',
+        alignContent: 'space-around',
     },
     viewAnimatedStart: {
         padding: 16,
-        width: '90%',
-        height: '80%',
         borderRadius: 3,
         backgroundColor: '#cfbfca',
         alignItems: 'flex-start',
@@ -307,10 +314,10 @@ export const styles = StyleSheet.create({
     },
 })
 
-export function displayProblem(displayIt) {
+export function displayOrHide(displayIt, displayStyle) {
     if (!displayIt) {
         return styles.none
     } else {
-        return styles.problem
+        return displayStyle
     }
 }

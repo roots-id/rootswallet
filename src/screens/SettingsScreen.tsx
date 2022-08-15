@@ -80,21 +80,18 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
                 </View>
                 <Text/>
                 <View style={{flexDirection: 'row',}}>
-                    <Text style={styles.listItemCenteredBlack}>Save/Restore Wallet: </Text>
-                    <IconButton
-                        icon="file-restore"
-                        size={36}
-                        color="#e69138"
-                        onPress={() => navigation.navigate("Save")}
-                    />
+                    <FormButton
+                        title="Save/Restore Wallet"
+                        modeValue="contained"
+                        labelStyle={styles.loginButtonLabel}
+                        onPress={() => navigation.navigate("Save")}/>
                 </View>
                 <Text/>
                 <View style={{flexDirection: 'row',}}>
-                    <Text style={styles.listItemCenteredBlack}>Go to Developer Page: </Text>
-                    <IconButton
-                        icon="skull-crossbones"
-                        size={36}
-                        color="#e69138"
+                    <FormButton
+                        title="Developers Only"
+                        modeValue="contained"
+                        labelStyle={styles.loginButtonLabel}
                         onPress={() => navigation.navigate("Developers")}
                     />
                 </View>

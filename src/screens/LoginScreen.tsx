@@ -8,7 +8,7 @@ import FormInput from '../components/FormInput';
 import AuthContext from '../context/AuthenticationContext';
 
 import {loadAll} from '../roots'
-import {displayProblem, styles} from "../styles/styles";
+import {displayOrHide, styles} from "../styles/styles";
 import {getWalletName} from "../wallet";
 import {brandLogo} from "../relationships";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
@@ -33,7 +33,7 @@ export default function LoginScreen({route, navigation}: CompositeScreenProps<an
 
     useEffect(() => {
         if (problemText.length > 0) {
-            setError(<Text style={displayProblem(true)}>{problemText}</Text>)
+            setError(<Text style={displayOrHide(true)}>{problemText}</Text>)
         } else {
             setError(<Text/>)
         }

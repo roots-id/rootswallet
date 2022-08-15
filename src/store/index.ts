@@ -1,6 +1,6 @@
 import * as AsyncStore from './AsyncStore'
 import * as CachedStore from './CachedStore'
-import * as SecureStore from 'expo-secure-store';
+//import * as SecureStore from 'expo-secure-store';
 
 import {logger} from '../logging'
 import {getJsonFromMap, getMapFromJson, replaceSpecial} from '../utils'
@@ -80,7 +80,7 @@ export async function hasWallet(walName: string) {
 export async function restoreWallet(passphrase: string) {
     try {
         //TODO use keychain for secrets, etc.
-        const walName = await SecureStore.getItemAsync(passphrase);
+        const walName = await AsyncStore.getItem(passphrase);
         logger("restoring",walName,"w/passphrase",passphrase)
         if(!walName) {
             logger("store - cannot restore wallet w/passphrase", passphrase)
@@ -128,7 +128,7 @@ async function storeWallet(walName: string, walPass: string, walJson: string): P
         try {
             logger('store - secure storing wallet',walName,"w/ pass",walPass)
             //TODO make wallet pass and storage actually secure
-            await SecureStore.setItemAsync(walPass,walName);
+            await AsyncStore.storeItem(walPass,walName);
             const asyncStored = await AsyncStore.storeItem(walName,walJson,true)
             if(asyncStored) {
                 CachedStore.storeWallet(walName,walJson)

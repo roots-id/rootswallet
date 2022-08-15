@@ -114,8 +114,8 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
 
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '95%',
-                    height: '95%',
+                    width: '100%',
+                    height: '100%',
                 }}>
                     <BarCodeScanner
                         onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
