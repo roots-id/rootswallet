@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Button, View, Text, NativeModules, TextInput } from 'react-native';
 import { createDIDPeer} from '../didpeer'
-import { decodeOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages } from '../protocols';
+import { decodeOOBURL, generateOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages } from '../protocols';
 import QRCode from 'react-native-qrcode-svg'
 
-const { PeerDidModule, DIDCommV2Module } = NativeModules;
 
 const Mediator = (props) => {
 
