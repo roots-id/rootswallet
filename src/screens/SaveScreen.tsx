@@ -190,9 +190,9 @@ export default function SaveScreen({route, navigation}: CompositeScreenProps<any
     }
 
     function getTitle(item: ReadDirItem) {
-        let title = "Saved Wallet"
-        if (item.name.endsWith(ZIP_EXTENSION)) {
-            title = "Latest Wallet"
+        let title = "Imported Wallet"
+        if (item.name.endsWith(RW_SAVED_BACKUP+ZIP_EXTENSION)) {
+            title = "Saved Wallet"
         }
         console.log("Got title",title)
         return title

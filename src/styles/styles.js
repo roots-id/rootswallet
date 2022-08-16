@@ -205,8 +205,6 @@ export const styles = StyleSheet.create({
     },
     problem: {
         color: '#ff5521',
-        flexWrap: 'wrap',
-        flex: 1,
     },
     qr: {
         color: 'orange',

@@ -108,7 +108,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                 />
             </View>
             <Animated.View
-                style={styles.viewAnimated}
+                style={[styles.viewAnimated,{minWidth: "90%",minHeight: "90%"}]}
             >
                 <View style={{
 
