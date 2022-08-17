@@ -1,11 +1,25 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { logger } from '../logging'
+import {exportKeyValue} from "../models";
 
 export async function clear() {
     logger("AsyncStorage - cleaning")
     const keys = await AsyncStorage.getAllKeys()
     keys.forEach(async (key) => await removeItem(key))
     logger("AsyncStorage - cleaned")
+}
+
+export async function exportStorage() : Promise<Map<string, string>>{
+    logger("AsyncStorage - exporting")
+    const keys = await AsyncStorage.getAllKeys()
+    const all: Map<string, string> = new Map<string,string>()
+    for (const key of keys) {
+        const value: string = <string>await AsyncStorage.getItem(key)
+        logger("AsyncStorage - exporting",key,value)
+        all.set(key,value)
+    }
+    logger("AsyncStorage - export complete")
+    return all;
 }
 
 export async function getItem(key: string) {
@@ -76,6 +90,28 @@ export async function hasWallet(walName: string) {
         logger("AsyncStore - no wallet found")
         return false;
     }
+}
+
+export async function loadStorage(importAll: Map<string, string>) : Promise<string[]>{
+    logger("AsyncStorage - importing",importAll)
+    const failed: string[] = [];
+    const entries = importAll.entries()
+    for (const entry of entries) {
+        const key = entry[0]
+        const value = entry[1]
+        logger("AsyncStorage - importing",key,value)
+        const result: boolean = await storeItem(key,value)
+        logger("AsyncStorage - imported",key,value,result)
+        if(!result) {
+            failed.push(key)
+        }
+    }
+    if(failed.length == 0) {
+        logger("AsyncStorage - import complete")
+    } else {
+        console.error("AsyncStorage - failed to import",failed)
+    }
+    return failed;
 }
 
 export async function removeItem(key: string) {

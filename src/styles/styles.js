@@ -6,8 +6,11 @@ export const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 30,
     },
+    black: {
+        color: "#111111",
+    },
     button: {
-        width: 200,
+        maxWidth: "80%",
         borderRadius: 10,
         backgroundColor: '#e69138',
         alignSelf: 'center',
@@ -24,15 +27,18 @@ export const styles = StyleSheet.create({
     cardano: {
         color: '#1c04ba'
     },
+    clickableListArchive: {
+        fontSize: 16,
+        color: '#c66108',
+    },
     clickableListTitle: {
         fontSize: 22,
         color: '#e69138',
     },
     closeButtonContainer: {
-        position: 'absolute',
-        top: 30,
-        right: 0,
-        zIndex: 1,
+        flexDirection: "row",
+        width: "100%",
+        justifyContent: "flex-end"
     },
     container: {
         backgroundColor: '#251520',
@@ -45,11 +51,24 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    containerRow: {
+        flexDirection: "row",
+        width: "100%",
+    },
+    containerRowSpaced: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        width: "100%",
+    },
     credLogoStyle: {
-        width:65,
-        height:75,
-        resizeMode:'contain',
-        margin:8
+        width: 65,
+        height: 75,
+        resizeMode: 'contain',
+        margin: 8
+    },
+    descriptionOrange: {
+        fontSize: 16,
+        color: '#aa4004',
     },
     detailTitle: {
         fontSize: 20,
@@ -76,10 +95,6 @@ export const styles = StyleSheet.create({
         fontWeight: 'normal',
         alignSelf: "flex-start",
         justifyContent: "flex-start"
-    },
-    highlightedItem: {
-        fontSize: 18,
-        fontWeight: "bold"
     },
     innerContainer: {
         flex: 1,
@@ -111,6 +126,10 @@ export const styles = StyleSheet.create({
         padding: 20,
         marginVertical: 8,
         marginHorizontal: 16,
+    },
+    itemHighlighted: {
+        fontSize: 18,
+        fontWeight: "bold"
     },
     leftHeader: {
         color: '#999999',
@@ -170,6 +189,8 @@ export const styles = StyleSheet.create({
     none: {
         display: 'none'
     },
+    orange: {color: '#b65100'},
+    orangeHighlight: {color: '#c67150'},
     phone: {
         color: 'blue',
         textDecorationLine: 'underline',
@@ -198,9 +219,16 @@ export const styles = StyleSheet.create({
         flexDirection: "row",
         flexWrap: "wrap",
     },
+    scrollableCompact: {
+        padding: 0,
+        width: '100%',
+        maxHeight: 290,
+        borderRadius: 6,
+        backgroundColor: '#baaab6',
+    },
     scrollableModal: {
         padding: 16,
-        width: '90%',
+        width: '95%',
         maxWidth: 350,
         maxHeight: 250,
         borderRadius: 3,
@@ -214,9 +242,11 @@ export const styles = StyleSheet.create({
         alignSelf: "flex-start",
         justifyContent: "flex-start"
     },
-    text: {
-        color: 'blue',
+    textOrange: {
+        color: '#aa4004',
         fontSize: 15,
+        flexWrap: 'wrap',
+        flex: 1,
     },
     titleText: {
         fontSize: 24,
@@ -248,12 +278,19 @@ export const styles = StyleSheet.create({
     },
     viewAnimated: {
         padding: 16,
-        width: '80%',
-        height: '80%',
-        maxWidth: 400,
+        maxWidth: '90%',
+        maxHeight: '85%',
         borderRadius: 3,
         backgroundColor: '#cfbfca',
-        alignItems: 'center',
+        alignItems: "center",
+        justifyContent: 'space-around',
+        alignContent: 'space-around',
+    },
+    viewAnimatedStart: {
+        padding: 16,
+        borderRadius: 3,
+        backgroundColor: '#cfbfca',
+        alignItems: 'flex-start',
         justifyContent: 'center',
     },
     walletIconStyle: {
@@ -270,13 +307,15 @@ export const styles = StyleSheet.create({
         height: 50,
         backgroundColor: '#F0EEEE'
     },
+    white: {
+        color: "#eeeeee"
+    },
 })
 
-export function displayProblem(displayIt) {
-    if(!displayIt){
+export function displayOrHide(displayIt, displayStyle) {
+    if (!displayIt) {
         return styles.none
-    }
-    else{
-        return styles.problem
+    } else {
+        return displayStyle
     }
 }

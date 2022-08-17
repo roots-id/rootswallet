@@ -1,12 +1,14 @@
 import * as AsyncStore from './AsyncStore'
 import * as CachedStore from './CachedStore'
-import * as SecureStore from 'expo-secure-store';
-import { logger } from '../logging'
-import { replaceSpecial } from '../utils'
+//import * as SecureStore from 'expo-secure-store';
+
+import {logger} from '../logging'
+import {getJsonFromMap, getMapFromJson, replaceSpecial} from '../utils'
+import {loadStorage} from "./AsyncStore";
 
 export const WALLET_LOGIN_SUCCESS = "rootsWalletLoginSuccessful"
 
-export async function clearStorage() {
+export async function clearStorage() : Promise<void>{
     logger("store - Clearing storage")
     try {
         CachedStore.clear()
@@ -14,6 +16,31 @@ export async function clearStorage() {
     } catch(error: any) {
         console.error("Failed to clear storage",error,error.stack)
     }
+}
+
+export async function exportStorage() : Promise<string|undefined>{
+    logger("store - exporting storage")
+    try {
+        const asyncStoreExport: Map<string,string> = await AsyncStore.exportStorage()
+        const storeExportJson = getJsonFromMap(asyncStoreExport)
+        logger("store - exported storage:",storeExportJson)
+        return storeExportJson
+    } catch(error: any) {
+        console.error("Failed to export storage",error,error.stack)
+    }
+    return undefined
+}
+
+export async function importStorage(importJson: string) : Promise<string[]|undefined>{
+    logger("store - loading storage",importJson)
+    try {
+        const storeImportMap = getMapFromJson(importJson)
+        const result: string[] = await AsyncStore.loadStorage(storeImportMap)
+        return result
+    } catch(error: any) {
+        console.error("Failed to export storage",error,error.stack)
+    }
+    return undefined
 }
 
 export async function status() {
@@ -53,7 +80,7 @@ export async function hasWallet(walName: string) {
 export async function restoreWallet(passphrase: string) {
     try {
         //TODO use keychain for secrets, etc.
-        const walName = await SecureStore.getItemAsync(passphrase);
+        const walName = await AsyncStore.getItem(passphrase);
         logger("restoring",walName,"w/passphrase",passphrase)
         if(!walName) {
             logger("store - cannot restore wallet w/passphrase", passphrase)
@@ -82,8 +109,7 @@ export async function saveWallet(walName: string, walPass: string, walJson: stri
         try {
             logger("store - Saving wallet to storage",walName,":",walJson)
             //TODO use keychain to encrypt values
-            const result = await storeWallet(walName,walPass,walJson)
-            return result
+            return await storeWallet(walName, walPass, walJson)
         } catch(error) {
             logger(errMsg,error)
             return errMsg+" "+error;
@@ -102,7 +128,7 @@ async function storeWallet(walName: string, walPass: string, walJson: string): P
         try {
             logger('store - secure storing wallet',walName,"w/ pass",walPass)
             //TODO make wallet pass and storage actually secure
-            await SecureStore.setItemAsync(walPass,walName);
+            await AsyncStore.storeItem(walPass,walName);
             const asyncStored = await AsyncStore.storeItem(walName,walJson,true)
             if(asyncStored) {
                 CachedStore.storeWallet(walName,walJson)

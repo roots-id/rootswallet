@@ -1,6 +1,8 @@
 import React from 'react';
-import {Button, View} from 'react-native';
+import {Button, NativeModules, View} from 'react-native';
 import * as store from '../store'
+import {initRoot} from "../roots";
+import {generateIdFromName} from "../relationships";
 
 const DeveloperScreen = (props) => {
     console.log(props.navigation)
@@ -21,10 +23,6 @@ const DeveloperScreen = (props) => {
             <Button
                 title={"Current Wallet"}
                 onPress={() => props.navigation.navigate("Wallet")}
-            />
-            <Button
-                title={"Export Wallet"}
-                onPress={() => props.navigation.navigate("Export")}
             />
         </View>
     )

@@ -72,11 +72,18 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
                 justifyContent: 'center',
             }}
         >
-
             <Pressable
                 style={styles.pressable}
                 onPress={navigation.goBack}
             />
+            <View style={styles.closeButtonContainer}>
+                <IconButton
+                    icon="close-circle"
+                    size={36}
+                    color="#e69138"
+                    onPress={() => navigation.goBack()}
+                />
+            </View>
             <Animated.View
                 style={styles.viewAnimated}
             >
@@ -92,12 +99,6 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
                         size={36}
                         color="#e69138"
                         onPress={() => showQR(navigation, cred.verifiedCredential)}
-                    />
-                    <IconButton
-                        icon="close-circle"
-                        size={36}
-                        color="#e69138"
-                        onPress={() => navigation.goBack()}
                     />
                 </View>
                 <Image source={credLogo}

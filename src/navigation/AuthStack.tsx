@@ -26,12 +26,12 @@ import ScanQRCodeScreen from '../screens/ScanQRCodeScreen'
 import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
 import StartChatScreen from '../screens/StartChatScreen';
 import React, {useState} from "react";
+import * as models from '../models'
 import {getChatItem, loadSettings, storageStatus} from '../roots'
 import * as contact from '../relationships'
 import * as utils from '../utils'
-import * as wallet from '../wallet'
 import {loadWalletName} from "../wallet";
-import ExportScreen from '../screens/ExportScreen';
+import SaveScreen from '../screens/SaveScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -88,6 +88,10 @@ export default function AuthStack() {
 
         bootstrapAsync().then(r => {
             console.log("AuthStack - Bootstrap complete", r)
+            updateState({
+                isLoading: false,
+                userToken: null,
+            })
         });
     }, []);
 
@@ -101,11 +105,6 @@ export default function AuthStack() {
         }),
         []
     );
-
-    if (state.isLoading) {
-        // We haven't finished checking for the token yet
-        return <LoadingScreen/>;
-    }
 
     const Main = () => {
         return (
@@ -169,39 +168,7 @@ export default function AuthStack() {
             </Stack.Navigator>
         )
     }
-    // const YouStack = () => {
-    //     return (
-    //         <Stack.Navigator
-    //             screenOptions={{
-    //               headerStyle: {
-    //                 backgroundColor: '#150510',
-    //               },
-    //               headerTintColor: '#eeeeee',
-    //               headerTitleStyle: {
-    //                 fontSize: 22,
-    //               },
-    //               gestureEnabled: true,
-    //               gestureDirection: "horizontal",
-    //               cardStyleInterpolator:CardStyleInterpolators.forHorizontalIOS,
-    //               animationEnabled: true,
-    //             }}
-    //
-    //         >
-    //         <Stack.Group>
-    //             <Stack.Screen
-    //                 name="Chat"
-    //                 component={ChatScreen}
-    //                 initialParams={{chatId: YOU_ALIAS}}
-    //                 options={ ({ navigation, route }) => ({
-    //                     headerTitle: (props) => <LogoTitle {...props} title={"You"}/>,
-    //                     headerRight: (props) => <IconActions {...props} nav={navigation}
-    //                         add="Create Rel" person={YOU_ALIAS} scan='contact' settings='Settings'/>,
-    //                 })}
-    //             />
-    //         </Stack.Group>
-    //         </Stack.Navigator>
-    //     )
-    // }
+
     const CredentialsStack = () => {
         return (
             <Stack.Navigator
@@ -239,8 +206,6 @@ export default function AuthStack() {
                 <Stack.Group>
                     <Stack.Screen name="Developer" component={DeveloperScreen}/>
                     <Stack.Screen name="Communications" component={CommunicationsScreen}/>
-                    <Stack.Screen name="Export" component={ExportScreen}/>
-                    <Stack.Screen name="Settings" component={SettingsScreen}/>
                     <Stack.Screen name="Wallet" component={WalletScreen}/>
                     <Stack.Screen name="Mediator" component={MediatorScreen}/>
                 </Stack.Group>
@@ -248,13 +213,11 @@ export default function AuthStack() {
         )
     }
 
-    // const WalletHistoryStack = () => {
-    //     <Stack.Navigator>
-    //         <Stack.Group>
-    //             <Stack.Screen name="WalletHistory" component={WalletHistoryScreen}/>
-    //         </Stack.Group>
-    //     </Stack.Navigator>
-    // }
+    // if (state.isLoading) {
+    //     // We haven't finished checking for the token yet
+    //     return <LoadingScreen/>;
+    // } else
+
 
     return (
         <AuthContext.Provider value={authContext}>
@@ -262,25 +225,8 @@ export default function AuthStack() {
                 screenOptions={{
                     headerShown: false
                 }}
-
             >
-                {!state.userToken || state.userToken == null ? (
-                    <>
-                        {walletFound ? (
-                            <>
-                                <Stack.Screen name="Login" component={LoginScreen}/>
-                            </>
-                        ) : (
-                            <>
-                                <Stack.Screen name="Create Wallet" component={CreateWalletScreen}/>
-                                <Stack.Group screenOptions={{presentation: 'transparentModal'}}>
-                                    <Stack.Screen name="Settings" component={SettingsScreen}/>
-                                    <Stack.Screen name="Developer" component={DevStack}/>
-                                </Stack.Group>
-                            </>
-                        )}
-                    </>
-                ) : (
+                {(walletFound) ? ((state && state.userToken) ? (
                     <>
                         <Stack.Group>
                             <Stack.Screen name="mainTabs" component={Main}/>
@@ -291,12 +237,21 @@ export default function AuthStack() {
                             <Stack.Screen name="Create Secure Chat" component={StartChatScreen}/>
                             <Stack.Screen name="Relationship Details" component={RelationshipDetailScreen}/>
                             <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen}/>
-                            <Stack.Screen name="Settings" component={SettingsScreen}/>
                             <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen}/>
-                            <Stack.Screen name="Developer" component={DevStack}/>
                         </Stack.Group>
+
                     </>
-                )}
+                ) : (
+                    <>
+                        <Stack.Screen name="Login" component={LoginScreen}/>
+                    </>
+                )) : (<Stack.Screen name="Create Wallet" component={CreateWalletScreen}/>)
+                }
+                <Stack.Group navigationKey={(state && state.userToken) ? 'init' : 'main'} screenOptions={{presentation: 'transparentModal'}}>
+                    <Stack.Screen name="Settings" component={SettingsScreen}/>
+                    <Stack.Screen name="Save" component={SaveScreen}/>
+                    <Stack.Screen name="Developers" component={DevStack}/>
+                </Stack.Group>
             </Stack.Navigator>
         </AuthContext.Provider>
     );

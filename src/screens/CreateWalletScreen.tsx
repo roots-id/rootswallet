@@ -8,7 +8,7 @@ import Loading from '../components/Loading'
 import {initRootsWallet} from '../roots'
 import {createWallet, getWallet} from '../wallet'
 
-import {displayProblem, styles} from "../styles/styles";
+import {displayOrHide, styles} from "../styles/styles";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {WALLET_LOGIN_SUCCESS} from "../store";
 import {brandLogo} from "../relationships";
@@ -49,37 +49,37 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
     function checkErrors() {
         const passNumeric = (/\d/.test(password))
         console.error("CreateWalletScreen - password must contain numbers",passNumeric)
-        setPasswordNumeric(<Text style={displayProblem(!passNumeric)}>Password must contain
+        setPasswordNumeric(<Text style={displayOrHide(!passNumeric,styles.problem)}>Password must contain
             numbers</Text>)
 
         const prob = problemText && problemText.length > 0
         console.error("CreateWalletScreen - problem detected", problemText)
-        setProblem(<Text style={displayProblem(prob)}>{problemText}</Text>)
+        setProblem(<Text style={displayOrHide(prob,styles.problem)}>{problemText}</Text>)
 
         const passAlpha = (/[a-zA-Z]/.test(password))
         console.log("password must contain letters",passAlpha)
-        setPasswordAlpha(<Text style={displayProblem(!passAlpha)}>Password must contain letters</Text>)
+        setPasswordAlpha(<Text style={displayOrHide(!passAlpha,styles.problem)}>Password must contain letters</Text>)
 
         const passAlphaNumOnly = (/^[\da-zA-Z]+$/).test(password)
         console.log("password can only contain numbers and letters",passAlphaNumOnly)
-        setPasswordAlphaNumericOnly(<Text style={displayProblem(!passAlphaNumOnly)}>Password can only contain numbers and letters</Text>)
+        setPasswordAlphaNumericOnly(<Text style={displayOrHide(!passAlphaNumOnly,styles.problem)}>Password can only contain numbers and letters</Text>)
 
         const passLength = password.length >= 8
         console.log("password not long enough", passLength)
-        setPasswordLongEnough(<Text style={displayProblem(!passLength)}>Password must be at least 8
+        setPasswordLongEnough(<Text style={displayOrHide(!passLength,styles.problem)}>Password must be at least 8
             characters</Text>)
 
         const passMatch = (password === confirmPassword)
         console.log("passwords must match", password, confirmPassword);
-        setPasswordsMatch(<Text style={displayProblem(!passMatch)}>Passwords must match</Text>)
+        setPasswordsMatch(<Text style={displayOrHide(!passMatch,styles.problem)}>Passwords must match</Text>)
 
         const userValid = (userName && userName.length > 0)
         console.log("user name must be set", userName);
-        setUserNameValid(<Text style={displayProblem(!userValid)}>User name must be set</Text>)
+        setUserNameValid(<Text style={displayOrHide(!userValid,styles.problem)}>User name must be set</Text>)
 
         const walletValid = (walletName && walletName.length > 0)
         console.log("wallet name must be set", walletName);
-        setWalletNameValid(<Text style={displayProblem(!walletValid)}>Wallet name must be set</Text>)
+        setWalletNameValid(<Text style={displayOrHide(!walletValid,styles.problem)}>Wallet name must be set</Text>)
 
         if (walletValid && userValid && passNumeric && passAlpha &&
             passLength && passMatch && passAlphaNumOnly) {

@@ -1,3 +1,27 @@
+export function getJsonFromMap(map: Map<string,string>) : string {
+    const entryArray = Array.from(map.entries()).reduce((o,[key,value]) => {
+        o[key] = value;
+        return o;
+    },{})
+    const jsonStr = JSON.stringify(entryArray)
+    console.log("utils - got json from map",jsonStr)
+    return jsonStr
+}
+
+export function getMapFromJson(jsonStr: string) : Map<string,string> {
+    console.log("utils - getting map from json",jsonStr)
+    const mapJson: Object = JSON.parse(jsonStr)
+    const map: Map<string,string> = new Map<string,string>()
+    console.log("utils - map from json is",mapJson)
+    // ✅ forEach after Object.entries (better)
+    Object.entries(mapJson).forEach(([key, value], index) => {
+        // 👇️ name Tom 0, country Chile 1
+        console.log("Adding to map",key, value, index);
+        map.set(key,value)
+    });
+    return map
+}
+
 export function getObjectField(obj: object|undefined|Readonly<object|undefined>, field: string) {
     if(obj) {
         for (const [key, value] of Object.entries(obj)) {

@@ -60,6 +60,14 @@ export default function ShowQRCodeScreen({route, navigation}) {
                 style={styles.pressable}
                 onPress={navigation.goBack}
             />
+            <View style={styles.closeButtonContainer}>
+                <IconButton
+                    icon="close-circle"
+                    size={36}
+                    color="#e69138"
+                    onPress={() => navigation.goBack()}
+                />
+            </View>
             <Animated.View
                 style={styles.viewAnimated}
             >
@@ -71,12 +79,6 @@ export default function ShowQRCodeScreen({route, navigation}) {
                         value="toggle view switch"
                         status={viewSelection}
                         onPress={onButtonToggle}
-                    />
-                    <IconButton
-                        icon="close-circle"
-                        size={26}
-                        color="#e69138"
-                        onPress={() => navigation.goBack()}
                     />
                 </View>
                 {viewOut}

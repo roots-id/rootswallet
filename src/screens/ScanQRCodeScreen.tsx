@@ -99,21 +99,23 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                 style={styles.pressable}
                 onPress={clearAndGoBack}
             />
-            <Animated.View
-                style={styles.viewAnimated}
-            >
+            <View style={styles.closeButtonContainer}>
                 <IconButton
                     icon="close-circle"
                     size={36}
                     color="#e69138"
-                    onPress={clearAndGoBack}
+                    onPress={() => navigation.goBack()}
                 />
+            </View>
+            <Animated.View
+                style={[styles.viewAnimated,{minWidth: "90%",minHeight: "90%"}]}
+            >
                 <View style={{
 
                     alignItems: 'center',
                     justifyContent: 'center',
-                    width: '95%',
-                    height: '95%',
+                    width: '100%',
+                    height: '100%',
                 }}>
                     <BarCodeScanner
                         onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}

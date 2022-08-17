@@ -6,7 +6,7 @@ import {IconButton, Title} from 'react-native-paper';
 import * as models from '../models'
 import {generateIdFromName} from '../relationships';
 import {initRoot} from '../roots';
-import {displayProblem, styles} from '../styles/styles'
+import {displayOrHide, styles} from '../styles/styles'
 import {CompositeScreenProps, DefaultNavigatorOptions} from "@react-navigation/core/src/types";
 
 export default function CreateRelScreen({route, navigation}: CompositeScreenProps<any, any>) {
@@ -33,7 +33,7 @@ export default function CreateRelScreen({route, navigation}: CompositeScreenProp
 
     useEffect(() => {
         if (!problemDisabled) {
-            setErrorText(<View><Text style={displayProblem(problemDisabled)}>Could not create
+            setErrorText(<View><Text style={displayOrHide(problemDisabled)}>Could not create
                 relationship</Text></View>)
         } else {
             setErrorText(<View></View>)
