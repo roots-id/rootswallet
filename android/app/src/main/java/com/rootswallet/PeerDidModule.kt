@@ -3,7 +3,7 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
-import com.facebook.react.bridge.Callback
+import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
@@ -38,49 +38,59 @@ class PeerDidModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
     // authPubKey is ed25519 public key in JWK format
     // agreemPubKey is x25519 public key in JWK format
     // service
-    @ReactMethod(isBlockingSynchronousMethod = true)
+    @ReactMethod
     fun createDID(
         authPubKey: ReadableMap,
         agreemPubKey: ReadableMap,
         serviceEndpoint: String? = null,
-        serviceRoutingKeys: ReadableArray? = null
-        ): String {
-        val authPublicKey = VerificationMaterialAuthentication(
-                format = VerificationMaterialFormatPeerDID.JWK,
-                type = VerificationMethodTypeAuthentication.JSON_WEB_KEY_2020,
-                value = authPubKey.toHashMap()
-            )
-
-        val agreemPublicKey = VerificationMaterialAgreement(
-                format = VerificationMaterialFormatPeerDID.JWK,
-                type = VerificationMethodTypeAgreement.JSON_WEB_KEY_2020,
-                value = agreemPubKey.toHashMap()
-            )
-        
-        val service = serviceEndpoint?.let {
-            toJson(
-                DIDCommServicePeerDID(
-                    id = "new-id",
-                    type = SERVICE_DIDCOMM_MESSAGING,
-                    serviceEndpoint = it,
-                    routingKeys = null,
-                    accept = listOf("didcomm/v2")
-                ).toDict()
-            )
-        }
-        println(service)
-        return createPeerDIDNumalgo2(
-                signingKeys = listOf(authPublicKey),
-                encryptionKeys = listOf(agreemPublicKey),
-                service = service
-            )
+        serviceRoutingKeys: ReadableArray? = null,
+        promise: Promise
+        ) {
+            try{
+                val authPublicKey = VerificationMaterialAuthentication(
+                    format = VerificationMaterialFormatPeerDID.JWK,
+                    type = VerificationMethodTypeAuthentication.JSON_WEB_KEY_2020,
+                    value = authPubKey.toHashMap()
+                )
+    
+                val agreemPublicKey = VerificationMaterialAgreement(
+                        format = VerificationMaterialFormatPeerDID.JWK,
+                        type = VerificationMethodTypeAgreement.JSON_WEB_KEY_2020,
+                        value = agreemPubKey.toHashMap()
+                    )
+                
+                val service = serviceEndpoint?.let {
+                    toJson(
+                        DIDCommServicePeerDID(
+                            id = "new-id",
+                            type = SERVICE_DIDCOMM_MESSAGING,
+                            serviceEndpoint = it,
+                            routingKeys = null,
+                            accept = listOf("didcomm/v2")
+                        ).toDict()
+                    )
+                }
+                promise.resolve(createPeerDIDNumalgo2(
+                        signingKeys = listOf(authPublicKey),
+                        encryptionKeys = listOf(agreemPublicKey),
+                        service = service
+                    ))
+            } catch (e: Throwable) {
+                promise.reject("Error", e)
+            }
+       
     }
 
     // Resolve PeerDID
-    @ReactMethod(isBlockingSynchronousMethod = true)
-    fun resolveDID(did: String): String {
+    @ReactMethod
+    fun resolveDID(did: String, promise: Promise) {
         // request DID Doc in JWK format
-        val didDocJson = resolvePeerDID(did, format = VerificationMaterialFormatPeerDID.JWK)
-        return didDocJson  
+        try {
+            val didDocJson = resolvePeerDID(did, format = VerificationMaterialFormatPeerDID.JWK)
+            promise.resolve(didDocJson)
+        } catch (e: Throwable) {
+            promise.reject("Error", e)
+        }
+         
     }
 }

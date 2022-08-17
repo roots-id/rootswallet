@@ -3,12 +3,14 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
-import com.facebook.react.bridge.Callback
+import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Arguments;
 import java.util.*
 import org.didcommx.didcomm.DIDComm
 import org.didcommx.didcomm.message.Message
@@ -31,8 +33,7 @@ import org.didcommx.didcomm.utils.toJson
 import org.didcommx.peerdid.DIDCommServicePeerDID
 import org.didcommx.peerdid.DIDDocPeerDID
 import org.didcommx.peerdid.VerificationMaterialFormatPeerDID
-import org.didcommx.peerdid.resolvePeerDID
-
+// import org.didcommx.peerdid.resolvePeerDID
 
 class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -45,7 +46,7 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
         return "DIDCommV2Module"
     }
 
-    @ReactMethod(isBlockingSynchronousMethod = true)
+    @ReactMethod
     fun pack(
         body: ReadableMap,
         id: String,
@@ -56,70 +57,67 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
         agreemKey: ReadableMap,
         signFrom: String? = null,
         protectSender: Boolean = false,
-        attachments: ReadableArray? = null
-    ): String {
-        val secretsResolver = SecretResolverInMemoryMock()
-        val didDoc = DIDDocPeerDID.fromJson(resolvePeerDID(from, VerificationMaterialFormatPeerDID.JWK))
-        didDoc.agreementKids.zip(listOf(KeyPair(public = agreemKey.toHashMap()["publicJwk"] as Map<String, Any>, private = agreemKey.toHashMap()["privateJwk"] as Map<String, Any> ))).forEach {
-            val privateKey = it.second.private.toMutableMap()
-            privateKey["kid"] = it.first
-            secretsResolver.addKey(jwkToSecret(privateKey))
-            println(jwkToSecret(privateKey))
-        }
-        var didcommAttachments: MutableList<Attachment>? = null
-        if (attachments != null) {
-            didcommAttachments = mutableListOf<Attachment>()
-            for (i in 0..attachments.size()-1) {
-                didcommAttachments.add(Attachment.builder("123", Attachment.Data.Json(attachments.getMap(i).toHashMap())
-                ).build())
+        attachments: ReadableArray? = null,
+        promise: Promise
+    ) {
+        try {
+            val secretsResolver = SecretResolverInMemoryMock()
+            secretsResolver.addKey(jwkToSecret(agreemKey.toHashMap()))
+            var didcommAttachments: MutableList<Attachment>? = null
+            if (attachments != null) {
+                didcommAttachments = mutableListOf<Attachment>()
+                for (i in 0..attachments.size()-1) {
+                    didcommAttachments.add(Attachment.builder("123", Attachment.Data.Json(attachments.getMap(i).toHashMap())
+                    ).build())
+                }
             }
+
+            val didComm = DIDComm(DIDDocResolverPeerDID(), secretsResolver)
+            val message = Message.builder(
+                id = id,
+                body = body.toHashMap(),
+                type = messageType,
+            )
+                .from(from)
+                .to(listOf(to)) 
+                .attachments(didcommAttachments)
+                // .customHeader("return_route", "all")
+                // .customHeader("return_route2", "all")
+                .build()
+                
+            var builder = PackEncryptedParams
+                .builder(message, to)
+                // .from(from)
+                .forward(false)
+                .protectSenderId(protectSender)
+            builder = from?.let { builder.from(it) } ?: builder
+            builder = signFrom?.let { builder.signFrom(it) } ?: builder
+            val params = builder.build()
+            promise.resolve(didComm.packEncrypted(params).packedMessage)
+        } catch (e: Throwable) {
+            promise.reject("Error", e)
         }
-
-        
-
-        val didComm = DIDComm(DIDDocResolverPeerDID(), secretsResolver)
-        val message = Message.builder(
-            id = id,
-            body = body.toHashMap(),
-            type = messageType,
-        )
-            .from(from)
-            .to(listOf(to)) 
-            .attachments(didcommAttachments)
-            // .customHeader("return_route", "all")
-            // .customHeader("return_route2", "all")
-            .build()
-            
-        var builder = PackEncryptedParams
-            .builder(message, to)
-            // .from(from)
-            .forward(false)
-            .protectSenderId(protectSender)
-        builder = from?.let { builder.from(it) } ?: builder
-        builder = signFrom?.let { builder.signFrom(it) } ?: builder
-        val params = builder.build()
-        return didComm.packEncrypted(params).packedMessage
     }
 
-    @ReactMethod(isBlockingSynchronousMethod = true)
+    @ReactMethod
     fun unpack(
             packedMsg: String, 
-            to: String,
             agreemKey: ReadableMap,
-        ): String {
-        val didDoc = DIDDocPeerDID.fromJson(resolvePeerDID(to, VerificationMaterialFormatPeerDID.JWK))
-        val secretsResolver = SecretResolverInMemoryMock()
-        didDoc.agreementKids.zip(listOf(KeyPair(public = agreemKey.toHashMap()["publicJwk"] as Map<String, Any>, private = agreemKey.toHashMap()["privateJwk"] as Map<String, Any> ))).forEach {
-            val privateKey = it.second.private.toMutableMap()
-            privateKey["kid"] = it.first
-            secretsResolver.addKey(jwkToSecret(privateKey))
-        }
-        val didComm = DIDComm(DIDDocResolverPeerDID(), secretsResolver)
-        val res = didComm.unpack(UnpackParams.Builder(packedMsg).build())
-    
-        // val msg = res.message.body["msg"].toString()
-        // val eto = res.metadata.encryptedTo?.let { divideDIDFragment(it.first()).first() } ?: ""
-        // val efrom = res.metadata.encryptedFrom?.let { divideDIDFragment(it).first() }
-        return res.message.toString()
+            promise: Promise
+        ) {
+            try{
+                val secretsResolver = SecretResolverInMemoryMock()
+                secretsResolver.addKey(jwkToSecret(agreemKey.toHashMap()))
+                val didComm = DIDComm(DIDDocResolverPeerDID(), secretsResolver)
+                val res = didComm.unpack(UnpackParams.Builder(packedMsg).build())
+                val map = Arguments.createMap();
+                map.putString("message", res.message.toString());
+                map.putString("fromPrior", res.message.fromPrior?.sub);
+                map.putString("to", res.metadata.encryptedTo?.let { divideDIDFragment(it.first()).first() } ?: "")
+                map.putString("from", res.metadata.encryptedFrom?.let { divideDIDFragment(it).first() })
+                promise.resolve(map)
+            } catch (e: Throwable) {
+                promise.reject("Error", e)
+            }
     }
 }
