@@ -6,6 +6,7 @@ const Sidetree = () => {
     
     const [createdDID, setCreatedDID] = useState('')
     const [resolvedDID, setResolvedDID] = useState('')
+    const [didToResolve, setDidToResolve] = useState('')
 
     const createDid = async () => {
         try {
@@ -18,8 +19,8 @@ const Sidetree = () => {
 
     const resolveDid = async () => {
         try {
-            const did = await resolveSidetreeDID("did:ada:EiAaf8BXolZrMqSKZK_zTjfCKwFHO-WjLtW_avtXHtkJJg")
-            setResolvedDID(JSON.stringify(did))
+            const didDoc = await resolveSidetreeDID(didToResolve)
+            setResolvedDID(JSON.stringify(didDoc))
         } catch (error) {
             console.error(error);
         }
@@ -27,10 +28,9 @@ const Sidetree = () => {
 
     return (
         <View>
-            <Text>SIDETREE-CARDANO</Text>
             <Button
                 title='Create did:ada'
-                color='#841584'
+                color='#b65100'
                 onPress={createDid}
             />
             <Text>
@@ -38,8 +38,13 @@ const Sidetree = () => {
             </Text>
             <Button
                 title='Resolve did:ada'
-                color='#841584'
+                color='#b65100'
                 onPress={resolveDid}
+            />
+            <TextInput
+                placeholder="did:ada:"
+                value={didToResolve}
+                onChangeText={setDidToResolve}
             />
             <Text>
                 {resolvedDID}
