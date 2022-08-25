@@ -10,8 +10,8 @@ import {logger} from "../logging";
 //TODO UPDATE, RECOVERY
 
 //TODO MOVE URL TO CONFIG
-//const nodeURL = 'https://testnet.sidetree-cardano.com/cardano';
-const nodeURL = 'http://192.168.86.38:3000';
+const nodeURL = 'https://testnet.sidetree-cardano.com';
+// const nodeURL = 'http://192.168.86.38:3000';
 
 
 export async function generateKeyPair(type: string) {
@@ -30,7 +30,7 @@ export async function generateKeyPair(type: string) {
             privateJwk: privateKeyJwk
         };
     } catch (error: any) {
-        logger("sidetree - Error", error)
+        console.error("sidetree - Error", error)
     }
 }
 
@@ -79,7 +79,7 @@ export async function createSideTreeDID(serviceEndpoint: string, serviceRoutingK
         await saveItem(did, JSON.stringify(storeItem))
         return did
     } catch (error: any) {
-        logger("sidetree - Error", error)
+        console.error("sidetree - Error", error)
     }
 }
 
@@ -89,7 +89,7 @@ export async function resolveSidetreeDID(did: string) {
         const respBody = await resp.json();
         return respBody
     } catch (error: any) {
-        logger("sidetree - Error", error)
+        console.error("sidetree - Error", error)
     }
 }
 
@@ -111,7 +111,7 @@ export async function deactivateSideTreeDID(did: string) {
             return resp.status;
         }
     } catch (error: any) {
-        logger("sidetree - Error", error)
+        console.error("sidetree - Error", error)
     }
 }
 
@@ -151,7 +151,7 @@ export async function updateSideTreeDID(did: string, serviceEndpoint: string, se
             return resp.status;
         }
     } catch (error: any) {
-        logger("sidetree - Error", error)
+        console.error("sidetree - Error", error)
     }
 }
 
@@ -204,6 +204,6 @@ export async function recoverSideTreeDID(did: string) {
             return resp.status;
         }
     } catch (error: any) {
-        logger("sidetree - Error", error)
+        console.error("sidetree - Error", error)
     }
 }
