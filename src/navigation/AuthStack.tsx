@@ -5,6 +5,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
 import CommunicationsScreen from '../screens/CommunicationsScreen';
 import MediatorScreen from '../screens/MediatorScreen';
 import RequestCredentialScreen from '../screens/RequestCredentialScreen';
+import Sidetree from '../screens/Sidetree';
 import IconActions from '../components/IconActions';
 import LogoTitle from '../components/LogoTitle';
 import CreateRelScreen from '../screens/CreateRelScreen';
@@ -210,6 +211,7 @@ export default function AuthStack() {
                     <Stack.Screen name="Wallet" component={WalletScreen}/>
                     <Stack.Screen name="Mediator" component={MediatorScreen}/>
                     <Stack.Screen name="RequestCredential" component={RequestCredentialScreen}/>
+                    <Stack.Screen name="Sidetree" component={Sidetree}/>
                 </Stack.Group>
             </Stack.Navigator>
         )
