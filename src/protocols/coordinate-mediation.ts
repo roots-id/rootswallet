@@ -42,7 +42,7 @@ export async function receiveMediate(msg: any) {
         const type = JSON.parse(msg.message).type
         switch (type) {
             case "https://didcomm.org/coordinate-mediation/2.0/mediate-grant":
-                return JSON.parse(msg.message).body.routing_keys[0]
+                return JSON.parse(msg.message).body.routing_did
             case "https://didcomm.org/coordinate-mediation/2.0/mediate-deny":
                 return "MEDIATE DENY"
             case "https://didcomm.org/coordinate-mediation/2.0/keylist-update-response":

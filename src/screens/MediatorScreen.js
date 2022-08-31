@@ -59,7 +59,7 @@ const Mediator = (props) => {
             // 2- KeyList update message
             const updates = [
                     {
-                        recipient_key: myDid,
+                        recipient_did: myDid,
                         action: "add"
                     }
                 ]
