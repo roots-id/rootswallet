@@ -24,6 +24,10 @@ const DeveloperScreen = (props) => {
                 title={"Current Wallet"}
                 onPress={() => props.navigation.navigate("Wallet")}
             />
+            <Button
+                title={"Request Credential"}
+                onPress={() => props.navigation.navigate("RequestCredential")}
+            />
         </View>
     )
 };

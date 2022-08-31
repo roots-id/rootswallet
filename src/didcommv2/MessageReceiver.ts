@@ -1,6 +1,6 @@
 import {logger} from "../logging";
 import { unpack } from "./PackUnpack";
-import {receivePing, receiveBasicMessage, receiveMediate, receivePickup} from "../protocols"
+import {receivePing, receiveBasicMessage, receiveMediate, receivePickup, receiveCredential} from "../protocols"
 
 export async function receiveMessage(packMsg: any) {
     try {
@@ -23,6 +23,9 @@ export async function receiveMessage(packMsg: any) {
             case type.startsWith('https://didcomm.org/messagepickup/3.0/') ? type : '' :
                 return await receivePickup(unpacked)
                 break; 
+            case type.startsWith('https://didcomm.org/issue-credential/3.0/') ? type : '' :
+                    return await receiveCredential(unpacked)
+                    break; 
             default:
                 return unpacked
                 break;
