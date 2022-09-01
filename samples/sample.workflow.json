@@ -1,0 +1,17 @@
+{
+  "_id": "sample_workflow_1",
+  "title": "Cardano Indonesia membership workflow",
+  "workflow": [
+    {
+      "type": "ISSUER_PROMPT",
+      "prompt": "What name would you like on your membership?"},
+    {
+      "type": "HOLDER_RESPONSE",
+      "field:": "holderName"
+    }
+  ],
+  "issuer": {
+    "did": "did:prism:b8ff969a1bf2be51914b2bcc29121af2ae9a8cbe652b1edf3b87f2461d7eed6c:Cj8KPRI7CgdtYXN0ZXIwEAFKLgoJc2VjcDI1NmsxEiECn4oNyPB3e1HeHQoPYjsIW5nuhI8XK0uc4P_xItiqlls",
+    "name": "Cardano Indonesia Issuer"
+  }
+}

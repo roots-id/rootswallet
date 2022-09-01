@@ -17,6 +17,7 @@ import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import SimpleTitle from '../components/SimpleTitle';
 import WalletScreen from "../screens/WalletScreen";
+import WorkflowsScreen from "../screens/WorkflowsScreen";
 
 import AuthContext from '../context/AuthenticationContext';
 
@@ -152,7 +153,8 @@ export default function AuthStack() {
                                       headerTitle: (props) => <LogoTitle {...props} title="Contacts"/>,
                                       headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel"
                                                                            person={contact.getUserId()} scan='contact'
-                                                                           settings='Settings'/>,
+                                                                           settings='Settings'
+                                                                           workflows='Workflow Selector'/>,
                                   })}
                     />
                     <Stack.Screen
@@ -163,7 +165,7 @@ export default function AuthStack() {
                                                                  title={getChatItem(utils.getObjectField(route.params, "chatId")).title}/>,
                             headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel"
                                                                  person={contact.getUserId()} scan='credential'
-                                                                 settings='Settings'/>,
+                                                                 settings='Settings' workflows='Workflow Selector'/>,
                         })}
                     />
                 </Stack.Group>
@@ -195,7 +197,8 @@ export default function AuthStack() {
                                       headerTitle: (props) => <LogoTitle {...props} title="Credentials"/>,
                                       headerRight: (props) => <IconActions {...props} nav={navigation}
                                                                            person={contact.getUserId()}
-                                                                           scan="credential" settings="Settings"/>,
+                                                                           scan="credential" settings="Settings"
+                                                                           workflows='Workflow Selector'/>,
                                   })}
                     />
                 </Stack.Group>
@@ -242,6 +245,7 @@ export default function AuthStack() {
                             <Stack.Screen name="Relationship Details" component={RelationshipDetailScreen}/>
                             <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen}/>
                             <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen}/>
+                            <Stack.Screen name="Workflow Selector" component={WorkflowsScreen}/>
                         </Stack.Group>
 
                     </>
@@ -251,7 +255,8 @@ export default function AuthStack() {
                     </>
                 )) : (<Stack.Screen name="Create Wallet" component={CreateWalletScreen}/>)
                 }
-                <Stack.Group navigationKey={(state && state.userToken) ? 'init' : 'main'} screenOptions={{presentation: 'transparentModal'}}>
+                <Stack.Group navigationKey={(state && state.userToken) ? 'init' : 'main'}
+                             screenOptions={{presentation: 'transparentModal'}}>
                     <Stack.Screen name="Settings" component={SettingsScreen}/>
                     <Stack.Screen name="Save" component={SaveScreen}/>
                     <Stack.Screen name="Developers" component={DevStack}/>
