@@ -22,6 +22,7 @@ const Mediator = (props) => {
             // It can also be a QR scan (qrcode image in https://mediator.rootsid.cloud/oob_qrcode)
             const response = await fetch(
                 'https://mediator.rootsid.cloud/oob_url'
+                //'http://127.0.0.1:8000/oob_url'
             );
             const oob_url = await response.text();
             const decodedMsg = await decodeOOBURL(oob_url)
@@ -59,7 +60,7 @@ const Mediator = (props) => {
             // 2- KeyList update message
             const updates = [
                     {
-                        recipient_key: myDid,
+                        recipient_did: myDid,
                         action: "add"
                     }
                 ]
