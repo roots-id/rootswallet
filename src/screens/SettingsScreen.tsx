@@ -17,6 +17,7 @@ import FormButton from "../components/FormButton";
 export default function SettingsScreen({route, navigation}: CompositeScreenProps<any, any>) {
     const [demoMode, setDemoMode] = useState<boolean>(roots.isDemo())
     const [host, setHost] = useState<string>(roots.getPrismHost());
+    const [mediator, setMediator] = useState<string>();
     const {current} = useCardAnimation();
 
     useEffect(() => {
@@ -68,6 +69,21 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
                     </View>
                 </View>
                 <Text/>
+                <View style={{flexDirection: 'row'}}>
+                    <Text style={styles.listItemCenteredBlack}>Mediator: </Text>
+                    <View style={{backgroundColor: '#251520', width: "80%"}}>
+                        <Picker
+                            style={styles.clickableListTitle}
+                            mode="dropdown"
+                            dropdownIconColor="#e69138"
+                            numberOfLines={5}
+                            selectedValue={host}
+                            onValueChange={(itemValue) => setMediator(itemValue)}>
+                            <Picker.Item label="Roots Test Mediator" value="https://mediator.rootsid.cloud/oob_url"/>
+                        </Picker>
+                    </View>
+                </View>
+                <Text />
                 <View style={{flexDirection: 'row',}}>
                     <Text style={styles.listItemCenteredBlack}>Demo Mode ON/OFF: </Text>
                     <ToggleButton
