@@ -35,6 +35,7 @@ import * as contact from '../relationships'
 import * as utils from '../utils'
 import {loadWalletName} from "../wallet";
 import SaveScreen from '../screens/SaveScreen';
+import AtalaPrismDevScreen from "../screens/AtalaPrismDevScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -215,6 +216,7 @@ export default function AuthStack() {
                     <Stack.Screen name="Mediator" component={MediatorScreen}/>
                     <Stack.Screen name="RequestCredential" component={RequestCredentialScreen}/>
                     <Stack.Screen name="Sidetree" component={Sidetree}/>
+                    <Stack.Screen name="Atala Prism Dev" component={AtalaPrismDevScreen}/>
                 </Stack.Group>
             </Stack.Navigator>
         )

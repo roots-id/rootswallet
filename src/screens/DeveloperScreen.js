@@ -9,6 +9,10 @@ const DeveloperScreen = (props) => {
     return (
         <View>
             <Button
+                title={"Atala Prism Dev Screen"}
+                onPress={() => props.navigation.navigate("Atala Prism Dev")}
+            />
+            <Button
                 title={"Clear Storage"}
                 onPress={() => store.clearStorage()}
             />
