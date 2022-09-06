@@ -8,13 +8,17 @@ const AtalaPrismDevScreen = (props) => {
     const [DID, setDID] = useState('')
     const [credential, setCredential] = useState('')
 
+    async function atalaDid() {
+        const did = await demoCreatePublishDid()
+        setDID(did)
+    }
 
     return (
         <View>
             <Button
-                title='Create Atala DID'
+                title='Get Atala DID doc'
                 color='#239B56'
-                onPress={() => {setDID(demoCreatePublishDid())}}
+                onPress={async () => {atalaDid()}}
             />
             <Text>{DID}</Text>
         </View>
