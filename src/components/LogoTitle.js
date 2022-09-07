@@ -18,7 +18,7 @@ export default function LogoTitle(...props) {
               style={{ width: 50, height: 50 }}
               source={brandLogo}
             />
-            <Text style={{ color: '#eeeeee',fontSize: 22,fontWeight: 'normal',textAlignVertical: "center",textAlign: "center", }}>
+            <Text maxLength="10" style={{ color: '#eeeeee',fontSize: 22,fontWeight: 'normal',textAlignVertical: "center",textAlign: "center", }}>
                 {getTitle(props[0]["title"])}
             </Text>
         </View>
