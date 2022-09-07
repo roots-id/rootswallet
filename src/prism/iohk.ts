@@ -47,7 +47,7 @@ export async function demoCreatePublishDid(): Promise<string> {
             const didInfo = payloadGen.createDid()
             const nodeApi = new NodeApi({
                 protocol: "http",
-                host: "ppp-node-test.atalaprism.io",
+                host: "ppp.atalaprism.io",
                 port: 50053,
             })
             console.log("IOHK - didInfo",didInfo.toString())
