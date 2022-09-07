@@ -7,6 +7,7 @@
   },
   "scripts": {
     "start": "expo start --dev-client",
+    "postinstall": "rn-nodeify --install process --hack --yarn",
     "android": "expo run:android",
     "eject": "expo eject"
   },
