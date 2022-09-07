@@ -7,6 +7,14 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.rootsid.wal.library.*
+import com.rootsid.wal.library.dlt.Dlt
+import com.rootsid.wal.library.dlt.model.Did
+import com.rootsid.wal.library.mongoimpl.WalletDocStorage
+import com.rootsid.wal.library.wallet.WalletService
+import com.rootsid.wal.library.wallet.model.IssuedCredential
+import com.rootsid.wal.library.wallet.model.Wallet
+import com.rootsid.wal.library.wallet.model.addDid
+import com.rootsid.wal.library.wallet.storage.WalletStorage
 //import io.iohk.atala.prism.api.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
@@ -17,6 +25,9 @@ import kotlin.concurrent.thread
 class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
     //var wal:Wallet = newWallet("wallet1","","passphrase")
+    var dlt: Dlt = Dlt()
+    var walStore = InMemoryWalletStorage();
+    var walSer: WalletService = WalletService(walStore,dlt)
 
     override fun getName(): String {
         return "PrismModule"
@@ -27,7 +38,7 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
         Log.d("PRISM_TAG","Getting DID doc"+did);
         thread(start = true) {
             try {
-                var didDocJson = getDidDocumentJson(did);
+                var didDocJson = dlt.getDidDocumentJson(did);
                 Log.d("PRISM_TAG","Got did document "+did+" w/ doc"+didDocJson)
                 promise.resolve(didDocJson);
             } catch (e: Exception) {
@@ -39,26 +50,24 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     @ReactMethod(isBlockingSynchronousMethod = true)
     fun newDID(walJson: String, didAlias: String): String {
         var cliWal = Json.decodeFromString<Wallet>(walJson);
-        cliWal = newDid(cliWal, didAlias, true);
+        cliWal.addDid(dlt.newDid(didAlias,0,));
         return Json.encodeToString(cliWal)
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
     fun newWal(name: String, mnemonic: String, passphrase: String): String {
-        val cliWal = newWallet(name,mnemonic,passphrase);
+        val cliWal = walSer.createWallet(name,mnemonic,passphrase);
         return Json.encodeToString<Wallet>(cliWal);
     }
 
     @ReactMethod
-    fun publishDid(walJson: String, didAlias: String, promise: Promise) {
-        Log.d("PRISM_TAG","Publishing "+didAlias+" from wallet "+walJson);
+    fun publishDid(walId: String, didAlias: String, seed:ByteArray, promise: Promise) {
+        Log.d("PRISM_TAG","Publishing "+didAlias);
         thread(start = true) {
             try {
-                var cliWal = Json.decodeFromString<Wallet>(walJson);
-                cliWal = publishDid(cliWal, didAlias);
-                var newWalJson = Json.encodeToString(cliWal)
-                Log.d("PRISM_TAG","Published "+didAlias+" from wallet "+newWalJson)
-                promise.resolve(newWalJson);
+                var didUpdate = dlt.publishDid(walStore.findDidByAlias(walId,didAlias).get(),seed);
+                Log.d("PRISM_TAG","Published $didAlias from with opId ${didUpdate.operationId}")
+                promise.resolve(didUpdate.operationId)
             } catch (e: Exception) {
                 promise.reject("Publish Error", e);
             }
@@ -66,16 +75,16 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     }
 
     @ReactMethod
-    fun issueCred(walJson: String, didAlias: String, credJson: String, promise: Promise) {
-        Log.d("PRISM_TAG","Issuing credential for "+didAlias+" from wallet "+walJson);
+    fun issueCred(issuerDidJson: String, seed: ByteArray, credJson: String, promise: Promise) {
+        Log.d("PRISM_TAG","Issuing credential for $issuerDidJson");
         thread(start = true) {
             try {
-                var cliWal = Json.decodeFromString<Wallet>(walJson);
+                //var cliWal = Json.decodeFromString<Wallet>(walJson);
                 val cliCred = Json.decodeFromString<IssuedCredential>(credJson);
-                cliWal = issueCredential(cliWal, didAlias, cliCred)
-                var newWalJson = Json.encodeToString(cliWal)
-                Log.d("PRISM_TAG","Credential "+cliCred.verifiedCredential+" for did "+didAlias+" from wallet "+newWalJson)
-                promise.resolve(newWalJson);
+                val issuerDid = Json.decodeFromString<Did>(issuerDidJson);
+                val dltUpdate = dlt.issueCredential(issuerDid, seed, cliCred)
+                Log.d("PRISM_TAG","Credential $cliCred.verifiedCredential for did $issuerDidJson from wallet $credJson")
+                promise.resolve(dltUpdate.operationId);
             } catch (e: Exception) {
                 promise.reject("Issue Credential Error", e);
             }
@@ -83,15 +92,15 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     }
 
     @ReactMethod
-    fun revokeCred(walJson: String, credAlias: String, promise: Promise) {
-        Log.d("PRISM_TAG","Revoking credential "+credAlias+" from wallet "+walJson);
+    fun revokeCred(credJson: String, issuerDidJson: String, seed: ByteArray, promise: Promise) {
+        Log.d("PRISM_TAG","Revoking credential $credJson from issuerDid $issuerDidJson");
         thread(start = true) {
             try {
-                var cliWal = Json.decodeFromString<Wallet>(walJson);
-                cliWal = revokeCredential(cliWal, credAlias)
-                var newWalJson = Json.encodeToString(cliWal)
-                Log.d("PRISM_TAG","Credential revoked"+credAlias+" from wallet "+newWalJson)
-                promise.resolve(newWalJson);
+                var issuerCred = Json.decodeFromString<IssuedCredential>(credJson);
+                var issuerDid = Json.decodeFromString<Did>(issuerDidJson)
+                var revUpdate = dlt.revokeCredential(issuerCred,issuerDid,seed)
+                Log.d("PRISM_TAG","Credential revoked $credJson for issuer $issuerDidJson")
+                promise.resolve(revUpdate.operationId);
             } catch (e: Exception) {
                 promise.reject("Revoke Credential Error", e);
             }
@@ -101,8 +110,8 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     @ReactMethod(isBlockingSynchronousMethod = true)
     fun setNetwork(host: String = "ppp.atalaprism.io", port: String = "50053") {
         Log.d("PRISM_TAG","Setting GrpcConfig host "+host+" w/port "+port);
-        GrpcConfig.host = host
-        GrpcConfig.port = port
+        Dlt.GrpcConfig.host = host
+        Dlt.GrpcConfig.port = port
     }
 
     @ReactMethod

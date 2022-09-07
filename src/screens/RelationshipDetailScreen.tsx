@@ -14,7 +14,7 @@ import * as models from '../models'
 import {showQR} from '../qrcode'
 import {
     addDidDoc,
-    asContactShareable,
+    asContactShareable,ƒ
 } from '../relationships'
 import {recursivePrint} from '../utils'
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
