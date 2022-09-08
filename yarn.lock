@@ -3232,7 +3232,7 @@ balanced-match@^1.0.0:
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
-base-64@0.1.0, base-64@^0.1.0:
+base-64@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/base-64/-/base-64-0.1.0.tgz#780a99c84e7d600260361511c4877613bf24f6bb"
   integrity sha512-Y5gU45svrR5tI2Vt/X9GPd3L0HNIKzGu202EjxrXMpuc2V2CiKgemAbUUsqYmZJvPtCXoUKjNZwBJzsNScUbXA==
@@ -8886,14 +8886,6 @@ react-native-base64@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/react-native-base64/-/react-native-base64-0.2.1.tgz#3d0e73a649c4c0129f7b7695d3912456aebae847"
   integrity sha512-eHgt/MA8y5ZF0aHfZ1aTPcIkDWxza9AaEk4GcpIX+ZYfZ04RcaNahO+527KR7J44/mD3efYfM23O2C1N44ByWA==
-
-react-native-blob-util@^0.16.2:
-  version "0.16.2"
-  resolved "https://registry.yarnpkg.com/react-native-blob-util/-/react-native-blob-util-0.16.2.tgz#d7ad25675b33908884a95159280abd11ca2b109f"
-  integrity sha512-eC7lps4dyTICYVLqn86PDlo/2OdQw7rcOD2ViD69BAfdWgcEqslci8IjbUCvbSZM+cRbMskuRuLSfcoNi+ILqQ==
-  dependencies:
-    base-64 "0.1.0"
-    glob "^7.1.6"
 
 react-native-codegen@^0.0.6:
   version "0.0.6"

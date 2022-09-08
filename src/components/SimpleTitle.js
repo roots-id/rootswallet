@@ -5,8 +5,7 @@ export default function SimpleTitle(...props) {
 //    <React.Fragment>
   return (
         <View style={{flexDirection:'row',}}>
-            <Text maxLength="10" style={{ color: '#eeeeee',fontSize: 18,fontWeight: 'normal',
-                alignContent: "flex-start" }}>
+            <Text style={{ color: '#eeeeee',fontSize: 22,fontWeight: 'normal',textAlignVertical: "center",textAlign: "center", }}>
                 {props[0]["title"]}
             </Text>
         </View>

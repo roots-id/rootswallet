@@ -9,10 +9,8 @@ const AtalaPrismDevScreen = (props) => {
     const [credential, setCredential] = useState('')
 
     async function atalaDid() {
-        //TODO work on RPC RN->NodeJS issues
-//        const did = await demoCreatePublishDid()
-//        setDID(did)
-        alert("Not implemented yet, comeback soon ;)")
+        const did = await demoCreatePublishDid()
+        setDID(did)
     }
 
     return (
