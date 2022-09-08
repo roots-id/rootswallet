@@ -1,25 +1,23 @@
 import React from 'react';
 import { Image, Text, View } from 'react-native';
-import {brandLogo} from "../relationships";
-
-function getTitle(title) {
-    if(title.length > 12) {
-        return title.substring(0,11)+"..."
-    } else {
-        return title
-    }
-}
+import * as utils from "../utils";
 
 export default function LogoTitle(...props) {
 //    <React.Fragment>
+    function getLogo() {
+        if(props[0]["logo"]) {
+            return <Image
+                style={{width: 50, height: 50}}
+                source={props[0]["logo"]}
+            />
+        }
+    }
+
   return (
         <View style={{flexDirection:'row',}}>
-            <Image
-              style={{ width: 50, height: 50 }}
-              source={brandLogo}
-            />
+            {getLogo()}
             <Text style={{ color: '#eeeeee',fontSize: 22,fontWeight: 'normal',textAlignVertical: "center",textAlign: "center", }}>
-                {getTitle(props[0]["title"])}
+                {utils.getTitle(props[0]["title"],12)}
             </Text>
         </View>
   );

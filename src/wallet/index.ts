@@ -8,7 +8,7 @@ const WALLET_NAME_STORAGE_KEY = "primaryRootsWalletStorageNameKey"
 export async function createWallet(walName: string, mnemonic: string, walPass: string): Promise<string> {
     const nameSet = await setWalletName(walName)
     if(nameSet) {
-        const prismWal = PrismModule.newWal(walName, mnemonic, walPass)
+        const prismWal = PrismModule.newWAL(walName, mnemonic, walPass)
         logger("wallet - created new wallet, updating stored wallet")
         return await updateWallet(walName, walPass, prismWal)
     }

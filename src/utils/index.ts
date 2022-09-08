@@ -62,3 +62,11 @@ export function recursivePrint(val: any, indent="\t") {
 
     return printMe;
 }
+
+export function getTitle(title: string,maxChars: number=12) {
+    if(title.length > maxChars) {
+        return title.substring(0,maxChars-1)+"..."
+    } else {
+        return title
+    }
+}

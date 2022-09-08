@@ -15,7 +15,6 @@ import DeveloperScreen from "../screens/DeveloperScreen";
 import RelationshipsScreen from "../screens/RelationshipsScreen";
 import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
 import SettingsScreen from "../screens/SettingsScreen";
-import SimpleTitle from '../components/SimpleTitle';
 import WalletScreen from "../screens/WalletScreen";
 import WorkflowsScreen from "../screens/WorkflowsScreen";
 
@@ -36,6 +35,8 @@ import * as utils from '../utils'
 import {loadWalletName} from "../wallet";
 import SaveScreen from '../screens/SaveScreen';
 import AtalaPrismDevScreen from "../screens/AtalaPrismDevScreen";
+
+import {brandLogo} from "../relationships";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -151,7 +152,7 @@ export default function AuthStack() {
                     <Stack.Screen name="Relationships"
                                   component={RelationshipsScreen}
                                   options={({navigation, route}) => ({
-                                      headerTitle: (props) => <LogoTitle {...props} title="Contacts"/>,
+                                      headerTitle: (props) => <LogoTitle {...props} logo={brandLogo} title="Contacts"/>,
                                       headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel"
                                                                            person={contact.getUserId()} scan='contact'
                                                                            settings='Settings'
@@ -162,7 +163,7 @@ export default function AuthStack() {
                         name="Chat"
                         component={ChatScreen}
                         options={({navigation, route}) => ({
-                            headerTitle: (props) => <SimpleTitle {...props}
+                            headerTitle: (props) => <LogoTitle {...props} logo={brandLogo}
                                                                  title={getChatItem(utils.getObjectField(route.params, "chatId")).title}/>,
                             headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel"
                                                                  person={contact.getUserId()} scan='credential'

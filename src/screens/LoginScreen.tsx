@@ -33,7 +33,7 @@ export default function LoginScreen({route, navigation}: CompositeScreenProps<an
 
     useEffect(() => {
         if (problemText.length > 0) {
-            setError(<Text style={displayOrHide(true)}>{problemText}</Text>)
+            setError(<Text style={displayOrHide(true,styles.problem)}>{problemText}</Text>)
         } else {
             setError(<Text/>)
         }

@@ -95,10 +95,10 @@ export async function initRootsWallet(userName: string): Promise<boolean> {
             await sendMessage(myChat, "Your new DID is being added to Prism so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
                 MessageType.TEXT, contact.PRISM_BOT)
             //intentionally not awaiting
-            const procPub = async () => await processPublishResponse(myChat)
-            procPub()
-                // make sure to catch any error
-                .catch(console.error);
+            // const procPub = async () => await processPublishResponse(myChat)
+            // procPub()
+            //     // make sure to catch any error
+            //     .catch(console.error);
             return true;
         }
     }
@@ -251,7 +251,7 @@ async function createDid(didAlias: string): Promise<models.did | undefined> {
     try {
         const existingDid = getDid(didAlias)
         if (existingDid) {
-            logger("roots - Chat/DID already exists", didAlias)
+            console.error("roots - Chat/DID already exists", didAlias)
             return existingDid;
         } else {
             logger("roots - DID does not exist, creating", didAlias, "DID")
@@ -264,7 +264,7 @@ async function createDid(didAlias: string): Promise<models.did | undefined> {
                 const saveResult = await wallet.updateWallet(wal._id, wal.passphrase, prismWalletJson)
                 if (saveResult) {
                     const newDid = getDid(didAlias)
-                    logger("roots - did added to wallet", newDid)
+                    logger("roots - did added to wallet", JSON.stringify(newDid))
                     return newDid;
                 } else {
                     console.error("roots - could not save wallet with new DID", prismWalletJson)
@@ -345,7 +345,7 @@ export async function publishPrismDid(didAlias: string): Promise<boolean> {
             try {
                 const wal = wallet.getWallet()
                 if (wal) {
-                    const newWalJson = await PrismModule.publishDid(wallet.getWalletJson(wal._id), did.alias)
+                    const newWalJson = await PrismModule.publishDID(wallet.getWalletJson(wal._id), did.alias)
                     const result = await wallet.updateWallet(wal._id, wal.passphrase, newWalJson)
                     const pubDid = getDid(didAlias)
                     if (pubDid) {
