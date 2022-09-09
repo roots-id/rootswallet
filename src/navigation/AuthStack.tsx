@@ -163,7 +163,7 @@ export default function AuthStack() {
                         name="Chat"
                         component={ChatScreen}
                         options={({navigation, route}) => ({
-                            headerTitle: (props) => <LogoTitle {...props} logo={brandLogo}
+                            headerTitle: (props) => <LogoTitle {...props}
                                                                  title={getChatItem(utils.getObjectField(route.params, "chatId")).title}/>,
                             headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel"
                                                                  person={contact.getUserId()} scan='credential'

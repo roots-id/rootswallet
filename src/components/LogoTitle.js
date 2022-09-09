@@ -14,10 +14,10 @@ export default function LogoTitle(...props) {
     }
 
   return (
-        <View style={{flexDirection:'row',}}>
+        <View style={{flexDirection:'row'}}>
             {getLogo()}
             <Text style={{ color: '#eeeeee',fontSize: 22,fontWeight: 'normal',textAlignVertical: "center",textAlign: "center", }}>
-                {utils.getTitle(props[0]["title"],12)}
+                {utils.getTitle(props[0]["title"],10)}
             </Text>
         </View>
   );
