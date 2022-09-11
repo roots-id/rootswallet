@@ -1,6 +1,6 @@
 import {logger} from "../logging";
 import { unpack } from "./PackUnpack";
-import {receivePing, receiveBasicMessage, receiveMediate, receivePickup, receiveCredential} from "../protocols"
+import {receivePing, receiveBasicMessage, receiveMediate, receivePickup, receiveCredential, receiveShortenedURL} from "../protocols"
 
 export async function receiveMessage(packMsg: any) {
     try {
@@ -24,8 +24,11 @@ export async function receiveMessage(packMsg: any) {
                 return await receivePickup(unpacked)
                 break; 
             case type.startsWith('https://didcomm.org/issue-credential/3.0/') ? type : '' :
-                    return await receiveCredential(unpacked)
-                    break; 
+                return await receiveCredential(unpacked)
+                break; 
+            case type.startsWith('https://didcomm.org/shorten-url/1.0/') ? type : '' :
+                return await receiveShortenedURL(unpacked)
+                break; 
             default:
                 return unpacked
                 break;
