@@ -2,7 +2,6 @@ package com.rootswallet
 
 import android.content.res.Resources.NotFoundException
 import com.rootsid.wal.library.dlt.model.Did
-import com.rootsid.wal.library.mongoimpl.config.DefaultMongoDbConn
 import com.rootsid.wal.library.mongoimpl.document.WalletDocument
 import com.rootsid.wal.library.wallet.model.Wallet
 import com.rootsid.wal.library.wallet.storage.WalletStorage
@@ -15,6 +14,8 @@ class InMemoryWalletStorage(): WalletStorage {
     init {
 //        this.wallet = wal
     }
+
+    override fun createWalletObject(walletId: String, seed: String): Wallet = WalletDocument(walletId, seed)
 
     override fun exists(walletId: String): Boolean {
         return wallet._id.equals(walletId)

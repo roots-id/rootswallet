@@ -10,6 +10,7 @@ import com.rootsid.wal.library.*
 import com.rootsid.wal.library.dlt.Dlt
 import com.rootsid.wal.library.dlt.model.Did
 import com.rootsid.wal.library.mongoimpl.WalletDocStorage
+import com.rootsid.wal.library.mongoimpl.document.WalletDocument
 import com.rootsid.wal.library.wallet.WalletService
 import com.rootsid.wal.library.wallet.model.IssuedCredential
 import com.rootsid.wal.library.wallet.model.Wallet
@@ -58,7 +59,7 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     fun newWal(name: String, mnemonic: String, passphrase: String): String {
         Log.d("PRISM_TAG","Creating new wal $name");
         val cliWal = walSer.createWallet(name,mnemonic,passphrase);
-        return Json.encodeToString<Wallet>(cliWal);
+        return Json.encodeToString<WalletDocument>(cliWal as WalletDocument);
     }
 
     @ReactMethod
