@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, View, Text, NativeModules, TextInput } from 'react-native';
 import { createDIDPeer} from '../didpeer'
-import { decodeOOBURL, generateOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages } from '../protocols';
+import { decodeOOBURL, generateOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages, shortenURLRequest } from '../protocols';
 import QRCode from 'react-native-qrcode-svg'
 
 
@@ -70,8 +70,12 @@ const Mediator = (props) => {
             //3- create OOB URL
             const ooburl = await generateOOBURL(myDid)
             console.log("OOB URL: "+ ooburl)
-            // QR Code too big. Need short url
-            setQRCode(ooburl)
+            // SHorten URL
+            const shortQR = await shortenURLRequest(didToMediator, mediatorDID, ooburl)
+
+
+
+            setQRCode(shortQR)
 
         } catch (error) {
             console.error(error);
