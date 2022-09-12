@@ -101,7 +101,7 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
                         onPress={() => showQR(navigation, cred.verifiedCredential)}
                     />
                 </View>
-                <Image source={credLogo}
+                <Image source={cred.credLogo}
                        style={styles.credLogoStyle}
                 />
                 <FlatList

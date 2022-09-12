@@ -95,10 +95,10 @@ export async function initRootsWallet(userName: string): Promise<boolean> {
             await sendMessage(myChat, "Your new DID is being added to Prism so that you can receive verifiable credentials (called VCs) from other users and organizations like Catalyst, your school, rental companies, etc.",
                 MessageType.TEXT, contact.PRISM_BOT)
             //intentionally not awaiting
-            // const procPub = async () => await processPublishResponse(myChat)
-            // procPub()
-            //     // make sure to catch any error
-            //     .catch(console.error);
+            const procPub = async () => await processPublishResponse(myChat)
+            procPub()
+                // make sure to catch any error
+                .catch(console.error);
             return true;
         }
     }

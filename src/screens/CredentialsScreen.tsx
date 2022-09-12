@@ -5,7 +5,7 @@ import {
     addRefreshTrigger,
     credLogo,
     decodeCredential,
-    getImportedCreds,
+    getImportedCreds, getIssuedCreds,
     hasNewCred
 } from '../credentials'
 import * as roots from '../roots'
@@ -25,8 +25,10 @@ const CredentialsScreen = ({route, navigation}: CompositeScreenProps<any, any>) 
             console.log("creds screen - toggling refresh")
             const wal = wallet.getWallet()
             if (wal) {
-                setCreds(getImportedCreds(wal))
-                console.log("creds screen - got imported creds", creds?.length)
+                const importedCreds = getImportedCreds(wal)
+                const issuedCreds = getIssuedCreds(wal)
+                setCreds(importedCreds.concat(issuedCreds))
+                console.log("creds screen - got imported and issued creds", creds?.length)
                 setRefresh(!refresh)
             }
         })

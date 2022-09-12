@@ -80,6 +80,10 @@ export type credential = {
     verifiedCredential: vc,
 }
 
+export type credentialDecorator = {
+
+}
+
 //id: did:prism:13fa8c3c4ee3ae007b44f5fad55c1b16536f4bba755d5edcef636be910932dfa"
 //keyId: issuing0
 //credentialSubject: {"name":"Prism DID publisher","achievement":"Published a DID to Cardano - Atala Prism","date":"2022-06-02T11:37:49.851Z","id":"did:prism:13fa8c3c4ee3ae007b44f5fad55c1b16536f4bba755d5edcef636be910932dfa:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQOhWLYFJSgXyj14L2Z9ztTjH_wTnxv2ZTJiTf858_DzxBI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhA7623sOMoMf3Hlxel3V9ClTVdpNcSLead7QCxhzQRTX3Ej8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiEDh_lYK9DBQER5Thr83c7oxB8TxJEhMtS8Q9KeCU3HbkY"}
