@@ -6,7 +6,7 @@ import {
     credLogo,
     decodeCredential,
     getImportedCreds, getIssuedCreds,
-    hasNewCred
+    hasNewCred, isIssuedCred, issuedCredLogo
 } from '../credentials'
 import * as roots from '../roots'
 import {styles} from "../styles/styles";
@@ -43,30 +43,56 @@ const CredentialsScreen = ({route, navigation}: CompositeScreenProps<any, any>) 
                     extraData={refresh}
                     keyExtractor={(item) => item.verifiedCredential.proof.hash}
                     ItemSeparatorComponent={() => <Divider/>}
-                    renderItem={({item}) => (
-                        <React.Fragment>
-                            <View style={{flex: 1, flexDirection: 'row',}}>
-                                <SafeAreaView>
-                                    <TouchableOpacity
-                                        onPress={() => roots.showCred(navigation, item.verifiedCredential.proof.hash)}>
-                                        <Image source={credLogo}
-                                               style={styles.credLogoStyle}
+                    renderItem={({item}) => isIssuedCred(item) ?
+                        (
+                            <React.Fragment>
+                                <View style={{flex: 1, flexDirection: 'row'}}>
+                                    <SafeAreaView style={styles.container}>
+                                        <List.Item
+                                            title={"Issued: " + utils.getObjectField(decodeCredential(item.verifiedCredential.encodedSignedCredential).credentialSubject, "name")}
+                                            titleNumberOfLines={1}
+                                            titleStyle={styles.clickableListTitle}
+                                            descriptionStyle={styles.listDescription}
+                                            descriptionNumberOfLines={1}
+                                            onPress={() => navigation.navigate('Credential Details', {cred: item})}
                                         />
-                                    </TouchableOpacity>
-                                </SafeAreaView>
-                                <SafeAreaView style={styles.container}>
-                                    <List.Item
-                                        title={utils.getObjectField(decodeCredential(item.verifiedCredential.encodedSignedCredential).credentialSubject, "name")}
-                                        titleNumberOfLines={1}
-                                        titleStyle={styles.clickableListTitle}
-                                        descriptionStyle={styles.listDescription}
-                                        descriptionNumberOfLines={1}
-                                        onPress={() => navigation.navigate('Credential Details', {cred: item})}
-                                    />
-                                </SafeAreaView>
-                            </View>
-                        </React.Fragment>
-                    )}
+                                    </SafeAreaView>
+                                    <SafeAreaView>
+                                        <TouchableOpacity
+                                            onPress={() => roots.showCred(navigation, item.verifiedCredential.proof.hash)}>
+                                            <Image source={isIssuedCred(item) ? issuedCredLogo : credLogo}
+                                                   style={styles.credLogoStyle}
+                                            />
+                                        </TouchableOpacity>
+                                    </SafeAreaView>
+                                </View>
+                            </React.Fragment>
+                        ):
+                        (
+                            <React.Fragment>
+                                <View style={{flex: 1, flexDirection: 'row',}}>
+                                    <SafeAreaView>
+                                        <TouchableOpacity
+                                            onPress={() => roots.showCred(navigation, item.verifiedCredential.proof.hash)}>
+                                            <Image source={isIssuedCred(item) ? issuedCredLogo : credLogo}
+                                                   style={styles.credLogoStyle}
+                                            />
+                                        </TouchableOpacity>
+                                    </SafeAreaView>
+                                    <SafeAreaView style={styles.container}>
+                                        <List.Item
+                                            title={utils.getObjectField(decodeCredential(item.verifiedCredential.encodedSignedCredential).credentialSubject, "name")}
+                                            titleNumberOfLines={1}
+                                            titleStyle={styles.clickableListTitle}
+                                            descriptionStyle={styles.listDescription}
+                                            descriptionNumberOfLines={1}
+                                            onPress={() => navigation.navigate('Credential Details', {cred: item})}
+                                        />
+                                    </SafeAreaView>
+                                </View>
+                            </React.Fragment>
+                        )
+                    }
                 />
             </SafeAreaView>
         </View>

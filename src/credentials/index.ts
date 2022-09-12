@@ -6,6 +6,7 @@ import {credential, issuedCredential} from "../models";
 import {updateWallet} from "../wallet";
 
 export const credLogo = require('../assets/vc.png');
+export const issuedCredLogo = require('../assets/issuedVc.png');
 
 export const refreshTriggers: { (): void }[] = []
 
@@ -256,7 +257,7 @@ export function hasNewCred() {
     refreshTriggers.forEach(trigger => trigger())
 }
 
-function isIssuedCred(cred: credential) {
+export function isIssuedCred(cred: credential) {
     if ((cred as issuedCredential).issuingDidAlias) {
         logger("creds - cred is issued cred", JSON.stringify(cred))
         return true

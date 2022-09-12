@@ -8,6 +8,7 @@ import { Reply} from 'react-native-gifted-chat';
 import * as store from '../store'
 import * as utils from '../utils'
 import * as wallet from '../wallet'
+import {hasNewCred} from "../credentials";
 
 //msg types
 export enum MessageType {
@@ -810,6 +811,7 @@ export async function processIssueCredential(iCred: models.issuedCredential, cha
     }
 
     endProcessing(chat.id, credAlias)
+    hasNewCred()
     return res
 }
 
