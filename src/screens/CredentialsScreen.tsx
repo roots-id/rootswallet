@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, Image, SafeAreaView, View, TouchableOpacity} from 'react-native';
-import {Divider, List} from 'react-native-paper';
+import {ListItem, Avatar} from '@rneui/base';
 import {
     addRefreshTrigger,
     credLogo,
@@ -49,12 +49,13 @@ const CredentialsScreen = ({route, navigation}: CompositeScreenProps<any, any>) 
                                 <View style={{flex: 1, flexDirection: 'row'}}>
                                     <SafeAreaView style={styles.container}>
                                         <List.Item
-                                            title={"Issued: " + utils.getObjectField(decodeCredential(item.verifiedCredential.encodedSignedCredential).credentialSubject, "name")}
+                                            title={"Sent: " + utils.getObjectField(decodeCredential(item.verifiedCredential.encodedSignedCredential).credentialSubject, "name")}
                                             titleNumberOfLines={1}
                                             titleStyle={styles.clickableListTitle}
                                             descriptionStyle={styles.listDescription}
                                             descriptionNumberOfLines={1}
                                             onPress={() => navigation.navigate('Credential Details', {cred: item})}
+                                            bottomDivider={true}
                                         />
                                     </SafeAreaView>
                                     <SafeAreaView>
