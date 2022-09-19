@@ -4,7 +4,6 @@ www.rootswallet.com
 
 ## Original Repo and Wiki
 https://github.com/roots-id/rootswallet
-https://github.com/roots-id/rootswallet/wiki
 
 ## Developers
 ### Setup
