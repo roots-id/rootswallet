@@ -51,9 +51,9 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
         const scanFunc = async () => {
             const {status} = await BarCodeScanner.requestPermissionsAsync();
             setHasPermission(status === 'granted');
-            if (isDemo()) {
-                setTimeOutId(setTimeout(handleDemo, 10000));
-            }
+            // if (isDemo()) {
+            //     setTimeOutId(setTimeout(handleDemo, 10000));
+            // }
         }
 
         scanFunc().catch(console.error)
