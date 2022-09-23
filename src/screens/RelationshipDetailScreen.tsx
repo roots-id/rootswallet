@@ -21,7 +21,7 @@ import {CompositeScreenProps} from "@react-navigation/core/src/types";
 
 export default function RelationshipDetailScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("RelDetailScreen - route params are", JSON.stringify(route.params))
-    const [rel, setRel] = useState<models.contact>(route.params.rel);
+    const [rel, setRel] = useState<models.contactDecorator>(route.params.rel);
 
     useEffect(() => {
         console.log("RelDetailScreen - rel changed", rel)
@@ -72,7 +72,7 @@ export default function RelationshipDetailScreen({route, navigation}: CompositeS
                         onPress={() => {
                             if (rel) {
                                 console.log("RelDetailScreen - show QR for rel", rel)
-                                showQR(navigation, asContactShareable(rel))
+                                showQR(navigation, rel)
                             } else {
                                 console.error("RelDetailScreen - cant show qr, rel not set", rel)
                             }

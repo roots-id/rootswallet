@@ -100,6 +100,7 @@
     "react-test-renderer": "16.8.0",
     "readable-stream": "1.0.33",
     "rn-nodeify": "^10.3.0",
+    "rxjs": "^7.5.6",
     "stream": "npm:stream-browserify@^3.0.0",
     "stream-browserify": "^1.0.0",
     "tslog": "^3.2.0",

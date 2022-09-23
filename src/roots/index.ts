@@ -176,7 +176,7 @@ export async function importVerifiedCredential(verCred: models.vc): Promise<bool
     }
 }
 
-export async function importContact(con: models.contactShareable): Promise<boolean> {
+export async function importContact(con: models.contactDecorator): Promise<boolean> {
     console.log("roots - importing contact", JSON.stringify(con))
     await initRoot(utils.replaceSpecial(con.displayName), contact.getUserId(), con.did, con.displayName, con.displayPictureUrl)
     //intentionally not awaiting
@@ -420,7 +420,7 @@ export async function getAllChats() {
     return result;
 }
 
-export async function getChatByRel(rel: models.contact) {
+export async function getChatByRel(rel: models.contactDecorator) {
     logger("getting chat by rel", rel.displayName)
     const chat = getChatItem(rel.displayName)
     logger("got chat by rel", chat.id)
@@ -449,7 +449,7 @@ function getChatItems() {
     return chats;
 }
 
-export async function hasNewContact(rel: models.contact) {
+export async function hasNewContact(rel: models.contactDecorator) {
     if (isDemo()) {
         const chat = await getChatByRel(rel)
         const msg = await sendMessage(chat, "To celebrate your new contact, you are issuing "

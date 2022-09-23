@@ -9,14 +9,14 @@ import {asContactShareable, getContactByAlias, getContactByDid, showRel} from '.
 import * as roots from '../roots';
 import Loading from '../components/Loading';
 import {styles} from "../styles/styles";
-import {contactShareable} from "../models";
+import {contactDecorator} from "../models";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BubbleProps} from "react-native-gifted-chat/lib/Bubble";
 
 export default function ChatScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("ChatScreen - route params", route.params)
     const [chat, setChat] = useState<models.chat>(roots.getChatItem(route.params.chatId));
-    const [contact, setContact] = useState<models.contact>();
+    const [contact, setContact] = useState<models.contactDecorator>();
     console.log("ChatScreen - got chatItem ", chat)
     const [loading, setLoading] = useState<boolean>(true);
     const [messages, setMessages] = useState<IMessage[]>();
@@ -137,7 +137,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     console.log("ChatScreen - quick reply view did")
                     const r = roots.getMessageById(reply.messageId)?.data
                     console.log("ChatScreen - View rel", r);
-                    showRel(navigation, asContactShareable(r))
+                    showRel(navigation, r)
                 } else if (reply.value.startsWith(roots.MessageType.PROMPT_ACCEPT_CREDENTIAL)) {
                     console.log("ChatScreen - process quick reply for accepting credential")
                     const res = await roots.processCredentialResponse(chat, reply)
@@ -194,7 +194,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     console.log("ChatScreen - Clickable did msg", msg.data)
                     const c = getContactByDid(msg.data)
                     if (c) {
-                        showQR(navigation, asContactShareable(c))
+                        showQR(navigation, c)
                     }
                     break;
                 default:
@@ -367,7 +367,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         // Any additional custom parameters are passed through
     }
 
-    function mapUser(rel: models.contact | undefined): User {
+    function mapUser(rel: models.contactDecorator | undefined): User {
         console.log("ChatScreen - Map User for gifted", rel);
         let user: User;
         if (rel) {

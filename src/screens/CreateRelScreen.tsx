@@ -10,7 +10,7 @@ import {displayOrHide, styles} from '../styles/styles'
 import {CompositeScreenProps, DefaultNavigatorOptions} from "@react-navigation/core/src/types";
 
 export default function CreateRelScreen({route, navigation}: CompositeScreenProps<any, any>) {
-    const [rel, setRel] = useState<models.contact>(route.params.rel);
+    const [rel, setRel] = useState<models.contactDecorator>(route.params.rel);
     const [relName, setRelName] = useState<string>(rel.displayName);
     const [relAvatar, setRelAvatar] = useState<string>(rel.displayPictureUrl);
     const [relDid, setRelDid] = useState<string>(rel.did);
