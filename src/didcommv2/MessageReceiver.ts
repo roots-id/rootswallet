@@ -1,6 +1,6 @@
 import {logger} from "../logging";
 import { unpack } from "./PackUnpack";
-import {receivePing, receiveBasicMessage, receiveMediate, receivePickup, receiveCredential, receiveShortenedURL} from "../protocols"
+import {receivePing, receiveBasicMessage, receiveMediate, receivePickup, receiveCredential, receiveShortenedURL, receiveDiscoverFeatures} from "../protocols"
 
 export async function receiveMessage(packMsg: any) {
     try {
@@ -29,6 +29,9 @@ export async function receiveMessage(packMsg: any) {
             case type.startsWith('https://didcomm.org/shorten-url/1.0/') ? type : '' :
                 return await receiveShortenedURL(unpacked)
                 break; 
+            case type.startsWith('https://didcomm.org/discover-features/2.0/') ? type : '' :
+                    return await receiveDiscoverFeatures(unpacked)
+                    break; 
             default:
                 return unpacked
                 break;

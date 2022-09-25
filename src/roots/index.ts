@@ -9,6 +9,7 @@ import * as store from '../store'
 import * as utils from '../utils'
 import * as wallet from '../wallet'
 import {hasNewCred} from "../credentials";
+import { startConversation } from './peerConversation';
 
 //msg types
 export enum MessageType {
@@ -23,6 +24,10 @@ export enum MessageType {
     PROMPT_ISSUED_CREDENTIAL = "rootsIssuedCredentialMsgType",
     STATUS = "statusMsgType",
     TEXT = "textMsgType",
+    MEDIATOR_REQUEST_MEDIATE = "mediatorRequestMediate",
+    MEDIATOR_KEYLYST_UPDATE = "mediatorKeyListUpdate",
+    MEDIATOR_STATUS_REQUEST = "mediatorStatusReuqest",
+    SHOW_QR_CODE = "showQRCode"
 }
 
 //meaningful literals
@@ -48,7 +53,7 @@ export const POLL_TIME = 2000
 //ppp-node-test
 export const DEFAULT_PRISM_HOST = "ppp.atalaprism.io"
 LogBox.ignoreAllLogs(true)
-let demo = true;
+let demo = false;
 
 type process = {
     endDate?: number,
@@ -217,6 +222,9 @@ export async function initRoot(alias: string, fromDidAlias: string, toDid: strin
             //not awaiting on purpose
             if (chat) {
                 //TODO what should a new chat trigger?
+                startConversation(alias)
+
+
                 //hasNewChat(getChatItem(alias));
             }
         }
@@ -391,13 +399,13 @@ export async function createChat(alias: string, fromDidAlias: string, toDid: str
     }
 }
 
-async function createChatItem(chatAlias: string, fromDidAlias: string, toDid: string, title = chatAlias) {
+async function createChatItem(chatAlias: string, fromDidAlias: string, toDid: string,  title = chatAlias) {
     logger('roots - Creating a new chat item', chatAlias)
     if (getChatItem(chatAlias)) {
         logger('roots - chat item already exists', chatAlias)
         return true
     } else {
-        const chatItem = models.createChat(chatAlias, fromDidAlias, [toDid], title)
+        const chatItem = models.createChat(chatAlias, fromDidAlias, [], [toDid], title)
         const savedChat = await store.saveItem(models.getStorageKey(chatAlias, models.ModelType.CHAT), JSON.stringify(chatItem))
         if (savedChat) {
             logger('roots - new chat saved', chatAlias)
@@ -544,6 +552,54 @@ function addQuickReply(msg: models.message) {
                 {
                     title: 'Retry(Coming Soon)',
                     value: MessageType.PROMPT_RETRY_PROCESS,
+                    messageId: msg.id,
+                }]
+        }
+    }
+    if(msg.type === MessageType.MEDIATOR_REQUEST_MEDIATE) {
+        msg.quickReplies = {
+            type: 'checkbox',
+            keepIt: true,
+            values: [
+                {
+                    title: "OK",
+                    value: MessageType.MEDIATOR_REQUEST_MEDIATE,
+                    messageId: msg.id,
+                }]
+        }
+    }
+    if(msg.type === MessageType.MEDIATOR_KEYLYST_UPDATE) {
+        msg.quickReplies = {
+            type: 'checkbox',
+            keepIt: true,
+            values: [
+                {
+                    title: "Generate QR code",
+                    value: MessageType.MEDIATOR_KEYLYST_UPDATE,
+                    messageId: msg.id,
+                }]
+        }
+    }
+    if(msg.type === MessageType.MEDIATOR_STATUS_REQUEST) {
+        msg.quickReplies = {
+            type: 'checkbox',
+            keepIt: true,
+            values: [
+                {
+                    title: "Check Messages",
+                    value: MessageType.MEDIATOR_STATUS_REQUEST,
+                    messageId: msg.id,
+                }]
+        }
+    }
+    if(msg.type === MessageType.SHOW_QR_CODE) {
+        msg.quickReplies = {
+            type: 'checkbox',
+            keepIt: true,
+            values: [
+                {
+                    title: "QR Code",
+                    value: MessageType.SHOW_QR_CODE,
                     messageId: msg.id,
                 }]
         }
