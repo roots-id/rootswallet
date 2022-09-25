@@ -12,7 +12,7 @@ import {styles} from "../styles/styles";
 import {contactShareable} from "../models";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BubbleProps} from "react-native-gifted-chat/lib/Bubble";
-import { requestMediate, sendBasicMsg } from '../roots/peerConversation';
+import { checkMessages, createOOBInvitation, requestMediate, sendBasicMsg } from '../roots/peerConversation';
 
 export default function ChatScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("ChatScreen - route params", route.params)
@@ -115,7 +115,8 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         console.log("ChatScreen - handle send", pendingMsgs)
         const result = await roots.sendMessages(chat, pendingMsgs.map(msg => msg.text), roots.MessageType.TEXT, contacts.getUserId());
 //        await setMessages((prevMessages) => GiftedChat.append(prevMessages, pendingMsgs));
-        // Try sending a basicmessage (nly first msg of the arraya)
+        // Try sending a basicmessage (only first msg of the arraya)
+        // TODO check if chat inlcudes basic message
         sendBasicMsg(chat.id, pendingMsgs.map(msg => msg.text)[0])
     }
 
@@ -175,8 +176,14 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     console.log("ChatScreen - process quick reply for retry process")
                     const process = roots.getMessageById(reply.messageId)?.data
                     process();
-                } else if (reply.value.startsWith(roots.MessageType.MEDIATOR_REQUEST_MEDIATE)) {
+                } else if (reply.value === roots.MessageType.MEDIATOR_REQUEST_MEDIATE) {
                     await requestMediate(chat.id)
+                } else if (reply.value === roots.MessageType.MEDIATOR_STATUS_REQUEST) {
+                    await checkMessages(chat.id)
+                } else if (reply.value === roots.MessageType.MEDIATOR_KEYLYST_UPDATE) {
+                    await createOOBInvitation(chat.id)
+                } else if (reply.value === roots.MessageType.SHOW_QR_CODE) {
+                    await showQR(navigation, roots.getMessageById(reply.messageId)?.data.url)
                 } else {
                     console.log("ChatScreen - reply value not recognized, was", chat.id, reply.value);
                 } 

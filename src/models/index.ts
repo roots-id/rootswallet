@@ -51,13 +51,17 @@ export type claim = {
     subjectDid: string,
 }
 
+export type mediator = {
+    routingKey: string
+}
+
 export type chat = {
     id: string,
     fromDids: string[]
     toDids: string[],
     fromAlias: string,
     title: string,
-    published: boolean,
+    mediator?: mediator,
 }
 
 export type compressedEcKeyData = {

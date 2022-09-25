@@ -23,7 +23,10 @@ export enum MessageType {
     PROMPT_ISSUED_CREDENTIAL = "rootsIssuedCredentialMsgType",
     STATUS = "statusMsgType",
     TEXT = "textMsgType",
-    MEDIATOR_REQUEST_MEDIATE = "mediatorRequestMediate"
+    MEDIATOR_REQUEST_MEDIATE = "mediatorRequestMediate",
+    MEDIATOR_KEYLYST_UPDATE = "mediatorKeyListUpdate",
+    MEDIATOR_STATUS_REQUEST = "mediatorStatusReuqest",
+    SHOW_QR_CODE = "showQRCode"
 }
 
 //meaningful literals
@@ -560,6 +563,42 @@ function addQuickReply(msg: models.message) {
                 {
                     title: "OK",
                     value: MessageType.MEDIATOR_REQUEST_MEDIATE,
+                    messageId: msg.id,
+                }]
+        }
+    }
+    if(msg.type === MessageType.MEDIATOR_KEYLYST_UPDATE) {
+        msg.quickReplies = {
+            type: 'checkbox',
+            keepIt: true,
+            values: [
+                {
+                    title: "Generate QR code",
+                    value: MessageType.MEDIATOR_KEYLYST_UPDATE,
+                    messageId: msg.id,
+                }]
+        }
+    }
+    if(msg.type === MessageType.MEDIATOR_STATUS_REQUEST) {
+        msg.quickReplies = {
+            type: 'checkbox',
+            keepIt: true,
+            values: [
+                {
+                    title: "Check Messages",
+                    value: MessageType.MEDIATOR_STATUS_REQUEST,
+                    messageId: msg.id,
+                }]
+        }
+    }
+    if(msg.type === MessageType.SHOW_QR_CODE) {
+        msg.quickReplies = {
+            type: 'checkbox',
+            keepIt: true,
+            values: [
+                {
+                    title: "QR Code",
+                    value: MessageType.SHOW_QR_CODE,
                     messageId: msg.id,
                 }]
         }

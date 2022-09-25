@@ -20,11 +20,12 @@ export async function startConversation(chatId: string) {
         const  fromDid = await createDIDPeer(null,null)
         chat.fromDids = [fromDid]
         console.log(chat)
-        await store.updateItem(models.getStorageKey(chatId, models.ModelType.CHAT), JSON.stringify(chat))
 
         // Discover Peer features
         const features = await discoverFeatures(fromDid, toDid)
         console.log(features)
+        chat.feautures = features
+        await store.updateItem(models.getStorageKey(chatId, models.ModelType.CHAT), JSON.stringify(chat))
         await sendMessage(chat,
             chat.title + " supports the following protocols:",
             MessageType.TEXT, contact.ROOTS_BOT)
@@ -62,9 +63,19 @@ export async function requestMediate(chatId: string) {
             "Mediate denied",
             MessageType.TEXT, contact.ROOTS_BOT)
     } else {
+        chat.mediator = {
+            routingKey: resp
+        }
+        await store.updateItem(models.getStorageKey(chatId, models.ModelType.CHAT), JSON.stringify(chat))
         await sendMessage(chat,
-            "Mediate granted and routing keys received",
+            "Mediate granted and routing keys received. Now you can:",
             MessageType.TEXT, contact.ROOTS_BOT)
+        await sendMessage(chat,
+            "Create an OOB invitation or check for incoming messages",
+                MessageType.MEDIATOR_KEYLYST_UPDATE, contact.ROOTS_BOT)
+        await sendMessage(chat,
+            "Check for incoming messages",
+                MessageType.MEDIATOR_STATUS_REQUEST, contact.ROOTS_BOT)
     }
 
 }
@@ -79,6 +90,43 @@ export async function sendBasicMsg(chatId: string, msg: string) {
     console.log("RM RESP: "+resp)
     await sendMessage(chat,
         resp,
+        MessageType.TEXT, contact.ROOTS_BOT)
+
+}
+
+export async function createOOBInvitation(chatId: string) {
+
+    const chat = getChatItem(chatId)
+    const toDid = chat.toDids[0]
+    const fromDid = chat.fromDids[0]
+    const routingKey = chat.mediator.routingKey
+    const  newDid = await createDIDPeer(routingKey,null)
+    const updates = [
+        {
+            recipient_did: newDid,
+            action: "add"
+        }
+    ]
+    const resp = await keylistUpdate(updates, fromDid, toDid)
+    const ooburl = await generateOOBURL(newDid)
+    const shortQR = await shortenURLRequest(fromDid, toDid, ooburl!, 60*60)
+    // TODO: save newDID or create a chat placeholder??
+
+    await sendMessage(chat,
+        "Display QR Code",
+        MessageType.SHOW_QR_CODE, contact.ROOTS_BOT,undefined,{url:shortQR})
+
+}
+
+export async function checkMessages(chatId: string) {
+
+    const chat = getChatItem(chatId)
+    const toDid = chat.toDids[0]
+    const fromDid = chat.fromDids[0]
+    const resp = await retrieveMessages(fromDid, toDid)
+    
+    await sendMessage(chat,
+        "Messages: " + resp,
         MessageType.TEXT, contact.ROOTS_BOT)
 
 }
