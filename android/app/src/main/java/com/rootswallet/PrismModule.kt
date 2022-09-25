@@ -23,7 +23,7 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     }
 
     @ReactMethod
-    fun getDidDocument(did: String, promise: Promise) {
+    fun getDIDDocument(did: String, promise: Promise) {
         Log.d("PRISM_TAG","Getting DID doc"+did);
         thread(start = true) {
             try {
@@ -44,13 +44,13 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
-    fun newWal(name: String, mnemonic: String, passphrase: String): String {
+    fun newWAL(name: String, mnemonic: String, passphrase: String): String {
         val cliWal = newWallet(name,mnemonic,passphrase);
         return Json.encodeToString<Wallet>(cliWal);
     }
 
     @ReactMethod
-    fun publishDid(walJson: String, didAlias: String, promise: Promise) {
+    fun publishDID(walJson: String, didAlias: String, promise: Promise) {
         Log.d("PRISM_TAG","Publishing "+didAlias+" from wallet "+walJson);
         thread(start = true) {
             try {

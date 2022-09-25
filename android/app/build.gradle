@@ -249,7 +249,7 @@ dependencies {
     } else {
         implementation jscFlavor
     }
-    implementation("com.rootsid.wal:wal-library:1.0.2") {
+    implementation("com.rootsid.wal:wal-library:1.0.3") {
         exclude group: 'io.github.vincenzopalazzo', module: 'material-ui-swing'
         exclude group: 'javax.annotation', module: 'jsr250-api'
         exclude group: 'org.didcommx', module: 'didcomm'
@@ -257,10 +257,10 @@ dependencies {
         exclude group: 'com.soywiz.korlibs.krypto', module: 'krypto-jvm'
         exclude group: 'com.google.protobuf', module: 'protobuf-javalite'
         exclude group: 'io.ipfs.multibase.Base16'
-        exclude group: 'org.bouncycastle', module: 'bcprov-jdk15to18'
+        //exclude group: 'org.bouncycastle', module: 'bcprov-jdk15to18'
         exclude group: 'org.jetbrains.kotlinx', module: 'kotlinx-coroutines-core'
     }
-    // implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
 
     //implementation("io.iohk.atala:prism-api:v1.3.2")
 
@@ -273,6 +273,8 @@ dependencies {
     })
 
     implementation project(':react-native-fs')
+
+    implementation ("net.java.dev.jna:jna:5.2.0")
 }
 
 // Run this once to be able to run the application with BUCK

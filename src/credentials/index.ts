@@ -6,6 +6,7 @@ import {credential, issuedCredential} from "../models";
 import {updateWallet} from "../wallet";
 
 export const credLogo = require('../assets/vc.png');
+export const issuedCredLogo = require('../assets/issuedVc.png');
 
 export const refreshTriggers: { (): void }[] = []
 
@@ -176,6 +177,25 @@ export function getImportedCreds(wal: models.wallet): models.credential[] {
     return result;
 }
 
+export function getIssuedCreds(wal: models.wallet): models.credential[] {
+    logger("creds - Getting issued credentials")
+    let result: credential[] = []
+    logger("creds - current wal has keys", Object.keys(wal))
+    if (wal.issuedCredentials) {
+        const creds = wal.issuedCredentials
+        if (creds && creds.length > 0) {
+            logger("creds - getting issued creds", creds.length)
+            creds.forEach(cred => logger("creds - issued cred", JSON.stringify(cred)))
+            result = creds
+        } else {
+            logger("creds - no issued creds found")
+        }
+    } else {
+        logger("creds - No issued credentials")
+    }
+    return result;
+}
+
 export function getIssuedCredByAlias(credAlias: string, wal: models.wallet): models.issuedCredential | undefined {
     logger("creds - Getting issued credential by alias", credAlias)
 
@@ -237,7 +257,7 @@ export function hasNewCred() {
     refreshTriggers.forEach(trigger => trigger())
 }
 
-function isIssuedCred(cred: credential) {
+export function isIssuedCred(cred: credential) {
     if ((cred as issuedCredential).issuingDidAlias) {
         logger("creds - cred is issued cred", JSON.stringify(cred))
         return true

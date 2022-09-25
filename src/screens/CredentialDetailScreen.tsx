@@ -20,6 +20,7 @@ import {styles} from "../styles/styles";
 import * as utils from '../utils'
 import * as wallet from '../wallet'
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
+import {ImageProps} from "react-native-svg/lib/typescript/ReactNativeSVG";
 
 
 export default function CredentialDetailScreen({route, navigation}: CompositeScreenProps<any, any>) {
@@ -101,7 +102,7 @@ export default function CredentialDetailScreen({route, navigation}: CompositeScr
                         onPress={() => showQR(navigation, cred.verifiedCredential)}
                     />
                 </View>
-                <Image source={credLogo}
+                <Image source={{uri: "https://raw.githubusercontent.com/roots-id/rootswallet/main/assets/icon.png"}}
                        style={styles.credLogoStyle}
                 />
                 <FlatList

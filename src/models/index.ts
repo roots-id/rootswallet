@@ -21,8 +21,6 @@ export enum ExportType {
     ASYNC_STORE = "rootsExportAsyncStoreType",
 }
 
-//TODO refactor away this general file to specific files, like 'chat'
-
 export type addOn = {
     transactionId: string,
     ledger: string,
@@ -69,20 +67,25 @@ export type compressedEcKeyData = {
     data: string,
 }
 
-export interface contact extends contactShareable {
-    id: string,
+export type contact = {
+    did: string,
     didDoc?: didDocument,
+    id: string,
 }
 
-export type contactShareable = {
+export type contactDecorator = contact & {
     displayName: string,
     displayPictureUrl: string,
-    did: string,
 }
 
 export type credential = {
     alias: string,
     verifiedCredential: vc,
+}
+
+export type credentialDecorator = credential & {
+    date: number,
+    displayPictureUrl: string,
 }
 
 //id: did:prism:13fa8c3c4ee3ae007b44f5fad55c1b16536f4bba755d5edcef636be910932dfa"
@@ -210,7 +213,6 @@ export function createChat(id: string, fromDidAlias: string,
         toDids: toDids,
         fromAlias: fromDidAlias,
         title: title,
-        published: false,
     }
     logger("models - created chat model w/keys", Object.keys(chat))
     return chat;

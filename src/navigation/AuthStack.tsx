@@ -15,8 +15,8 @@ import DeveloperScreen from "../screens/DeveloperScreen";
 import RelationshipsScreen from "../screens/RelationshipsScreen";
 import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
 import SettingsScreen from "../screens/SettingsScreen";
-import SimpleTitle from '../components/SimpleTitle';
 import WalletScreen from "../screens/WalletScreen";
+import WorkflowsScreen from "../screens/WorkflowsScreen";
 
 import AuthContext from '../context/AuthenticationContext';
 
@@ -34,6 +34,9 @@ import * as contact from '../relationships'
 import * as utils from '../utils'
 import {loadWalletName} from "../wallet";
 import SaveScreen from '../screens/SaveScreen';
+import AtalaPrismDevScreen from "../screens/AtalaPrismDevScreen";
+
+import {brandLogo} from "../relationships";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -149,21 +152,22 @@ export default function AuthStack() {
                     <Stack.Screen name="Relationships"
                                   component={RelationshipsScreen}
                                   options={({navigation, route}) => ({
-                                      headerTitle: (props) => <LogoTitle {...props} title="Contacts"/>,
+                                      headerTitle: (props) => <LogoTitle {...props} logo={brandLogo} title="Contacts"/>,
                                       headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel"
                                                                            person={contact.getUserId()} scan='contact'
-                                                                           settings='Settings'/>,
+                                                                           settings='Settings'
+                                                                           workflows='Workflow Selector'/>,
                                   })}
                     />
                     <Stack.Screen
                         name="Chat"
                         component={ChatScreen}
                         options={({navigation, route}) => ({
-                            headerTitle: (props) => <SimpleTitle {...props}
+                            headerTitle: (props) => <LogoTitle {...props}
                                                                  title={getChatItem(utils.getObjectField(route.params, "chatId")).title}/>,
                             headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel"
                                                                  person={contact.getUserId()} scan='credential'
-                                                                 settings='Settings'/>,
+                                                                 settings='Settings' workflows='Workflow Selector'/>,
                         })}
                     />
                 </Stack.Group>
@@ -195,7 +199,8 @@ export default function AuthStack() {
                                       headerTitle: (props) => <LogoTitle {...props} title="Credentials"/>,
                                       headerRight: (props) => <IconActions {...props} nav={navigation}
                                                                            person={contact.getUserId()}
-                                                                           scan="credential" settings="Settings"/>,
+                                                                           scan="credential" settings="Settings"
+                                                                           workflows='Workflow Selector'/>,
                                   })}
                     />
                 </Stack.Group>
@@ -212,6 +217,7 @@ export default function AuthStack() {
                     <Stack.Screen name="Mediator" component={MediatorScreen}/>
                     <Stack.Screen name="RequestCredential" component={RequestCredentialScreen}/>
                     <Stack.Screen name="Sidetree" component={Sidetree}/>
+                    <Stack.Screen name="Atala Prism Dev" component={AtalaPrismDevScreen}/>
                 </Stack.Group>
             </Stack.Navigator>
         )
@@ -242,6 +248,7 @@ export default function AuthStack() {
                             <Stack.Screen name="Relationship Details" component={RelationshipDetailScreen}/>
                             <Stack.Screen name="Scan QR Code" component={ScanQRCodeScreen}/>
                             <Stack.Screen name="Show QR Code" component={ShowQRCodeScreen}/>
+                            <Stack.Screen name="Workflow Selector" component={WorkflowsScreen}/>
                         </Stack.Group>
 
                     </>
@@ -251,7 +258,8 @@ export default function AuthStack() {
                     </>
                 )) : (<Stack.Screen name="Create Wallet" component={CreateWalletScreen}/>)
                 }
-                <Stack.Group navigationKey={(state && state.userToken) ? 'init' : 'main'} screenOptions={{presentation: 'transparentModal'}}>
+                <Stack.Group navigationKey={(state && state.userToken) ? 'init' : 'main'}
+                             screenOptions={{presentation: 'transparentModal'}}>
                     <Stack.Screen name="Settings" component={SettingsScreen}/>
                     <Stack.Screen name="Save" component={SaveScreen}/>
                     <Stack.Screen name="Developers" component={DevStack}/>

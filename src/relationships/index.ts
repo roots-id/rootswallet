@@ -1,6 +1,6 @@
 import * as models from '../models'
 import {logger} from '../logging'
-import {contact, contactShareable} from "../models";
+import {contact, contactDecorator} from "../models";
 import {getPrismDidDoc} from "../prism";
 import * as store from '../store'
 import * as utils from '../utils'
@@ -315,7 +315,7 @@ export const refreshTriggers: {(): void}[] = []
 //DEMO stuff
 let currentDemoRel = -1
 const demoRelOrder = [ESTEBAN,RODO,LANCE,BUTCH,DARRELL,TONY,ROOTSID,IOG_TECH,LIBRARY_BOT]
-const demoRels: {[did: string]: models.contact} = {}
+const demoRels: {[did: string]: models.contactDecorator} = {}
 demoRels[LIBRARY_BOT] = createRel(LIBRARY_BOT,"Library",personLogo,LIBRARY_BOT);
 demoRels[IOG_TECH] = createRel(IOG_TECH, "IOG Tech Community",iogLogo,IOG_TECH);
 demoRels[ROOTSID] = createRel(ROOTSID, "RootsID",rootsLogo,ROOTSID);
@@ -329,7 +329,7 @@ demoRels[RODO] = createRel(RODO,"Rodolfo Miranda",rodoLogo,RODO);
 const USER_NAME_STORAGE_KEY = "primaryUserNameKey"
 let userName: string = "";
 
-export async function addDidDoc(contact: models.contact) {
+export async function addDidDoc(contact: models.contactDecorator) {
     logger("roots - getting did doc for contact",contact.did)
     const didDocJson = await getPrismDidDoc(contact.did)
     if(didDocJson) {
@@ -350,17 +350,17 @@ export function addRefreshTrigger(trigger: ()=>{}) {
     refreshTriggers.push(trigger)
 }
 
-export function asContactShareable(contact: models.contact): contactShareable {
-    const shareable = {
-        displayName: contact.displayName,
-        displayPictureUrl: contact.displayPictureUrl,
-        did: contact.did,
-    }
-    console.log("rels - shareable contact", JSON.stringify(shareable))
-    return shareable
+export function asContactShareable(contact: models.contact, displayName: string, displayPictureUrl: string): contactDecorator {
+    const decorated: models.contactDecorator = {...contact,...{
+        displayName: displayName,
+        displayPictureUrl: displayPictureUrl
+    }}
+
+    console.log("rels - shareable contact", JSON.stringify(decorated))
+    return decorated
 }
 
-export function createRel(relAlias: string, relName: string, relPicUrl: string, did: string) :contact{
+export function createRel(relAlias: string, relName: string, relPicUrl: string, did: string) :contactDecorator{
     const rel = {
         id: relAlias,
         displayName: relName,
@@ -395,7 +395,7 @@ export function generateIdFromName(displayName: string): string {
     return utils.replaceSpecial(displayName)
 }
 
-export function getContactByAlias(relId: string): models.contact|undefined {
+export function getContactByAlias(relId: string): models.contactDecorator|undefined {
     logger("rels - Getting rel",relId)
     if(relId) {
         const relItemJson = store.getItem(models.getStorageKey(relId,models.ModelType.CONTACT));
@@ -413,7 +413,7 @@ export function getContactByAlias(relId: string): models.contact|undefined {
     return;
 }
 
-export function getContactByDid(did: string): models.contact|undefined {
+export function getContactByDid(did: string): models.contactDecorator|undefined {
     logger("rels - Getting contact by DID",did)
     if(did) {
         const contact = getRelationships().find(con => con.did === did);
@@ -425,24 +425,25 @@ export function getContactByDid(did: string): models.contact|undefined {
     return;
 }
 
-export function getDemoRel(): models.contactShareable {
+export function getDemoRel(): models.contactDecorator {
     if(currentDemoRel >= (demoRelOrder.length-1)) {
         return getFakeRelItem()
     } else {
         currentDemoRel++
-        return asContactShareable(demoRels[demoRelOrder[currentDemoRel]])
+        return demoRels[demoRelOrder[currentDemoRel]]
     }
 }
 
-function getFakeRelItem(): models.contactShareable {
+function getFakeRelItem(): models.contactDecorator {
     return {
-        displayPictureUrl: personLogo,
-        displayName: "fakePerson"+Date.now(),
+        id: "did:roots:fakedid"+Date.now(),
         did: "did:roots:fakedid"+Date.now(),
+        displayName: "fakePerson"+Date.now(),
+        displayPictureUrl: personLogo,
     }
 }
 
-export function getRelationships() {
+export function getRelationships(): contactDecorator[] {
     logger("rels - getting rel items")
     const relItemJsonArray = store.getItems(allRelsRegex)
     logger("rels - got rel items",String(relItemJsonArray))
@@ -451,11 +452,11 @@ export function getRelationships() {
     return rels;
 }
 
-export function getShareableRelByAlias(alias: string): models.contactShareable|undefined {
+export function getShareableRelByAlias(alias: string): models.contactDecorator|undefined {
     logger("roots - getting shareable rel by alias",alias)
     const rel = getContactByAlias(alias)
     if(rel && rel.did) {
-        return asContactShareable(rel)
+        return rel
     }
 }
 
@@ -516,7 +517,7 @@ export async function setUserName(uName: string): Promise<boolean> {
     return false
 }
 
-export function showRel(navigation: any, rel: contactShareable) {
+export function showRel(navigation: any, rel: contactDecorator) {
     console.log("rel - show rel",rel)
     navigation.navigate('Relationship Details',{rel: rel})
 }

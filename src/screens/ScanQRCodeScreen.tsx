@@ -5,12 +5,12 @@ import {
     Text,
     Pressable,
     Button,
-    StyleSheet,
+    StyleSheet, Image,
 } from 'react-native';
-import {IconButton} from 'react-native-paper';
+import {IconButton, Title} from 'react-native-paper';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
-import {getDemoRel, getUserId} from '../relationships';
+import {brandLogo, getDemoRel, getUserId} from '../relationships';
 import {getDid, importContact, importVerifiedCredential, isDemo} from '../roots'
 import React from 'react';
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
@@ -133,10 +133,11 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                 />
             </View>
             <Animated.View
-                style={[styles.viewAnimated,{minWidth: "90%",minHeight: "90%"}]}
+                style={[styles.viewAnimated,{minWidth: "90%",minHeight: "90%",flexDirection:"column"}]}
             >
+                <Title style={styles.textOrange}>Scan Barcode</Title>
                 <View style={{
-
+                    flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
                     width: '100%',

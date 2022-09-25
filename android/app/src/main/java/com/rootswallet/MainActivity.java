@@ -3,6 +3,8 @@ package com.rootswallet;
 import android.os.Build;
 import android.os.Bundle;
 
+import android.system.ErrnoException;
+import android.system.Os;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
@@ -12,11 +14,17 @@ import expo.modules.ReactActivityDelegateWrapper;
 public class MainActivity extends ReactActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    // Set the theme to AppTheme BEFORE onCreate to support 
+    // Set the theme to AppTheme BEFORE onCreate to support
     // coloring the background, status bar, and navigation bar.
     // This is required for expo-splash-screen.
     setTheme(R.style.AppTheme);
     super.onCreate(null);
+    try {
+      Os.setenv("EXTERNAL_STORAGE", getExternalFilesDir(null).getAbsolutePath(), true);
+      System.loadLibrary("indy");
+    } catch (ErrnoException e) {
+      e.printStackTrace();
+    }
   }
 
   /**

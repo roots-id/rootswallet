@@ -55,5 +55,8 @@ allprojects {
                 password = System.getenv("GITHUB_TOKEN")
             }
         }
+        maven {
+            url 'https://repo.sovrin.org/repository/maven-public'
+        }
     }
 }

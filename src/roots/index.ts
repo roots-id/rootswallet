@@ -8,6 +8,7 @@ import { Reply} from 'react-native-gifted-chat';
 import * as store from '../store'
 import * as utils from '../utils'
 import * as wallet from '../wallet'
+import {hasNewCred} from "../credentials";
 import { startConversation } from './peerConversation';
 
 //msg types
@@ -180,7 +181,7 @@ export async function importVerifiedCredential(verCred: models.vc): Promise<bool
     }
 }
 
-export async function importContact(con: models.contactShareable): Promise<boolean> {
+export async function importContact(con: models.contactDecorator): Promise<boolean> {
     console.log("roots - importing contact", JSON.stringify(con))
     await initRoot(utils.replaceSpecial(con.displayName), contact.getUserId(), con.did, con.displayName, con.displayPictureUrl)
     //intentionally not awaiting
@@ -259,7 +260,7 @@ async function createDid(didAlias: string): Promise<models.did | undefined> {
     try {
         const existingDid = getDid(didAlias)
         if (existingDid) {
-            logger("roots - Chat/DID already exists", didAlias)
+            console.error("roots - Chat/DID already exists", didAlias)
             return existingDid;
         } else {
             logger("roots - DID does not exist, creating", didAlias, "DID")
@@ -272,7 +273,7 @@ async function createDid(didAlias: string): Promise<models.did | undefined> {
                 const saveResult = await wallet.updateWallet(wal._id, wal.passphrase, prismWalletJson)
                 if (saveResult) {
                     const newDid = getDid(didAlias)
-                    logger("roots - did added to wallet", newDid)
+                    logger("roots - did added to wallet", JSON.stringify(newDid))
                     return newDid;
                 } else {
                     console.error("roots - could not save wallet with new DID", prismWalletJson)
@@ -353,7 +354,7 @@ export async function publishPrismDid(didAlias: string): Promise<boolean> {
             try {
                 const wal = wallet.getWallet()
                 if (wal) {
-                    const newWalJson = await PrismModule.publishDid(wallet.getWalletJson(wal._id), did.alias)
+                    const newWalJson = await PrismModule.publishDID(wallet.getWalletJson(wal._id), did.alias)
                     const result = await wallet.updateWallet(wal._id, wal.passphrase, newWalJson)
                     const pubDid = getDid(didAlias)
                     if (pubDid) {
@@ -427,7 +428,7 @@ export async function getAllChats() {
     return result;
 }
 
-export async function getChatByRel(rel: models.contact) {
+export async function getChatByRel(rel: models.contactDecorator) {
     logger("getting chat by rel", rel.displayName)
     const chat = getChatItem(rel.displayName)
     logger("got chat by rel", chat.id)
@@ -456,7 +457,7 @@ function getChatItems() {
     return chats;
 }
 
-export async function hasNewContact(rel: models.contact) {
+export async function hasNewContact(rel: models.contactDecorator) {
     if (isDemo()) {
         const chat = await getChatByRel(rel)
         const msg = await sendMessage(chat, "To celebrate your new contact, you are issuing "
@@ -866,6 +867,7 @@ export async function processIssueCredential(iCred: models.issuedCredential, cha
     }
 
     endProcessing(chat.id, credAlias)
+    hasNewCred()
     return res
 }
 
