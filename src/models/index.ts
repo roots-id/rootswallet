@@ -51,12 +51,17 @@ export type claim = {
     subjectDid: string,
 }
 
+export type mediator = {
+    routingKey: string
+}
+
 export type chat = {
     id: string,
+    fromDids: string[]
     toDids: string[],
     fromAlias: string,
     title: string,
-    published: boolean,
+    mediator?: mediator,
 }
 
 export type compressedEcKeyData = {
@@ -197,11 +202,12 @@ export type wallet = {
     blockchainTxLogEntry: blocktxs[],
 };
 
-export function createChat(chatAlias: string, fromDidAlias: string,
-                           toIds: string[], title = chatAlias): chat {
+export function createChat(id: string, fromDidAlias: string,
+                    fromDids: string[], toDids: string[],  title = id): chat {
     const chat = {
-        id: chatAlias,
-        toDids: toIds,
+        id: id,
+        fromDids: fromDids,
+        toDids: toDids,
         fromAlias: fromDidAlias,
         title: title,
         published: false,
