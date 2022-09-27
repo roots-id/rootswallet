@@ -17,6 +17,8 @@ import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BarCodeEvent} from "expo-barcode-scanner/src/BarCodeScanner";
 import {styles} from "../styles/styles";
 import { decodeOOBURL } from '../protocols';
+import uuid from 'react-native-uuid';
+
 
 
 export default function ScanQRCodeScreen({route, navigation}: CompositeScreenProps<any, any>) {
@@ -77,10 +79,12 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                 //const jsonData = JSON.parse(decodedMsg)
                 console.log(decodedMsg)
                 const personLogo = require('../assets/smallBWPerson.png');
+                const displayName = decodedMsg.body.label !== undefined? decodedMsg.body.label : "Agent="+uuid.v4().toString().slice(-5)
                 await importContact({
-                    displayName: "Mediator",
+                    displayName: displayName,
                     displayPictureUrl: personLogo,
                     did: decodedMsg.from,
+                    id: uuid.v4().toString()
                 })
             }
         } else {
