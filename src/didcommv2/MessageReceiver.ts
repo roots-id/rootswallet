@@ -8,6 +8,7 @@ export async function receiveMessage(packMsg: any) {
         // TODO Process from_prior, thid y pthid
         // TODO return errors
         const type = JSON.parse(unpacked.message).type
+
         logger(type)
         // Message dispatch
         switch (type) {

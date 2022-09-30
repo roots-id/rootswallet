@@ -1,11 +1,12 @@
 import { getChatItem, sendMessage, MessageType } from "."
-import { createDIDPeer} from '../didpeer'
+import { createDIDPeer,resolveDIDPeer} from '../didpeer'
 import * as store from '../store'
 import * as models from '../models'
 import * as contact from '../relationships'
 
 
 import { decodeOOBURL, generateOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages, shortenURLRequest, discoverFeatures } from '../protocols';
+import { logger } from "../logging"
 
 
 
@@ -18,33 +19,42 @@ export async function startConversation(chatId: string) {
     if (toDid.startsWith("did:peer")) {
         // Create a dedicated DID Peer and update chat
         const  fromDid = await createDIDPeer(null,null)
-        chat.fromDids = [fromDid]
-        console.log(chat)
+        const DidDoc = await resolveDIDPeer(toDid)
+        const serviceEndpoint = DidDoc.service[0].serviceEndpoint
+        logger('DidDoc for sender ', DidDoc)
+        if (serviceEndpoint.startsWith("https")) {
+            chat.fromDids = [fromDid]
+            console.log(chat)
 
-        // Discover Peer features
-        const features = await discoverFeatures(fromDid, toDid)
-        console.log(features)
-        chat.feautures = features
-        await store.updateItem(models.getStorageKey(chatId, models.ModelType.CHAT), JSON.stringify(chat))
-        await sendMessage(chat,
-            chat.title + " supports the following protocols:",
-            MessageType.TEXT, contact.ROOTS_BOT)
-        var isMediator = false
-        for (const feat of features) { 
-            if (feat.id.includes("coordinate-mediation/2.0")) {isMediator = true}
+            // Discover Peer features
+            const features = await discoverFeatures(fromDid, toDid)
+            chat.feautures = features
+            await store.updateItem(models.getStorageKey(chatId, models.ModelType.CHAT), JSON.stringify(chat))
             await sendMessage(chat,
-                feat.id.replace("https://didcomm.org/",""),
-                MessageType.TEXT, contact.ROOTS_BOT) 
-        }
-        // Ask to request mediate
-        if (isMediator) {
+                chat.title + " supports the following protocols:",
+                MessageType.TEXT, contact.ROOTS_BOT)
+            var isMediator = false
+            for (const feat of features) { 
+                if (feat.id.includes("coordinate-mediation/2.0")) {isMediator = true}
+                await sendMessage(chat,
+                    feat.id.replace("https://didcomm.org/",""),
+                    MessageType.TEXT, contact.ROOTS_BOT) 
+            }
+            // Ask to request mediate
+            if (isMediator) {
 
+                await sendMessage(chat,
+                    "Request Mediate?",
+                    MessageType.MEDIATOR_REQUEST_MEDIATE, contact.ROOTS_BOT)
+
+            }
+
+        }
+        else{
             await sendMessage(chat,
-                "Request Mediate?",
-                MessageType.MEDIATOR_REQUEST_MEDIATE, contact.ROOTS_BOT)
-
+                "This peer is not reachable via https",
+                MessageType.TEXT, contact.ROOTS_BOT)
         }
-
 
 
     }
@@ -87,7 +97,6 @@ export async function sendBasicMsg(chatId: string, msg: string) {
     const fromDid = chat.fromDids[0]
     
     const resp = await sendBasicMessage(msg, fromDid, toDid)
-    console.log("RM RESP: "+resp)
     await sendMessage(chat,
         resp,
         MessageType.TEXT, contact.ROOTS_BOT)
@@ -123,10 +132,23 @@ export async function checkMessages(chatId: string) {
     const chat = getChatItem(chatId)
     const toDid = chat.toDids[0]
     const fromDid = chat.fromDids[0]
-    const resp = await retrieveMessages(fromDid, toDid)
+
+    const [resp,messages] = await retrieveMessages(fromDid, toDid)
+    //Check if resp is > 0 and if so, send messages
+    if (messages.length > 0) {
+        for (const msg of messages) {
+            await sendMessage(chat,
+                "LOG:"+ '\n'+
+                "type: "+msg.type.replace("https://didcomm.org/","") + '\n' + 
+                "body: "+msg.body.content + '\n' + 
+                "from: "+msg.body.displayName, 
+                MessageType.TEXT , contact.ROOTS_BOT)
+                
+        }
+    } else {
     
     await sendMessage(chat,
         "Messages: " + resp,
         MessageType.TEXT, contact.ROOTS_BOT)
-
+    }
 }
