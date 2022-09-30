@@ -104,7 +104,6 @@ export async function receivePickup(msg: any) {
             case "https://didcomm.org/messagepickup/3.0/status":
                 return JSON.parse(msg.message).body.message_count
             case "https://didcomm.org/messagepickup/3.0/delivery":
-                console.log("Delivery")
                 return JSON.parse(msg.message).attachments
             default:
                 break;

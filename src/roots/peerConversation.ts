@@ -28,7 +28,6 @@ export async function startConversation(chatId: string) {
 
             // Discover Peer features
             const features = await discoverFeatures(fromDid, toDid)
-            console.log(features)
             chat.feautures = features
             await store.updateItem(models.getStorageKey(chatId, models.ModelType.CHAT), JSON.stringify(chat))
             await sendMessage(chat,
@@ -98,7 +97,6 @@ export async function sendBasicMsg(chatId: string, msg: string) {
     const fromDid = chat.fromDids[0]
     
     const resp = await sendBasicMessage(msg, fromDid, toDid)
-    console.log("RM RESP: "+resp)
     await sendMessage(chat,
         resp,
         MessageType.TEXT, contact.ROOTS_BOT)
@@ -135,21 +133,16 @@ export async function checkMessages(chatId: string) {
     const toDid = chat.toDids[0]
     const fromDid = chat.fromDids[0]
 
-    console.log('CHAT ID FOR CHECK MESSAGES: '+chatId)
     const [resp,messages] = await retrieveMessages(fromDid, toDid)
-    console.log("RM RESP: "+resp)
-    console.log('messages'+messages)
     //Check if resp is > 0 and if so, send messages
     if (messages.length > 0) {
         for (const msg of messages) {
-            console.log("MSG: "+msg)
             await sendMessage(chat,
                 "LOG:"+ '\n'+
                 "type: "+msg.type.replace("https://didcomm.org/","") + '\n' + 
                 "body: "+msg.body.content + '\n' + 
-                "from: "+msg.body.displayName
-                
-                , MessageType.TEXT , contact.ROOTS_BOT)
+                "from: "+msg.body.displayName, 
+                MessageType.TEXT , contact.ROOTS_BOT)
                 
         }
     } else {

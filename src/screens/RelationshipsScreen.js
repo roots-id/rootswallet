@@ -29,19 +29,14 @@ const RelationshipsScreen = ({route, navigation}) => {
         hasNewRels()
     }, [])
 
-    //evert 5 seconds, check for new messages fron all chats
+    //evert 6 seconds, gets all chats, finds the mediator and does a checkMessages
     useEffect(() => {
         const interval = setInterval(async () => {
-            console.log("checking for new messages")
             const result =  getChatItems()
-            console.log('breakkkkkk')
             for (let i =0; i < result.length; i++  ) {
-                //check if index >1 
                 let res = result[i]
-                console.log('res', res)
                 if (res.id == 'Mediator') {
-                    console.log('MEDIAOTR CHECKING MESSAGESSS')
-                    console.log(res.id)
+                    console.log("checking messages for mediator")
                     await checkMessages(res.id)
                 }
             };
