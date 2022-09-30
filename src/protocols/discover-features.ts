@@ -53,6 +53,7 @@ export async function receiveDiscoverFeatures(msg: any) {
             case "https://didcomm.org/discover-features/2.0/disclose":
                 return JSON.parse(msg.message).body.disclosures
             case "https://didcomm.org/discover-features/2.0/queries":
+                console.log('QUERY NOT IMPLEMENTED')
                 return "NOT IMPLEMENTED"
             default:
                 break;

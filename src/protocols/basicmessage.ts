@@ -1,5 +1,8 @@
 import {logger} from "../logging";
 import { sendMessage, pack } from "../didcommv2";
+import { getChatItem, MessageType,importContact,getAllChats,sendMessages } from '../roots'
+import * as contact from '../relationships'
+import { constants } from "buffer";
 
 export async function sendBasicMessage(content: string, from: string, to: string) {
     try {
@@ -24,6 +27,24 @@ export async function sendBasicMessage(content: string, from: string, to: string
 
 export async function receiveBasicMessage(msg: any) {
     const content = JSON.parse(msg.message).body.content
+    const relName = JSON.parse(msg.message).body.displayName
+    const from = msg.from
+    console.log('from basic message,', from)
+    console.log('relName basic message,', relName)
+    let chat = await getChatItem(relName)
+
+    //if chat is undefined, create a new chat
+    if (typeof chat === 'undefined') {
+        await importContact({
+            displayName: relName,
+            displayPictureUrl: contact.prismLogo,
+            did: from
+        })
+    }
+    chat = await getChatItem(relName)
+    logger('chatssssss', chat)
+    const msgs = await sendMessages(chat, [content], 'textMsgType', 'RootsHelper')
+
     logger("Basic Message received:", content)
     return content
 }

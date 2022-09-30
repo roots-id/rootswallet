@@ -27,7 +27,8 @@ export enum MessageType {
     MEDIATOR_REQUEST_MEDIATE = "mediatorRequestMediate",
     MEDIATOR_KEYLYST_UPDATE = "mediatorKeyListUpdate",
     MEDIATOR_STATUS_REQUEST = "mediatorStatusReuqest",
-    SHOW_QR_CODE = "showQRCode"
+    SHOW_QR_CODE = "showQRCode",
+    MEDIATOR_QUERY_PROTOCOLS = "mediatorQueryProtocol2"
 }
 
 //meaningful literals
@@ -449,7 +450,7 @@ export function getChatItem(chatAlias: string) {
 }
 
 //TODO make order of chats deterministic (likely should be most recent first)
-function getChatItems() {
+export function getChatItems() {
     logger("roots - getting chat items")
     const chatItemJsonArray = store.getItems(allChatsRegex)
     logger("roots - got chat items", String(chatItemJsonArray))

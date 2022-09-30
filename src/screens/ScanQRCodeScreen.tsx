@@ -11,12 +11,13 @@ import {IconButton, Title} from 'react-native-paper';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
 import {brandLogo, getDemoRel, getUserId} from '../relationships';
-import {getDid, importContact, importVerifiedCredential, isDemo} from '../roots'
+import {getDid, importContact, importVerifiedCredential, isDemo, setDemo} from '../roots'
 import React from 'react';
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BarCodeEvent} from "expo-barcode-scanner/src/BarCodeScanner";
 import {styles} from "../styles/styles";
 import { decodeOOBURL } from '../protocols';
+const OOB_URL = 'https://mediator.rootsid.cloud/?_oob=eyJ0eXBlIjoiaHR0cHM6Ly9kaWRjb21tLm9yZy9vdXQtb2YtYmFuZC8yLjAvaW52aXRhdGlvbiIsImlkIjoiYTJmYzI4NjMtZjhjNi00N2Y5LWEzZDMtODg3MWNlNzA0YmFiIiwiZnJvbSI6ImRpZDpwZWVyOjIuRXo2TFNvN2dyZUFRNEdaUnVwYXJRQzFjeXN4dWJjQ0ZqVlZaZHN2RFNvY0VrTDk3MS5WejZNa3RpRmg3aDNqSGNIdHhvU1dDTmoxb0I1WVJzVGdvWDhTbkRvOUhCWm1kUmR4LlNleUpwWkNJNkltNWxkeTFwWkNJc0luUWlPaUprYlNJc0luTWlPaUpvZEhSd2N6b3ZMMjFsWkdsaGRHOXlMbkp2YjNSemFXUXVZMnh2ZFdRaUxDSmhJanBiSW1ScFpHTnZiVzB2ZGpJaVhYMCIsImJvZHkiOnsiZ29hbF9jb2RlIjoicmVxdWVzdC1tZWRpYXRlIiwiZ29hbCI6IlJlcXVlc3RNZWRpYXRlIiwiYWNjZXB0IjpbImRpZGNvbW0vdjIiLCJkaWRjb21tL2FpcDI7ZW52PXJmYzU4NyJdfX0'
 
 
 export default function ScanQRCodeScreen({route, navigation}: CompositeScreenProps<any, any>) {
@@ -26,6 +27,49 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
     const [timeOutId, setTimeOutId] = useState<NodeJS.Timeout>();
     const modelType = route.params.type
 
+    const handleMediatorDemo = async () => {
+        if (!scanned && isDemo()) {
+            let data = OOB_URL
+            if (data.startsWith("http") || data.startsWith("ws")){
+                if (data.toLowerCase().includes("_oobid")){
+                    const response = await fetch(data);
+                    data = response.url
+                }
+                if (data.toLowerCase().includes("_oob")){
+                    setDemo(false)
+                    console.log("Scan QR - OOB URL= " + data)
+                    const decodedMsg = await decodeOOBURL(data);
+                    //const jsonData = JSON.parse(decodedMsg)
+                    console.log(decodedMsg)
+                    const personLogo = require('../assets/smallBWPerson.png');
+                    await importContact({
+                        displayName: "Mediator",
+                        displayPictureUrl: personLogo,
+                        did: decodedMsg.from,
+                    })
+                }
+            } else {
+                // TODO HANDLE JSON ERROR
+                const jsonData = JSON.parse(data)
+                if (modelType == "credential") {
+                    console.log("Scan QR - Importing scanned vc",jsonData)
+                    await importVerifiedCredential(jsonData)
+                } else if (modelType == "contact") {
+                    console.log("Scan QR - Importing scanned contact",jsonData)
+                    await importContact(jsonData)
+                }
+            }
+
+
+
+        }
+
+
+
+
+
+        clearAndGoBack()
+    }
     const handleDemo = async () => {
         if (!scanned && isDemo()) {
             setScanned(true)
@@ -54,7 +98,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
             const {status} = await BarCodeScanner.requestPermissionsAsync();
             setHasPermission(status === 'granted');
             if (isDemo()) {
-                setTimeOutId(setTimeout(handleDemo, 10000));
+                setTimeOutId(setTimeout(handleMediatorDemo, 5000));
             }
         }
 

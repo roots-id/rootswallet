@@ -7,11 +7,15 @@ import {
     PRISM_BOT, ROOTS_BOT, hasNewRels
 } from '../relationships'
 import {styles} from "../styles/styles";
-
+import {checkMessages} from '../roots/peerConversation'
+import { getChatItems } from '../roots';
 const RelationshipsScreen = ({route, navigation}) => {
     console.log("rel screen - params", route.params)
     const [refresh, setRefresh] = useState(true)
     const [contacts, setContacts] = useState([])
+
+
+    
 
     useEffect(() => {
         addRefreshTrigger(() => {
@@ -24,6 +28,27 @@ const RelationshipsScreen = ({route, navigation}) => {
         })
         hasNewRels()
     }, [])
+
+    //evert 5 seconds, check for new messages fron all chats
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            console.log("checking for new messages")
+            const result =  getChatItems()
+            console.log('breakkkkkk')
+            for (let i =0; i < result.length; i++  ) {
+                //check if index >1 
+                let res = result[i]
+                console.log('res', res)
+                if (res.id == 'Mediator') {
+                    console.log('MEDIAOTR CHECKING MESSAGESSS')
+                    console.log(res.id)
+                    await checkMessages(res.id)
+                }
+            };
+        }, 6000);
+        return () => clearInterval(interval);
+    }, []);
+
 
     return (
         <View style={styles.container}>
