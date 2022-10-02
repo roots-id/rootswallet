@@ -6,11 +6,10 @@ import { pack } from "./PackUnpack";
 export async function sendDIDCommMessage(packMsg: any, to: string) {
     try {
         const didDoc = await resolveDIDPeer(to)
-        var serviceEndpoint = didDoc.service[0].serviceEndpoint
+        var serviceEndpoint = typeof didDoc.service[0].serviceEndpoint === 'string'? didDoc.service[0].serviceEndpoint : didDoc.service[0].serviceEndpoint[0].uri
         var packed = packMsg
         var endpoint = serviceEndpoint
-        // TODO case when there are several nested forwards
-        if (serviceEndpoint.startsWith("did:")) {
+        if (serviceEndpoint.startsWith("did:")){
             const didDocNext = await resolveDIDPeer(serviceEndpoint)
             endpoint = didDocNext.service[0].serviceEndpoint
             const newDID = await createDIDPeer(null,null)
@@ -26,6 +25,8 @@ export async function sendDIDCommMessage(packMsg: any, to: string) {
                 [JSON.parse(packMsg)]
             )
         }
+        
+
         console.log("ServiceEndpoint:",endpoint)
         // TODO add WebSocket transport
         const resp = await fetch(endpoint, {
