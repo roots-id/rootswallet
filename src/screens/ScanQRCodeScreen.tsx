@@ -10,7 +10,7 @@ import {
 import {IconButton, Title} from 'react-native-paper';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
-import {brandLogo, getDemoRel, getUserId} from '../relationships';
+import { getDemoRel, getUserId} from '../relationships';
 import {getDid, importContact, importVerifiedCredential, isDemo} from '../roots'
 import React from 'react';
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
@@ -68,6 +68,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
         setScanned(true);
         console.log("Scan QR - scanned data", modelType, type, data)
         if (data.startsWith("http") || data.startsWith("ws")){
+            console.log(data)
             if (data.toLowerCase().includes("_oobid")){
                 const response = await fetch(data);
                 data = response.url
@@ -79,7 +80,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                 //const jsonData = JSON.parse(decodedMsg)
                 console.log(decodedMsg)
                 const personLogo = require('../assets/smallBWPerson.png');
-                const displayName = decodedMsg.body.label !== undefined? decodedMsg.body.label : "Agent="+uuid.v4().toString().slice(-5)
+                const displayName = decodedMsg.body.label !== undefined? decodedMsg.body.label : "Agent-"+uuid.v4().toString().slice(-5)
                 await importContact({
                     displayName: displayName,
                     displayPictureUrl: personLogo,
@@ -99,8 +100,6 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
             }
         }
         clearAndGoBack()
-
-
     };
 
     const clearAndGoBack = () => {

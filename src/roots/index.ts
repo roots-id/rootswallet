@@ -27,6 +27,7 @@ export enum MessageType {
     MEDIATOR_REQUEST_MEDIATE = "mediatorRequestMediate",
     MEDIATOR_KEYLYST_UPDATE = "mediatorKeyListUpdate",
     MEDIATOR_STATUS_REQUEST = "mediatorStatusReuqest",
+    MEDIATOR_RETRIEVE_MESSAGES = "mediatorRetrieveMessages",
     SHOW_QR_CODE = "showQRCode"
 }
 
@@ -183,7 +184,7 @@ export async function importVerifiedCredential(verCred: models.vc): Promise<bool
 
 export async function importContact(con: models.contactDecorator): Promise<boolean> {
     console.log("roots - importing contact", JSON.stringify(con))
-    await initRoot(utils.replaceSpecial(con.displayName), contact.getUserId(), con.did, con.displayName, con.displayPictureUrl)
+    await initRoot(con.id, contact.getUserId(), con.did, con.displayName, con.displayPictureUrl)
     //intentionally not awaiting
     const c = contact.getContactByDid(con.did)
     if(c) {
@@ -209,20 +210,20 @@ export function getPrismHost() {
 }
 
 //--------------- Roots ----------------------
-export async function initRoot(alias: string, fromDidAlias: string, toDid: string, display = alias, avatar = contact.personLogo) {
-    logger("roots - creating root", alias, fromDidAlias, toDid, display, avatar)
+export async function initRoot(id: string, fromDidAlias: string, toDid: string, display = id, avatar = contact.personLogo, fromDid?:string) {
+    logger("roots - creating root", id, fromDidAlias, toDid, display, avatar)
     try {
-        const relCreated = await contact.createRelItem(alias, display, avatar, toDid);
+        const relCreated = await contact.createRelItem(id, display, avatar, toDid);
         logger("roots - rel created/existed?", relCreated)
-        const con = contact.getContactByAlias(alias)
+        const con = contact.getContactByAlias(id)
         logger("roots - getting rel DID document")
-        if (con && alias !== contact.PRISM_BOT && alias !== contact.ROOTS_BOT) {
+        if (con && id !== contact.PRISM_BOT && id !== contact.ROOTS_BOT) {
             logger("roots - creating chat for rel", con.id)
-            const chat = await createChat(alias, fromDidAlias, toDid, display)
+            const chat = await createChat(id, fromDidAlias, toDid, display, fromDid)
             //not awaiting on purpose
             if (chat) {
                 //TODO what should a new chat trigger?
-                startConversation(alias)
+                startConversation(id)
 
 
                 //hasNewChat(getChatItem(alias));
@@ -275,6 +276,18 @@ async function createDid(didAlias: string): Promise<models.did | undefined> {
                     const newDid = getDid(didAlias)
                     logger("roots - did added to wallet", JSON.stringify(newDid))
                     return newDid;
+                // This code is for Rodo's build problem
+                // const newDid = {
+                //     alias: "RODO_FAKE_DID",
+                //     didIdx: 0,
+                //     keyPairs: [],
+                //     operationHash: "fake",
+                //     uriCanonical: "fake",
+                //     uriLongForm: "fake",
+                // }
+
+                // return newDid
+                
                 } else {
                     console.error("roots - could not save wallet with new DID", prismWalletJson)
                 }
@@ -375,9 +388,9 @@ export async function publishPrismDid(didAlias: string): Promise<boolean> {
 }
 
 //------------------ Chats  --------------
-export async function createChat(alias: string, fromDidAlias: string, toDid: string, title = "Untitled") {
+export async function createChat(alias: string, fromDidAlias: string, toDid: string, title = "Untitled", fromDid?: string) {
     logger("roots - Creating chat", alias, "for toDid", toDid, "and fromDidAlias", fromDidAlias, "w/ title", title)
-    const chatItemCreated = await createChatItem(alias, fromDidAlias, toDid, title)
+    const chatItemCreated = await createChatItem(alias, fromDidAlias, toDid, title, fromDid)
     logger("roots - chat item created/existed?", chatItemCreated)
     const chatItem = getChatItem(alias)
     logger("roots - chat item", chatItem)
@@ -386,10 +399,10 @@ export async function createChat(alias: string, fromDidAlias: string, toDid: str
         logger("Created chat and added welcome to chat", chatItem.title)
         if (!(alias === contact.getUserId())) {
             const chMsg = await sendMessage(chatItem,
-                "You are now in contact with " + alias,
+                "You are now in contact with " + title,
                 MessageType.TEXT, contact.ROOTS_BOT)
             const statusMsg = await sendMessage(getChatItem(contact.getUserId()),
-                "New contact added: " + alias,
+                "New contact added: " + title,
                 MessageType.TEXT, contact.ROOTS_BOT)
         }
         return true;
@@ -399,13 +412,13 @@ export async function createChat(alias: string, fromDidAlias: string, toDid: str
     }
 }
 
-async function createChatItem(chatAlias: string, fromDidAlias: string, toDid: string,  title = chatAlias) {
+async function createChatItem(chatAlias: string, fromDidAlias: string, toDid: string,  title = chatAlias, fromDid?:string) {
     logger('roots - Creating a new chat item', chatAlias)
     if (getChatItem(chatAlias)) {
         logger('roots - chat item already exists', chatAlias)
         return true
     } else {
-        const chatItem = models.createChat(chatAlias, fromDidAlias, [], [toDid], title)
+        const chatItem = models.createChat(chatAlias, fromDidAlias, fromDid? [fromDid]:[], [toDid], title)
         const savedChat = await store.saveItem(models.getStorageKey(chatAlias, models.ModelType.CHAT), JSON.stringify(chatItem))
         if (savedChat) {
             logger('roots - new chat saved', chatAlias)
@@ -449,7 +462,7 @@ export function getChatItem(chatAlias: string) {
 }
 
 //TODO make order of chats deterministic (likely should be most recent first)
-function getChatItems() {
+export function getChatItems() {
     logger("roots - getting chat items")
     const chatItemJsonArray = store.getItems(allChatsRegex)
     logger("roots - got chat items", String(chatItemJsonArray))
@@ -600,6 +613,18 @@ function addQuickReply(msg: models.message) {
                 {
                     title: "QR Code",
                     value: MessageType.SHOW_QR_CODE,
+                    messageId: msg.id,
+                }]
+        }
+    }
+    if(msg.type === MessageType.MEDIATOR_RETRIEVE_MESSAGES) {
+        msg.quickReplies = {
+            type: 'checkbox',
+            keepIt: true,
+            values: [
+                {
+                    title: "QR Code",
+                    value: MessageType.MEDIATOR_RETRIEVE_MESSAGES,
                     messageId: msg.id,
                 }]
         }

@@ -1,5 +1,5 @@
 import {logger} from "../logging";
-import { sendMessage, pack } from "../didcommv2";
+import { sendDIDCommMessage, pack } from "../didcommv2";
 
 export async function mediateRequest(from: string, to: string) {
     try {
@@ -13,7 +13,7 @@ export async function mediateRequest(from: string, to: string) {
             true,
             null
           )
-        return await sendMessage(msgPacked, to)
+        return await sendDIDCommMessage(msgPacked, to)
     } catch (error: any) {
         logger("coordinate-mediation - Error", error)
     }
@@ -31,7 +31,7 @@ export async function keylistUpdate(updates: any[], from: string, to: string) {
             true,
             null
           )
-        return await sendMessage(msgPacked, to)
+        return await sendDIDCommMessage(msgPacked, to)
     } catch (error: any) {
         logger("coordinate-mediation - Error", error)
     }

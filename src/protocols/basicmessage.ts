@@ -1,5 +1,7 @@
 import {logger} from "../logging";
-import { sendMessage, pack } from "../didcommv2";
+import { sendDIDCommMessage, pack } from "../didcommv2";
+import {  publishTextMessage } from '../roots/peerConversation'
+
 
 export async function sendBasicMessage(content: string, from: string, to: string) {
     try {
@@ -16,7 +18,7 @@ export async function sendBasicMessage(content: string, from: string, to: string
             true,
             null
           )
-        return await sendMessage(packedMsg, to)
+        return await sendDIDCommMessage(packedMsg, to)
     } catch (error: any) {
         logger("basicmessage - Error", error)
     }
@@ -25,5 +27,9 @@ export async function sendBasicMessage(content: string, from: string, to: string
 export async function receiveBasicMessage(msg: any) {
     const content = JSON.parse(msg.message).body.content
     logger("Basic Message received:", content)
+    const from = msg.from
+    const to = msg.to
+    await publishTextMessage(content, to, from)
+
     return content
 }

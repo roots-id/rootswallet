@@ -372,21 +372,21 @@ export function createRel(relAlias: string, relName: string, relPicUrl: string, 
 }
 
 //TODO unify aliases and storageKeys?
-export async function createRelItem(alias: string, name: string, pic=personLogo, did: string) {
+export async function createRelItem(id: string, name: string, pic=personLogo, did: string) {
     try {
-        logger("rels - create rel item",alias,name,pic);
-        if(getContactByAlias(alias)) {
-            logger("rels - rel already exists",alias)
+        logger("rels - create rel item",id,name,pic);
+        if(getContactByAlias(id)) {
+            logger("rels - rel already exists",id)
             return true;
         } else {
-            logger("rels - rel did not exist",alias)
-            const relItem = createRel(alias, name, pic,did)
+            logger("rels - rel did not exist",id)
+            const relItem = createRel(id, name, pic,did)
             const result = updateContact(relItem)
-            logger("rels - created rel",alias,"?",result)
+            logger("rels - created rel",id,"?",result)
             return result;
         }
     } catch(error: any) {
-        console.error("Failed to create rel",alias,error,error.stack)
+        console.error("Failed to create rel",id,error,error.stack)
         return false
     }
 }

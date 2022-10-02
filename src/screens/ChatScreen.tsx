@@ -5,14 +5,13 @@ import {Bubble, GiftedChat, IMessage, InputToolbar, InputToolbarProps, Reply, Us
 import * as contacts from '../relationships'
 import * as models from "../models";
 import {showQR} from '../qrcode'
-import {asContactShareable, getContactByAlias, getContactByDid, showRel} from '../relationships'
+import { getContactByAlias, getContactByDid, showRel} from '../relationships'
 import * as roots from '../roots';
 import Loading from '../components/Loading';
 import {styles} from "../styles/styles";
-import {contactDecorator} from "../models";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BubbleProps} from "react-native-gifted-chat/lib/Bubble";
-import { checkMessages, createOOBInvitation, requestMediate, sendBasicMsg } from '../roots/peerConversation';
+import { checkMessages, createOOBInvitation, requestMediate, sendBasicMsg, retrieveMessagesFromMediator } from '../roots/peerConversation';
 
 export default function ChatScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("ChatScreen - route params", route.params)
@@ -182,6 +181,8 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     await checkMessages(chat.id)
                 } else if (reply.value === roots.MessageType.MEDIATOR_KEYLYST_UPDATE) {
                     await createOOBInvitation(chat.id)
+                } else if (reply.value === roots.MessageType.MEDIATOR_RETRIEVE_MESSAGES) {
+                    await retrieveMessagesFromMediator(chat.id)
                 } else if (reply.value === roots.MessageType.SHOW_QR_CODE) {
                     await showQR(navigation, roots.getMessageById(reply.messageId)?.data.url)
                 } else {

@@ -198,7 +198,6 @@ android {
         exclude 'META-INF/LICENSE.md'
         exclude 'google/protobuf/compiler/plugin.proto'
         exclude 'META-INF/LICENSE-notice.md'
-        exclude 'META-INF/*.kotlin_module'
     }
 }
 

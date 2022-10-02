@@ -1,5 +1,5 @@
 import {logger} from "../logging";
-import { sendMessage, pack } from "../didcommv2";
+import { sendDIDCommMessage, pack } from "../didcommv2";
 
 export async function sendPing(from: string, to: string) {
     try {
@@ -14,7 +14,7 @@ export async function sendPing(from: string, to: string) {
             true,
             null
           )
-        return await sendMessage(pingMsgPacked, to)
+        return await sendDIDCommMessage(pingMsgPacked, to)
     } catch (error: any) {
         logger("trust-ping - Error", error)
     }
@@ -33,7 +33,7 @@ export async function sendPingResponse(from: string, to: string) {
             true,
             null
           )
-        await sendMessage(pingMsgPacked, to)
+        await sendDIDCommMessage(pingMsgPacked, to)
     } catch (error: any) {
         logger("trust-ping - Error", error)
     }

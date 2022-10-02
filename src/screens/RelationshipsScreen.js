@@ -2,6 +2,8 @@ import RelRow from '../components/RelRow'
 import React, {useEffect, useState} from 'react';
 import {FlatList, SafeAreaView, View} from 'react-native';
 import {Divider} from 'react-native-paper';
+import {checkMessages} from '../roots/peerConversation'
+import { getChatItems } from '../roots';
 import {
     getRelationships, addRefreshTrigger,
     PRISM_BOT, ROOTS_BOT, hasNewRels
@@ -24,6 +26,22 @@ const RelationshipsScreen = ({route, navigation}) => {
         })
         hasNewRels()
     }, [])
+
+
+    //every 5 seconds, gets all chats, finds the mediator and does a checkMessages
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            const result =  getChatItems()
+            for (let i =0; i < result.length; i++  ) {
+                let res = result[i]
+                if (res.mediator !== undefined) {
+                    console.log("checking messages for mediator")
+                    await checkMessages(res.id)
+                }
+            };
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <View style={styles.container}>

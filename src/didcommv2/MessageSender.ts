@@ -3,7 +3,7 @@ import { receiveMessage } from "./MessageReceiver";
 import {createDIDPeer, resolveDIDPeer} from "../didpeer"
 import { pack } from "./PackUnpack";
 
-export async function sendMessage(packMsg: any, to: string) {
+export async function sendDIDCommMessage(packMsg: any, to: string) {
     try {
         const didDoc = await resolveDIDPeer(to)
         var serviceEndpoint = didDoc.service[0].serviceEndpoint

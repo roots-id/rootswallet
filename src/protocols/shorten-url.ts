@@ -1,5 +1,5 @@
 import {logger} from "../logging";
-import { sendMessage, pack } from "../didcommv2";
+import { sendDIDCommMessage, pack } from "../didcommv2";
 
 
 export async function shortenURLRequest(from: string, to: string, url: string, validityInSecond: number) {
@@ -19,7 +19,7 @@ export async function shortenURLRequest(from: string, to: string, url: string, v
             true,
             null
           )
-        return await sendMessage(msgPacked, to)
+        return await sendDIDCommMessage(msgPacked, to)
     } catch (error: any) {
         logger("shorten-url - Error", error)
     }
@@ -40,7 +40,7 @@ export async function invalidateShortURL(from: string, to: string, url: string) 
             true,
             null
           )
-        return await sendMessage(msgPacked, to)
+        return await sendDIDCommMessage(msgPacked, to)
     } catch (error: any) {
         logger("shorten-url - Error", error)
     }
