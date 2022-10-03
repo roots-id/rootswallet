@@ -37,22 +37,22 @@ class DIDDocResolverPeerDID : DIDDocResolver {
                             value = toJson(it.verMaterial.value)
                         )
                     )
-                },
-                didCommServices = didDoc.service
-                    ?.map {
-                        when (it) {
-                            is DIDCommServicePeerDID ->
-                                DIDCommService(
-                                    id = it.id,
-                                    serviceEndpoint = it.serviceEndpoint ?: "",
-                                    routingKeys = it.routingKeys ?: emptyList(),
-                                    accept = it.accept ?: emptyList()
-                                )
-                            else -> null
-                        }
-                    }
-                    ?.filterNotNull()
-                    ?: emptyList()
+                }, emptyList()
+                // didCommServices = didDoc.service
+                //     ?.map {
+                //         when (it) {
+                //             is DIDCommServicePeerDID ->
+                //                 DIDCommService(
+                //                     id = it.id,
+                //                     serviceEndpoint = it.serviceEndpoint ?: "",
+                //                     routingKeys = it.routingKeys ?: emptyList(),
+                //                     accept = it.accept ?: emptyList()
+                //                 )
+                //             else -> null
+                //         }
+                //     }
+                //     ?.filterNotNull()
+                //     ?: emptyList()
             )
         )
     }

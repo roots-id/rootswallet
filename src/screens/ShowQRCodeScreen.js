@@ -15,7 +15,7 @@ import {styles} from "../styles/styles";
 export default function ShowQRCodeScreen({route, navigation}) {
     const data = route.params.qrdata
     console.log("raw qr data", data)
-    const jsonData = JSON.stringify(data)
+    const jsonData = typeof data === 'string'? data : JSON.stringify(data)
     console.log("json qr data", jsonData)
     const qrView = 1
     const textView = 2

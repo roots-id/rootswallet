@@ -1,5 +1,5 @@
 import {logger} from "../logging";
-import { sendMessage, pack } from "../didcommv2";
+import { sendDIDCommMessage, pack } from "../didcommv2";
 
 
 export async function credentialRequest(from: string, to: string, credential: any) {
@@ -17,7 +17,7 @@ export async function credentialRequest(from: string, to: string, credential: an
             true,
             [credential]
           )
-        return await sendMessage(msgPacked, to)
+        return await sendDIDCommMessage(msgPacked, to)
     } catch (error: any) {
         logger("issue-credential - Error", error)
     }

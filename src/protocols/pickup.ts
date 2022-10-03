@@ -1,12 +1,12 @@
 import {logger} from "../logging";
-import { sendMessage, pack, receiveMessage } from "../didcommv2";
+import { sendDIDCommMessage, pack, receiveMessage } from "../didcommv2";
 
 export async function retrieveMessages(from: string, to: string){
     try {
         const messageCount = await statusRequest(from, to)
         logger("Pickup message count: "+messageCount)
         if (messageCount>0){
-            const attachments = await deliveryRequest(1,from, to)
+            const attachments = await deliveryRequest(5,from, to)
             await processDelivery(attachments, from, to)
         } 
         return messageCount
@@ -27,7 +27,7 @@ export async function statusRequest(from: string, to: string) {
             true,
             null
           )
-        return await sendMessage(msgPacked, to)
+        return await sendDIDCommMessage(msgPacked, to)
     } catch (error: any) {
         logger("pickup - Error", error)
     }
@@ -45,7 +45,7 @@ export async function deliveryRequest(limit: number, from: string, to: string) {
             true,
             null
           )
-        return await sendMessage(msgPacked, to)
+        return await sendDIDCommMessage(msgPacked, to)
     } catch (error: any) {
         logger("pickup - Error", error)
     }
@@ -63,7 +63,7 @@ export async function messageReceived(ids: string[], from: string, to: string) {
             true,
             null
           )
-        return await sendMessage(msgPacked, to)
+        return await sendDIDCommMessage(msgPacked, to)
     } catch (error: any) {
         logger("pickup - Error", error)
     }
