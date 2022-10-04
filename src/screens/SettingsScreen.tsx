@@ -17,7 +17,8 @@ import FormButton from "../components/FormButton";
 export default function SettingsScreen({route, navigation}: CompositeScreenProps<any, any>) {
     const [demoMode, setDemoMode] = useState<boolean>(roots.isDemo())
     const [host, setHost] = useState<string>(roots.getPrismHost());
-    const [mediator, setMediator] = useState<string>();
+    const [showMediator, setMediatorShow] = useState<boolean>(roots.isShowMediator());
+    const [mediatior, setMediator] = useState<string>(roots.getMediatorURL());
     const {current} = useCardAnimation();
 
     useEffect(() => {
@@ -27,6 +28,14 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
     useEffect(() => {
         roots.setDemo(demoMode)
     }, [demoMode]);
+
+    useEffect(() => {
+        roots.setShowMediator(showMediator)
+    }, [showMediator]);
+
+    useEffect(() => {
+        roots.setMediatorURL(mediatior)
+    }, [mediatior]);
 
     return (
         <View
@@ -71,17 +80,19 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
                 <Text/>
                 <View style={{flexDirection: 'row'}}>
                     <Text style={styles.listItemCenteredBlack}>Mediator: </Text>
-                    <View style={{backgroundColor: '#251520', width: "80%"}}>
-                        <Picker
-                            style={styles.clickableListTitle}
-                            mode="dropdown"
-                            dropdownIconColor="#e69138"
-                            numberOfLines={5}
-                            selectedValue={host}
-                            onValueChange={(itemValue) => setMediator(itemValue)}>
-                            <Picker.Item label="Roots Test Mediator" value="https://mediator.rootsid.cloud/oob_url"/>
-                        </Picker>
+                    <View style={{backgroundColor: '#251520', width: "60%", height:'60%', marginTop:10}}>
+                        <Text
+                            //style font color white and size
+                            style={{color: '#e69138', fontSize: 18, textAlign: 'center',justifyContent: 'center',alignItems: 'center',paddingTop : 5}}
+                            >
+                                {mediatior}
+                        </Text>
                     </View>
+                    <IconButton
+                    icon="receipt"
+                    size={36}
+                    color="#e69138"
+                    onPress={() => navigation.navigate('MediatorLogsScreen')}/>
                 </View>
                 <Text />
                 <View style={{flexDirection: 'row',}}>

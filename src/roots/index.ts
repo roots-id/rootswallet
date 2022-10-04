@@ -55,7 +55,8 @@ export const POLL_TIME = 2000
 export const DEFAULT_PRISM_HOST = "ppp.atalaprism.io"
 LogBox.ignoreAllLogs(true)
 let demo = false;
-
+let showMediator = false;
+let mediatorUrl = 'No mediator set';
 type process = {
     endDate?: number,
     polling: NodeJS.Timer,
@@ -1193,8 +1194,7 @@ export async function issueDemoPublishDidCredential(chat: models.chat, msgId: st
                 const contentJson = JSON.stringify(content)
                 return issueDemoCredential(chat, msgId, contentJson)
             } else {
-                logger("roots - Couldn't issue demo credential, is the chat published",
-                    didPub, "was the credential already found", alreadyIssued)
+                logger("roots - Couldn't issue demo credential, is the chat published",didPub, "was the credential already found", alreadyIssued)
             }
         } else {
             console.error("could not get wallet", wallet.getWalletName(), wal)
@@ -1230,4 +1230,23 @@ export function setDemo(demoMode: boolean): void {
 
 function rootsDid(alias: string) {
     return "did:root:" + utils.replaceSpecial(alias);
+}
+
+
+export function isShowMediator() {
+    return showMediator
+}
+
+export function setShowMediator(show: boolean): void {
+    showMediator = show
+    logger("roots - show mediator set to", showMediator)
+}
+
+export function getMediatorURL(){
+    return mediatorUrl
+}
+
+export function setMediatorURL(url: string): void {
+    mediatorUrl = url
+    logger("roots - mediator url set to", mediatorUrl)
 }

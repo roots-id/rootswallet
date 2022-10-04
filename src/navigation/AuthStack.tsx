@@ -17,6 +17,7 @@ import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import WalletScreen from "../screens/WalletScreen";
 import WorkflowsScreen from "../screens/WorkflowsScreen";
+import MediatorLogsScreen from "../screens/MediatorLogsScreen";
 
 import AuthContext from '../context/AuthenticationContext';
 
@@ -263,6 +264,7 @@ export default function AuthStack() {
                     <Stack.Screen name="Settings" component={SettingsScreen}/>
                     <Stack.Screen name="Save" component={SaveScreen}/>
                     <Stack.Screen name="Developers" component={DevStack}/>
+                    <Stack.Screen name="MediatorLogsScreen" component={MediatorLogsScreen}/>
                 </Stack.Group>
             </Stack.Navigator>
         </AuthContext.Provider>
