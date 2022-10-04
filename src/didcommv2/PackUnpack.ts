@@ -36,14 +36,16 @@ export async function pack(msg: any, from: string, to: string, messageType: stri
 export async function unpack(packMsg: any) {
     try {
         // TODO case with several key agreement in did doc
-        const recipient = JSON.parse(packMsg.toString()).recipients[0].header.kid.split("#")[0]
+        console.log("RM HERE")
+        console.log(packMsg)
+        const recipient = packMsg.recipients[0].header.kid.split("#")[0]
         const didDoc = await resolveDIDPeer(recipient)
         const kid = didDoc.keyAgreement[0].id
         const key = JSON.parse(await getItem(kid)!)
         var privateKey = key.privateJwk
         privateKey.kid = kid
         var unpacked = await DIDCommV2Module.unpack(
-            packMsg, 
+            JSON.stringify(packMsg), 
             privateKey, 
           )
         return unpacked

@@ -75,7 +75,7 @@ export async function messageReceived(ids: string[], from: string, to: string) {
             const msgPacked = attachment.data.json
             const msgId = attachment.id
             await messageReceived([msgId], from, to)
-            receiveMessage(JSON.stringify(msgPacked))
+            receiveMessage(msgPacked)
         })
     } catch (error: any) {
         logger("pickup - Error", error)
