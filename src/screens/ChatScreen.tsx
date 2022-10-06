@@ -25,7 +25,8 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
 
     useEffect(() => {
         console.log("ChatScreen - chat set", chat)
-        const chatSession = roots.startChatSession(chat.id, {
+        const chatSession = roots.startChatSession(chat.id, 
+            {
             chat: chat,
             onReceivedMessage: (message) => {
                 if (message && GiftedChat) {

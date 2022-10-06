@@ -5,11 +5,12 @@ import {PrismModule} from '../prism'
 import {LogBox} from "react-native";
 import * as contact from '../relationships'
 import { Reply} from 'react-native-gifted-chat';
-import * as store from '../store'
+import * as store from '../store/'
 import * as utils from '../utils'
 import * as wallet from '../wallet'
 import {hasNewCred} from "../credentials";
 import { startConversation } from './peerConversation';
+import * as AsyncStore from '../store/AsyncStore'
 
 //msg types
 export enum MessageType {
@@ -55,7 +56,8 @@ export const POLL_TIME = 2000
 export const DEFAULT_PRISM_HOST = "ppp.atalaprism.io"
 LogBox.ignoreAllLogs(true)
 let demo = false;
-
+let showMediator = false;
+let mediatorUrl = '';
 type process = {
     endDate?: number,
     polling: NodeJS.Timer,
@@ -1193,8 +1195,7 @@ export async function issueDemoPublishDidCredential(chat: models.chat, msgId: st
                 const contentJson = JSON.stringify(content)
                 return issueDemoCredential(chat, msgId, contentJson)
             } else {
-                logger("roots - Couldn't issue demo credential, is the chat published",
-                    didPub, "was the credential already found", alreadyIssued)
+                logger("roots - Couldn't issue demo credential, is the chat published",didPub, "was the credential already found", alreadyIssued)
             }
         } else {
             console.error("could not get wallet", wallet.getWalletName(), wal)
@@ -1230,4 +1231,36 @@ export function setDemo(demoMode: boolean): void {
 
 function rootsDid(alias: string) {
     return "did:root:" + utils.replaceSpecial(alias);
+}
+
+
+export function isShowMediator() {
+    return showMediator
+}
+
+export function setShowMediator(show: boolean): void {
+    showMediator = show
+    logger("roots - show mediator set to", showMediator)
+}
+
+export async function getMediatorURL(): Promise<string> {
+    // return mediatorUrl if it is empty from storage
+    const mediatorUrl = await AsyncStore.getItem("mediatorUrl")
+    console.log("roots - mediatorUrl from storage", mediatorUrl)
+
+// if it is empty or undefined, set it to the null
+    if(!mediatorUrl) {
+        console.log("roots - mediatorUrl is empty, setting to null")
+        return 'no mediator found'
+    }
+    else{
+        console.log(mediatorUrl)
+        return mediatorUrl
+    }
+}
+
+export async function setMediatorURL(url: string): Promise<void> {
+    mediatorUrl = url
+    await AsyncStore.storeItem("mediatorUrl", url,true)
+    logger("roots - mediator url set to", mediatorUrl)
 }

@@ -19,7 +19,7 @@ const RelationshipsScreen = ({route, navigation}) => {
         addRefreshTrigger(() => {
             console.log("contacts screen - toggling refresh")
             setContacts(
-                getRelationships().filter(rel => rel.displayName !== PRISM_BOT && rel.displayName !== ROOTS_BOT)
+                getRelationships().filter(rel => rel.displayName !== PRISM_BOT && rel.displayName !== ROOTS_BOT&& rel.displayName !== 'Mediator')
             )
             setRefresh(!refresh)
             console.log("contacts screen - contacts size", contacts.length)

@@ -11,7 +11,7 @@ import {IconButton, Title} from 'react-native-paper';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
 import { getDemoRel, getUserId} from '../relationships';
-import {getDid, importContact, importVerifiedCredential, isDemo} from '../roots'
+import {getDid, importContact, importVerifiedCredential, isDemo, setMediatorURL} from '../roots'
 import React from 'react';
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BarCodeEvent} from "expo-barcode-scanner/src/BarCodeScanner";
@@ -19,7 +19,7 @@ import {styles} from "../styles/styles";
 import { decodeOOBURL } from '../protocols';
 import uuid from 'react-native-uuid';
 
-
+import {requestMediate} from '../roots/peerConversation';
 
 export default function ScanQRCodeScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("Scan QR - rout params", route.params)
@@ -73,12 +73,30 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                 const response = await fetch(data);
                 data = response.url
             }
+
+            const decodedMsg = await decodeOOBURL(data);
+            const personLogo = require('../assets/smallBWPerson.png');
             if (data.toLowerCase().includes("_oob")){
-                
+                if (data.toLowerCase().startsWith("https://mediator.rootsid.cloud") && decodedMsg.body.goal === "RequestMediate"){
+                    setMediatorURL('mediator.rootsid.cloud')
+                    clearAndGoBack()
+                    navigation.navigate('MediatorLogsScreen')
+                    await importContact({
+                        displayName: 'Mediator',
+                        displayPictureUrl: personLogo,
+                        did: decodedMsg.from,
+                        id: 'mediator'
+                    })
+                    
+
+
+                    // await requestMediate('mediator')
+                }
+                else{
+
                 console.log("Scan QR - OOB URL= " + data)
-                const decodedMsg = await decodeOOBURL(data);
                 //const jsonData = JSON.parse(decodedMsg)
-                console.log(decodedMsg)
+                console.log('decodedMsg',decodedMsg)
                 const personLogo = require('../assets/smallBWPerson.png');
                 const displayName = decodedMsg.body.label !== undefined? decodedMsg.body.label : "Agent-"+uuid.v4().toString().slice(-5)
                 await importContact({
@@ -87,6 +105,8 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                     did: decodedMsg.from,
                     id: uuid.v4().toString()
                 })
+
+            }
             }
         } else {
             // TODO HANDLE JSON ERROR
@@ -99,7 +119,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                 await importContact(jsonData)
             }
         }
-        clearAndGoBack()
+        
     };
 
     const clearAndGoBack = () => {
