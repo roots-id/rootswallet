@@ -10,6 +10,7 @@ import * as utils from '../utils'
 import * as wallet from '../wallet'
 import {hasNewCred} from "../credentials";
 import { startConversation } from './peerConversation';
+import * as AsyncStore from '../store/AsyncStore'
 
 //msg types
 export enum MessageType {
@@ -1230,4 +1231,25 @@ export function setDemo(demoMode: boolean): void {
 
 function rootsDid(alias: string) {
     return "did:root:" + utils.replaceSpecial(alias);
+}
+
+export async function getMediatorURL(): Promise<string> {
+    // return mediatorUrl if it is empty from storage
+    const mediatorUrl = await AsyncStore.getItem("mediatorUrl")
+    console.log("roots - mediatorUrl from storage", mediatorUrl)
+
+// if it is empty or undefined, set it to the null
+    if(!mediatorUrl) {
+        console.log("roots - mediatorUrl is empty, setting to null")
+        return ''
+    }
+    else{
+        console.log(mediatorUrl)
+        return mediatorUrl
+    }
+}
+
+export async function setMediatorURL(url: string): Promise<void> {
+    await AsyncStore.storeItem("mediatorUrl", url,true)
+    logger("roots - mediator url set to", url)
 }

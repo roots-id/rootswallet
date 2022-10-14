@@ -27,6 +27,16 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
     useEffect(() => {
         roots.setDemo(demoMode)
     }, [demoMode]);
+    
+    useEffect(() => {
+        async function getMediator() {
+        let url = await roots.getMediatorURL()
+        console.log("url",url)
+        setMediator(url)
+        return url
+        }
+        getMediator()
+    }, [mediator]);
 
     return (
         <View
@@ -70,16 +80,18 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
                 </View>
                 <Text/>
                 <View style={{flexDirection: 'row'}}>
-                    <Text style={styles.listItemCenteredBlack}>Mediator: </Text>
+                    <Text style={styles.listItemCenteredBlack}>Server: </Text>
                     <View style={{backgroundColor: '#251520', width: "80%"}}>
                         <Picker
                             style={styles.clickableListTitle}
                             mode="dropdown"
                             dropdownIconColor="#e69138"
                             numberOfLines={5}
-                            selectedValue={host}
-                            onValueChange={(itemValue) => setMediator(itemValue)}>
-                            <Picker.Item label="Roots Test Mediator" value="https://mediator.rootsid.cloud/oob_url"/>
+                            selectedValue={mediator}
+                            enabled={false}
+                            >
+                            <Picker.Item label="no mediator selected" value=""/>
+                            <Picker.Item label="Roots Id Mediator" value="https://mediator.rootsid.cloud"/>
                         </Picker>
                     </View>
                 </View>

@@ -1,7 +1,8 @@
 import React from 'react';
 import {View} from 'react-native';
 import {IconButton} from 'react-native-paper';
-
+import {  createOOBInvitation } from '../roots/peerConversation';
+import * as roots from '../roots';
 import {asContactShareable, getContactByAlias, showRel} from '../relationships';
 
 export default function IconActions(...props) {
@@ -39,10 +40,23 @@ export default function IconActions(...props) {
                 onPress={() => navigation.navigate(settings)}
             />
             <IconButton
-                icon="sitemap"
+                icon="chat-plus-outline"
                 size={28}
                 color="#e69138"
-                onPress={() => navigation.navigate(workflows)}
+                // TODO: disabled if getMediatorURL is an empty string else enabled
+                // disabled = {async () => {
+                //     const data = await roots.getMediatorURL() 
+                //     return data === ""}}
+
+                // onPress={async () => navigation.navigate("Show QR Code",{qrdata: await createOOBInvitation('mediator')})}
+                //convert single line async  onPress function to multi-line
+                onPress={async () => {
+                    const data = await createOOBInvitation('mediator')
+                    console.log("IconActions - data",data)
+                    navigation.navigate("Show QR Code",{qrdata: data})
+                }
+            }
+
             />
         </View>
     )

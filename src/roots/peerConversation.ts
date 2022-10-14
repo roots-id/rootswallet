@@ -128,8 +128,9 @@ export async function createOOBInvitation(chatId: string) {
     const ooburl = await generateOOBURL(newDid)
     const shortQR = await shortenURLRequest(fromDid, toDid, ooburl!, 60*60)
     await sendMessage(chat,
-        "Display QR Code",
+        "Display OOB invitation for id: "+ newDid.substring(0,40),
         MessageType.SHOW_QR_CODE, contact.ROOTS_BOT,undefined,{url:shortQR})
+    return shortQR
 }
 
 export async function checkMessages(chatId: string) {

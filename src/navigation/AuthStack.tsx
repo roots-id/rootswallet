@@ -29,7 +29,7 @@ import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
 import StartChatScreen from '../screens/StartChatScreen';
 import React, {useState} from "react";
 import * as models from '../models'
-import {getChatItem, loadSettings, storageStatus} from '../roots'
+import {getChatItem, loadSettings, storageStatus, getMediatorURL} from '../roots'
 import * as contact from '../relationships'
 import * as utils from '../utils'
 import {loadWalletName} from "../wallet";
@@ -156,7 +156,7 @@ export default function AuthStack() {
                                       headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel"
                                                                            person={contact.getUserId()} scan='contact'
                                                                            settings='Settings'
-                                                                           workflows='Workflow Selector'/>,
+                                                                           chat={async () => await getMediatorURL() }/>,
                                   })}
                     />
                     <Stack.Screen
@@ -167,7 +167,7 @@ export default function AuthStack() {
                                                                  title={getChatItem(utils.getObjectField(route.params, "chatId")).title}/>,
                             headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel"
                                                                  person={contact.getUserId()} scan='credential'
-                                                                 settings='Settings' workflows='Workflow Selector'/>,
+                                                                 settings='Settings' chat={async () => await getMediatorURL() }/>,
                         })}
                     />
                 </Stack.Group>
@@ -200,7 +200,7 @@ export default function AuthStack() {
                                       headerRight: (props) => <IconActions {...props} nav={navigation}
                                                                            person={contact.getUserId()}
                                                                            scan="credential" settings="Settings"
-                                                                           workflows='Workflow Selector'/>,
+                                                                           chat={async () => await getMediatorURL() }/>,
                                   })}
                     />
                 </Stack.Group>
