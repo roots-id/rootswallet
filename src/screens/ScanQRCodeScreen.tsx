@@ -90,6 +90,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                         id: 'mediator'
                     })
                     clearAndGoBack()
+                    navigation.navigate('Chat', { chatId: 'mediator' })
                     
 
 

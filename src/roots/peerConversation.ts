@@ -49,16 +49,19 @@ export async function startConversation(chatId: string) {
         await store.updateItem(models.getStorageKey(chatId, models.ModelType.CHAT), JSON.stringify(chat))
         var isMediator = false
         if (features !== undefined){
-            await sendMessage(chat,
-                chat.title + " supports the following protocols:",
-                MessageType.TEXT, contact.ROOTS_BOT)
+            //create an array of features using the id of the feature
+            //create array of strings typescript
+            let featuresArray = Array<string>()
+
             
             for (const feat of features) { 
                 if (feat.id.includes("coordinate-mediation/2.0")) {isMediator = true}
-                await sendMessage(chat,
-                    feat.id.replace("https://didcomm.org/",""),
-                    MessageType.TEXT, contact.ROOTS_BOT) 
+                featuresArray.push(feat.id.replace('https://didcomm.org/', ''))
             }
+
+            await sendMessage(chat,
+                chat.title + " supports the following protocols:\n" + featuresArray.join(",\n"),
+                MessageType.TEXT, contact.ROOTS_BOT)
         }
         
         // Ask to request mediate
