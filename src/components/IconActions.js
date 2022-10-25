@@ -3,9 +3,40 @@ import {Text, View} from 'react-native';
 import {IconButton} from 'react-native-paper';
 import {  createOOBInvitation } from '../roots/peerConversation';
 import * as roots from '../roots';
-import {asContactShareable, getContactByAlias, showRel} from '../relationships';
+import {asContactShareable, getContactByAlias, getUserId, ROOTS_BOT, showRel} from '../relationships';
 import {useEffect, useState} from "@types/react";
 import {displayOrHide} from "../styles/styles";
+import {getChatItem, MessageType, sendMessage} from "../roots";
+
+async function noMediatorPrompt(navigation) {
+    const statusMsg = await sendMessage(getChatItem(getUserId()),
+        "You are not connected to a mediator, please connect to one.  For instance you could scan a mediator QR Code",
+        MessageType.TEXT,ROOTS_BOT)
+    navigation.navigate('Chat', { chatId: getUserId()})
+}
+
+async function mediatorNotAccepted(navigation) {
+    await sendMessage(getChatItem("mediator"),
+        "Request Mediate?",
+        MessageType.MEDIATOR_REQUEST_MEDIATE, ROOTS_BOT)
+    navigation.navigate('Chat', { chatId: "mediator"})
+}
+
+async function hasMediator(navigation) {
+    navigation.navigate("Show QR Code",{qrdata: await createOOBInvitation('mediator')})
+}
+
+async function chooseMediationNav(navigation) {
+    if(await roots.getMediatorURL()=="") {
+        await noMediatorPrompt(navigation)
+    }else {
+        if(getChatItem("mediator").mediator == undefined) {
+            await mediatorNotAccepted(navigation)
+        } else {
+            await hasMediator(navigation)
+        }
+    }
+}
 
 export default function IconActions(...props) {
 //  console.log("IconActions - props",props)
@@ -59,9 +90,9 @@ export default function IconActions(...props) {
                 size={28}
                 color="#e69138"
                 // TODO: disabled if getMediatorURL is an empty string else enabled
-                disabled = {chat==""}
+                disabled = {false}
 
-                onPress={async () => navigation.navigate("Show QR Code",{qrdata: await createOOBInvitation('mediator')})}
+                onPress={async () => await chooseMediationNav(navigation)}
                 //convert single line async  onPress function to multi-line
                 // onPress={async () => {
                 //     const data = await createOOBInvitation('mediator')
