@@ -27,7 +27,7 @@ import LoginScreen from '../screens/LoginScreen';
 import ScanQRCodeScreen from '../screens/ScanQRCodeScreen'
 import ShowQRCodeScreen from '../screens/ShowQRCodeScreen'
 import StartChatScreen from '../screens/StartChatScreen';
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import * as models from '../models'
 import {getChatItem, loadSettings, storageStatus, getMediatorURL} from '../roots'
 import * as contact from '../relationships'
@@ -37,6 +37,7 @@ import SaveScreen from '../screens/SaveScreen';
 import AtalaPrismDevScreen from "../screens/AtalaPrismDevScreen";
 
 import {brandLogo} from "../relationships";
+import * as roots from "../roots";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -44,6 +45,8 @@ const Tab = createBottomTabNavigator();
 export default function AuthStack() {
     console.log("AuthStack - Determining which auth screen to use.")
     const [walletFound, setWalletFound] = useState<boolean>(false);
+    const [mediator, setMediator] = useState<string>("")
+    const [iconActions, setIconActions] = useState<typeof IconActions>();
 
     const [state, updateState] = React.useReducer(
         (prevState: any, action: any) => {
@@ -100,6 +103,17 @@ export default function AuthStack() {
         });
     }, []);
 
+    React.useEffect(() => {
+        console.log("IconActions - checking chat disabled")
+        async function getMediator() {
+            let url = await roots.getMediatorURL()
+            console.log("IconActions - mediator url",url)
+            setMediator(url)
+            return url
+        }
+        getMediator()
+    }, [mediator])
+
     let authContext = React.useMemo(
         () => ({
             signIn: (data: string, created = false) => {
@@ -110,6 +124,13 @@ export default function AuthStack() {
         }),
         []
     );
+
+    function getIconActions(props: { tintColor?: string | undefined; pressColor?: string | undefined; pressOpacity?: number | undefined; canGoBack?: boolean | undefined; },navigation: any) {
+        return <IconActions {...props} nav={navigation} add="Create Rel"
+                     person={contact.getUserId()} scan='contact'
+                     settings='Settings'
+                     chat={mediator}/>
+    }
 
     const Main = () => {
         return (
@@ -153,10 +174,7 @@ export default function AuthStack() {
                                   component={RelationshipsScreen}
                                   options={({navigation, route}) => ({
                                       headerTitle: (props) => <LogoTitle {...props} logo={brandLogo} title="Contacts"/>,
-                                      headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel"
-                                                                           person={contact.getUserId()} scan='contact'
-                                                                           settings='Settings'
-                                                                           chat={async () => await getMediatorURL() }/>,
+                                      headerRight: (props) => getIconActions({...props},navigation),
                                   })}
                     />
                     <Stack.Screen
