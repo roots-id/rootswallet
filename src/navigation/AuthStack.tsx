@@ -183,9 +183,7 @@ export default function AuthStack() {
                         options={({navigation, route}) => ({
                             headerTitle: (props) => <LogoTitle {...props}
                                                                  title={getChatItem(utils.getObjectField(route.params, "chatId")).title}/>,
-                            headerRight: (props) => <IconActions {...props} nav={navigation} add="Create Rel"
-                                                                 person={contact.getUserId()} scan='credential'
-                                                                 settings='Settings' chat={async () => await getMediatorURL() }/>,
+                            headerRight: (props) => getIconActions({...props},navigation),
                         })}
                     />
                 </Stack.Group>
@@ -215,10 +213,7 @@ export default function AuthStack() {
                                   component={CredentialsScreen}
                                   options={({navigation, route}) => ({
                                       headerTitle: (props) => <LogoTitle {...props} title="Credentials"/>,
-                                      headerRight: (props) => <IconActions {...props} nav={navigation}
-                                                                           person={contact.getUserId()}
-                                                                           scan="credential" settings="Settings"
-                                                                           chat={async () => await getMediatorURL() }/>,
+                                      headerRight: (props) => getIconActions({...props},navigation),
                                   })}
                     />
                 </Stack.Group>
