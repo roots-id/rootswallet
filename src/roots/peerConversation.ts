@@ -95,14 +95,8 @@ export async function requestMediate(chatId: string) {
         }
         await store.updateItem(models.getStorageKey(chatId, models.ModelType.CHAT), JSON.stringify(chat))
         await sendMessage(chat,
-            "Mediate granted and routing keys received. Now you can:",
+            "Mediate granted and routing keys received. Now you can receive messages offilne. To create a new communication channgel using the icon in the top right.",
             MessageType.TEXT, contact.ROOTS_BOT)
-        await sendMessage(chat,
-            "Create an OOB invitation or check for incoming messages",
-                MessageType.MEDIATOR_KEYLYST_UPDATE, contact.ROOTS_BOT)
-        await sendMessage(chat,
-            "Check for incoming messages",
-                MessageType.MEDIATOR_STATUS_REQUEST, contact.ROOTS_BOT)
     }
 
 }

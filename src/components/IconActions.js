@@ -17,7 +17,7 @@ async function noMediatorPrompt(navigation) {
 
 async function mediatorNotAccepted(navigation) {
     await sendMessage(getChatItem("mediator"),
-        "Request Mediate?",
+        "Remember to request mediation?",
         MessageType.MEDIATOR_REQUEST_MEDIATE, ROOTS_BOT)
     navigation.navigate('Chat', { chatId: "mediator"})
 }
