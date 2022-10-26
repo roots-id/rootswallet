@@ -95,7 +95,7 @@ export async function requestMediate(chatId: string) {
         }
         await store.updateItem(models.getStorageKey(chatId, models.ModelType.CHAT), JSON.stringify(chat))
         await sendMessage(chat,
-            "Mediate granted and routing keys received. Now you can receive messages offilne. To create a new communication channgel using the icon in the top right.",
+            "Mediation granted and routing keys received. Now you can receive messages offilne. To create a new communication channgel using the icon in the top right.",
             MessageType.TEXT, contact.ROOTS_BOT)
     }
 
