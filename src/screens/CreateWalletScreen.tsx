@@ -5,19 +5,19 @@ import AuthContext from '../context/AuthenticationContext';
 import FormButton from '../components/FormButton';
 import FormInput from '../components/FormInput';
 import Loading from '../components/Loading'
-import {initRootsWallet} from '../roots'
+import {initRootsWallet, createIIWcredential} from '../roots'
 import {createWallet, getWallet} from '../wallet'
 const {PrismModule, PeerDidModule} = NativeModules;
 import vc from '@sphereon/rn-vc-js';
+import {extendContextLoader} from '@sphereon/rn-jsonld-signatures';
 import { randomBytes } from 'react-native-randombytes'
-import { X25519KeyPair } from '@transmute/did-key-x25519';
 import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
 import {
     Ed25519VerificationKey2018,
     Ed25519Signature2018,
   } from "@transmute/ed25519-signature-2018";
-import { verifiable } from "@transmute/vc.js";
 // Required to set up a suite instance with private key
+//conver require to import
 
 
 // jsigs.use('documentLoader', defaultDocumentLoader);
@@ -59,78 +59,11 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
         checkErrors()
     }, [userName, walletName, password, confirmPassword, problemText]);
 
-    async function generateKeyPair(type: string) {
-       
-            let keyGenerator = Ed25519KeyPair;
-            const keyPair = await keyGenerator.generate({
-                secureRandom: () => randomBytes(32)
-            });
-            // const { publicKeyJwk, privateKeyJwk } = await keyPair.export({
-            //     type: 'JsonWebKey2020',
-            //     privateKey: true,
-            // });
-            // console.log("publicKeyJwk", publicKeyJwk)
-            // console.log("privateKeyJwk", privateKeyJwk)
-
-            let Ed25519VerificationKey = await keyPair.export({
-                type: 'Ed25519VerificationKey2018',
-                privateKey: true,
-                })
-            
-            console.log("Ed25519VerificationKey", Ed25519VerificationKey.id)
-
-            const suite = new Ed25519Signature2018({
-                key: await Ed25519VerificationKey2018.from(
-                    Ed25519VerificationKey
-                )
-                });
-            console.log("suite", suite)
-
-
-            // let suite = new Ed25519Signature2018({
-            //     key: Ed25519VerificationKey
-            //   })
-
-            const credential = {
-                "@context": [
-                  "https://www.w3.org/2018/credentials/v1",
-                  "https://www.w3.org/2018/credentials/examples/v1"
-                ],
-                "id": "https://example.com/credentials/1872",
-                "type": ["VerifiableCredential", "AlumniCredential"],
-                "issuer": "https://example.edu/issuers/565049",
-                "issuanceDate": "2010-01-01T19:23:24Z",
-                "credentialSubject": {
-                  "id": 'Ed25519VerificationKey.id',
-                  "alumniOf": "Example University"
-                }
-              };
-              console.log('ciaooooooo')
-        
-              const signedVC = await vc.issue({credential, suite});
-              console.log(JSON.stringify(signedVC, null, 2));
-
-            // const result = await verifiable.credential.create({
-            //     credential,
-            //     format: ["vc"],
-            //     documentLoader: defaultDocumentLoader,
-            //     suite: suite
-            //   });
-            // console.log(JSON.stringify(result));
-
-
-            return {
-                // publicJwk: publicKeyJwk,
-                // privateJwk: privateKeyJwk,
-                Ed25519VerificationKey : Ed25519VerificationKey
-            }
-           
-    } 
-
-    useEffect( () => {
-        
-        generateKeyPair('ciao')
-    }, [])
+    async function showCredIIW() {
+        let credIIW = await createIIWcredential()
+        navigation.navigate("Display Custom Credential", {credential: credIIW})
+    
+    }
 
     function checkErrors() {
         const passNumeric = (/\d/.test(password))
@@ -229,6 +162,8 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
         return (<Loading/>)
     }
 
+   
+
     return (
         <View style={styles.centeredContainer}>
             <Image
@@ -283,6 +218,19 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
                     <Button
                         title="Settings"
                         onPress={handleSettings}
+                        color={'#251520'}
+                    />
+                </View>
+            </View>
+            <View style={{
+                backgroundColor: '#251520', flex: 1, flexDirection: "row",
+                justifyContent: 'space-between', marginBottom: 10, width: '90%',
+                maxWidth: 400,
+            }}>
+                <View style={{backgroundColor: '#251520', flex: 1, marginLeft: 5, marginRight: 10}}>
+                    <Button
+                        title="Display Cred"
+                        onPress={showCredIIW}
                         color={'#251520'}
                     />
                 </View>

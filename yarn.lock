@@ -2285,7 +2285,7 @@
   version "1.0.1-0"
   resolved "https://registry.yarnpkg.com/@sphereon/rn-w3c-credentials-context/-/rn-w3c-credentials-context-1.0.1-0.tgz#55050cb135bebff6e861d8d3cd0ede14000a0781"
 
-"@sphereon/w3c-security-contexts@0.2.0":
+"@sphereon/w3c-security-contexts@0.2.0", "@sphereon/w3c-security-contexts@^0.2.0":
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/@sphereon/w3c-security-contexts/-/w3c-security-contexts-0.2.0.tgz#d621856f13b48f03d0d2efba7bd4680d4a458f02"
 

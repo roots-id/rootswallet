@@ -12,6 +12,15 @@ import {hasNewCred} from "../credentials";
 import { startConversation } from './peerConversation';
 import * as AsyncStore from '../store/AsyncStore'
 
+import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
+import {
+    Ed25519VerificationKey2018,
+    Ed25519Signature2018,
+  } from "@transmute/ed25519-signature-2018";
+import { randomBytes } from 'react-native-randombytes'
+import vc from '@sphereon/rn-vc-js';
+
+
 //msg types
 export enum MessageType {
     BLOCKCHAIN_URL = "blockchainUrlMsgType",
@@ -1252,4 +1261,73 @@ export async function getMediatorURL(): Promise<string> {
 export async function setMediatorURL(url: string): Promise<void> {
     await AsyncStore.storeItem("mediatorUrl", url,true)
     logger("roots - mediator url set to", url)
+}
+
+export async function generateKeyPair() {
+    let keyGenerator = Ed25519KeyPair;
+    const keyPair = await keyGenerator.generate({
+        secureRandom: () => randomBytes(32)
+    });
+
+    let Ed25519VerificationKey = await keyPair.export({
+        type: 'Ed25519VerificationKey2018',
+        privateKey: true,
+        })
+    
+
+    const suite = new Ed25519Signature2018({
+        key: await Ed25519VerificationKey2018.from(
+            Ed25519VerificationKey
+        )
+        });
+    return suite
+   
+} 
+export async function creteCredential(credential: any, suite: any) {
+    const signedVC = await vc.issue({credential, suite});
+    return signedVC
+}
+export async function createIIWcredential() {
+    const suite = await generateKeyPair()
+
+    const credential = {
+        "@context": [
+          "https://www.w3.org/2018/credentials/v1",
+          "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/jff-vc-edu-plugfest-1-context.json"
+        ],
+        "type": [
+          "VerifiableCredential",
+          "OpenBadgeCredential"
+        ],
+        "issuer": {
+          "type": "Profile",
+          "id": "did:key:z6MkrHKzgsahxBLyNAbLQyB1pcWNYC9GmywiWPgkrvntAZcj",
+          "name": "Jobs for the Future (JFF)"
+        },
+        "issuanceDate": "2022-05-01T00:00:00Z",
+        "credentialSubject": {
+          "type": "AchievementSubject",
+          "id": "did:key:123",
+          "achievement": {
+            "type": "Achievement",
+            "name": "Our Wallet Passed JFF Plugfest #1 2022",
+            "description": "This wallet can display this Open Badge 3.0",
+            "criteria": {
+              "type": "Criteria",
+              "narrative": "The first cohort of the JFF Plugfest 1 in May/June of 2021 collaborated to push interoperability of VCs in education forward."
+            },
+            "image": "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/images/plugfest-1-badge-image.png"
+          }
+        },
+        "proof": {
+          "type": "Ed25519Signature2018",
+          "created": "2022-05-27T15:08:03Z",
+          "verificationMethod": "did:key:z6MkrHKzgsahxBLyNAbLQyB1pcWNYC9GmywiWPgkrvntAZcj#z6MkrHKzgsahxBLyNAbLQyB1pcWNYC9GmywiWPgkrvntAZcj",
+          "proofPurpose": "assertionMethod",
+          "jws": "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..-1WePLNRNxXq2wOJeLOsxf7kXQqQfQovWYqF6TZATp0CWnn1LL5ABWmsY_EcwtWXfh5KywsuTW_b0re2Y3epDQ"
+        }
+      };
+    const signedVC = await creteCredential(credential, suite)
+    console.log(JSON.stringify(signedVC, null, 2));
+    return signedVC
 }

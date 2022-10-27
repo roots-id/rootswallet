@@ -17,6 +17,7 @@ import RelationshipDetailScreen from "../screens/RelationshipDetailScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import WalletScreen from "../screens/WalletScreen";
 import WorkflowsScreen from "../screens/WorkflowsScreen";
+import CustomCredential from "../screens/CustomCredential";
 
 import AuthContext from '../context/AuthenticationContext';
 
@@ -274,6 +275,7 @@ export default function AuthStack() {
                 <Stack.Group navigationKey={(state && state.userToken) ? 'init' : 'main'}
                              screenOptions={{presentation: 'transparentModal'}}>
                     <Stack.Screen name="Settings" component={SettingsScreen}/>
+                    <Stack.Screen name="Display Custom Credential" component={CustomCredential}/>
                     <Stack.Screen name="Save" component={SaveScreen}/>
                     <Stack.Screen name="Developers" component={DevStack}/>
                 </Stack.Group>

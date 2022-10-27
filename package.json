@@ -36,6 +36,7 @@
     "@rneui/themed": "^4.0.0-rc.6",
     "@sphereon/rn-jsonld-signatures": "^9.3.1-0",
     "@sphereon/rn-vc-js": "^1.0.1-0",
+    "@sphereon/w3c-security-contexts": "^0.2.0",
     "@transmute/credentials-context": "^0.7.0-unstable.67",
     "@transmute/did-key-ed25519": "^0.3.0-unstable.8",
     "@transmute/did-key-secp256k1": "^0.3.0-unstable.9",
