@@ -1,5 +1,6 @@
 import { registerRootComponent } from 'expo';
 import 'react-native-get-random-values';
+import 'text-encoding-polyfill';
 import './shim.js';
 import App from './App';
 

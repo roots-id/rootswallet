@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Image, Linking, Text, View} from 'react-native';
+import {Button, Image, Linking, Text, View, NativeModules} from 'react-native';
 import {Title} from 'react-native-paper';
 import AuthContext from '../context/AuthenticationContext';
 import FormButton from '../components/FormButton';
@@ -7,7 +7,20 @@ import FormInput from '../components/FormInput';
 import Loading from '../components/Loading'
 import {initRootsWallet} from '../roots'
 import {createWallet, getWallet} from '../wallet'
+const {PrismModule, PeerDidModule} = NativeModules;
+import vc from '@sphereon/rn-vc-js';
+import { randomBytes } from 'react-native-randombytes'
+import { X25519KeyPair } from '@transmute/did-key-x25519';
+import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
+import {
+    Ed25519VerificationKey2018,
+    Ed25519Signature2018,
+  } from "@transmute/ed25519-signature-2018";
+import { verifiable } from "@transmute/vc.js";
+// Required to set up a suite instance with private key
 
+
+// jsigs.use('documentLoader', defaultDocumentLoader);
 import {displayOrHide, styles} from "../styles/styles";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {WALLET_LOGIN_SUCCESS} from "../store";
@@ -45,6 +58,79 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
     useEffect(() => {
         checkErrors()
     }, [userName, walletName, password, confirmPassword, problemText]);
+
+    async function generateKeyPair(type: string) {
+       
+            let keyGenerator = Ed25519KeyPair;
+            const keyPair = await keyGenerator.generate({
+                secureRandom: () => randomBytes(32)
+            });
+            // const { publicKeyJwk, privateKeyJwk } = await keyPair.export({
+            //     type: 'JsonWebKey2020',
+            //     privateKey: true,
+            // });
+            // console.log("publicKeyJwk", publicKeyJwk)
+            // console.log("privateKeyJwk", privateKeyJwk)
+
+            let Ed25519VerificationKey = await keyPair.export({
+                type: 'Ed25519VerificationKey2018',
+                privateKey: true,
+                })
+            
+            console.log("Ed25519VerificationKey", Ed25519VerificationKey.id)
+
+            const suite = new Ed25519Signature2018({
+                key: await Ed25519VerificationKey2018.from(
+                    Ed25519VerificationKey
+                )
+                });
+            console.log("suite", suite)
+
+
+            // let suite = new Ed25519Signature2018({
+            //     key: Ed25519VerificationKey
+            //   })
+
+            const credential = {
+                "@context": [
+                  "https://www.w3.org/2018/credentials/v1",
+                  "https://www.w3.org/2018/credentials/examples/v1"
+                ],
+                "id": "https://example.com/credentials/1872",
+                "type": ["VerifiableCredential", "AlumniCredential"],
+                "issuer": "https://example.edu/issuers/565049",
+                "issuanceDate": "2010-01-01T19:23:24Z",
+                "credentialSubject": {
+                  "id": 'Ed25519VerificationKey.id',
+                  "alumniOf": "Example University"
+                }
+              };
+              console.log('ciaooooooo')
+        
+              const signedVC = await vc.issue({credential, suite});
+              console.log(JSON.stringify(signedVC, null, 2));
+
+            // const result = await verifiable.credential.create({
+            //     credential,
+            //     format: ["vc"],
+            //     documentLoader: defaultDocumentLoader,
+            //     suite: suite
+            //   });
+            // console.log(JSON.stringify(result));
+
+
+            return {
+                // publicJwk: publicKeyJwk,
+                // privateJwk: privateKeyJwk,
+                Ed25519VerificationKey : Ed25519VerificationKey
+            }
+           
+    } 
+
+    useEffect( () => {
+        
+        generateKeyPair('ciao')
+    }, [])
 
     function checkErrors() {
         const passNumeric = (/\d/.test(password))
