@@ -38,7 +38,8 @@ export enum MessageType {
     MEDIATOR_KEYLYST_UPDATE = "mediatorKeyListUpdate",
     MEDIATOR_STATUS_REQUEST = "mediatorStatusReuqest",
     MEDIATOR_RETRIEVE_MESSAGES = "mediatorRetrieveMessages",
-    SHOW_QR_CODE = "showQRCode"
+    SHOW_QR_CODE = "showQRCode",
+    IIWCREDENTIAL = "iiwCredential",
 }
 
 //meaningful literals
@@ -510,6 +511,31 @@ function addQuickReply(msg: models.message) {
                 {
                     title: 'Add to Prism',
                     value: MessageType.PROMPT_PUBLISH + PUBLISH_DID,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+
+    //TODO check for roots.MessageType.IIWCREDENTIAL 
+    if (msg.type === MessageType.IIWCREDENTIAL) {
+        msg.quickReplies = {
+            type: 'radio', 
+            keepIt: true,
+            values: [
+                {
+                    title: 'Preview',
+                    value: MessageType.IIWCREDENTIAL + CRED_VIEW,
+                    messageId: msg.id,
+                },
+                {
+                    title: 'Accept',
+                    value: MessageType.IIWCREDENTIAL + CRED_ACCEPTED,
+                    messageId: msg.id,
+                },
+                {
+                    title: 'Deny',
+                    value: MessageType.IIWCREDENTIAL + CRED_REJECTED,
                     messageId: msg.id,
                 }
             ],
@@ -1287,7 +1313,7 @@ export async function creteCredential(credential: any, suite: any) {
     const signedVC = await vc.issue({credential, suite});
     return signedVC
 }
-export async function createIIWcredential() {
+export async function createJFFcredential() {
     const suite = await generateKeyPair()
 
     const credential = {
@@ -1330,4 +1356,60 @@ export async function createIIWcredential() {
     const signedVC = await creteCredential(credential, suite)
     console.log(JSON.stringify(signedVC, null, 2));
     return signedVC
+}
+
+export async function createIIWcredential(name: string) {
+    const suite = await generateKeyPair()
+
+    const credential = {
+        "@context": [
+          "https://www.w3.org/2018/credentials/v1",
+          "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/jff-vc-edu-plugfest-1-context.json",
+          "https://www.w3.org/2018/credentials/examples/v1"
+        ],
+        "type": [
+          "VerifiableCredential",
+          "subjectPresence"
+        ],
+        "issuer": {
+          "type": "Profile",
+          "id": "https://rootsid.com",
+          "name": "Roots Issuer"
+        },
+        "issuanceDate": "2022-05-01T00:00:00Z",
+        "credentialSubject": {
+        "id": "did:key:123",
+        "name": name,
+        "image": "https://media-exp1.licdn.com/dms/image/C510BAQEMJ0bx115X_Q/company-logo_200_200/0/1519341150268?e=1674691200&v=beta&t=es3U9GsduolTqXbL2o9bRqYrRWIahLydgQ-FKfa2Law"
+
+        }
+      };
+    const signedVC = await creteCredential(credential, suite)
+    console.log(JSON.stringify(signedVC, null, 2));
+    const res = await verifyCredential(signedVC, suite)
+    return signedVC
+}
+
+export async function verifyCredential(credential:any, suite:any) {
+
+    const result = await vc.verifyCredential({credential, suite})
+    console.log('waiiiiiiiiiiiiiiit result check proof here should be ')
+    console.log(result)
+    return result
+}
+
+
+export async function acceptIIWCredential(chat: models.chat){
+    await sendMessage(chat, 'IIW credential accepted.',
+    MessageType.STATUS,
+    contact.ROOTS_BOT)
+    return true
+     
+}
+
+export async function denyIIWCredential(chat: models.chat){
+    await sendMessage(chat, 'IIW credential denied.',
+    MessageType.STATUS,
+    contact.ROOTS_BOT)
+    return true
 }

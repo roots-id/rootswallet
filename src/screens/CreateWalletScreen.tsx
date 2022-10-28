@@ -5,7 +5,7 @@ import AuthContext from '../context/AuthenticationContext';
 import FormButton from '../components/FormButton';
 import FormInput from '../components/FormInput';
 import Loading from '../components/Loading'
-import {initRootsWallet, createIIWcredential} from '../roots'
+import {initRootsWallet, createJFFcredential, createIIWcredential} from '../roots'
 import {createWallet, getWallet} from '../wallet'
 const {PrismModule, PeerDidModule} = NativeModules;
 import vc from '@sphereon/rn-vc-js';
@@ -60,7 +60,7 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
     }, [userName, walletName, password, confirmPassword, problemText]);
 
     async function showCredIIW() {
-        let credIIW = await createIIWcredential()
+        let credIIW = await createIIWcredential('joe fjif Andrei')
         navigation.navigate("Display Custom Credential", {credential: credIIW})
     
     }

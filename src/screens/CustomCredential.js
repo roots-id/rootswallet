@@ -75,7 +75,11 @@ export default function CustomCredential({route, navigation}: CompositeScreenPro
                         // onPress={() => showQR(navigation, cred.verifiedCredential)}
                     />
                 </View>
-
+                {cred.credentialSubject.achievement && (
+                    <View style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
                 <Image source={{uri: cred.credentialSubject.achievement.image}}
                        style={styles.credLogoStyle}
                 />
@@ -86,11 +90,26 @@ export default function CustomCredential({route, navigation}: CompositeScreenPro
                 <Divider style={styles.dividerStyle}/>
                 <Text style={styles.credTitleStyle}>{cred.credentialSubject.achievement.criteria.type}</Text>
                 <Text style={styles.credTitleStyle}>{cred.credentialSubject.achievement.criteria.narrative}</Text>
-
-
+                </View>
+                )}
+                {cred.credentialSubject.name && (
+                    <View>
+                    <View style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
+                        <Image source={{uri: cred.credentialSubject.image}}
+                                 style={styles.credLogoStyle}
+                        />
+                        
+                    </View>
+                    <Text style={styles.credTitleStyle}>Issued by: {cred.issuer.name}</Text>
+                    <Text style={styles.credTitleStyle}>To: {cred.credentialSubject.name}</Text>
+                    </View>
+                )}
                 {/* //show scrollView only if the state 'detail' is set to true */}
                 {showJson && (
-                    <ScrollView style={styles.scrollView}>
+                <ScrollView style={styles.scrollView}>
                     <Text style={styles.credText}>{JSON.stringify(cred, null, 2)}</Text>
                 </ScrollView>
                 )}

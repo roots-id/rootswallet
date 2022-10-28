@@ -21,6 +21,14 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
     const [loading, setLoading] = useState<boolean>(true);
     const [messages, setMessages] = useState<IMessage[]>();
     const [processing, setProcessing] = useState<boolean>(false)
+
+    const [requesting_credentials, setRequestingCredentials] = useState<boolean>(false)
+    const [request_data, setRequestData] = useState<any>(null)
+    // {
+    //     'first_name': 'John',
+    //     'last_name': 'Doe',
+    //     'date_now': '2021-01-01'
+    // }
     //const [showSystem, setShowSystem] = useState<boolean>(false)
 
     useEffect(() => {
@@ -116,7 +124,38 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
 //        await setMessages((prevMessages) => GiftedChat.append(prevMessages, pendingMsgs));
         // Try sending a basicmessage (only first msg of the arraya)
         // TODO check if chat inlcudes basic message
-        sendBasicMsg(chat.id, pendingMsgs.map(msg => msg.text)[0])
+        let text = pendingMsgs.map(msg => msg.text)[0].toLowerCase()
+
+        //check if text contains "iiw" and "request" and "credential"
+        if (text.includes("iiw") && text.includes("request") && text.includes("credential")) {
+            setRequestingCredentials(true)
+            const result = await roots.sendMessages(chat, ['Provide your first name'], roots.MessageType.TEXT, contacts.ROOTS_BOT);
+            setRequestData(null)
+        }
+
+        // check if requesting_credentials is true and if request_data is undefined
+        if (requesting_credentials && request_data == null) {
+            setRequestData({
+                'first_name': text,
+                'last_name': '',
+            })
+            const result = await roots.sendMessages(chat, ['Provide your last name'], roots.MessageType.TEXT, contacts.ROOTS_BOT);
+            console.log("ChatScreen - request_data", request_data)
+        }  
+
+
+        // check if requesting_credentials is true and if request_data is defined
+        if (requesting_credentials && request_data != null) {
+            let _temp_request_data = request_data
+            _temp_request_data['last_name'] = text
+            setRequestData(_temp_request_data)
+            console.log("ChatScreen - request_data", request_data)
+            const result = await roots.sendMessage(chat, 'Preview your credential below', roots.MessageType.IIWCREDENTIAL, contacts.ROOTS_BOT,false, _temp_request_data)
+            setRequestingCredentials(false)
+            setRequestData(null)
+        }
+            console.log("ChatScreen - sending basic message", text)
+        // sendBasicMsg(chat.id, pendingMsgs.map(msg => msg.text)[0])
     }
 
     async function handleQuickReply(replies: Reply[]) {
@@ -185,6 +224,16 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     await retrieveMessagesFromMediator(chat.id)
                 } else if (reply.value === roots.MessageType.SHOW_QR_CODE) {
                     await showQR(navigation, roots.getMessageById(reply.messageId)?.data.url)
+                
+                } else if (reply.value === roots.MessageType.IIWCREDENTIAL +roots.CRED_VIEW) {
+                    const process = roots.getMessageById(reply.messageId)?.data
+                    let _temp_name = process.first_name + ' ' + process.last_name
+                    let credIIW = await roots.createIIWcredential(_temp_name)
+                    navigation.navigate("Display Custom Credential", {credential: credIIW})
+                } else if (reply.value === roots.MessageType.IIWCREDENTIAL +roots.CRED_ACCEPTED) {
+                    let accepted_status = await roots.acceptIIWCredential(chat)
+                } else if (reply.value === roots.MessageType.IIWCREDENTIAL +roots.CRED_REJECTED) {
+                    let accepted_status = await roots.denyIIWCredential(chat)
                 } else {
                     console.log("ChatScreen - reply value not recognized, was", chat.id, reply.value);
                 } 
