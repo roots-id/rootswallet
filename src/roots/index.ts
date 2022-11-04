@@ -11,6 +11,7 @@ import * as wallet from '../wallet'
 import {hasNewCred} from "../credentials";
 import { startConversation } from './peerConversation';
 import * as AsyncStore from '../store/AsyncStore'
+import { credentialRequest } from '../protocols';
 
 import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
 import {
@@ -40,6 +41,10 @@ export enum MessageType {
     MEDIATOR_RETRIEVE_MESSAGES = "mediatorRetrieveMessages",
     SHOW_QR_CODE = "showQRCode",
     IIWCREDENTIAL = "iiwCredential",
+    IIWCREDENTIALREQUEST = "iiwCredentialRequest",
+    IIWACCEPTEDCREDENTIAL = "iiwAcceptedCredential",
+    IIWREJECTEDCREDENTIAL = "iiwRejectedCredential",
+    
 }
 
 //meaningful literals
@@ -54,6 +59,7 @@ export const CRED_REVOKE = "credRevoke"
 export const CRED_VERIFY = "credVerify"
 export const CRED_VIEW = "credView"
 export const PUBLISH_DID = "publishDID"
+export const CRED_REQUEST = "credRequest"
 
 const allChatsRegex = new RegExp(models.getStorageKey("", models.ModelType.CHAT) + '*')
 const allCredsRegex = new RegExp(models.getStorageKey("", models.ModelType.CREDENTIAL) + '*')
@@ -520,22 +526,30 @@ function addQuickReply(msg: models.message) {
     //TODO check for roots.MessageType.IIWCREDENTIAL 
     if (msg.type === MessageType.IIWCREDENTIAL) {
         msg.quickReplies = {
-            type: 'radio', 
+            type: 'checkbox', 
             keepIt: true,
             values: [
                 {
                     title: 'Preview',
                     value: MessageType.IIWCREDENTIAL + CRED_VIEW,
                     messageId: msg.id,
-                },
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.IIWCREDENTIALREQUEST) {
+        msg.quickReplies = {
+            type: 'radio', 
+            keepIt: true,
+            values: [
                 {
                     title: 'Accept',
-                    value: MessageType.IIWCREDENTIAL + CRED_ACCEPTED,
+                    value: MessageType.IIWACCEPTEDCREDENTIAL ,
                     messageId: msg.id,
                 },
                 {
                     title: 'Deny',
-                    value: MessageType.IIWCREDENTIAL + CRED_REJECTED,
+                    value: MessageType.IIWREJECTEDCREDENTIAL,
                     messageId: msg.id,
                 }
             ],
@@ -1369,7 +1383,7 @@ export async function createIIWcredential(name: string) {
         ],
         "type": [
           "VerifiableCredential",
-          "subjectPresence"
+          "OpenBadgeCredential"
         ],
         "issuer": {
           "type": "Profile",
@@ -1412,4 +1426,38 @@ export async function denyIIWCredential(chat: models.chat){
     MessageType.STATUS,
     contact.ROOTS_BOT)
     return true
+}
+
+export async function requestJFFCredential(chatid: string, name: string){
+    let chat = getChatItem(chatid)
+    let requested_credential = {
+        "credential": {
+            "@context": [
+              "https://www.w3.org/2018/credentials/v1",
+              "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/jff-vc-edu-plugfest-1-context.json",
+              "https://www.w3.org/2018/credentials/examples/v1"
+            ],
+            "type": [
+              "VerifiableCredential",
+              "OpenBadgeCredential"
+            ],
+            "issuer": {
+              "type": "Profile",
+              "id": "https://rootsid.com",
+              "name": "Roots Issuer"
+            },
+            "issuanceDate": "2022-05-01T00:00:00Z",
+            "credentialSubject": {
+            "id": chat.fromDids[0],
+            "name": name,
+            "image": "https://media-exp1.licdn.com/dms/image/C510BAQEMJ0bx115X_Q/company-logo_200_200/0/1519341150268?e=1674691200&v=beta&t=es3U9GsduolTqXbL2o9bRqYrRWIahLydgQ-FKfa2Law"
+    
+            }
+          }
+    }
+    
+
+    console.log(chat.fromDids[0],chat.toDids[0],'CREDDD IDDSS')
+    let _mediator_cred = await credentialRequest(chat.fromDids[0],chat.toDids[0], requested_credential)
+    return _mediator_cred
 }

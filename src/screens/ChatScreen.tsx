@@ -228,12 +228,25 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                 } else if (reply.value === roots.MessageType.IIWCREDENTIAL +roots.CRED_VIEW) {
                     const process = roots.getMessageById(reply.messageId)?.data
                     let _temp_name = process.first_name + ' ' + process.last_name
-                    let credIIW = await roots.createIIWcredential(_temp_name)
+                    // let credIIW = await roots.createIIWcredential(_temp_name)
+                    let credIIW = await roots.requestJFFCredential(chat.id,_temp_name)
+                    console.log("ChatScreen - JFFCREDD", credIIW)
+                    //TODO: replace with credentialRequest()
                     navigation.navigate("Display Custom Credential", {credential: credIIW})
-                } else if (reply.value === roots.MessageType.IIWCREDENTIAL +roots.CRED_ACCEPTED) {
-                    let accepted_status = await roots.acceptIIWCredential(chat)
-                } else if (reply.value === roots.MessageType.IIWCREDENTIAL +roots.CRED_REJECTED) {
-                    let accepted_status = await roots.denyIIWCredential(chat)
+                    await roots.sendMessage(chat, 'Accept or Deny credential', roots.MessageType.IIWCREDENTIALREQUEST, contacts.ROOTS_BOT)
+
+                } else if (reply.value === roots.MessageType.IIWACCEPTEDCREDENTIAL ) {
+                    console.log('CREDENTIAL ACCEPTED')
+                    //TODO: replace with credentialRequest()
+
+                    await roots.sendMessage(chat, 'IIW credential accepted.',
+                    roots.MessageType.TEXT,
+                    contacts.ROOTS_BOT)
+                } else if (reply.value === roots.MessageType.IIWREJECTEDCREDENTIAL) {
+                    console.log('CREDENTIAL REJECTED')
+                    await roots.sendMessage(chat, 'IIW credential denied.',
+                    roots.MessageType.TEXT,
+                    contacts.ROOTS_BOT)
                 } else {
                     console.log("ChatScreen - reply value not recognized, was", chat.id, reply.value);
                 } 
