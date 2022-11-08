@@ -540,7 +540,7 @@ function addQuickReply(msg: models.message) {
     if (msg.type === MessageType.IIWCREDENTIALREQUEST) {
         msg.quickReplies = {
             type: 'radio', 
-            keepIt: true,
+            keepIt: false,
             values: [
                 {
                     title: 'Accept',
