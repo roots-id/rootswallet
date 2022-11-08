@@ -11,7 +11,7 @@ import {IconButton, Title} from 'react-native-paper';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
 import { getDemoRel, getUserId} from '../relationships';
-import {getDid, importContact, importVerifiedCredential, isDemo} from '../roots'
+import {getDid, importContact, importVerifiedCredential, isDemo, setMediatorURL} from '../roots'
 import React from 'react';
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BarCodeEvent} from "expo-barcode-scanner/src/BarCodeScanner";
@@ -28,6 +28,11 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
     const [timeOutId, setTimeOutId] = useState<NodeJS.Timeout>();
     const modelType = route.params.type
 
+    const clearAndGoBack = () => {
+        setScanned(true)
+        if (timeOutId) clearTimeout(timeOutId)
+        if (navigation.canGoBack()) navigation.goBack()
+    }
     const handleDemo = async () => {
         if (!scanned && isDemo()) {
             setScanned(true)
@@ -73,12 +78,29 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                 const response = await fetch(data);
                 data = response.url
             }
+            const decodedMsg = await decodeOOBURL(data);
+            const personLogo = require('../assets/smallBWPerson.png');
             if (data.toLowerCase().includes("_oob")){
-                
+                if (data.toLowerCase().startsWith("https://mediator.rootsid.cloud") && decodedMsg.body.goal === "RequestMediate"){
+                    setMediatorURL("https://mediator.rootsid.cloud")
+                await importContact({
+                        displayName: 'Mediator',
+                        displayPictureUrl: personLogo,
+                        did: decodedMsg.from,
+                        id: 'mediator'
+                    })
+                    clearAndGoBack()
+                    navigation.navigate('Chat', { chatId: 'mediator' })
+                    
+
+
+                    // await requestMediate('mediator')
+                }
+                else{
+
                 console.log("Scan QR - OOB URL= " + data)
-                const decodedMsg = await decodeOOBURL(data);
                 //const jsonData = JSON.parse(decodedMsg)
-                console.log(decodedMsg)
+                console.log('decodedMsg',decodedMsg)
                 const personLogo = require('../assets/smallBWPerson.png');
                 const displayName = decodedMsg.body.label !== undefined? decodedMsg.body.label : "Agent-"+uuid.v4().toString().slice(-5)
                 await importContact({
@@ -87,6 +109,8 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                     did: decodedMsg.from,
                     id: uuid.v4().toString()
                 })
+
+                }
             }
         } else {
             // TODO HANDLE JSON ERROR
@@ -102,11 +126,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
         clearAndGoBack()
     };
 
-    const clearAndGoBack = () => {
-        setScanned(true)
-        if (timeOutId) clearTimeout(timeOutId)
-        if (navigation.canGoBack()) navigation.goBack()
-    }
+    
 
     if (hasPermission === null) {
         return <Text>Requesting camera permission</Text>;

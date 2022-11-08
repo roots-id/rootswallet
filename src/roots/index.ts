@@ -10,6 +10,17 @@ import * as utils from '../utils'
 import * as wallet from '../wallet'
 import {hasNewCred} from "../credentials";
 import { startConversation } from './peerConversation';
+import * as AsyncStore from '../store/AsyncStore'
+import { credentialRequest } from '../protocols';
+
+import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
+import {
+    Ed25519VerificationKey2018,
+    Ed25519Signature2018,
+  } from "@transmute/ed25519-signature-2018";
+import { randomBytes } from 'react-native-randombytes'
+import vc from '@sphereon/rn-vc-js';
+
 
 //msg types
 export enum MessageType {
@@ -28,7 +39,12 @@ export enum MessageType {
     MEDIATOR_KEYLYST_UPDATE = "mediatorKeyListUpdate",
     MEDIATOR_STATUS_REQUEST = "mediatorStatusReuqest",
     MEDIATOR_RETRIEVE_MESSAGES = "mediatorRetrieveMessages",
-    SHOW_QR_CODE = "showQRCode"
+    SHOW_QR_CODE = "showQRCode",
+    IIWCREDENTIAL = "iiwCredential",
+    IIWCREDENTIALREQUEST = "iiwCredentialRequest",
+    IIWACCEPTEDCREDENTIAL = "iiwAcceptedCredential",
+    IIWREJECTEDCREDENTIAL = "iiwRejectedCredential",
+    
 }
 
 //meaningful literals
@@ -43,6 +59,7 @@ export const CRED_REVOKE = "credRevoke"
 export const CRED_VERIFY = "credVerify"
 export const CRED_VIEW = "credView"
 export const PUBLISH_DID = "publishDID"
+export const CRED_REQUEST = "credRequest"
 
 const allChatsRegex = new RegExp(models.getStorageKey("", models.ModelType.CHAT) + '*')
 const allCredsRegex = new RegExp(models.getStorageKey("", models.ModelType.CREDENTIAL) + '*')
@@ -500,6 +517,39 @@ function addQuickReply(msg: models.message) {
                 {
                     title: 'Add to Prism',
                     value: MessageType.PROMPT_PUBLISH + PUBLISH_DID,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+
+    //TODO check for roots.MessageType.IIWCREDENTIAL 
+    if (msg.type === MessageType.IIWCREDENTIAL) {
+        msg.quickReplies = {
+            type: 'checkbox', 
+            keepIt: true,
+            values: [
+                {
+                    title: 'Preview',
+                    value: MessageType.IIWCREDENTIAL + CRED_VIEW,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.IIWCREDENTIALREQUEST) {
+        msg.quickReplies = {
+            type: 'radio', 
+            keepIt: false,
+            values: [
+                {
+                    title: 'Accept',
+                    value: MessageType.IIWACCEPTEDCREDENTIAL ,
+                    messageId: msg.id,
+                },
+                {
+                    title: 'Deny',
+                    value: MessageType.IIWREJECTEDCREDENTIAL,
                     messageId: msg.id,
                 }
             ],
@@ -1230,4 +1280,184 @@ export function setDemo(demoMode: boolean): void {
 
 function rootsDid(alias: string) {
     return "did:root:" + utils.replaceSpecial(alias);
+}
+
+export async function getMediatorURL(): Promise<string> {
+    // return mediatorUrl if it is empty from storage
+    const mediatorUrl = await AsyncStore.getItem("mediatorUrl")
+    console.log("roots - mediatorUrl from storage", mediatorUrl)
+
+// if it is empty or undefined, set it to the null
+    if(!mediatorUrl) {
+        console.log("roots - mediatorUrl is empty, setting to null")
+        return ''
+    }
+    else{
+        console.log(mediatorUrl)
+        return mediatorUrl
+    }
+}
+
+export async function setMediatorURL(url: string): Promise<void> {
+    await AsyncStore.storeItem("mediatorUrl", url,true)
+    logger("roots - mediator url set to", url)
+}
+
+export async function generateKeyPair() {
+    let keyGenerator = Ed25519KeyPair;
+    const keyPair = await keyGenerator.generate({
+        secureRandom: () => randomBytes(32)
+    });
+
+    let Ed25519VerificationKey = await keyPair.export({
+        type: 'Ed25519VerificationKey2018',
+        privateKey: true,
+        })
+    
+
+    const suite = new Ed25519Signature2018({
+        key: await Ed25519VerificationKey2018.from(
+            Ed25519VerificationKey
+        )
+        });
+    return suite
+   
+} 
+export async function creteCredential(credential: any, suite: any) {
+    const signedVC = await vc.issue({credential, suite});
+    return signedVC
+}
+export async function createJFFcredential() {
+    const suite = await generateKeyPair()
+
+    const credential = {
+        "@context": [
+          "https://www.w3.org/2018/credentials/v1",
+          "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/jff-vc-edu-plugfest-1-context.json"
+        ],
+        "type": [
+          "VerifiableCredential",
+          "OpenBadgeCredential"
+        ],
+        "issuer": {
+          "type": "Profile",
+          "id": "did:key:z6MkrHKzgsahxBLyNAbLQyB1pcWNYC9GmywiWPgkrvntAZcj",
+          "name": "Jobs for the Future (JFF)"
+        },
+        "issuanceDate": "2022-05-01T00:00:00Z",
+        "credentialSubject": {
+          "type": "AchievementSubject",
+          "id": "did:key:123",
+          "achievement": {
+            "type": "Achievement",
+            "name": "Our Wallet Passed JFF Plugfest #1 2022",
+            "description": "This wallet can display this Open Badge 3.0",
+            "criteria": {
+              "type": "Criteria",
+              "narrative": "The first cohort of the JFF Plugfest 1 in May/June of 2021 collaborated to push interoperability of VCs in education forward."
+            },
+            "image": "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/images/plugfest-1-badge-image.png"
+          }
+        },
+        "proof": {
+          "type": "Ed25519Signature2018",
+          "created": "2022-05-27T15:08:03Z",
+          "verificationMethod": "did:key:z6MkrHKzgsahxBLyNAbLQyB1pcWNYC9GmywiWPgkrvntAZcj#z6MkrHKzgsahxBLyNAbLQyB1pcWNYC9GmywiWPgkrvntAZcj",
+          "proofPurpose": "assertionMethod",
+          "jws": "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..-1WePLNRNxXq2wOJeLOsxf7kXQqQfQovWYqF6TZATp0CWnn1LL5ABWmsY_EcwtWXfh5KywsuTW_b0re2Y3epDQ"
+        }
+      };
+    const signedVC = await creteCredential(credential, suite)
+    console.log(JSON.stringify(signedVC, null, 2));
+    return signedVC
+}
+
+export async function createIIWcredential(name: string) {
+    const suite = await generateKeyPair()
+
+    const credential = {
+        "@context": [
+          "https://www.w3.org/2018/credentials/v1",
+          "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/jff-vc-edu-plugfest-1-context.json",
+          "https://www.w3.org/2018/credentials/examples/v1"
+        ],
+        "type": [
+          "VerifiableCredential",
+          "OpenBadgeCredential"
+        ],
+        "issuer": {
+          "type": "Profile",
+          "id": "https://rootsid.com",
+          "name": "Roots Issuer"
+        },
+        "issuanceDate": "2022-05-01T00:00:00Z",
+        "credentialSubject": {
+        "id": "did:key:123",
+        "name": name,
+        "image": "https://media-exp1.licdn.com/dms/image/C510BAQEMJ0bx115X_Q/company-logo_200_200/0/1519341150268?e=1674691200&v=beta&t=es3U9GsduolTqXbL2o9bRqYrRWIahLydgQ-FKfa2Law"
+
+        }
+      };
+    const signedVC = await creteCredential(credential, suite)
+    console.log(JSON.stringify(signedVC, null, 2));
+    const res = await verifyCredential(signedVC, suite)
+    return signedVC
+}
+
+export async function verifyCredential(credential:any, suite:any) {
+
+    const result = await vc.verifyCredential({credential, suite})
+    console.log('waiiiiiiiiiiiiiiit result check proof here should be ')
+    console.log(result)
+    return result
+}
+
+
+export async function acceptIIWCredential(chat: models.chat){
+    await sendMessage(chat, 'IIW credential accepted.',
+    MessageType.STATUS,
+    contact.ROOTS_BOT)
+    return true
+     
+}
+
+export async function denyIIWCredential(chat: models.chat){
+    await sendMessage(chat, 'IIW credential denied.',
+    MessageType.STATUS,
+    contact.ROOTS_BOT)
+    return true
+}
+
+export async function requestJFFCredential(chatid: string, name: string){
+    let chat = getChatItem(chatid)
+    let requested_credential = {
+        "credential": {
+            "@context": [
+              "https://www.w3.org/2018/credentials/v1",
+              "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/jff-vc-edu-plugfest-1-context.json",
+              "https://www.w3.org/2018/credentials/examples/v1"
+            ],
+            "type": [
+              "VerifiableCredential",
+              "OpenBadgeCredential"
+            ],
+            "issuer": {
+              "type": "Profile",
+              "id": "https://rootsid.com",
+              "name": "Roots Issuer"
+            },
+            "issuanceDate": "2022-05-01T00:00:00Z",
+            "credentialSubject": {
+            "id": chat.fromDids[0],
+            "name": name,
+            "image": "https://media-exp1.licdn.com/dms/image/C510BAQEMJ0bx115X_Q/company-logo_200_200/0/1519341150268?e=1674691200&v=beta&t=es3U9GsduolTqXbL2o9bRqYrRWIahLydgQ-FKfa2Law"
+    
+            }
+          }
+    }
+    
+
+    console.log(chat.fromDids[0],chat.toDids[0],'CREDDD IDDSS')
+    let _mediator_cred = await credentialRequest(chat.fromDids[0],chat.toDids[0], requested_credential)
+    return _mediator_cred
 }

@@ -49,16 +49,19 @@ export async function startConversation(chatId: string) {
         await store.updateItem(models.getStorageKey(chatId, models.ModelType.CHAT), JSON.stringify(chat))
         var isMediator = false
         if (features !== undefined){
-            await sendMessage(chat,
-                chat.title + " supports the following protocols:",
-                MessageType.TEXT, contact.ROOTS_BOT)
+            //create an array of features using the id of the feature
+            //create array of strings typescript
+            let featuresArray = Array<string>()
+
             
             for (const feat of features) { 
                 if (feat.id.includes("coordinate-mediation/2.0")) {isMediator = true}
-                await sendMessage(chat,
-                    feat.id.replace("https://didcomm.org/",""),
-                    MessageType.TEXT, contact.ROOTS_BOT) 
+                featuresArray.push(feat.id.replace('https://didcomm.org/', ''))
             }
+
+            await sendMessage(chat,
+                chat.title + " supports the following protocols:\n" + featuresArray.join(",\n"),
+                MessageType.TEXT, contact.ROOTS_BOT)
         }
         
         // Ask to request mediate
@@ -92,14 +95,8 @@ export async function requestMediate(chatId: string) {
         }
         await store.updateItem(models.getStorageKey(chatId, models.ModelType.CHAT), JSON.stringify(chat))
         await sendMessage(chat,
-            "Mediate granted and routing keys received. Now you can:",
+            "Mediation granted and routing keys received. Now you can receive messages offilne. To create a new communication channgel using the icon in the top right.",
             MessageType.TEXT, contact.ROOTS_BOT)
-        await sendMessage(chat,
-            "Create an OOB invitation or check for incoming messages",
-                MessageType.MEDIATOR_KEYLYST_UPDATE, contact.ROOTS_BOT)
-        await sendMessage(chat,
-            "Check for incoming messages",
-                MessageType.MEDIATOR_STATUS_REQUEST, contact.ROOTS_BOT)
     }
 
 }
@@ -128,8 +125,9 @@ export async function createOOBInvitation(chatId: string) {
     const ooburl = await generateOOBURL(newDid)
     const shortQR = await shortenURLRequest(fromDid, toDid, ooburl!, 60*60)
     await sendMessage(chat,
-        "Display QR Code",
+        "Display OOB invitation for id: "+ newDid.substring(0,40),
         MessageType.SHOW_QR_CODE, contact.ROOTS_BOT,undefined,{url:shortQR})
+    return shortQR
 }
 
 export async function checkMessages(chatId: string) {

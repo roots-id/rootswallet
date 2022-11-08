@@ -1,13 +1,26 @@
 import React, {useEffect, useState} from 'react';
-import {Button, Image, Linking, Text, View} from 'react-native';
+import {Button, Image, Linking, Text, View, NativeModules} from 'react-native';
 import {Title} from 'react-native-paper';
 import AuthContext from '../context/AuthenticationContext';
 import FormButton from '../components/FormButton';
 import FormInput from '../components/FormInput';
 import Loading from '../components/Loading'
-import {initRootsWallet} from '../roots'
+import {initRootsWallet, createJFFcredential, createIIWcredential} from '../roots'
 import {createWallet, getWallet} from '../wallet'
+const {PrismModule, PeerDidModule} = NativeModules;
+import vc from '@sphereon/rn-vc-js';
+import {extendContextLoader} from '@sphereon/rn-jsonld-signatures';
+import { randomBytes } from 'react-native-randombytes'
+import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
+import {
+    Ed25519VerificationKey2018,
+    Ed25519Signature2018,
+  } from "@transmute/ed25519-signature-2018";
+// Required to set up a suite instance with private key
+//conver require to import
 
+
+// jsigs.use('documentLoader', defaultDocumentLoader);
 import {displayOrHide, styles} from "../styles/styles";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {WALLET_LOGIN_SUCCESS} from "../store";
@@ -45,6 +58,12 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
     useEffect(() => {
         checkErrors()
     }, [userName, walletName, password, confirmPassword, problemText]);
+
+    async function showCredIIW() {
+        let credIIW = await createIIWcredential('joe fjif Andrei')
+        navigation.navigate("Display Custom Credential", {credential: credIIW})
+    
+    }
 
     function checkErrors() {
         const passNumeric = (/\d/.test(password))
@@ -143,6 +162,8 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
         return (<Loading/>)
     }
 
+   
+
     return (
         <View style={styles.centeredContainer}>
             <Image
@@ -197,6 +218,19 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
                     <Button
                         title="Settings"
                         onPress={handleSettings}
+                        color={'#251520'}
+                    />
+                </View>
+            </View>
+            <View style={{
+                backgroundColor: '#251520', flex: 1, flexDirection: "row",
+                justifyContent: 'space-between', marginBottom: 10, width: '90%',
+                maxWidth: 400,
+            }}>
+                <View style={{backgroundColor: '#251520', flex: 1, marginLeft: 5, marginRight: 10}}>
+                    <Button
+                        title="Display Cred"
+                        onPress={showCredIIW}
                         color={'#251520'}
                     />
                 </View>

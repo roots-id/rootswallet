@@ -186,7 +186,7 @@ export function getItems(regex: RegExp) {
         logger('store - no cached items found')
         return items;
     } else {
-        logger('store - cached items found',items.length)
+        //logger('store - cached items found',items.length)
         items.forEach(item => logger("item",item))
         return items;
     }

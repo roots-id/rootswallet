@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {DefaultTheme, Provider as PaperProvider} from 'react-native-paper';
 import AgentProvider from "@aries-framework/react-hooks";
 import Providers from './src/navigation';
+import PolyfillCrypto from 'react-native-webview-crypto';
 
 export default function App() {
     console.log("app - setting up providers")
@@ -18,6 +19,7 @@ export default function App() {
 
     return (
         <AgentProvider agent={agent}>
+            <PolyfillCrypto />
             <PaperProvider theme={theme}>
                 <Providers/>
             </PaperProvider>
