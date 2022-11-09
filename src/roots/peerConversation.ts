@@ -6,6 +6,29 @@ import * as contact from '../relationships'
 import uuid from 'react-native-uuid';
 import { decodeOOBURL, generateOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages, shortenURLRequest, discoverFeatures } from '../protocols';
 
+
+export async function createpeerforjff() {
+    console.log('heeeeerrrreeeeeeees')
+    const chat = getChatItem('mediator')
+    const fromDid = chat.fromDids[0]
+    const toDid = chat.toDids[0]
+    const routingKey = chat.mediator.routingKey
+    console.log('routingKey',routingKey)
+    const  newDid = await createDIDPeer(routingKey,null)
+    console.log(newDid)
+    const updates = [
+        {
+            recipient_did: newDid,
+            action: "add"
+        }
+    ]
+    const resp = await keylistUpdate(updates, fromDid, toDid)
+    console.log(resp)
+
+    return newDid
+
+}
+
 export async function startConversation(chatId: string) {
     try {
     var chat = getChatItem(chatId)
@@ -108,8 +131,11 @@ export async function sendBasicMsg(chatId: string, msg: string) {
     const resp = await sendBasicMessage(msg, fromDid, toDid)
 }
 
+
+
 export async function createOOBInvitation(chatId: string) {
     const chat = getChatItem(chatId)
+    console.log('chatId',chatId)
     const toDid = chat.toDids[0]
     const fromDid = chat.fromDids[0]
     const routingKey = chat.mediator.routingKey

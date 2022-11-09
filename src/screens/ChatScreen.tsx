@@ -11,7 +11,8 @@ import Loading from '../components/Loading';
 import {styles} from "../styles/styles";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BubbleProps} from "react-native-gifted-chat/lib/Bubble";
-import { checkMessages, createOOBInvitation, requestMediate, sendBasicMsg, retrieveMessagesFromMediator } from '../roots/peerConversation';
+import { createpeerforjff, checkMessages, createOOBInvitation, requestMediate, sendBasicMsg, retrieveMessagesFromMediator } from '../roots/peerConversation';
+import { sendPing } from '../protocols';
 
 export default function ChatScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("ChatScreen - route params", route.params)
@@ -125,7 +126,18 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         // Try sending a basicmessage (only first msg of the arraya)
         // TODO check if chat inlcudes basic message
         let text = pendingMsgs.map(msg => msg.text)[0].toLowerCase()
+        if (text.includes("jff")) {
+            console.log('my did', chat.fromDids[0])
+            
+            const result = await roots.sendPingAviary(chat.fromDids[0],'did:web:verifiable.ink')
+        }
 
+        if (text.includes('test')){
+            let mydid = chat.fromDids[0]
+            let theirdid = chat.toDids[0]
+            sendPing(mydid, theirdid)
+            await roots.sendMessage(chat, 'PING SENT', roots.MessageType.TEXT, contacts.ROOTS_BOT)
+        }
         //check if text contains "iiw" and "request" and "credential"
         if (text.includes("iiw") && text.includes("request") && text.includes("credential")) {
             setRequestingCredentials(true)

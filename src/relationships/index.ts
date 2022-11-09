@@ -330,7 +330,7 @@ const USER_NAME_STORAGE_KEY = "primaryUserNameKey"
 let userName: string = "";
 
 export async function addDidDoc(contact: models.contactDecorator) {
-    logger("roots - getting did doc for contact",contact.did)
+    //logger("roots - getting did doc for contact",contact.did)
     const didDocJson = await getPrismDidDoc(contact.did)
     if(didDocJson) {
         const saveMe = getContactByDid(contact.did)
@@ -453,7 +453,7 @@ export function getRelationships(): contactDecorator[] {
 }
 
 export function getShareableRelByAlias(alias: string): models.contactDecorator|undefined {
-    logger("roots - getting shareable rel by alias",alias)
+    //logger("roots - getting shareable rel by alias",alias)
     const rel = getContactByAlias(alias)
     if(rel && rel.did) {
         return rel

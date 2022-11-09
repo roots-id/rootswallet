@@ -11,7 +11,7 @@ import * as wallet from '../wallet'
 import {hasNewCred} from "../credentials";
 import { startConversation } from './peerConversation';
 import * as AsyncStore from '../store/AsyncStore'
-import { credentialRequest } from '../protocols';
+import { credentialRequest , sendPing} from '../protocols';
 
 import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
 import {
@@ -83,27 +83,27 @@ const allProcessing: { [processGroup: string]: { [processAlias: string]: process
 const sessions: { [chatId: string]: models.session } = {};
 
 export async function initRootsWallet(userName: string): Promise<boolean> {
-    logger("roots - initializing RootsWallet")
+    //logger("roots - initializing RootsWallet")
     const savedName = await contact.setUserName(userName)
 
     if(savedName) {
-        logger("roots - initializing your Did")
+        //logger("roots - initializing your Did")
         const cId = contact.generateIdFromName(userName)
         const createdDid = await createDid(cId)
 
         if (createdDid) {
             const didAlias = createdDid.alias
 
-            logger("roots - initializing your narrator bots roots")
+            //logger("roots - initializing your narrator bots roots")
             const prism = await initRoot(contact.PRISM_BOT, didAlias, rootsDid(contact.PRISM_BOT), contact.PRISM_BOT, contact.prismLogo)
             const rw = await initRoot(contact.ROOTS_BOT, didAlias, rootsDid(contact.ROOTS_BOT), contact.ROOTS_BOT, contact.rootsLogo)
 
-            logger("roots - initializing your root")
+            //logger("roots - initializing your root")
             const relCreated = await initRoot(cId, didAlias, createdDid.uriLongForm, userName, contact.catalystLogo);
-            logger("roots - initialized your root", relCreated)
+            //logger("roots - initialized your root", relCreated)
             const myRel = contact.getContactByAlias(cId)
 
-            logger("roots - posting your personal initialization messages")
+            //logger("roots - posting your personal initialization messages")
             const myChat = getChatItem(cId)
             const welcomeAchMsg = await sendMessage(myChat,
                 "Welcome to your personal RootsWallet history!",
@@ -155,7 +155,7 @@ export async function loadAll(walName: string, walPass: string): Promise<string>
             }
         } else {
             const errorMsg = "Failed to load wallet " + walName
-            logger("roots -",errorMsg)
+            //logger("roots -",errorMsg)
             return errorMsg;
         }
     } catch(error: any) {
@@ -168,7 +168,7 @@ async function loadItems(regex: RegExp) {
     try {
         const result = await store.restoreByRegex(regex)
         if (result) {
-            logger("roots - successfully loaded items w/regex", regex)
+            //logger("roots - successfully loaded items w/regex", regex)
             return true;
         } else {
             console.error("roots - Failed to load items w/regex", regex)
@@ -181,7 +181,7 @@ async function loadItems(regex: RegExp) {
 }
 
 export async function storageStatus() {
-    logger("roots - Getting storage status")
+    //logger("roots - Getting storage status")
     await store.status();
 }
 
@@ -215,7 +215,7 @@ export async function importContact(con: models.contactDecorator): Promise<boole
 
 //----------------- Prism ----------------------
 export function setPrismHost(host = DEFAULT_PRISM_HOST, port = "50053") {
-    logger("roots - setting Prism host and port", host, port)
+    //logger("roots - setting Prism host and port", host, port)
     PrismModule.setNetwork(host, port)
     store.updateItem(getSettingAlias("prismNodePort"), port)
     store.updateItem(getSettingAlias("prismNodeHost"), host)
@@ -228,14 +228,14 @@ export function getPrismHost() {
 
 //--------------- Roots ----------------------
 export async function initRoot(id: string, fromDidAlias: string, toDid: string, display = id, avatar = contact.personLogo, fromDid?:string) {
-    logger("roots - creating root", id, fromDidAlias, toDid, display, avatar)
+    //logger("roots - creating root", id, fromDidAlias, toDid, display, avatar)
     try {
         const relCreated = await contact.createRelItem(id, display, avatar, toDid);
-        logger("roots - rel created/existed?", relCreated)
+        //logger("roots - rel created/existed?", relCreated)
         const con = contact.getContactByAlias(id)
-        logger("roots - getting rel DID document")
+        //logger("roots - getting rel DID document")
         if (con && id !== contact.PRISM_BOT && id !== contact.ROOTS_BOT) {
-            logger("roots - creating chat for rel", con.id)
+            //logger("roots - creating chat for rel", con.id)
             const chat = await createChat(id, fromDidAlias, toDid, display, fromDid)
             //not awaiting on purpose
             if (chat) {
@@ -281,17 +281,17 @@ async function createDid(didAlias: string): Promise<models.did | undefined> {
             console.error("roots - Chat/DID already exists", didAlias)
             return existingDid;
         } else {
-            logger("roots - DID does not exist, creating", didAlias, "DID")
+            //logger("roots - DID does not exist, creating", didAlias, "DID")
             const wal = wallet.getWallet()
             if (wal) {
                 const walletJson = wallet.getWalletJson(wal._id)
-                logger("roots - requesting chat/did from prism, w/wallet", walletJson)
+                //logger("roots - requesting chat/did from prism, w/wallet", walletJson)
                 const prismWalletJson = PrismModule.newDID(walletJson, didAlias)
-                logger("roots - Chat/prismDid added to wallet", prismWalletJson)
+                //logger("roots - Chat/prismDid added to wallet", prismWalletJson)
                 const saveResult = await wallet.updateWallet(wal._id, wal.passphrase, prismWalletJson)
                 if (saveResult) {
                     const newDid = getDid(didAlias)
-                    logger("roots - did added to wallet", JSON.stringify(newDid))
+                    //logger("roots - did added to wallet", JSON.stringify(newDid))
                     return newDid;
                 // This code is for Rodo's build problem
                 // const newDid = {
@@ -319,32 +319,32 @@ async function createDid(didAlias: string): Promise<models.did | undefined> {
 }
 
 export function getDid(didAlias: string): models.did | undefined {
-    logger("roots - getDid by alias", didAlias)
+    //logger("roots - getDid by alias", didAlias)
     const dids = wallet.getWallet()?.dids;
     if (dids) {
-        logger("roots - # of current dids", dids.length);
+        //logger("roots - # of current dids", dids.length);
         dids.forEach(did => logger("\tdid:", did.alias))
         const findDid = dids.find(did => (did.alias === didAlias));
         if (findDid) {
-            logger("roots -  found did alias", didAlias, "w/keys:", Object.keys(findDid))
+            //logger("roots -  found did alias", didAlias, "w/keys:", Object.keys(findDid))
             return findDid
         } else {
-            logger("roots - Couldn't find DID", didAlias)
+            //logger("roots - Couldn't find DID", didAlias)
             return;
         }
     } else {
-        logger("roots - wallet has no DIDs to get.")
+        //logger("roots - wallet has no DIDs to get.")
         return;
     }
 
 }
 
 function getDidPubTx(didAlias: string) {
-    logger("roots - getting DID pub tx", didAlias)
+    //logger("roots - getting DID pub tx", didAlias)
     const txLogs = wallet.getWallet()?.blockchainTxLogEntry
-    logger("roots - got tx logs", JSON.stringify(txLogs))
+    //logger("roots - got tx logs", JSON.stringify(txLogs))
     const didPublishTxLog = txLogs?.find(txLog => (txLog.action === models.DID_PUBLISH_TX && txLog.description === didAlias))
-    logger("roots - got DID publish tx log", JSON.stringify(didPublishTxLog))
+    //logger("roots - got DID publish tx log", JSON.stringify(didPublishTxLog))
     return didPublishTxLog;
 }
 
@@ -352,10 +352,10 @@ function hasLongForm(did: models.did) {
     console.log("roots - checking DID has long form", did.uriLongForm);
     const hasLong = did.uriLongForm && did.uriLongForm.length > 0;
     if (hasLong) {
-        logger("roots - DID has long form", did.uriLongForm);
+        //logger("roots - DID has long form", did.uriLongForm);
         return true;
     } else {
-        logger("roots - DID does not have long form", did.uriCanonical);
+        //logger("roots - DID does not have long form", did.uriCanonical);
         return false;
     }
 }
@@ -365,10 +365,10 @@ function isDidPublished(did: models.did): boolean {
     console.log("roots - checking DID has been published", didAlias);
     const didPubTxLog = getDidPubTx(didAlias)
     if (didPubTxLog) {
-        logger("roots - DID was published", didPubTxLog)
+        //logger("roots - DID was published", didPubTxLog)
         return true;
     } else {
-        logger("roots - DID not published", didAlias)
+        //logger("roots - DID not published", didAlias)
         return false;
     }
 }
@@ -380,7 +380,7 @@ export async function publishPrismDid(didAlias: string): Promise<boolean> {
             "and long form", did.uriLongForm)
         if (!isDidPublished(did)) {
             const longFormDid = did.uriLongForm
-            logger("roots - Publishing DID to Prism", longFormDid)
+            //logger("roots - Publishing DID to Prism", longFormDid)
             try {
                 const wal = wallet.getWallet()
                 if (wal) {
@@ -397,7 +397,7 @@ export async function publishPrismDid(didAlias: string): Promise<boolean> {
                 console.error("roots - Error publishing DID", longFormDid, "w/DID alias", didAlias, error, error.stack)
             }
         } else {
-            logger("roots - already", PUBLISHED_TO_PRISM, did.alias)
+            //logger("roots - already", PUBLISHED_TO_PRISM, did.alias)
             return true;
         }
     }
@@ -406,11 +406,11 @@ export async function publishPrismDid(didAlias: string): Promise<boolean> {
 
 //------------------ Chats  --------------
 export async function createChat(alias: string, fromDidAlias: string, toDid: string, title = "Untitled", fromDid?: string) {
-    logger("roots - Creating chat", alias, "for toDid", toDid, "and fromDidAlias", fromDidAlias, "w/ title", title)
+    //logger("roots - Creating chat", alias, "for toDid", toDid, "and fromDidAlias", fromDidAlias, "w/ title", title)
     const chatItemCreated = await createChatItem(alias, fromDidAlias, toDid, title, fromDid)
-    logger("roots - chat item created/existed?", chatItemCreated)
+    //logger("roots - chat item created/existed?", chatItemCreated)
     const chatItem = getChatItem(alias)
-    logger("roots - chat item", chatItem)
+    //logger("roots - chat item", chatItem)
 
     if (chatItemCreated && chatItem) {
         logger("Created chat and added welcome to chat", chatItem.title)
@@ -453,7 +453,7 @@ export async function getAllChats() {
 
     const result = {paginator: {items: allChats}};
     result.paginator.items.forEach(function (item, index) {
-        logger("roots - getting chats", index + ".", item.id);
+        //logger("roots - getting chats", index + ".", item.id);
     });
     return result;
 }
@@ -466,23 +466,23 @@ export async function getChatByRel(rel: models.contactDecorator) {
 }
 
 export function getChatItem(chatAlias: string) {
-    logger("roots - getting chat item", chatAlias)
+    //logger("roots - getting chat item", chatAlias)
     const chatJson = store.getItem(models.getStorageKey(chatAlias, models.ModelType.CHAT))
-    logger("roots - got chat", chatJson)
+    //logger("roots - got chat", chatJson)
     if (chatJson) {
         const chat = JSON.parse(chatJson)
-        logger("roots - parsed chat json w/keys", Object.keys(chat));
+        //logger("roots - parsed chat json w/keys", Object.keys(chat));
         return chat;
     } else {
-        logger("roots - could not get chat item", chatAlias)
+        //logger("roots - could not get chat item", chatAlias)
     }
 }
 
 //TODO make order of chats deterministic (likely should be most recent first)
 export function getChatItems() {
-    logger("roots - getting chat items")
+    //logger("roots - getting chat items")
     const chatItemJsonArray = store.getItems(allChatsRegex)
-    logger("roots - got chat items", String(chatItemJsonArray))
+    //logger("roots - got chat items", String(chatItemJsonArray))
     const chats = chatItemJsonArray.map(chatItemJson => JSON.parse(chatItemJson))
     return chats;
 }
@@ -688,10 +688,10 @@ function addMessageExtensions(msg: models.message) {
 }
 
 export function getMessagesByChat(chatAlias: string): models.message[] {
-    logger("roots - getting message items for chat", chatAlias)
+    //logger("roots - getting message items for chat", chatAlias)
     const msgRegex = new RegExp('^' + models.getStorageKey(chatAlias, models.ModelType.MESSAGE) + '*')
     const msgItemJsonArray = store.getItems(msgRegex)
-    logger("roots - got msg items", msgItemJsonArray.length)
+    //logger("roots - got msg items", msgItemJsonArray.length)
     const chatMsgs = msgItemJsonArray.map(
         (msgItemJson) => {
             logger("parsing msg json", msgItemJson)
@@ -703,7 +703,7 @@ export function getMessagesByChat(chatAlias: string): models.message[] {
 }
 
 export function getMessageById(msgId: string): models.message | undefined {
-    logger("roots - getting message by id", msgId)
+    //logger("roots - getting message by id", msgId)
     const msgJson = store.getItem(msgId)
     if (msgJson) {
         const msg = JSON.parse(msgJson)
@@ -714,10 +714,10 @@ export function getMessageById(msgId: string): models.message | undefined {
 }
 
 export function getMessagesByRel(relId: string) {
-    logger("roots - getting message items by user", relId)
+    //logger("roots - getting message items by user", relId)
     const msgRegex = new RegExp(models.ModelType.MESSAGE + '_' + utils.replaceSpecial(relId) + '*')
     const msgItemJsonArray = store.getItems(msgRegex)
-    logger("roots - got user msg items", msgItemJsonArray.length)
+    //logger("roots - got user msg items", msgItemJsonArray.length)
     const chatMsgs = msgItemJsonArray.map(
         (msgItemJson) => {
             logger("parsing msg json", msgItemJson)
@@ -737,7 +737,7 @@ export async function sendMessage(chat: models.chat, msgText: string, msgType: M
     const msgTime = Date.now()
     const relDisplay = contact.getContactByAlias(contactAlias)
     if (relDisplay) {
-        logger("roots - rel", relDisplay.id, "sending", msgText, "to chat", chat.id);
+        //logger("roots - rel", relDisplay.id, "sending", msgText, "to chat", chat.id);
         const msgId = models.createMessageId(chat.id, relDisplay.id, msgTime);
         let msg = models.createMessage(msgId, msgText, msgType, msgTime, relDisplay.id, system, data);
         msg = addMessageExtensions(msg);
@@ -746,12 +746,12 @@ export async function sendMessage(chat: models.chat, msgText: string, msgType: M
             const result = await store.saveItem(msg.id, msgJson)
             if (result) {
                 if (sessions[chat.id]) {
-                    logger("roots - sending message to onReceivedMessage", chat.id, msgJson)
+                    //logger("roots - sending message to onReceivedMessage", chat.id, msgJson)
                     sessions[chat.id].onReceivedMessage(msg)
                 } else {
                     console.log("roots - no session yet for", chat.id)
                 }
-                logger("roots - Sent/Stored message", msgJson)
+                //logger("roots - Sent/Stored message", msgJson)
                 return msg
             } else {
                 console.error("roots - couldn't save message, so not sending it", msgJson)
@@ -767,18 +767,18 @@ export async function sendMessage(chat: models.chat, msgText: string, msgType: M
 
 export async function processCredentialResponse(chat: models.chat, reply: Reply): Promise<boolean> {
     let res = false;
-    logger("roots - quick reply credential", chat.id, reply)
+    //logger("roots - quick reply credential", chat.id, reply)
     const credReqAlias = getCredRequestAlias(reply.messageId)
-    logger("roots - got credential request", credReqAlias)
+    //logger("roots - got credential request", credReqAlias)
     const replyJson = JSON.stringify(reply)
     //TODO should we allow updates to previous credRequest response?
-    logger("roots - updating cred req", replyJson)
+    //logger("roots - updating cred req", replyJson)
     const status = await store.updateItem(credReqAlias, replyJson)
     if (!status) {
         console.error("roots - Could not save credential request for", credReqAlias)
     } else {
         if (reply.value.endsWith(CRED_ACCEPTED)) {
-            logger("roots - quick reply credential accepted", credReqAlias)
+            //logger("roots - quick reply credential accepted", credReqAlias)
             const msg = getMessageById(reply.messageId)
             if (msg) {
                 startProcessing(chat.id, reply.messageId)
@@ -794,7 +794,7 @@ export async function processCredentialResponse(chat: models.chat, reply: Reply)
                         if (wal) {
                             const success = await cred.addImportedCredential(iCred, wal)
                             if (success) {
-                                logger("roots - accepted credential w/hash", credHash)
+                                //logger("roots - accepted credential w/hash", credHash)
                                 const credOwnMsg = await sendMessage(chat, "Credential accepted.",
                                     MessageType.PROMPT_OWN_CREDENTIAL, contact.ROOTS_BOT, false, credHash)
                                 if (chat.id !== contact.getUserId()) {
@@ -816,10 +816,10 @@ export async function processCredentialResponse(chat: models.chat, reply: Reply)
                 console.error("Could not find message for reply", reply.messageId)
             }
         } else if (reply.value.endsWith(CRED_REJECTED)) {
-            logger("roots - quick reply credential rejected", credReqAlias)
+            //logger("roots - quick reply credential rejected", credReqAlias)
             res = true
         } else {
-            logger("roots - unknown credential prompt reply", credReqAlias, replyJson)
+            //logger("roots - unknown credential prompt reply", credReqAlias, replyJson)
         }
     }
     endProcessing(chat.id, reply.messageId)
@@ -828,7 +828,7 @@ export async function processCredentialResponse(chat: models.chat, reply: Reply)
 
 //TODO use workflow instead of hardcoding it here
 export async function processPublishResponse(chat: models.chat): Promise<models.chat> {
-    logger("roots - started publish DID alias", chat.fromAlias)
+    //logger("roots - started publish DID alias", chat.fromAlias)
     try {
         startProcessing(chat.id, chat.fromAlias)
         const published = await publishPrismDid(chat.fromAlias);
@@ -844,7 +844,7 @@ export async function processPublishResponse(chat: models.chat): Promise<models.
                     false, didPubTx?.url)
                 if (didLinkMsg) {
                     if (demo) {
-                        logger("roots - demo celebrating did publishing credential", pubDid.uriLongForm)
+                        //logger("roots - demo celebrating did publishing credential", pubDid.uriLongForm)
                         const vcMsg = await sendMessage(chat,
                             "To celebrate your published DID, a verifiable credential is being created for you.",
                             MessageType.TEXT, contact.ROOTS_BOT)
@@ -857,12 +857,12 @@ export async function processPublishResponse(chat: models.chat): Promise<models.
 
                                 if (credSuccess) {
                                     //TODO create credential acceptance method
-                                    logger("roots - demo credential issued", iCred.credentialHash)
+                                    //logger("roots - demo credential issued", iCred.credentialHash)
                                     const credReqMsg = await sendMessage(chat,
                                         "Do you want to accept this verifiable credential",
                                         MessageType.PROMPT_ACCEPT_CREDENTIAL, contact.ROOTS_BOT, false, iCred.credentialHash)
                                     const credJson = JSON.stringify((iCred as models.credential))
-                                    logger("roots - saving cred for acceptance", credJson)
+                                    //logger("roots - saving cred for acceptance", credJson)
                                     await store.saveItem(iCred.credentialHash, credJson)
                                 }
                             }
@@ -875,7 +875,7 @@ export async function processPublishResponse(chat: models.chat): Promise<models.
                 console.error("could not retrieve newly created DID", chat.fromAlias)
             }
         } else {
-            logger("roots - Could not process publish DID request", chat.id)
+            //logger("roots - Could not process publish DID request", chat.id)
             const credReqMsg = await sendMessage(chat,
                 "DID was already added to Prism",
                 MessageType.TEXT, contact.PRISM_BOT)
@@ -891,17 +891,17 @@ export async function processPublishResponse(chat: models.chat): Promise<models.
 
 function getCredentialAlias(msgId: string) {
     const alias = msgId.replace(models.ModelType.MESSAGE, models.ModelType.CREDENTIAL)
-    logger("roots - generated credential alias", alias)
+    //logger("roots - generated credential alias", alias)
     return alias
 }
 
 function getCredPubTx(didAlias: string, credAlias: string) {
-    logger("roots - getting cred pub tx", didAlias)
+    //logger("roots - getting cred pub tx", didAlias)
     const txLogs = wallet.getWallet()?.blockchainTxLogEntry
     const txName = didAlias + "/" + credAlias
-    logger("roots - got tx logs", txLogs, "searching for", txName)
+    //logger("roots - got tx logs", txLogs, "searching for", txName)
     const credPubTxLog = txLogs?.find(txLog => (txLog.action === models.CRED_ISSUE_TX && txLog.description === txName))
-    logger("roots - got cred publish tx log", credPubTxLog)
+    //logger("roots - got cred publish tx log", credPubTxLog)
     return credPubTxLog;
 }
 
@@ -918,12 +918,12 @@ export async function processIssueCredential(iCred: models.issuedCredential, cha
         const wal = wallet.getWallet()
         if (wal) {
             const newWal = await cred.issueCredential(chat.fromAlias, iCred, wal)
-            logger("roots - issued cred", newWal)
+            //logger("roots - issued cred", newWal)
             if (newWal) {
                 const newWalJson = JSON.stringify(newWal)
                 const savedWal = await wallet.updateWallet(wal._id, wal.passphrase, newWalJson)
                 if (savedWal) {
-                    logger("roots - Added issued credential to wallet", newWalJson)
+                    //logger("roots - Added issued credential to wallet", newWalJson)
                     const credPubTx = getCredPubTx(iCred.issuingDidAlias, iCred.alias)
                     const credLinkMsg = await sendMessage(chat, BLOCKCHAIN_URL_MSG,
                         MessageType.BLOCKCHAIN_URL, contact.PRISM_BOT, false, credPubTx?.url)
@@ -974,18 +974,18 @@ export async function processRevokeCredential(chat: models.chat, reply: Reply): 
         const credHash = msg.data
         startProcessing(chat.id, credHash + CRED_REVOKE)
         try {
-            logger("roots - revoking credential with hash", credHash)
+            //logger("roots - revoking credential with hash", credHash)
             const wal = wallet.getWallet()
             if (wal) {
                 const newWal = await cred.revokeCredentialByHash(credHash, wal)
                 if (newWal) {
                     const newWalJson = JSON.stringify(newWal)
-                    logger("roots - cred revoke result", newWalJson)
+                    //logger("roots - cred revoke result", newWalJson)
                     const savedWal = await wallet.updateWallet(newWal._id, newWal.passphrase, newWalJson)
                     if (savedWal) {
                         const iCred = cred.getIssuedCredByHash(credHash, newWal)
                         if (iCred) {
-                            logger("roots - Revoked credential", iCred.alias)
+                            //logger("roots - Revoked credential", iCred.alias)
                             const credRevokedMsg = await sendMessage(chat, "Credential is revoked.",
                                 MessageType.TEXT, contact.ROOTS_BOT, false, credHash)
                             res = iCred;
@@ -1019,7 +1019,7 @@ export async function processVerifyCredential(chat: models.chat, credHash: strin
             const verify = await cred.verifyCredentialByHash(credHash, wal)
             if (verify) {
                 const vDate = Date.now()
-                logger("roots - verification result", verify, vDate)
+                //logger("roots - verification result", verify, vDate)
                 const verResult = JSON.parse(verify)
                 if (verResult && verResult.length <= 0) {
                     console.log("roots - credential verification result", verResult)
@@ -1059,7 +1059,7 @@ export function showCred(navigation: any, credHash: string) {
 
 // ------------------ Session ---------------
 export function startChatSession(chatId: string, sessionInfo: models.session): models.sessionStatus {
-    logger("roots - starting session w/chat", sessionInfo.chat.title);
+    //logger("roots - starting session w/chat", sessionInfo.chat.title);
     sessions[chatId] = sessionInfo
 
     return {
@@ -1109,36 +1109,36 @@ function isActiveProcess(processGroup: string, processAlias: string) {
 function getActiveProcesses(processGroup: string) {
     let allActive: process[] = []
     if (!processGroup) {
-        logger("roots - getting all active processing groups")
+        //logger("roots - getting all active processing groups")
         const allGroups = Object.keys(allProcessing)
         allGroups.forEach(group => {
             allActive.concat(getActiveProcesses(group))
         })
     } else {
-        logger("roots - getting active processing for group", processGroup)
+        //logger("roots - getting active processing for group", processGroup)
         if (allProcessing[processGroup]) {
             const allProcAliases = Object.keys(allProcessing[processGroup])
             const activeProcAliases = allProcAliases.filter(procAlias => isActiveProcess(processGroup, procAlias))
             if (activeProcAliases && activeProcAliases.length > 0) {
                 const active = activeProcAliases.map(procAlias => allProcessing[processGroup][procAlias]);
-                logger("roots - found active processing", JSON.stringify(active))
+                //logger("roots - found active processing", JSON.stringify(active))
                 allActive = allActive.concat(active)
             }
         }
     }
-    logger("roots - all active processes:", allActive.length)
+    //logger("roots - all active processes:", allActive.length)
     return allActive
 }
 
 export function isProcessing(processGroup: string) {
-    logger("roots - determining if is processing", processGroup)
+    //logger("roots - determining if is processing", processGroup)
     const activeProcs = getActiveProcesses(processGroup)
     let processing = false
     if (activeProcs && activeProcs.length > 0) {
-        logger("roots - active processes:", JSON.stringify(activeProcs))
+        //logger("roots - active processes:", JSON.stringify(activeProcs))
         processing = true;
     } else {
-        logger("roots - signaling not processing")
+        //logger("roots - signaling not processing")
         processing = false;
     }
 
@@ -1147,7 +1147,7 @@ export function isProcessing(processGroup: string) {
 
 export function updateProcessIndicator(processGroup: string) {
     const processing = isProcessing(processGroup)
-    logger("roots - updating processing indicator", processGroup, processing)
+    //logger("roots - updating processing indicator", processGroup, processing)
     if (sessions[processGroup]) {
         sessions[processGroup].onProcessing(processing)
     }
@@ -1165,7 +1165,7 @@ export async function issueDemoContactCredential(chat: models.chat, msgId: strin
 }
 
 export async function issueDemoCredential(chat: models.chat, msgId: string, contentJson: string): Promise<models.issuedCredential | undefined> {
-    logger("roots - Trying to create demo credential for chat", chat.id, msgId)
+    //logger("roots - Trying to create demo credential for chat", chat.id, msgId)
     const msg = getMessageById(msgId)
     if (msg) {
         const credHash = msg.data
@@ -1173,7 +1173,7 @@ export async function issueDemoCredential(chat: models.chat, msgId: string, cont
         if (wal) {
             const alreadyIssued = cred.getIssuedCredByHash(credHash, wal)
             if (!alreadyIssued) {
-                logger("roots - credential not found, creating....", credHash)
+                //logger("roots - credential not found, creating....", credHash)
                 const toDid = chat.toDids[0]
                 console.log("roots - contact credential being issued to DID", toDid)
                 const credAlias = getCredentialAlias(msgId)
@@ -1212,7 +1212,7 @@ export async function issueDemoCredential(chat: models.chat, msgId: string, cont
                         MessageType.PROMPT_RETRY_PROCESS, contact.ROOTS_BOT, false, async ()=>{await processIssueCredential(iCred, chat)})
                 }
             } else {
-                logger("roots - Couldn't issue demo contact credential, was the credential already found", alreadyIssued)
+                //logger("roots - Couldn't issue demo contact credential, was the credential already found", alreadyIssued)
             }
         } else {
             console.error("could not get wallet", wallet.getWalletName(), wal)
@@ -1223,7 +1223,7 @@ export async function issueDemoCredential(chat: models.chat, msgId: string, cont
 }
 
 export async function issueDemoPublishDidCredential(chat: models.chat, msgId: string): Promise<models.issuedCredential | undefined> {
-    logger("roots - Trying to create demo credential for publishing DID", chat.id, msgId)
+    //logger("roots - Trying to create demo credential for publishing DID", chat.id, msgId)
     const credMsgs = []
     const credAlias = getCredentialAlias(msgId)
     const did = getDid(chat.fromAlias)
@@ -1233,9 +1233,9 @@ export async function issueDemoPublishDidCredential(chat: models.chat, msgId: st
         if (wal) {
             const alreadyIssued = cred.getIssuedCredByAlias(credAlias, wal)
             if (didPub && !alreadyIssued) {
-                logger("roots - Chat is published and credential not found, creating....")
+                //logger("roots - Chat is published and credential not found, creating....")
                 const didLong = did.uriLongForm
-                logger("roots - Creating demo credential for chat", chat.id, "w/long form did", didLong)
+                //logger("roots - Creating demo credential for chat", chat.id, "w/long form did", didLong)
                 const today = new Date(Date.now());
                 const content = {
                     name: "Prism DID publisher",
@@ -1243,8 +1243,8 @@ export async function issueDemoPublishDidCredential(chat: models.chat, msgId: st
                 const contentJson = JSON.stringify(content)
                 return issueDemoCredential(chat, msgId, contentJson)
             } else {
-                logger("roots - Couldn't issue demo credential, is the chat published",
-                    didPub, "was the credential already found", alreadyIssued)
+                //logger("roots - Couldn't issue demo credential, is the chat published",
+                    //didPub, "was the credential already found", alreadyIssued)
             }
         } else {
             console.error("could not get wallet", wallet.getWalletName(), wal)
@@ -1275,7 +1275,7 @@ export function isDemo() {
 
 export function setDemo(demoMode: boolean): void {
     demo = demoMode
-    logger("roots - demo mode set to", demo)
+    //logger("roots - demo mode set to", demo)
 }
 
 function rootsDid(alias: string) {
@@ -1300,7 +1300,7 @@ export async function getMediatorURL(): Promise<string> {
 
 export async function setMediatorURL(url: string): Promise<void> {
     await AsyncStore.storeItem("mediatorUrl", url,true)
-    logger("roots - mediator url set to", url)
+    //logger("roots - mediator url set to", url)
 }
 
 export async function generateKeyPair() {
@@ -1460,4 +1460,9 @@ export async function requestJFFCredential(chatid: string, name: string){
     console.log(chat.fromDids[0],chat.toDids[0],'CREDDD IDDSS')
     let _mediator_cred = await credentialRequest(chat.fromDids[0],chat.toDids[0], requested_credential)
     return _mediator_cred
+}
+
+export async function sendPingAviary(from: string, to: string) {
+    sendPing(from, to)
+    console.log('ping sent')
 }

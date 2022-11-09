@@ -1,8 +1,8 @@
 import { NativeModules } from 'react-native';
 import { getItem } from '../store/';
 import {logger} from "../logging";
-import { resolveDIDPeer } from '../didpeer';
 import uuid from 'react-native-uuid';
+import {resolveDid} from "./Resolve"
 
 const { PeerDidModule, DIDCommV2Module } = NativeModules;
 
@@ -10,7 +10,7 @@ export async function pack(msg: any, from: string, to: string, messageType: stri
     try {
         // TODO case with several key agreement in did doc
         // TODO pthid, thid
-        const didDoc = await resolveDIDPeer(from)
+        const didDoc = await resolveDid(from)
         const kid = didDoc.keyAgreement[0].id
         const key = JSON.parse(await getItem(kid)!)
         var privateKey = key.privateJwk
@@ -39,7 +39,7 @@ export async function unpack(packMsg: any) {
         console.log("RM HERE")
         console.log(packMsg)
         const recipient = packMsg.recipients[0].header.kid.split("#")[0]
-        const didDoc = await resolveDIDPeer(recipient)
+        const didDoc = await resolveDid(recipient)
         const kid = didDoc.keyAgreement[0].id
         const key = JSON.parse(await getItem(kid)!)
         var privateKey = key.privateJwk

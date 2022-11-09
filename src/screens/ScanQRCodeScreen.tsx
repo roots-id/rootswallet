@@ -11,15 +11,18 @@ import {IconButton, Title} from 'react-native-paper';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
 import { getDemoRel, getUserId} from '../relationships';
-import {getDid, importContact, importVerifiedCredential, isDemo, setMediatorURL} from '../roots'
+import {getDid, importContact, getChatItem,importVerifiedCredential, isDemo, setMediatorURL} from '../roots'
 import React from 'react';
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BarCodeEvent} from "expo-barcode-scanner/src/BarCodeScanner";
 import {styles} from "../styles/styles";
 import { decodeOOBURL } from '../protocols';
 import uuid from 'react-native-uuid';
+import {createpeerforjff} from './../roots/peerConversation'
+import * as store from '../store'
+import * as models from '../models'
 
-
+import { createDIDPeer } from "../didpeer"
 
 export default function ScanQRCodeScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("Scan QR - rout params", route.params)
@@ -104,11 +107,18 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                 const personLogo = require('../assets/smallBWPerson.png');
                 const displayName = decodedMsg.body.label !== undefined? decodedMsg.body.label : "Agent-"+uuid.v4().toString().slice(-5)
                 await importContact({
-                    displayName: displayName,
-                    displayPictureUrl: personLogo,
+                    displayName: 'brian',
+                    displayPictureUrl: displayName,
                     did: decodedMsg.from,
-                    id: uuid.v4().toString()
+                    id: 'brian',
                 })
+                let chat = getChatItem('brian')
+                let peer_did = await createpeerforjff()
+                // let peer_did = 'alex'
+                console.log('peer_did for brian ',peer_did)
+                chat.fromDids = [peer_did]
+                await store.updateItem(models.getStorageKey('brian', models.ModelType.CHAT), JSON.stringify(chat))
+
 
                 }
             }

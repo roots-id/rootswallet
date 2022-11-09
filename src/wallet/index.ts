@@ -42,12 +42,12 @@ export function getWalletName(): string | undefined {
 }
 
 export async function loadWallet(walName = getWalletName(), walPass: string): Promise<boolean> {
-    logger("roots - loading wallet", walName, "with walPass", walPass);
+    //logger("roots - loading wallet", walName, "with walPass", walPass);
     const restored = await store.restoreWallet(walPass);
     //retrieving wallet pulls the object into memory here
     const rootsWalJson = getWalletJson(walName)
     if (restored && rootsWalJson) {
-        logger("roots - loaded wallet", walName, "with walPass", walPass);
+        //logger("roots - loaded wallet", walName, "with walPass", walPass);
         return true
     } else {
         console.error("could not load wallet with walPass", walPass)

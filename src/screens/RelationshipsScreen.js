@@ -30,17 +30,17 @@ const RelationshipsScreen = ({route, navigation}) => {
 
     //every 5 seconds, gets all chats, finds the mediator and does a checkMessages
     useEffect(() => {
-        const interval = setInterval(async () => {
-            const result =  getChatItems()
-            for (let i =0; i < result.length; i++  ) {
-                let res = result[i]
-                if (res.mediator !== undefined) {
-                    console.log("checking messages for mediator")
-                    await checkMessages(res.id)
-                }
-            };
-        }, 5000);
-        return () => clearInterval(interval);
+        // const interval = setInterval(async () => {
+        //     const result =  getChatItems()
+        //     for (let i =0; i < result.length; i++  ) {
+        //         let res = result[i]
+        //         if (res.mediator !== undefined) {
+        //             console.log("checking messages for mediator")
+        //             await checkMessages(res.id)
+        //         }
+        //     };
+        // }, 5000);
+        // return () => clearInterval(interval);
     }, []);
 
     return (
