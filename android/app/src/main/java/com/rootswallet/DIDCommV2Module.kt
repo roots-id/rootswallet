@@ -85,14 +85,14 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
                 // .customHeader("return_route2", "all")
                 .build()
                 
-            var builder = PackEncryptedParams
+            var builder_p = PackEncryptedParams
                 .builder(message, to)
                 // .from(from)
                 .forward(false)
                 .protectSenderId(protectSender)
-            builder = from?.let { builder.from(it) } ?: builder
-            builder = signFrom?.let { builder.signFrom(it) } ?: builder
-            val params = builder.build()
+            // builder_p = from?.let { builder_p.from(it) } ?: builder_p
+            // builder_p = signFrom?.let { builder_p.signFrom(it) } ?: builder_p
+            val params = builder_p.build()
             promise.resolve(didComm.packEncrypted(params).packedMessage)
         } catch (e: Throwable) {
             promise.reject("Error", e)

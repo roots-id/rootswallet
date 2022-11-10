@@ -3,6 +3,8 @@ import { Resolver, ResolverRegistry } from 'did-resolver'
 import { resolveDIDPeer } from "../didpeer"
 
 import web from 'web-did-resolver'
+
+//convert to class and add a resolve method
 export async function resolveDid(did: string) {
     let webResolver = web.getResolver()
     const resolver = new Resolver({...webResolver} as ResolverRegistry)

@@ -4,6 +4,8 @@ import { sendDIDCommMessage, pack } from "../didcommv2";
 export async function sendPing(from: string, to: string) {
     try {
         const pingBody = { response_requested: true }
+        console.log("packing ping heeeeerrrreeee")
+        //log 50 * 
         const pingMsgPacked = await pack(
             pingBody, 
             from, 

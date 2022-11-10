@@ -8,7 +8,7 @@ export async function sendDIDCommMessage(packMsg: any, to: string) {
     try {
         
         const didDoc = await resolveDid(to)
-        console.log('didDoc tooooooo', didDoc)
+        console.log('didDocsendDIDCommMessage', didDoc)
         var serviceEndpoint = typeof didDoc.service[0].serviceEndpoint === 'string'? didDoc.service[0].serviceEndpoint : didDoc.service[0].serviceEndpoint[0].uri
         console.log('serviceEndpoint',serviceEndpoint)
         
