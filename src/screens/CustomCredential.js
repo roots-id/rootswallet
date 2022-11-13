@@ -5,7 +5,7 @@ import {
     Image,
     Text,
     Pressable,
-    View, ScrollView,
+    View, ScrollView, ViewBase,
 } from 'react-native';
 import {Divider, IconButton} from 'react-native-paper';
 import {useTheme} from '@react-navigation/native';
@@ -80,7 +80,7 @@ export default function CustomCredential({route, navigation}: CompositeScreenPro
                         alignItems: 'center',
                         justifyContent: 'center',
                     }}>
-                <Image source={{uri: cred.credentialSubject.achievement.image}}
+                <Image source={{uri: cred.credentialSubject.achievement.image.id}}
                        style={styles.credLogoStyle}
                 />
                 <Text style={styles.credTitleStyle}>{cred.issuer.name}</Text>
@@ -109,9 +109,12 @@ export default function CustomCredential({route, navigation}: CompositeScreenPro
                 )}
                 {/* //show scrollView only if the state 'detail' is set to true */}
                 {showJson && (
-                <ScrollView style={styles.scrollView}>
-                    <Text style={styles.credText}>{JSON.stringify(cred, null, 2)}</Text>
-                </ScrollView>
+                    <View style={{flex: 1, flexDirection: 'column'}}>
+                    <Text style={{fontSize:20}}>Credential JSON</Text>
+                    <ScrollView style={styles.scrollView}>
+                        <Text style={styles.credText}>{JSON.stringify(cred, null, 2)}</Text>
+                    </ScrollView>
+                    </View>
                 )}
                 
            

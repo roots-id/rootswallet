@@ -24,6 +24,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
 
     const [requesting_credentials, setRequestingCredentials] = useState<boolean>(false)
     const [request_data, setRequestData] = useState<any>(null)
+    const [requested_credentials, setRequestedCredentials] = useState<any>(null)
     // {
     //     'first_name': 'John',
     //     'last_name': 'Doe',
@@ -133,6 +134,20 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
             setRequestData(null)
         }
 
+        if(text.includes("jff")){
+            
+            // const result = await roots.sendMessages(chat, ['Provide your first name'], roots.MessageType.TEXT, contacts.ROOTS_BOT);
+            const result = await roots.sendMessage(chat,
+                 'Preview your credential below',
+                  roots.MessageType.JFFCREDENTIAL, 
+                  contacts.ROOTS_BOT,
+                  false)
+
+
+
+
+        }
+
         // check if requesting_credentials is true and if request_data is undefined
         if (requesting_credentials && request_data == null) {
             setRequestData({
@@ -224,7 +239,22 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     await retrieveMessagesFromMediator(chat.id)
                 } else if (reply.value === roots.MessageType.SHOW_QR_CODE) {
                     await showQR(navigation, roots.getMessageById(reply.messageId)?.data.url)
-                
+                } else if (reply.value === roots.MessageType.JFFCREDENTIAL +roots.CRED_VIEW) {
+                    let jffcred = await roots.createJFFcredential()
+                    setRequestedCredentials(jffcred)
+                    console.log('jffcred', jffcred)
+                    navigation.navigate("Display Custom Credential", {credential: jffcred})
+                    await roots.sendMessage(chat, 'Accept or Deny credential', roots.MessageType.IIWCREDENTIALREQUEST, contacts.AVIERY_BOT, false, jffcred)
+
+                } else if (reply.value === roots.MessageType.JFFACCEPTEDCREDENTIAL ) {
+                    console.log('CREDENTIAL ACCEPTED')
+                    //TODO: replace with credentialRequest()
+
+                    await roots.sendMessage(chat, 'JFF credential accepted.',
+                    roots.MessageType.TEXT,
+                    contacts.ROOTS_BOT)
+                    //TODO save credential to
+
                 } else if (reply.value === roots.MessageType.IIWCREDENTIAL +roots.CRED_VIEW) {
                     const process = roots.getMessageById(reply.messageId)?.data
                     let _temp_name = process.first_name + ' ' + process.last_name

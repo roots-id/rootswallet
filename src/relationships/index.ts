@@ -17,11 +17,15 @@ export const tonyLogo = require('../assets/tony.png');
 export const prismLogo = require('../assets/ATALAPRISM.png');
 export const catalystLogo = require('../assets/catalyst.png');
 export const personLogo = require('../assets/smallBWPerson.png');
+export const avieryLogo = require('../assets/avierytech.png');
+
 export const rootsLogo = require('../assets/LogoCropped.png');
 export const brandLogo = require('../assets/LogoOnly1024.png');
 
 export const ROOTS_BOT = "RootsHelper";
 export const PRISM_BOT = "PrismHelper";
+export const AVIERY_BOT = "Aviery";
+
 
 export const LIBRARY_BOT = "did:roots:librarybot1";
 const IOG_TECH = "\"did:prism:b4766dae6f496f2b1980ed5a0977e126014d2da2126f588ca4e5088cef52e989:Cr8BCrwBEjsKB21hc3RlcjAQAUouCglzZWNwMjU2azESIQLW_ckfGDXfS0iftU8_FwzWR-q2xqPwepaWPG58u1Qc_hI8Cghpc3N1aW5nMBACSi4KCXNlY3AyNTZrMRIhAnt_c7RF_oYNbB6ELgF7AhXiQ9s905oHkiMTnf8_FFBWEj8KC3Jldm9jYXRpb24wEAVKLgoJc2VjcDI1NmsxEiECHwzsoV7NrJdo5AAvzmk4WtYWN0130GruIViUSNVU4w8";

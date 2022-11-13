@@ -10,7 +10,7 @@ import {
 import {IconButton, Title} from 'react-native-paper';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
-import { getDemoRel, getUserId} from '../relationships';
+import { getDemoRel, getUserId, AVIERY_BOT} from '../relationships';
 import {getDid, importContact, importVerifiedCredential, isDemo, setMediatorURL} from '../roots'
 import React from 'react';
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
@@ -96,6 +96,20 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
 
                     // await requestMediate('mediator')
                 }
+                else if(decodedMsg.from.startsWith('did:web:')){
+                    const avLogo = require('../assets/avierytech.png');
+                    await importContact({
+                        displayName: AVIERY_BOT,
+                        displayPictureUrl: avLogo,
+                        did: decodedMsg.from,
+                        id: AVIERY_BOT
+                    })
+                    clearAndGoBack()
+                    navigation.navigate('Chat', { chatId: AVIERY_BOT })
+                }
+                    
+                
+
                 else{
 
                 console.log("Scan QR - OOB URL= " + data)

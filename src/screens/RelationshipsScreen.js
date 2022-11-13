@@ -39,7 +39,7 @@ const RelationshipsScreen = ({route, navigation}) => {
                     await checkMessages(res.id)
                 }
             };
-        }, 5000);
+        }, 50000);
         return () => clearInterval(interval);
     }, []);
 

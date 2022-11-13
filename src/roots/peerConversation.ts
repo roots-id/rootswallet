@@ -15,9 +15,9 @@ export async function startConversation(chatId: string) {
        // Find if theres a mediator
         if (chat.fromDids.length === 0){
             const chats = getChatItems()
-            var routingKey = null 
-            var mediatorDid = null
-            var didToMediator = null
+            let routingKey = null 
+            let mediatorDid = null
+            let didToMediator = null
             chats.forEach(element => {
                 if ( element.mediator !== undefined) { 
                     routingKey = element.mediator.routingKey
@@ -72,6 +72,42 @@ export async function startConversation(chatId: string) {
                 MessageType.MEDIATOR_REQUEST_MEDIATE, contact.ROOTS_BOT)
         }
     }
+
+    if (toDid.startsWith('did:web')){
+        if (chat.fromDids.length === 0){
+            const chats = getChatItems()
+            var routingKey = null 
+            var mediatorDid = null
+            var didToMediator = null
+            chats.forEach(element => {
+                if ( element.mediator !== undefined) { 
+                    routingKey = element.mediator.routingKey
+                    mediatorDid = element.toDids[0]
+                    didToMediator = element.fromDids[0]
+                }
+            });
+            var  fromDid = await createDIDPeer(routingKey,null)
+            if (routingKey !== null){
+                console.log("UPDATING KEYS")
+                console.log(fromDid)
+                const updates = [
+                    {
+                        recipient_did: fromDid,
+                        action: "add"
+                    }
+                 ]
+            const resp = await keylistUpdate(updates, didToMediator, mediatorDid)
+            } 
+
+            chat.fromDids = [fromDid]
+            await store.updateItem(models.getStorageKey(chatId, models.ModelType.CHAT), JSON.stringify(chat))
+        }
+
+        await sendMessage(chat,
+            "Verifiable wants to issue a JFF Credential.",
+            MessageType.TEXT, contact.ROOTS_BOT)
+    }
+
     } catch (error) {
         console.log("Start Conversation error " + error)
     }

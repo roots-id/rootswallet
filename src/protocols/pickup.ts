@@ -6,7 +6,7 @@ export async function retrieveMessages(from: string, to: string){
         const messageCount = await statusRequest(from, to)
         logger("Pickup message count: "+messageCount)
         if (messageCount>0){
-            const attachments = await deliveryRequest(5,from, to)
+            const attachments = await deliveryRequest(messageCount,from, to)
             await processDelivery(attachments, from, to)
         } 
         return messageCount

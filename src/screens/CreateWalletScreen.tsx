@@ -59,8 +59,8 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
         checkErrors()
     }, [userName, walletName, password, confirmPassword, problemText]);
 
-    async function showCredIIW() {
-        let credIIW = await createIIWcredential('joe fjif Andrei')
+    async function showJFFCred() {
+        let credIIW = await createJFFcredential()
         navigation.navigate("Display Custom Credential", {credential: credIIW})
     
     }
@@ -230,7 +230,7 @@ export default function CreateWalletScreen({route, navigation}: CompositeScreenP
                 <View style={{backgroundColor: '#251520', flex: 1, marginLeft: 5, marginRight: 10}}>
                     <Button
                         title="Display Cred"
-                        onPress={showCredIIW}
+                        onPress={showJFFCred}
                         color={'#251520'}
                     />
                 </View>

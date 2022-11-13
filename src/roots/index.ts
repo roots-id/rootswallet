@@ -44,6 +44,10 @@ export enum MessageType {
     IIWCREDENTIALREQUEST = "iiwCredentialRequest",
     IIWACCEPTEDCREDENTIAL = "iiwAcceptedCredential",
     IIWREJECTEDCREDENTIAL = "iiwRejectedCredential",
+    JFFCREDENTIAL = "jffCredential",
+    JFFCREDENTIALREQUEST = "jffCredentialRequest",
+    JFFACCEPTEDCREDENTIAL = "jffAcceptedCredential",
+    JFFREJECTEDCREDENTIAL = "jffRejectedCredential",
     
 }
 
@@ -97,6 +101,7 @@ export async function initRootsWallet(userName: string): Promise<boolean> {
             logger("roots - initializing your narrator bots roots")
             const prism = await initRoot(contact.PRISM_BOT, didAlias, rootsDid(contact.PRISM_BOT), contact.PRISM_BOT, contact.prismLogo)
             const rw = await initRoot(contact.ROOTS_BOT, didAlias, rootsDid(contact.ROOTS_BOT), contact.ROOTS_BOT, contact.rootsLogo)
+            // const av = await initRoot(contact.AVIERY_BOT, didAlias, rootsDid(contact.AVIERY_BOT), contact.AVIERY_BOT, contact.avieryLogo)
 
             logger("roots - initializing your root")
             const relCreated = await initRoot(cId, didAlias, createdDid.uriLongForm, userName, contact.catalystLogo);
@@ -537,10 +542,11 @@ function addQuickReply(msg: models.message) {
             ],
         }
     }
+    
     if (msg.type === MessageType.IIWCREDENTIALREQUEST) {
         msg.quickReplies = {
             type: 'radio', 
-            keepIt: false,
+            keepIt: true,
             values: [
                 {
                     title: 'Accept',
@@ -550,6 +556,37 @@ function addQuickReply(msg: models.message) {
                 {
                     title: 'Deny',
                     value: MessageType.IIWREJECTEDCREDENTIAL,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.JFFCREDENTIAL) {
+        msg.quickReplies = {
+            type: 'checkbox', 
+            keepIt: true,
+            values: [
+                {
+                    title: 'Preview',
+                    value: MessageType.JFFCREDENTIAL + CRED_VIEW,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.JFFCREDENTIALREQUEST) {
+        msg.quickReplies = {
+            type: 'radio',
+            keepIt: true,
+            values: [
+                {
+                    title: 'Accept',
+                    value: MessageType.JFFACCEPTEDCREDENTIAL,
+                    messageId: msg.id,
+                },
+                {
+                    title: 'Deny',
+                    value: MessageType.JFFREJECTEDCREDENTIAL,
                     messageId: msg.id,
                 }
             ],
@@ -1333,41 +1370,43 @@ export async function createJFFcredential() {
     const credential = {
         "@context": [
           "https://www.w3.org/2018/credentials/v1",
-          "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/jff-vc-edu-plugfest-1-context.json"
+          "https://purl.imsglobal.org/spec/ob/v3p0/context.json"
         ],
+        "id": "urn:uuid:a63a60be-f4af-491c-87fc-2c8fd3007a58",
         "type": [
           "VerifiableCredential",
           "OpenBadgeCredential"
         ],
+        "name": "JFF x vc-edu PlugFest 2 Interoperability",
         "issuer": {
-          "type": "Profile",
-          "id": "did:key:z6MkrHKzgsahxBLyNAbLQyB1pcWNYC9GmywiWPgkrvntAZcj",
+          "type": ["Profile"],
+          "id": "did:key:z6MktiSzqF9kqwdU8VkdBKx56EYzXfpgnNPUAGznpicNiWfn",
           "name": "Jobs for the Future (JFF)"
         },
-        "issuanceDate": "2022-05-01T00:00:00Z",
+        "issuanceDate": "2022-11-14T00:00:00Z",
         "credentialSubject": {
-          "type": "AchievementSubject",
+          "type": ["AchievementSubject"],
           "id": "did:key:123",
           "achievement": {
-            "type": "Achievement",
-            "name": "Our Wallet Passed JFF Plugfest #1 2022",
-            "description": "This wallet can display this Open Badge 3.0",
+            "id": "urn:uuid:bd6d9316-f7ae-4073-a1e5-2f7f5bd22922",
+            "type": ["Achievement"],
+            "name": "JFF x vc-edu PlugFest 2 Interoperability",
+            "description": "This credential solution supports the use of OBv3 and w3c Verifiable Credentials and is interoperable with at least two other solutions.  This was demonstrated successfully during JFF x vc-edu PlugFest 2.",
             "criteria": {
               "type": "Criteria",
-              "narrative": "The first cohort of the JFF Plugfest 1 in May/June of 2021 collaborated to push interoperability of VCs in education forward."
+              "narrative": "Solutions providers earned this badge by demonstrating interoperability between multiple providers based on the OBv3 candidate final standard, with some additional required fields. Credential issuers earning this badge successfully issued a credential into at least two wallets.  Wallet implementers earning this badge successfully displayed credentials issued by at least two different credential issuers."
             },
-            "image": "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/images/plugfest-1-badge-image.png"
+            "image": {
+              "id":"https://w3c-ccg.github.io/vc-ed/plugfest-2-2022/images/JFF-VC-EDU-PLUGFEST2-badge-image.png",
+              "type": "Image"
+            }
           }
-        },
-        "proof": {
-          "type": "Ed25519Signature2018",
-          "created": "2022-05-27T15:08:03Z",
-          "verificationMethod": "did:key:z6MkrHKzgsahxBLyNAbLQyB1pcWNYC9GmywiWPgkrvntAZcj#z6MkrHKzgsahxBLyNAbLQyB1pcWNYC9GmywiWPgkrvntAZcj",
-          "proofPurpose": "assertionMethod",
-          "jws": "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..-1WePLNRNxXq2wOJeLOsxf7kXQqQfQovWYqF6TZATp0CWnn1LL5ABWmsY_EcwtWXfh5KywsuTW_b0re2Y3epDQ"
         }
       };
     const signedVC = await creteCredential(credential, suite)
+    signedVC['issuer']['id']='did:web:verifiable.ink'
+    signedVC['proof']['verificationMethod']='did:web:verifiable.ink#0'
+    // signedVC['proof']['id']= 'did:web:verifiable.ink'
     console.log(JSON.stringify(signedVC, null, 2));
     return signedVC
 }
