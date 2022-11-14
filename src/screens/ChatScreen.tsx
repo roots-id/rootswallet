@@ -12,6 +12,7 @@ import {styles} from "../styles/styles";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BubbleProps} from "react-native-gifted-chat/lib/Bubble";
 import { checkMessages, createOOBInvitation, requestMediate, sendBasicMsg, retrieveMessagesFromMediator } from '../roots/peerConversation';
+import { storeItem } from '../store/CachedStore';
 
 export default function ChatScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("ChatScreen - route params", route.params)
@@ -239,12 +240,19 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     await retrieveMessagesFromMediator(chat.id)
                 } else if (reply.value === roots.MessageType.SHOW_QR_CODE) {
                     await showQR(navigation, roots.getMessageById(reply.messageId)?.data.url)
+                } else if (reply.value === roots.MessageType.JFFCREDENTIAL) {
+                    //
+                    const result = await roots.sendMessage(chat,
+                        'Preview your credential below',
+                         roots.MessageType.JFFCREDENTIAL, 
+                         contacts.ROOTS_BOT,
+                         false)
                 } else if (reply.value === roots.MessageType.JFFCREDENTIAL +roots.CRED_VIEW) {
                     let jffcred = await roots.createJFFcredential()
                     setRequestedCredentials(jffcred)
                     console.log('jffcred', jffcred)
                     navigation.navigate("Display Custom Credential", {credential: jffcred})
-                    await roots.sendMessage(chat, 'Accept or Deny credential', roots.MessageType.IIWCREDENTIALREQUEST, contacts.AVIERY_BOT, false, jffcred)
+                    await roots.sendMessage(chat, 'Accept or Deny credential jff', roots.MessageType.JFFCREDENTIALREQUEST, contacts.ROOTS_BOT, false, jffcred)
 
                 } else if (reply.value === roots.MessageType.JFFACCEPTEDCREDENTIAL ) {
                     console.log('CREDENTIAL ACCEPTED')
@@ -255,18 +263,25 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     contacts.ROOTS_BOT)
                     //TODO save credential to
 
+                    storeItem('demo_jffcredential', JSON.stringify(requested_credentials))
+                    setRequestedCredentials(null)
+
                 } else if (reply.value === roots.MessageType.IIWCREDENTIAL +roots.CRED_VIEW) {
                     const process = roots.getMessageById(reply.messageId)?.data
                     let _temp_name = process.first_name + ' ' + process.last_name
                     // let credIIW = await roots.createIIWcredential(_temp_name)
-                    let credIIW = await roots.requestJFFCredential(chat.id,_temp_name)
+                    let credIIW = await roots.requestIIWCredential(chat.id,_temp_name)
                     console.log("ChatScreen - JFFCREDD", credIIW)
+                    setRequestedCredentials(credIIW)
                     //TODO: replace with credentialRequest()
                     navigation.navigate("Display Custom Credential", {credential: credIIW})
-                    await roots.sendMessage(chat, 'Accept or Deny credential', roots.MessageType.IIWCREDENTIALREQUEST, contacts.ROOTS_BOT)
+                    await roots.sendMessage(chat, 'Accept or Deny credential iiw', roots.MessageType.IIWCREDENTIALREQUEST, contacts.ROOTS_BOT)
 
                 } else if (reply.value === roots.MessageType.IIWACCEPTEDCREDENTIAL ) {
                     console.log('CREDENTIAL ACCEPTED')
+                    storeItem('demo_iiwcredential', JSON.stringify(requested_credentials))
+                    setRequestedCredentials(null)
+
                     //TODO: replace with credentialRequest()
 
                     await roots.sendMessage(chat, 'IIW credential accepted.',

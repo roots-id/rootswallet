@@ -105,7 +105,7 @@ export async function startConversation(chatId: string) {
 
         await sendMessage(chat,
             "Verifiable wants to issue a JFF Credential.",
-            MessageType.TEXT, contact.ROOTS_BOT)
+            MessageType.JFFCREDENTIALOOB, contact.ROOTS_BOT)
     }
 
     } catch (error) {

@@ -14,32 +14,76 @@ import * as wallet from '../wallet'
 import {credential} from "../models";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import * as utils from "../utils";
+import { getItem, getItems } from '../store';
 
 const DemoCredentialCredentialsScreen = ({route, navigation}: CompositeScreenProps<any, any>) => {
-    console.log("creds screen - params", route.params)
+    console.log("alex creds screen - params", route.params)
     const [refresh, setRefresh] = useState(true)
     const [creds, setCreds] = useState<any[]>()
 
-    useEffect(() => {
-        addRefreshTrigger(() => {
-            console.log("creds screen - toggling refresh")
-            const wal = wallet.getWallet()
-            if (wal) {
-                const importedCreds = getImportedCreds(wal)
-                console.log("creds screen - got imported and issued creds", creds?.length)
-                setRefresh(!refresh)
-            }
-        })
-        hasNewCred()
-    }, [])
+    // useEffect(() => {
+    //     addRefreshTrigger(() => {
+    //         console.log("alex cred screen - toggling refresh")
+    //         const creds2 = getItems(new RegExp('demo_*'))
+    //         console.log('creds2', creds2)
+    //         let _creds = []
+    //         let _jff = getItem('demo_jffcredential')
+    //         if (_jff) {
+    //             _creds.push(JSON.parse(_jff))
+    //         }
 
-    function renderCredRow(cred: credential) {
+    //         let _iiw = getItem('demo_iiwcredential')
+            
+    //         if (_iiw) {
+    //             _creds.push(JSON.parse(_iiw))
+    //         }
+    //         console.log("typeof creds", typeof(_creds))
+    //         if (_creds) {
+    //             setCreds(_creds)
+    //             // console.log("alex creds screen --alex --", _creds)
+    //             setRefresh(!refresh)
+    //         }
+    //     })
+    //     hasNewCred()
+    // }, [])
+
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            console.log("alex cred screen - toggling refresh")
+            const creds2 = getItems(new RegExp('demo_*'))
+            console.log('creds2', creds2)
+            let _creds = []
+            let _jff = getItem('demo_jffcredential')
+            if (_jff) {
+                _creds.push(JSON.parse(_jff))
+            }
+
+            let _iiw = getItem('demo_iiwcredential')
+            
+            if (_iiw) {
+                _creds.push(JSON.parse(_iiw))
+            }
+            console.log("typeof creds", typeof(_creds))
+            if (_creds) {
+                setCreds(_creds)
+            }
+
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+
+
+
+    function renderCredRow(cred: any) {
+        // console.log('alex renderCredRow', cred.credentialSubject)
 
         const avatar =
             <SafeAreaView>
             <TouchableOpacity
-            onPress={() => roots.showCred(navigation, cred.verifiedCredential.proof.hash)}>
-            <Image source={isIssuedCred(cred) ? issuedCredLogo : credLogo}
+                onPress={() => navigation.navigate('Display Custom Credential', {credential: cred})}
+                >
+            <Image source={{uri: cred.credentialSubject?.achievement?.image?.id ? cred.credentialSubject.achievement.image.id : cred.credentialSubject.image}}
                    style={styles.credLogoStyle}
             />
             </TouchableOpacity>
@@ -48,16 +92,16 @@ const DemoCredentialCredentialsScreen = ({route, navigation}: CompositeScreenPro
         const listItem =
             <SafeAreaView style={styles.container}>
             <List.Item
-                title={utils.getObjectField(decodeCredential(cred.verifiedCredential.encodedSignedCredential).credentialSubject, "name")}
+                title={cred.name ? cred.name : cred.credentialSubject.type}
                 titleNumberOfLines={1}
                 titleStyle={styles.clickableListTitle}
                 descriptionStyle={styles.listDescription}
                 descriptionNumberOfLines={1}
-                onPress={() => navigation.navigate('Credential Details', {cred: cred})}
+                onPress={() => navigation.navigate('Display Custom Credential', {credential: cred})}
             />
             </SafeAreaView>
 
-        const issued = isIssuedCred(cred)
+        const issued = true
         const first =  issued ? listItem : avatar
         const second = issued ? avatar : listItem
 
@@ -78,7 +122,7 @@ const DemoCredentialCredentialsScreen = ({route, navigation}: CompositeScreenPro
                 <FlatList
                     data={creds}
                     extraData={refresh}
-                    keyExtractor={(item) => item.verifiedCredential.proof.hash}
+                    keyExtractor={(item) => item.id}
                     ItemSeparatorComponent={() => <Divider/>}
                     renderItem={({item}) => renderCredRow(item)}
                 />

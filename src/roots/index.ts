@@ -45,6 +45,7 @@ export enum MessageType {
     IIWACCEPTEDCREDENTIAL = "iiwAcceptedCredential",
     IIWREJECTEDCREDENTIAL = "iiwRejectedCredential",
     JFFCREDENTIAL = "jffCredential",
+    JFFCREDENTIALOOB = "jffCredentialOOB",
     JFFCREDENTIALREQUEST = "jffCredentialRequest",
     JFFACCEPTEDCREDENTIAL = "jffAcceptedCredential",
     JFFREJECTEDCREDENTIAL = "jffRejectedCredential",
@@ -561,6 +562,20 @@ function addQuickReply(msg: models.message) {
             ],
         }
     }
+    if (msg.type === MessageType.JFFCREDENTIALOOB) {
+        msg.quickReplies = {
+            type: 'radio', 
+            keepIt: true,
+            values: [
+                {
+                    title: 'Request JFF Credential',
+                    value: MessageType.JFFCREDENTIAL,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+
     if (msg.type === MessageType.JFFCREDENTIAL) {
         msg.quickReplies = {
             type: 'checkbox', 
@@ -1429,10 +1444,12 @@ export async function createIIWcredential(name: string) {
           "id": "https://rootsid.com",
           "name": "Roots Issuer"
         },
+        "kid": "did:key:3455",
         "issuanceDate": "2022-05-01T00:00:00Z",
         "credentialSubject": {
-        "id": "did:key:123",
+        "id": "did:key:3455",
         "name": name,
+        "type": "IIW Attendee",
         "image": "https://media-exp1.licdn.com/dms/image/C510BAQEMJ0bx115X_Q/company-logo_200_200/0/1519341150268?e=1674691200&v=beta&t=es3U9GsduolTqXbL2o9bRqYrRWIahLydgQ-FKfa2Law"
 
         }
@@ -1467,30 +1484,43 @@ export async function denyIIWCredential(chat: models.chat){
     return true
 }
 
-export async function requestJFFCredential(chatid: string, name: string){
+export async function requestIIWCredential(chatid: string, name: string){
     let chat = getChatItem(chatid)
     let requested_credential = {
         "credential": {
             "@context": [
               "https://www.w3.org/2018/credentials/v1",
-              "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/jff-vc-edu-plugfest-1-context.json",
-              "https://www.w3.org/2018/credentials/examples/v1"
+              "https://purl.imsglobal.org/spec/ob/v3p0/context.json"
             ],
+            "id": "aaa:uuid:a63a60be-f4af-491c-87fc-2c8fd3007a58",
             "type": [
               "VerifiableCredential",
               "OpenBadgeCredential"
             ],
+            "name": "IIW 2022 Attendance",
             "issuer": {
-              "type": "Profile",
-              "id": "https://rootsid.com",
-              "name": "Roots Issuer"
+              "type": ["Profile"],
+              "id": "did:key:z6MktiSzqF9kqwdU8VkdBKx56EYzXfpgnNPUAGznpicNiWfn",
+              "name": "Jobs for the Future (JFF)"
             },
-            "issuanceDate": "2022-05-01T00:00:00Z",
+            "issuanceDate": "2022-11-14T00:00:00Z",
             "credentialSubject": {
-            "id": chat.fromDids[0],
-            "name": name,
-            "image": "https://media-exp1.licdn.com/dms/image/C510BAQEMJ0bx115X_Q/company-logo_200_200/0/1519341150268?e=1674691200&v=beta&t=es3U9GsduolTqXbL2o9bRqYrRWIahLydgQ-FKfa2Law"
-    
+              "type": ["AchievementSubject"],
+              "id": "did:key:123",
+              "achievement": {
+                "id": "urn:uuid:bd6d9316-f7ae-4073-a1e5-2f7f5bd22922",
+                "type": ["Achievement"],
+                "name": name,
+                "description": "This credential solution supports DIDComm V2. ",
+                "criteria": {
+                  "type": "Criteria",
+                  "narrative": "Today you are at IIW at"+ new Date().toString()
+                },
+                "image": {
+                  "id":"https://media-exp1.licdn.com/dms/image/C510BAQEMJ0bx115X_Q/company-logo_200_200/0/1519341150268?e=1674691200&v=beta&t=es3U9GsduolTqXbL2o9bRqYrRWIahLydgQ-FKfa2Law",
+                  "type": "Image"
+                }
+              }
             }
           }
     }

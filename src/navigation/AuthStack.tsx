@@ -10,6 +10,7 @@ import IconActions from '../components/IconActions';
 import LogoTitle from '../components/LogoTitle';
 import CreateRelScreen from '../screens/CreateRelScreen';
 import CredentialsScreen from '../screens/CredentialsScreen';
+import DemoCredentialsScreen from '../screens/DemoCredentialsScreen';
 import CredentialDetailScreen from "../screens/CredentialDetailScreen";
 import DeveloperScreen from "../screens/DeveloperScreen";
 import RelationshipsScreen from "../screens/RelationshipsScreen";
@@ -211,9 +212,9 @@ export default function AuthStack() {
             >
                 <Stack.Group>
                     <Stack.Screen name="VCs"
-                                  component={CredentialsScreen}
+                                  component={DemoCredentialsScreen}
                                   options={({navigation, route}) => ({
-                                      headerTitle: (props) => <LogoTitle {...props} title="Credentials"/>,
+                                      headerTitle: (props) => <LogoTitle {...props} title="DemoCredentials"/>,
                                       headerRight: (props) => getIconActions({...props},navigation),
                                   })}
                     />
