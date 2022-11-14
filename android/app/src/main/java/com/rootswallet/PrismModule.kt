@@ -99,8 +99,9 @@ class PrismModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
-    fun setNetwork(host: String = "ppp.atalaprism.io", port: String = "50053") {
-        Log.d("PRISM_TAG","Setting GrpcConfig host "+host+" w/port "+port);
+    fun setNetwork(host: String = "grpc-in-mem.atalaprism.io", port: String = "50053", proto: String = "https") {
+        Log.d("PRISM_TAG","Setting GrpcConfig protocol " + proto +" host "+host+" w/port "+port);
+        GrpcConfig.protocol = proto
         GrpcConfig.host = host
         GrpcConfig.port = port
     }

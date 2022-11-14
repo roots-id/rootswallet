@@ -21,13 +21,14 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
     const {current} = useCardAnimation();
 
     useEffect(() => {
+        console.log("Setting host",host)
         roots.setPrismHost(host)
     }, [host]);
 
     useEffect(() => {
         roots.setDemo(demoMode)
     }, [demoMode]);
-    
+
     useEffect(() => {
         async function getMediator() {
         let url = await roots.getMediatorURL()
@@ -73,8 +74,9 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
                             numberOfLines={5}
                             selectedValue={host}
                             onValueChange={(itemValue) => setHost(itemValue)}>
-                            <Picker.Item label="Local Test Node" value="ppp-node-test.atalaprism.io"/>
-                            <Picker.Item label="Prism Test Node" value="ppp.atalaprism.io"/>
+                            <Picker.Item label="Local Test Node" value="grpc-in-mem.atalaprism.io"/>
+                            <Picker.Item label="Prism Test Node" value="ppp-vasil.atalaprism.io"/>
+                            <Picker.Item label="Prism PrePod Node" value="preprod.atala.iog.io"/>
                         </Picker>
                     </View>
                 </View>

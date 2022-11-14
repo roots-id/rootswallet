@@ -11,7 +11,7 @@ import * as wallet from '../wallet'
 import {hasNewCred} from "../credentials";
 import { startConversation } from './peerConversation';
 import * as AsyncStore from '../store/AsyncStore'
-import { credentialRequest } from '../protocols';
+import {credentialRequest, sendPing} from '../protocols';
 
 import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
 import {
@@ -44,7 +44,7 @@ export enum MessageType {
     IIWCREDENTIALREQUEST = "iiwCredentialRequest",
     IIWACCEPTEDCREDENTIAL = "iiwAcceptedCredential",
     IIWREJECTEDCREDENTIAL = "iiwRejectedCredential",
-    
+
 }
 
 //meaningful literals
@@ -69,7 +69,7 @@ const allSettingsRegex = new RegExp(models.getStorageKey("", models.ModelType.SE
 
 export const POLL_TIME = 2000
 //ppp-node-test
-export const DEFAULT_PRISM_HOST = "ppp.atalaprism.io"
+export const DEFAULT_PRISM_HOST = "grpc-in-mem.atalaprism.io"
 LogBox.ignoreAllLogs(true)
 let demo = false;
 
@@ -214,9 +214,10 @@ export async function importContact(con: models.contactDecorator): Promise<boole
 }
 
 //----------------- Prism ----------------------
-export function setPrismHost(host = DEFAULT_PRISM_HOST, port = "50053") {
-    logger("roots - setting Prism host and port", host, port)
-    PrismModule.setNetwork(host, port)
+export function setPrismHost(host = DEFAULT_PRISM_HOST, port = "50053", proto = "https") {
+    //logger("roots - setting Prism host and port", host, port)
+    PrismModule.setNetwork(host, port, host)
+    store.updateItem(getSettingAlias("prismNodeProto"), proto)
     store.updateItem(getSettingAlias("prismNodePort"), port)
     store.updateItem(getSettingAlias("prismNodeHost"), host)
 }
@@ -258,7 +259,7 @@ export async function initRoot(id: string, fromDidAlias: string, toDid: string, 
 //---------------- Settings -----------------------
 function applyAppSettings() {
     setPrismHost(store.getItem(getSettingAlias("prismNodeHost")),
-        store.getItem(getSettingAlias("prismNodePort")));
+        store.getItem(getSettingAlias("prismNodePort")),store.getItem(getSettingAlias("prismNodeProto")));
 }
 
 function getSettingAlias(key: string) {
@@ -304,7 +305,7 @@ async function createDid(didAlias: string): Promise<models.did | undefined> {
                 // }
 
                 // return newDid
-                
+
                 } else {
                     console.error("roots - could not save wallet with new DID", prismWalletJson)
                 }
@@ -523,10 +524,10 @@ function addQuickReply(msg: models.message) {
         }
     }
 
-    //TODO check for roots.MessageType.IIWCREDENTIAL 
+    //TODO check for roots.MessageType.IIWCREDENTIAL
     if (msg.type === MessageType.IIWCREDENTIAL) {
         msg.quickReplies = {
-            type: 'checkbox', 
+            type: 'checkbox',
             keepIt: true,
             values: [
                 {
@@ -539,7 +540,7 @@ function addQuickReply(msg: models.message) {
     }
     if (msg.type === MessageType.IIWCREDENTIALREQUEST) {
         msg.quickReplies = {
-            type: 'radio', 
+            type: 'radio',
             keepIt: false,
             values: [
                 {
@@ -875,9 +876,9 @@ export async function processPublishResponse(chat: models.chat): Promise<models.
                 console.error("could not retrieve newly created DID", chat.fromAlias)
             }
         } else {
-            logger("roots - Could not process publish DID request", chat.id)
+            console.error("roots - Could not process publish DID request", chat.id)
             const credReqMsg = await sendMessage(chat,
-                "DID was already added to Prism",
+                "Could not add DID to prism",
                 MessageType.TEXT, contact.PRISM_BOT)
         }
     } catch(error: any) {
@@ -1313,7 +1314,7 @@ export async function generateKeyPair() {
         type: 'Ed25519VerificationKey2018',
         privateKey: true,
         })
-    
+
 
     const suite = new Ed25519Signature2018({
         key: await Ed25519VerificationKey2018.from(
@@ -1321,8 +1322,8 @@ export async function generateKeyPair() {
         )
         });
     return suite
-   
-} 
+
+}
 export async function creteCredential(credential: any, suite: any) {
     const signedVC = await vc.issue({credential, suite});
     return signedVC
@@ -1418,7 +1419,7 @@ export async function acceptIIWCredential(chat: models.chat){
     MessageType.STATUS,
     contact.ROOTS_BOT)
     return true
-     
+
 }
 
 export async function denyIIWCredential(chat: models.chat){
@@ -1451,13 +1452,18 @@ export async function requestJFFCredential(chatid: string, name: string){
             "id": chat.fromDids[0],
             "name": name,
             "image": "https://media-exp1.licdn.com/dms/image/C510BAQEMJ0bx115X_Q/company-logo_200_200/0/1519341150268?e=1674691200&v=beta&t=es3U9GsduolTqXbL2o9bRqYrRWIahLydgQ-FKfa2Law"
-    
+
             }
           }
     }
-    
+
 
     console.log(chat.fromDids[0],chat.toDids[0],'CREDDD IDDSS')
     let _mediator_cred = await credentialRequest(chat.fromDids[0],chat.toDids[0], requested_credential)
     return _mediator_cred
+}
+
+export async function sendPingAviary(from: string, to: string) {
+    sendPing(from, to)
+    console.log('ping sent')
 }
