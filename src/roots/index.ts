@@ -1486,6 +1486,16 @@ export async function denyIIWCredential(chat: models.chat){
 
 export async function requestIIWCredential(chatid: string, name: string){
     let chat = getChatItem(chatid)
+    //no seconds
+    let date = new Date().toLocaleString('en-US', { 
+                    month: 'long',
+                    day: 'numeric', 
+                    year: 'numeric', 
+                    hour: 'numeric', 
+                    minute: 'numeric', 
+                    hour12: true }
+                )
+
     let requested_credential = {
         "credential": {
             "@context": [
@@ -1514,7 +1524,7 @@ export async function requestIIWCredential(chatid: string, name: string){
                 "description": "This credential solution supports DIDComm V2. ",
                 "criteria": {
                   "type": "Criteria",
-                  "narrative": "Today you are at IIW at"+ new Date().toString()
+                  "narrative": "Today you are at IIW at "+ date
                 },
                 "image": {
                   "id":"https://media-exp1.licdn.com/dms/image/C510BAQEMJ0bx115X_Q/company-logo_200_200/0/1519341150268?e=1674691200&v=beta&t=es3U9GsduolTqXbL2o9bRqYrRWIahLydgQ-FKfa2Law",
@@ -1525,8 +1535,10 @@ export async function requestIIWCredential(chatid: string, name: string){
           }
     }
     
+//console.log date with the following format July, 4th 2021, 3:25:50 pm
 
     console.log(chat.fromDids[0],chat.toDids[0],'CREDDD IDDSS')
     let _mediator_cred = await credentialRequest(chat.fromDids[0],chat.toDids[0], requested_credential)
     return _mediator_cred
+    
 }
