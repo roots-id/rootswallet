@@ -5,7 +5,8 @@ import * as models from '../models'
 import * as contact from '../relationships'
 import uuid from 'react-native-uuid';
 import { decodeOOBURL, generateOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages, shortenURLRequest, discoverFeatures } from '../protocols';
-
+import { sendDIDCommMessage } from "../didcommv2"
+import { credentialRequest } from "../protocols"
 export async function startConversation(chatId: string) {
     try {
     var chat = getChatItem(chatId)
@@ -98,14 +99,20 @@ export async function startConversation(chatId: string) {
                  ]
             const resp = await keylistUpdate(updates, didToMediator, mediatorDid)
             } 
-
+            //print toDid and fromDid
+            console.log("*".repeat(100))
+            console.log(toDid)
+            console.log(fromDid)
+            const alex = await credentialRequest(fromDid, toDid, {'name': 'Verifiable'})
+            console.log(alex)
+            console.log("*".repeat(100))
             chat.fromDids = [fromDid]
             await store.updateItem(models.getStorageKey(chatId, models.ModelType.CHAT), JSON.stringify(chat))
         }
 
-        await sendMessage(chat,
-            "Verifiable wants to issue a JFF Credential.",
-            MessageType.JFFCREDENTIALOOB, contact.ROOTS_BOT)
+        // await sendMessage(chat,
+        //     "Verifiable wants to issue a JFF Credential.",
+        //     MessageType.JFFCREDENTIALOOB, contact.ROOTS_BOT)
     }
 
     } catch (error) {
