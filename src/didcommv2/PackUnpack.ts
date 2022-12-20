@@ -6,7 +6,7 @@ import uuid from 'react-native-uuid';
 
 const { PeerDidModule, DIDCommV2Module } = NativeModules;
 
-export async function pack(msg: any, from: string, to: string, messageType: string, customHeaders: any, signFrom: any, protectSender: boolean, attachments: any) {
+export async function pack(msg: any, from: string, to: string, messageType: string, customHeaders: any, signFrom: any, protectSender: boolean, attachments: any, thid?:string) {
     try {
         // TODO case with several key agreement in did doc
         // TODO pthid, thid
@@ -18,6 +18,7 @@ export async function pack(msg: any, from: string, to: string, messageType: stri
         var packed = await DIDCommV2Module.pack(
             msg, 
             uuid.v4(), 
+            typeof thid !== 'undefined' ? thid:null, 
             to, 
             from, 
             messageType,
@@ -36,8 +37,7 @@ export async function pack(msg: any, from: string, to: string, messageType: stri
 export async function unpack(packMsg: any) {
     try {
         // TODO case with several key agreement in did doc
-        console.log("RM HERE")
-        console.log(packMsg)
+
         const recipient = packMsg.recipients[0].header.kid.split("#")[0]
         const didDoc = await resolveDIDPeer(recipient)
         const kid = didDoc.keyAgreement[0].id

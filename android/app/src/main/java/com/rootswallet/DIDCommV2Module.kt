@@ -50,6 +50,7 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
     fun pack(
         body: ReadableMap,
         id: String,
+        thid: String? = null,
         to: String,
         from: String,
         messageType: String = "my-protocol/1.0",
@@ -79,7 +80,8 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
                 type = messageType,
             )
                 .from(from)
-                .to(listOf(to)) 
+                .to(listOf(to))
+                .thid(thid)
                 .attachments(didcommAttachments)
                 // .customHeader("return_route", "all")
                 // .customHeader("return_route2", "all")

@@ -103,7 +103,8 @@ export default function CustomCredential({route, navigation}: CompositeScreenPro
                         />
                         
                     </View>
-                    <Text style={styles.credTitleStyle}>Issued by: {cred.issuer.name}</Text>
+                    {/* <Text style={styles.credTitleStyle}>Issued by: {cred.issuer.name}</Text> */}
+                    <Text style={styles.credTitleStyle}>Issued by: {cred.credentialSubject.company}</Text>
                     <Text style={styles.credTitleStyle}>To: {cred.credentialSubject.name}</Text>
                     </View>
                 )}

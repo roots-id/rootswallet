@@ -214,7 +214,7 @@ export default function AuthStack() {
                     <Stack.Screen name="VCs"
                                   component={DemoCredentialsScreen}
                                   options={({navigation, route}) => ({
-                                      headerTitle: (props) => <LogoTitle {...props} title="DemoCredentials"/>,
+                                      headerTitle: (props) => <LogoTitle {...props} title="Creds"/>,
                                       headerRight: (props) => getIconActions({...props},navigation),
                                   })}
                     />

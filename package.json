@@ -71,6 +71,7 @@
     "jest": "^28.1.1",
     "jsc-android": "^250230.2.1",
     "jsonld": "^8.1.0",
+    "jwt-decode": "^3.1.2",
     "metro-react-native-babel-preset": "^0.71.1",
     "prettier": ">=2",
     "process": "^0.11.0",

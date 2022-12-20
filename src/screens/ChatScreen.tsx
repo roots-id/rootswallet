@@ -292,6 +292,34 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     await roots.sendMessage(chat, 'IIW credential denied.',
                     roots.MessageType.TEXT,
                     contacts.ROOTS_BOT)
+                } else if (reply.value === roots.MessageType.AP2_CREDENTIAL_OFFER_ACCEPTED){
+                    console.log('CREDENTIAL OFFER ACCEPTED')
+                    await roots.sendMessage(chat, 'Credential offer accepted.',
+                    roots.MessageType.TEXT,
+                    contacts.ROOTS_BOT)
+                    const offer = roots.getMessageById(reply.messageId)?.data
+                    await roots.requestAP2Credential(chat.id,offer)
+
+                } else if (reply.value === roots.MessageType.AP2_CREDENTIAL_OFFER_DENIED){
+                    console.log('CREDENTIAL OFFER DENIED')
+                    await roots.sendMessage(chat, 'Credential offer denied.',
+                    roots.MessageType.TEXT,
+                    contacts.ROOTS_BOT)
+                } else if (reply.value === roots.MessageType.AP2_CREDENTIAL_ISSUED_ACCEPTED){
+                    console.log('CREDENTIAL ISSUED ACCEPTED')
+                    await roots.sendMessage(chat, 'Credential accepted.',
+                    roots.MessageType.TEXT,
+                    contacts.ROOTS_BOT)
+                    const cred = roots.getMessageById(reply.messageId)?.data
+                    storeItem('ap2_credential', JSON.stringify(cred))
+                    setRequestedCredentials(null)
+
+                } else if (reply.value === roots.MessageType.AP2_CREDENTIAL_ISSUED_DENIED){
+                    console.log('CREDENTIAL ISSUED DENIED')
+                    await roots.sendMessage(chat, 'Credential denied.',
+                    roots.MessageType.TEXT,
+                    contacts.ROOTS_BOT)
+
                 } else {
                     console.log("ChatScreen - reply value not recognized, was", chat.id, reply.value);
                 } 

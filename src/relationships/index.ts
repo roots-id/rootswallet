@@ -25,6 +25,7 @@ export const brandLogo = require('../assets/LogoOnly1024.png');
 export const ROOTS_BOT = "RootsHelper";
 export const PRISM_BOT = "PrismHelper";
 export const AVIERY_BOT = "Aviery";
+export const PRISMAGENT_BOT = "PrismAgent"
 
 
 export const LIBRARY_BOT = "did:roots:librarybot1";

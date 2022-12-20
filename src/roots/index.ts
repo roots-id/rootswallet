@@ -11,7 +11,7 @@ import * as wallet from '../wallet'
 import {hasNewCred} from "../credentials";
 import { startConversation } from './peerConversation';
 import * as AsyncStore from '../store/AsyncStore'
-import { credentialRequest } from '../protocols';
+import { credentialRequest, credentialPrism2Request } from '../protocols';
 
 import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
 import {
@@ -49,6 +49,12 @@ export enum MessageType {
     JFFCREDENTIALREQUEST = "jffCredentialRequest",
     JFFACCEPTEDCREDENTIAL = "jffAcceptedCredential",
     JFFREJECTEDCREDENTIAL = "jffRejectedCredential",
+    AP2_CREDENTIAL_OFFER = "ap2CredentialOffer",
+    AP2_CREDENTIAL_OFFER_ACCEPTED = "ap2CredentialOfferAccepted",
+    AP2_CREDENTIAL_OFFER_DENIED = "ap2CredentialOfferDenied",
+    AP2_CREDENTIAL_ISSUED = "ap2CredentialIssued",
+    AP2_CREDENTIAL_ISSUED_ACCEPTED = "ap2CredentialIssuedAccepted",
+    AP2_CREDENTIAL_ISSUED_DENIED = "ap2CredentialIssuedDenied"
     
 }
 
@@ -290,30 +296,30 @@ async function createDid(didAlias: string): Promise<models.did | undefined> {
             logger("roots - DID does not exist, creating", didAlias, "DID")
             const wal = wallet.getWallet()
             if (wal) {
-                const walletJson = wallet.getWalletJson(wal._id)
-                logger("roots - requesting chat/did from prism, w/wallet", walletJson)
-                const prismWalletJson = PrismModule.newDID(walletJson, didAlias)
-                logger("roots - Chat/prismDid added to wallet", prismWalletJson)
-                const saveResult = await wallet.updateWallet(wal._id, wal.passphrase, prismWalletJson)
-                if (saveResult) {
-                    const newDid = getDid(didAlias)
-                    logger("roots - did added to wallet", JSON.stringify(newDid))
-                    return newDid;
+                // const walletJson = wallet.getWalletJson(wal._id)
+                // logger("roots - requesting chat/did from prism, w/wallet", walletJson)
+                // const prismWalletJson = PrismModule.newDID(walletJson, didAlias)
+                // logger("roots - Chat/prismDid added to wallet", prismWalletJson)
+                // const saveResult = await wallet.updateWallet(wal._id, wal.passphrase, prismWalletJson)
+                // if (saveResult) {
+                //     const newDid = getDid(didAlias)
+                //     logger("roots - did added to wallet", JSON.stringify(newDid))
+                //     return newDid;
                 // This code is for Rodo's build problem
-                // const newDid = {
-                //     alias: "RODO_FAKE_DID",
-                //     didIdx: 0,
-                //     keyPairs: [],
-                //     operationHash: "fake",
-                //     uriCanonical: "fake",
-                //     uriLongForm: "fake",
-                // }
-
-                // return newDid
-                
-                } else {
-                    console.error("roots - could not save wallet with new DID", prismWalletJson)
+                const newDid = {
+                    alias: "RODO_FAKE_DID",
+                    didIdx: 0,
+                    keyPairs: [],
+                    operationHash: "fake",
+                    uriCanonical: "fake",
+                    uriLongForm: "fake",
                 }
+
+                 return newDid
+                
+                // } else {
+                //     console.error("roots - could not save wallet with new DID", prismWalletJson)
+                // }
             } else {
                 console.error("roots - Wallet no found", wal)
             }
@@ -729,6 +735,42 @@ function addQuickReply(msg: models.message) {
                     value: MessageType.MEDIATOR_RETRIEVE_MESSAGES,
                     messageId: msg.id,
                 }]
+        }
+    }
+    if (msg.type === MessageType.AP2_CREDENTIAL_OFFER) {
+        msg.quickReplies = {
+            type: 'radio',
+            keepIt: true,
+            values: [
+                {
+                    title: 'Accept',
+                    value: MessageType.AP2_CREDENTIAL_OFFER_ACCEPTED,
+                    messageId: msg.id,
+                },
+                {
+                    title: 'Deny',
+                    value: MessageType.AP2_CREDENTIAL_OFFER_DENIED,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.AP2_CREDENTIAL_ISSUED) {
+        msg.quickReplies = {
+            type: 'radio',
+            keepIt: true,
+            values: [
+                {
+                    title: 'Accept',
+                    value: MessageType.AP2_CREDENTIAL_ISSUED_ACCEPTED,
+                    messageId: msg.id,
+                },
+                {
+                    title: 'Deny',
+                    value: MessageType.AP2_CREDENTIAL_ISSUED_DENIED,
+                    messageId: msg.id,
+                }
+            ],
         }
     }
     return msg
@@ -1540,5 +1582,12 @@ export async function requestIIWCredential(chatid: string, name: string){
     console.log(chat.fromDids[0],chat.toDids[0],'CREDDD IDDSS')
     let _mediator_cred = await credentialRequest(chat.fromDids[0],chat.toDids[0], requested_credential)
     return _mediator_cred
+    
+}
+
+
+export async function requestAP2Credential(chatid: string, credentialOffered: any){
+    let chat = getChatItem(chatid)    
+    await credentialPrism2Request(chat.fromDids[0],chat.toDids[0], credentialOffered.thid)
     
 }

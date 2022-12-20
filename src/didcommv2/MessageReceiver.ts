@@ -1,6 +1,6 @@
 import {logger} from "../logging";
 import { unpack } from "./PackUnpack";
-import {receivePing, receiveBasicMessage, receiveMediate, receivePickup, receiveCredential, receiveShortenedURL, receiveDiscoverFeatures} from "../protocols"
+import {receivePing, receiveBasicMessage, receiveMediate, receivePickup, receiveCredential, receiveShortenedURL, receiveDiscoverFeatures, prismConnectionResponse} from "../protocols"
 
 export async function receiveMessage(packMsg: any) {
     try {
@@ -23,7 +23,7 @@ export async function receiveMessage(packMsg: any) {
             case type.startsWith('https://didcomm.org/messagepickup/3.0/') ? type : '' :
                 return await receivePickup(unpacked)
                 break; 
-            case type.startsWith('https://didcomm.org/issue-credential/3.0/') ? type : '' :
+            case type.startsWith('https://didcomm.org/issue-credential/') ? type : '' :
                 return await receiveCredential(unpacked)
                 break; 
             case type.startsWith('https://didcomm.org/shorten-url/1.0/') ? type : '' :
@@ -32,6 +32,9 @@ export async function receiveMessage(packMsg: any) {
             case type.startsWith('https://didcomm.org/discover-features/2.0/') ? type : '' :
                     return await receiveDiscoverFeatures(unpacked)
                     break; 
+            case type.startsWith('https://atalaprism.io/mercury/connections/1.0/response') ? type : '' :
+                return await prismConnectionResponse(unpacked)
+                break; 
             default:
                 return unpacked
                 break;

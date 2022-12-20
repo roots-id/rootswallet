@@ -10,7 +10,7 @@ import {
 import {IconButton, Title} from 'react-native-paper';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
-import { getDemoRel, getUserId, AVIERY_BOT} from '../relationships';
+import { getDemoRel, getUserId, AVIERY_BOT, PRISMAGENT_BOT} from '../relationships';
 import {getDid, importContact, importVerifiedCredential, isDemo, setMediatorURL} from '../roots'
 import React from 'react';
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
@@ -107,7 +107,18 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                     clearAndGoBack()
                     navigation.navigate('Chat', { chatId: AVIERY_BOT })
                 }
-                    
+                // ATALA PRISM AGENT OOB (Connect Protocol)
+                else if(decodedMsg.body.goal_code === "connect"){
+                    const atalaLogo = require('../assets/prismAgent.png');
+                    await importContact({
+                        displayName: "Prism Agent",
+                        displayPictureUrl: atalaLogo,
+                        did: decodedMsg.from,
+                        id: decodedMsg.id
+                    })
+                    clearAndGoBack()
+                    navigation.navigate('Chat', { chatId: decodedMsg.id })
+                }   
                 
 
                 else{

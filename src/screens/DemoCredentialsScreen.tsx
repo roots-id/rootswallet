@@ -63,12 +63,19 @@ const DemoCredentialCredentialsScreen = ({route, navigation}: CompositeScreenPro
             if (_iiw) {
                 _creds.push(JSON.parse(_iiw))
             }
+
+            let _ap2 = getItem('ap2_credential')
+            
+            if (_ap2) {
+                _creds.push(JSON.parse(_ap2))
+            }
+
             console.log("typeof creds", typeof(_creds))
             if (_creds) {
                 setCreds(_creds)
             }
 
-        }, 1000);
+        }, 3000);
         return () => clearInterval(interval);
     }, []);
 

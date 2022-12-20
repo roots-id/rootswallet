@@ -3,8 +3,9 @@ import { createDIDPeer} from '../didpeer'
 import * as store from '../store'
 import * as models from '../models'
 import * as contact from '../relationships'
+
 import uuid from 'react-native-uuid';
-import { decodeOOBURL, generateOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages, shortenURLRequest, discoverFeatures } from '../protocols';
+import { decodeOOBURL, generateOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages, shortenURLRequest, discoverFeatures, prismConnectionRequest } from '../protocols';
 
 export async function startConversation(chatId: string) {
     try {
@@ -70,6 +71,17 @@ export async function startConversation(chatId: string) {
             await sendMessage(chat,
                 "Request Mediate?",
                 MessageType.MEDIATOR_REQUEST_MEDIATE, contact.ROOTS_BOT)
+        } else {
+
+        // If PRISM AGENT -> Request Connect
+
+            console.log("PRISM AGENT REQUEST CONNECT")
+            // create and submit the connection request -> display
+            await prismConnectionRequest(chat.fromDids[0], toDid, chatId)
+            console.log("Prism Agent Connection Requested")
+            await sendMessage(chat,"Connection requested",MessageType.TEXT, contact.ROOTS_BOT)
+            // receive the connectriom accept and display it
+            // receive credential offer and display, accept and submit request
         }
     }
 
@@ -188,8 +200,11 @@ export async function publishTextMessage(content: string, fromDid: string, toDid
     var chat = null
     chats.forEach(element => {
 
-        //TODO now checks only sender DID. Should check reeiver DID as well?
-        if ( element.toDids.includes(toDid)){  //element.fromDids.includes(from) &&
+        //TODO now checks only sender DID or receiver DID. Should check both as well?
+        if ( element.toDids.includes(toDid)){  
+            chat = element
+        }
+        else if ( element.fromDids.length>0 && element.fromDids[0].includes(fromDid)){  
             chat = element
         }
     });
@@ -210,5 +225,37 @@ export async function publishTextMessage(content: string, fromDid: string, toDid
     await sendMessage(chat,
         content,
         MessageType.TEXT, contact.ROOTS_BOT)
+}
+
+export async function publishGenericMessage(content: string, type: MessageType, data: any, fromDid: string, toDid: string) {
+    const chats = getChatItems()
+    var chat = null
+    chats.forEach(element => {
+
+        //TODO now checks only sender DID or receiver DID. Should check both as well?
+        if ( element.toDids.includes(toDid)){ 
+            chat = element
+        }
+        else if ( element.fromDids.length>0 && element.fromDids[0].includes(fromDid)){  
+            chat = element
+        }
+    });
+    if (chat === null){
+        const personLogo = require('../assets/smallBWPerson.png');
+        const displayName = "Agent-"+uuid.v4().toString().slice(-5)
+        const id = uuid.v4().toString()
+        await initRoot(
+            id,
+            contact.getUserId(),
+            toDid,
+            displayName,
+            personLogo,
+            fromDid)
+        chat = await getChatItem(id)
+    }
+    
+    await sendMessage(chat,
+        content,
+        type, contact.ROOTS_BOT,false,data)
 }
 
