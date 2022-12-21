@@ -73,13 +73,9 @@ export async function startConversation(chatId: string) {
                 MessageType.MEDIATOR_REQUEST_MEDIATE, contact.ROOTS_BOT)
         } else {
 
-        // If PRISM AGENT -> Request Connect
-
-            console.log("PRISM AGENT REQUEST CONNECT")
-            // create and submit the connection request -> display
+            // Try Request Connect in case it's a Prism Agent
             await prismConnectionRequest(chat.fromDids[0], toDid, chatId)
-            console.log("Prism Agent Connection Requested")
-            await sendMessage(chat,"Connection requested",MessageType.TEXT, contact.ROOTS_BOT)
+            await sendMessage(chat,"Connection requested to Prism Agent",MessageType.TEXT, contact.ROOTS_BOT)
             // receive the connectriom accept and display it
             // receive credential offer and display, accept and submit request
         }

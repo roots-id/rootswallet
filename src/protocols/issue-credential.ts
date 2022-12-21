@@ -5,8 +5,6 @@ import { MessageType } from "../roots";
 import { Buffer } from "buffer";
 import jwt_decode from "jwt-decode";
 
-
-
 export async function credentialRequest(from: string, to: string, credential: any) {
 
     try {
@@ -63,10 +61,8 @@ export async function receiveCredential(msg: any) {
                 console.log(JSON.parse(msg.message).attachments[0].data.json)
                 return JSON.parse(msg.message).attachments[0].data.json
             case "https://didcomm.org/issue-credential/2.0/issue-credential":
-                console.log("ATALA CREDENTIAL")
                 const credJWT = JSON.parse(Buffer.from(JSON.parse(msg.message).attachments[0].data.base64, 'base64').toString('ascii'))
                 const cred = jwt_decode(credJWT)
-                console.log(cred.vc)
                 await publishGenericMessage("Credential received",MessageType.AP2_CREDENTIAL_ISSUED,cred.vc,msg.to,msg.from)
                 break
             case "https://didcomm.org/issue-credential/2.0/offer-credential":
