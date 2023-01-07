@@ -68,7 +68,7 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
             if (attachments != null) {
                 didcommAttachments = mutableListOf<Attachment>()
                 for (i in 0..attachments.size()-1) {
-                    didcommAttachments.add(Attachment.builder("123", Attachment.Data.Json(attachments.getMap(i).toHashMap())
+                    didcommAttachments.add(Attachment.builder(i.toString(), Attachment.Data.Json(attachments.getMap(i).toHashMap())
                     ).build())
                 }
             }

@@ -62,7 +62,7 @@ export async function receiveCredential(msg: any) {
                 return JSON.parse(msg.message).attachments[0].data.json
             case "https://didcomm.org/issue-credential/2.0/issue-credential":
                 const credJWT = JSON.parse(Buffer.from(JSON.parse(msg.message).attachments[0].data.base64, 'base64').toString('ascii'))
-                const cred = jwt_decode(credJWT)
+                const cred:any = jwt_decode(credJWT)
                 await publishGenericMessage("Credential received",MessageType.AP2_CREDENTIAL_ISSUED,cred.vc,msg.to,msg.from)
                 break
             case "https://didcomm.org/issue-credential/2.0/offer-credential":
@@ -75,3 +75,30 @@ export async function receiveCredential(msg: any) {
         logger("coordinate-mediation - Error", error)
     }
 }
+
+export async function kycCredentialRequest(from: string, to: string, credential: any, selfie: string, front: string) {
+    console.log("Sending KYC Credential Request")
+    console.log("from: " + from)
+    console.log("to: " + to)
+
+
+    try {
+        const msgPacked = await pack(
+            {
+                "goal_code": "kyc-credential"
+            }, 
+            from, 
+            to, 
+            "https://didcomm.org/issue-credential/3.0/request-credential", 
+            [{return_route: "all"}],
+            null,
+            true,
+            [credential, {base64: selfie}, {base64: front}]
+          )
+        return await sendDIDCommMessage(msgPacked, to)
+    } catch (error: any) {
+        logger("kyc issue-credential - Error", error)
+    }
+}
+
+

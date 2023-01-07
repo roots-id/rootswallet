@@ -13,6 +13,9 @@ import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BubbleProps} from "react-native-gifted-chat/lib/Bubble";
 import { checkMessages, createOOBInvitation, requestMediate, sendBasicMsg, retrieveMessagesFromMediator } from '../roots/peerConversation';
 import { storeItem } from '../store/CachedStore';
+import { KYCProcess } from '../roots/KYCProcess';
+import {launchCamera} from 'react-native-image-picker';
+
 
 export default function ChatScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("ChatScreen - route params", route.params)
@@ -26,6 +29,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
     const [requesting_credentials, setRequestingCredentials] = useState<boolean>(false)
     const [request_data, setRequestData] = useState<any>(null)
     const [requested_credentials, setRequestedCredentials] = useState<any>(null)
+    const [kyc_process, setKYCProcess] = useState<KYCProcess | null>(null)
     // {
     //     'first_name': 'John',
     //     'last_name': 'Doe',
@@ -143,10 +147,6 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                   roots.MessageType.JFFCREDENTIAL, 
                   contacts.ROOTS_BOT,
                   false)
-
-
-
-
         }
 
         // check if requesting_credentials is true and if request_data is undefined
@@ -170,6 +170,11 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
             setRequestingCredentials(false)
             setRequestData(null)
         }
+
+        if (kyc_process !== null){
+            kyc_process.handleTextInput(text)
+        }
+
             console.log("ChatScreen - sending basic message", text)
         // sendBasicMsg(chat.id, pendingMsgs.map(msg => msg.text)[0])
     }
@@ -319,6 +324,43 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     await roots.sendMessage(chat, 'Credential denied.',
                     roots.MessageType.TEXT,
                     contacts.ROOTS_BOT)
+                } else if (reply.value === roots.MessageType.KYC_START_ACCEPTED){
+                    console.log('STARTING KYC PROCESS')
+
+                    try {
+                        setKYCProcess(new KYCProcess(chat.id))
+                    } catch (error) {
+                        console.log('KYC ERROR', error)
+                    }
+                } else if (reply.value === roots.MessageType.KYC_FRONT_PICTURE_ACCEPTED){
+                    console.log('Taking picture')
+                    if (kyc_process !== null ){await launchCamera(
+                        {
+                            mediaType: 'photo',
+                            cameraType: 'front',
+                            includeBase64: true,
+                            saveToPhotos: false,
+                            presentationStyle: 'currentContext'
+                        }, 
+                        async (response) => {
+                            await kyc_process?.processFrontPicture(response)
+                        }
+                    )}
+                } else if (reply.value === roots.MessageType.KYC_SELFIE_ACCEPTED){
+                    console.log('Taking picture')
+                    if (kyc_process !== null ){await launchCamera(
+                        {
+                            mediaType: 'photo',
+                            cameraType: 'front',
+                            includeBase64: true,
+                            saveToPhotos: false,
+                            presentationStyle: 'currentContext'
+                        }, 
+                        async (response) => {
+                            await kyc_process?.processSelfiePicture(response)
+                        }
+                    )}
+                   
 
                 } else {
                     console.log("ChatScreen - reply value not recognized, was", chat.id, reply.value);
@@ -536,4 +578,5 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         console.log("ChatScreen - mapped user is", user)
         return user;
     }
+
 }

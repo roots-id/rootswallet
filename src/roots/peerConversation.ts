@@ -71,13 +71,16 @@ export async function startConversation(chatId: string) {
             await sendMessage(chat,
                 "Request Mediate?",
                 MessageType.MEDIATOR_REQUEST_MEDIATE, contact.ROOTS_BOT)
-        } else {
+        } else if (chatId.startsWith("prism")) {
 
             // Try Request Connect in case it's a Prism Agent
             await prismConnectionRequest(chat.fromDids[0], toDid, chatId)
             await sendMessage(chat,"Connection requested to Prism Agent",MessageType.TEXT, contact.ROOTS_BOT)
-            // receive the connectriom accept and display it
-            // receive credential offer and display, accept and submit request
+        } else if (chatId.startsWith("kyc")) {
+            console.log("KYC START ########")
+            console.log(chat.fromDids[0])
+            
+            await sendMessage(chat,"Do you want to start a KYC verification?",MessageType.KYC_START, contact.ROOTS_BOT)
         }
     }
 

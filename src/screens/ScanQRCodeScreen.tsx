@@ -114,11 +114,22 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                         displayName: "Prism Agent",
                         displayPictureUrl: atalaLogo,
                         did: decodedMsg.from,
-                        id: decodedMsg.id
+                        id: "prism="+decodedMsg.id
                     })
                     clearAndGoBack()
-                    navigation.navigate('Chat', { chatId: decodedMsg.id })
-                }   
+                    navigation.navigate('Chat', { chatId: "prism="+decodedMsg.id })
+                } 
+                else if(decodedMsg.body.goal_code === "kyc-credential"){
+                    const dataseersLogo = require('../assets/dataseers.png');
+                    await importContact({
+                        displayName: "KYC Issuer",
+                        displayPictureUrl: dataseersLogo,
+                        did: decodedMsg.from,
+                        id: "kyc"+decodedMsg.id
+                    })
+                    clearAndGoBack()
+                    navigation.navigate('Chat', { chatId: "kyc"+decodedMsg.id })
+                }     
                 
 
                 else{

@@ -54,7 +54,14 @@ export enum MessageType {
     AP2_CREDENTIAL_OFFER_DENIED = "ap2CredentialOfferDenied",
     AP2_CREDENTIAL_ISSUED = "ap2CredentialIssued",
     AP2_CREDENTIAL_ISSUED_ACCEPTED = "ap2CredentialIssuedAccepted",
-    AP2_CREDENTIAL_ISSUED_DENIED = "ap2CredentialIssuedDenied"
+    AP2_CREDENTIAL_ISSUED_DENIED = "ap2CredentialIssuedDenied",
+    KYC_START = "kycStart",
+    KYC_START_ACCEPTED = "kycStartAccepted",
+    KYC_START_DENIED = "kycStartDenied",
+    KYC_FRONT_PICTURE = "kycFrontPicture",
+    KYC_FRONT_PICTURE_ACCEPTED = "kycPFronticture",
+    KYC_SELFIE = "kycSelfie",
+    KYC_SELFIE_ACCEPTED = "kycSelfieAccepted",
     
 }
 
@@ -307,7 +314,7 @@ async function createDid(didAlias: string): Promise<models.did | undefined> {
                 //     return newDid;
                 // This code is for Rodo's build problem
                 const newDid = {
-                    alias: "RODO_FAKE_DID",
+                    alias: "DID",
                     didIdx: 0,
                     keyPairs: [],
                     operationHash: "fake",
@@ -768,6 +775,50 @@ function addQuickReply(msg: models.message) {
                 {
                     title: 'Deny',
                     value: MessageType.AP2_CREDENTIAL_ISSUED_DENIED,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.KYC_START) {
+        msg.quickReplies = {
+            type: 'radio',
+            keepIt: true,
+            values: [
+                {
+                    title: 'Yes',
+                    value: MessageType.KYC_START_ACCEPTED,
+                    messageId: msg.id,
+                },
+                {
+                    title: 'No',
+                    value: MessageType.KYC_START_DENIED,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.KYC_SELFIE) {
+        msg.quickReplies = {
+            type: 'radio',
+            keepIt: true,
+            values: [
+                {
+                    title: 'Open camera',
+                    value: MessageType.KYC_SELFIE_ACCEPTED,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.KYC_FRONT_PICTURE) {
+        msg.quickReplies = {
+            type: 'radio',
+            keepIt: true,
+            values: [
+                {
+                    title: 'Open camera',
+                    value: MessageType.KYC_FRONT_PICTURE_ACCEPTED,
                     messageId: msg.id,
                 }
             ],
