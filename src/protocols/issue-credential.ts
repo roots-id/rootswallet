@@ -55,7 +55,9 @@ export async function receiveCredential(msg: any) {
         switch (type) {
             case "https://didcomm.org/issue-credential/3.0/issue-credential":
                 console.log(JSON.parse(msg.message).attachments[0].data.json)
-                return JSON.parse(msg.message).attachments[0].data.json
+                const credential =  JSON.parse(msg.message).attachments[0].data.json
+                await publishGenericMessage("Credential received",MessageType.AP2_CREDENTIAL_ISSUED,credential,msg.to,msg.from)
+                break
             case "https://didcomm.org/issue-credential/3.0/offer-credential":
                 console.log(msg)
                 console.log(JSON.parse(msg.message).attachments[0].data.json)

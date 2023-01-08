@@ -1,6 +1,5 @@
 import { NativeModules } from 'react-native';
 import { getItem } from '../store/';
-import {logger} from "../logging";
 import { resolveDIDPeer } from '../didpeer';
 import uuid from 'react-native-uuid';
 

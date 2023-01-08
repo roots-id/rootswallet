@@ -173,7 +173,7 @@ export function getItem(alias: string) {
     const itemJson = CachedStore.getItem(alias);
     if (!itemJson) {
         logger('store - item not found in cache',alias)
-        return;
+        return // await AsyncStore.getItem(alias)
     } else {
         logger('store - item found in cache',alias,itemJson)
         return itemJson;

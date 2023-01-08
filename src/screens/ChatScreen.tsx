@@ -175,8 +175,8 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
             kyc_process.handleTextInput(text)
         }
 
-            console.log("ChatScreen - sending basic message", text)
-        // sendBasicMsg(chat.id, pendingMsgs.map(msg => msg.text)[0])
+        console.log("ChatScreen - sending basic message", text)
+        //sendBasicMsg(chat.id, pendingMsgs.map(msg => msg.text)[0])
     }
 
     async function handleQuickReply(replies: Reply[]) {
