@@ -30,32 +30,8 @@ export class KYCProcess {
                 type: "text"
             },
             {
-                question: "Please, provide a contact number",
-                field: "contact_number",
-                value: null,
-                type: "text"
-            },
-            {
-                question: "What is your first address?",
-                field: "address_1",
-                value: null,
-                type: "text"
-            },
-            {
-                question: "Which city do you live in?",
-                field: "city",
-                value: null,
-                type: "text"
-            },
-            {
-                question: "What is your state or province?",
-                field: "state",
-                value: null,
-                type: "text"
-            },
-            {
-                question: "What is your ZIP or Postal code?",
-                field: "zip",
+                question: "Please, provide your email",
+                field: "email",
                 value: null,
                 type: "text"
             },
@@ -158,20 +134,13 @@ export class KYCProcess {
                     issuanceDate: "",
                     credentialSubject: {
                         id: "did:prism",//roots.getDid('DID'),
-                        information: {
-                            first_name: this.personalInfo[0].value,
-                            last_name: this.personalInfo[1].value,
-                            contact_number: this.personalInfo[2].value,
-                            address_1: this.personalInfo[3].value,
-                            city: this.personalInfo[4].value,
-                            state: this.personalInfo[5].value,
-                            zip: this.personalInfo[6].value,
-                        },
-                        verificationResult: {}
+                        first_name: this.personalInfo[0].value,
+                        last_name: this.personalInfo[1].value,
+                        email: this.personalInfo[2].value,
                     }
                 }
             }
         
-        await kycCredentialRequest(this.chat.fromDids[0],this.chat.toDids[0], credential, this.personalInfo[7], this.personalInfo[8])
+        await kycCredentialRequest(this.chat.fromDids[0],this.chat.toDids[0], credential, this.personalInfo[3].value, this.personalInfo[4].value)
     }
 }
