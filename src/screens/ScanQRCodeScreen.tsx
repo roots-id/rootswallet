@@ -81,7 +81,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
             const decodedMsg = await decodeOOBURL(data);
             const personLogo = require('../assets/smallBWPerson.png');
             if (data.toLowerCase().includes("_oob")){
-                if (data.toLowerCase().startsWith("https://mediator.rootsid.cloud") && decodedMsg.body.goal === "RequestMediate"){
+                if ( decodedMsg.body.goal_code === "request-mediate"){
                     setMediatorURL("https://mediator.rootsid.cloud")
                 await importContact({
                         displayName: 'Mediator',
