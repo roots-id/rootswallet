@@ -131,6 +131,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         // Try sending a basicmessage (only first msg of the arraya)
         // TODO check if chat inlcudes basic message
         let text = pendingMsgs.map(msg => msg.text)[0].toLowerCase()
+        let textUnaltered = pendingMsgs.map(msg => msg.text)[0]
 
         //check if text contains "iiw" and "request" and "credential"
         if (text.includes("iiw") && text.includes("request") && text.includes("credential")) {
@@ -172,7 +173,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         }
 
         if (kyc_process !== null){
-            kyc_process.handleTextInput(text)
+            kyc_process.handleTextInput(textUnaltered)
         }
 
         console.log("ChatScreen - sending basic message", text)
