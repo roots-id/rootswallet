@@ -16,6 +16,7 @@ export async function retrieveMessages(from: string, to: string){
 }
 
 export async function statusRequest(from: string, to: string) {
+    console.log(from, to)
     try {
         const msgPacked = await pack(
             {}, 
@@ -27,7 +28,8 @@ export async function statusRequest(from: string, to: string) {
             true,
             null
           )
-        return await sendDIDCommMessage(msgPacked, to)
+          const resp = await sendDIDCommMessage(msgPacked, to)
+        return resp
     } catch (error: any) {
         logger("pickup - Error", error)
     }

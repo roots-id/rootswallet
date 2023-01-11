@@ -82,8 +82,8 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
             const personLogo = require('../assets/smallBWPerson.png');
             if (data.toLowerCase().includes("_oob")){
                 if ( decodedMsg.body.goal_code === "request-mediate"){
-                    setMediatorURL("https://mediator.rootsid.cloud")
-                await importContact({
+                    await setMediatorURL("https://mediator.rootsid.cloud")
+                    await importContact({
                         displayName: 'Mediator',
                         displayPictureUrl: personLogo,
                         did: decodedMsg.from,

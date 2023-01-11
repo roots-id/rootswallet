@@ -2,6 +2,9 @@ import { NativeModules } from 'react-native';
 import { getItem } from '../store/';
 import { resolveDIDPeer } from '../didpeer';
 import uuid from 'react-native-uuid';
+import {logger} from "../logging";
+import {getItem as getAsyncItem} from '../store/AsyncStore'
+
 
 const { PeerDidModule, DIDCommV2Module } = NativeModules;
 
@@ -11,7 +14,8 @@ export async function pack(msg: any, from: string, to: string, messageType: stri
         // TODO pthid, thid
         const didDoc = await resolveDIDPeer(from)
         const kid = didDoc.keyAgreement[0].id
-        const key = JSON.parse(await getItem(kid)!)
+        const _key = getItem(kid!) !== undefined ?  getItem(kid!) : await getAsyncItem(kid!)
+        const key = JSON.parse(_key!)
         var privateKey = key.privateJwk
         privateKey.kid = kid
         var packed = await DIDCommV2Module.pack(

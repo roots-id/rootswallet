@@ -4,6 +4,8 @@ import { X25519KeyPair } from '@transmute/did-key-x25519';
 import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
 import { saveItem } from '../store/';
 import {logger} from "../logging";
+import * as AsyncStore from '../store/AsyncStore'
+
 
 const { PeerDidModule } = NativeModules;
 
@@ -37,6 +39,10 @@ export async function createDIDPeer(serviceEndpoint: string, serviceRoutingKeys:
         // Store Authentication and Agreement Keys
         await saveItem(didDoc.authentication[0].id, JSON.stringify(authKey))
         await saveItem(didDoc.keyAgreement[0].id, JSON.stringify(agreemKey))
+
+        await AsyncStore.storeItem(didDoc.authentication[0].id, JSON.stringify(authKey))
+        await AsyncStore.storeItem(didDoc.keyAgreement[0].id, JSON.stringify(authKey))
+
         return peerDID
     } catch (error: any) {
         logger("didpeer - Error", error)
