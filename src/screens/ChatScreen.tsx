@@ -138,9 +138,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
             setRequestingCredentials(true)
             const result = await roots.sendMessages(chat, ['Provide your first name'], roots.MessageType.TEXT, contacts.ROOTS_BOT);
             setRequestData(null)
-        }
-
-        if(text.includes("jff")){
+        } else if(text.includes("jff")){
             
             // const result = await roots.sendMessages(chat, ['Provide your first name'], roots.MessageType.TEXT, contacts.ROOTS_BOT);
             const result = await roots.sendMessage(chat,
@@ -148,21 +146,19 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                   roots.MessageType.JFFCREDENTIAL, 
                   contacts.ROOTS_BOT,
                   false)
-        }
-
+        
         // check if requesting_credentials is true and if request_data is undefined
-        if (requesting_credentials && request_data == null) {
+
+        } else if (requesting_credentials && request_data == null) {
             setRequestData({
                 'first_name': text,
                 'last_name': '',
             })
             const result = await roots.sendMessages(chat, ['Provide your last name'], roots.MessageType.TEXT, contacts.ROOTS_BOT);
             console.log("ChatScreen - request_data", request_data)
-        }  
-
-
+        }  else if (requesting_credentials && request_data != null){
         // check if requesting_credentials is true and if request_data is defined
-        if (requesting_credentials && request_data != null) {
+        
             let _temp_request_data = request_data
             _temp_request_data['last_name'] = text
             setRequestData(_temp_request_data)
@@ -170,14 +166,13 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
             const result = await roots.sendMessage(chat, 'Preview your credential below', roots.MessageType.IIWCREDENTIAL, contacts.ROOTS_BOT,false, _temp_request_data)
             setRequestingCredentials(false)
             setRequestData(null)
-        }
-
-        if (kyc_process !== null){
+        } else if (kyc_process !== null){
             kyc_process.handleTextInput(textUnaltered)
-        }
+        } else {
 
-        console.log("ChatScreen - sending basic message", text)
-        //sendBasicMsg(chat.id, pendingMsgs.map(msg => msg.text)[0])
+            console.log("ChatScreen - sending basic message", text)
+            sendBasicMsg(chat.id, pendingMsgs.map(msg => msg.text)[0])
+        }
     }
 
     async function handleQuickReply(replies: Reply[]) {
