@@ -171,7 +171,7 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
             setRequestData(null)
         }
             console.log("ChatScreen - sending basic message", text)
-        // sendBasicMsg(chat.id, pendingMsgs.map(msg => msg.text)[0])
+        sendBasicMsg(chat.id, pendingMsgs.map(msg => msg.text)[0])
     }
 
     async function handleQuickReply(replies: Reply[]) {

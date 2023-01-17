@@ -72,8 +72,30 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
     const handleBarCodeScanned = async ({type,data}: BarCodeEvent) => {
         setScanned(true);
         console.log("Scan QR - scanned data", modelType, type, data)
-        if (data.startsWith("http") || data.startsWith("ws")){
+        console.log("QR DATA", data)
+
+        //check if data is an integer
+      
+
+        if (data.startsWith("http") || data.startsWith("ws") || Number.isInteger(parseInt(data)) ){
             console.log(data)
+            if( Number.isInteger(parseInt(data))){
+                const decodedMsg = await decodeOOBURL(`
+                https://www.domain.com/path?_oob=eyJ0eXBlIjoiaHR0cHM6Ly9kaWRjb21tLm9yZy9vdXQtb2YtYmFuZC8yLjAvaW52aXRhdGlvbiIsImlkIjoiNjM0OTNhNWYtYjZlNS00NTM5LWE1MDQtNjg4ODlmZTBmZjQ4IiwiZnJvbSI6ImRpZDpwZWVyOjIuRXo2TFNlazFTTnRNZVBzczNOZ3FBN3lrQVZGUURDWmNIQkpTNnlUZHhWUGk0cVB3Qy5WejZNa2ZxdUtxcG5qNFB0ZXBVS29GcDVnVUNReGd3cEQ2b0JMcjdlVXVyMnh3eG5zLlNleUp5SWpwYlhTd2ljeUk2SW1ScFpEcHdaV1Z5T2pJdVJYbzJURk50Y3pVMU5WbG9SblJvYmpGWFZqaGphVVJDY0ZwdE9EWm9TemwwY0RnelYyOXFTbFZ0ZUZCSGF6Rm9XaTVXZWpaTmEyMWtRbXBOZVVJMFZGTTFWV0ppVVhjMU5ITjZiVGg1ZGsxTlpqRm1kRWRXTW5OUlZsbEJlR0ZsVjJoRkxsTmxlVXB3V2tOSk5rbHROV3hrZVRGd1drTkpjMGx1VVdsUGFVcHJZbE5KYzBsdVRXbFBhVXB2WkVoU2QyTjZiM1pNTWpGc1drZHNhR1JIT1hsTWJrcDJZak5TZW1GWFVYVlpNbmgyWkZkUmFVeERTbWhKYW5CaVNXMVNjRnBIVG5aaVZ6QjJaR3BKYVZoWU1DSXNJbUVpT2x0ZExDSjBJam9pWkcwaWZRIiwiYm9keSI6eyJhY2NlcHQiOlsiZGlkY29tbS92MiJdLCJsYWJlbCI6IlByaXNtIERlbW8ifX0=
+                
+                `.trim());
+                const personLogo = require('../assets/smallBWPerson.png');
+
+                await importContact({
+                    displayName:  decodedMsg.body.label,
+                    displayPictureUrl: personLogo,
+                    did: decodedMsg.from,
+                    id: decodedMsg.body.label
+                })
+                clearAndGoBack()
+                navigation.navigate('Chat', { chatId:  decodedMsg.body.label })
+                
+            }
             if (data.toLowerCase().includes("_oobid")){
                 const response = await fetch(data);
                 data = response.url
@@ -120,7 +142,7 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                 await importContact({
                     displayName: displayName,
                     displayPictureUrl: personLogo,
-                    did: decodedMsg.from,
+                    did: decodedMsg.body.from,
                     id: uuid.v4().toString()
                 })
 
