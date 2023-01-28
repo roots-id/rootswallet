@@ -156,7 +156,12 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                 await importVerifiedCredential(jsonData)
             } else if (modelType == "contact") {
                 console.log("Scan QR - Importing scanned contact",jsonData)
-                await importContact(jsonData)
+                await importContact({
+                    displayName: jsonData.from.slice(0,20),
+                    displayPictureUrl: require('../assets/smallBWPerson.png'),
+                    did: jsonData.from,
+                    id: jsonData.id
+                }) //jsonData
             }
         }
         clearAndGoBack()
