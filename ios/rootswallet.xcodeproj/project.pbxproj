@@ -33,6 +33,7 @@
 		DB43871E2986EF550099AB9D /* Service+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4387022986EF540099AB9D /* Service+Extensions.swift */; };
 		DB43871F2986EF550099AB9D /* Metadata+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB43870D2986EF550099AB9D /* Metadata+Extensions.swift */; };
 		DB4387212986F00E0099AB9D /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4387202986F00E0099AB9D /* Utils.swift */; };
+		DB7DCF06298AA9B200BC06D1 /* Base58Swift in Frameworks */ = {isa = PBXBuildFile; productRef = DB7DCF05298AA9B200BC06D1 /* Base58Swift */; };
 		DB968F462985AC6600EF67E9 /* PackUnpack.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB968F452985AC6600EF67E9 /* PackUnpack.swift */; };
 /* End PBXBuildFile section */
 
@@ -93,6 +94,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				96905EF65AED1B983A6B3ABC /* libPods-rootswallet.a in Frameworks */,
+				DB7DCF06298AA9B200BC06D1 /* Base58Swift in Frameworks */,
 				DB4386DC29860F7D0099AB9D /* Multibase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -232,6 +234,7 @@
 			name = rootswallet;
 			packageProductDependencies = (
 				DB4386DB29860F7D0099AB9D /* Multibase */,
+				DB7DCF05298AA9B200BC06D1 /* Base58Swift */,
 			);
 			productName = rootswallet;
 			productReference = 13B07F961A680F5B00A75B9A /* rootswallet.app */;
@@ -262,6 +265,7 @@
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			packageReferences = (
 				DB4386DA29860F7D0099AB9D /* XCRemoteSwiftPackageReference "swift-multibase.git" */,
+				DB7DCF04298AA9B200BC06D1 /* XCRemoteSwiftPackageReference "Base58Swift.git" */,
 			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
@@ -664,6 +668,14 @@
 				minimumVersion = 0.0.1;
 			};
 		};
+		DB7DCF04298AA9B200BC06D1 /* XCRemoteSwiftPackageReference "Base58Swift.git" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/keefertaylor/Base58Swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -671,6 +683,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DB4386DA29860F7D0099AB9D /* XCRemoteSwiftPackageReference "swift-multibase.git" */;
 			productName = Multibase;
+		};
+		DB7DCF05298AA9B200BC06D1 /* Base58Swift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DB7DCF04298AA9B200BC06D1 /* XCRemoteSwiftPackageReference "Base58Swift.git" */;
+			productName = Base58Swift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

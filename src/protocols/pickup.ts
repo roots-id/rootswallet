@@ -16,7 +16,6 @@ export async function retrieveMessages(from: string, to: string){
 }
 
 export async function statusRequest(from: string, to: string) {
-    console.log(from, to)
     try {
         const msgPacked = await pack(
             {}, 
@@ -74,7 +73,7 @@ export async function messageReceived(ids: string[], from: string, to: string) {
  async function processDelivery(attachments: any[], from: string, to: string) {
     try {
         attachments.forEach(async function (attachment) {
-            const msgPacked = attachment.data.json
+            const msgPacked = typeof attachment.data.json === "string"? JSON.parse(attachment.data.json): attachment.data.json
             const msgId = attachment.id
             await messageReceived([msgId], from, to)
             receiveMessage(msgPacked)

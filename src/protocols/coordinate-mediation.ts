@@ -8,9 +8,9 @@ export async function mediateRequest(from: string, to: string) {
             from, 
             to, 
             "https://didcomm.org/coordinate-mediation/2.0/mediate-request", 
-            [{return_route: "all"}],
+            [],
             null,
-            true,
+            false,
             null
           )
         return await sendDIDCommMessage(msgPacked, to)

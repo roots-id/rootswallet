@@ -75,7 +75,9 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
         if (data.startsWith("http") || data.startsWith("ws")){
             console.log(data)
             if (data.toLowerCase().includes("_oobid")){
+                console.log("QR CODE SMALL")
                 const response = await fetch(data);
+                console.log(response)
                 data = response.url
             }
             const decodedMsg = await decodeOOBURL(data);

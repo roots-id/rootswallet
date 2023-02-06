@@ -27,7 +27,7 @@ export async function sendDIDCommMessage(packMsg: any, to: string) {
         }
         
 
-        console.log("ServiceEndpoint:",endpoint)
+
         // TODO add WebSocket transport
         const resp = await fetch(endpoint, {
                     method: 'POST',

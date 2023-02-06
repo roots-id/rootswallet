@@ -32,14 +32,13 @@ RCT_EXPORT_METHOD(pack:(NSString *)body
                   messageType:(NSString *)messageType
                   customHeaders:(NSDictionary *)customHeaders
                   privateKey:(NSString *)privateKey
-                  publicKey:(NSString *)publicKey
                   signFrom:(BOOL *)signFrom
                   protectSender:(BOOL *)protectSender
                   attachments:(NSArray *)attachments
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 {
-  [[PackUnpack new] packEncrypted:body id:id thid:thid to:to from:from messageType:messageType customHeaders:customHeaders privateKey:privateKey publicKey:publicKey signFrom:signFrom protectSender:protectSender attachments:attachments withResolver:resolve withRejecter:reject ];
+  [[PackUnpack new] packEncrypted:body id:id thid:thid to:to from:from messageType:messageType customHeaders:customHeaders privateKey:privateKey signFrom:signFrom protectSender:protectSender attachments:attachments withResolver:resolve withRejecter:reject ];
 };
 
 

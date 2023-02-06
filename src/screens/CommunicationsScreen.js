@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import {Button, View, Text, NativeModules, TextInput} from 'react-native';
-import { createDIDPeer} from '../didpeer'
-import { decodeOOBURL, sendPing, sendBasicMessage } from '../protocols';
+import { createDIDPeer, resolveDIDPeerServiceEndpoint} from '../didpeer'
+import { decodeOOBURL, sendPing, sendBasicMessage, discoverFeatures } from '../protocols';
 import { pack, unpack } from '../didcommv2' 
+import {resolve } from '../didpeer2'
 
 const Communications = (props) => {
     const [question, setQuestion] = useState(null)
@@ -14,13 +15,14 @@ const Communications = (props) => {
     const onPressHelloWorld = async() => {
         // TODO This Hello World should be moved to tests
         // 1. Bob creates a pairwise peer DID for the connection
-        const bobPeerDID = await createDIDPeer(null, null)
+        const bobPeerDID = await createDIDPeer("http://example.com", null)
+        
+        console.log(await resolve(bobPeerDID))
         console.log("Bob generates a new pairwise peer DID for communication with Alice: "+ bobPeerDID)
         console.log("")
 
         // 2. Alice creates a pairwise peer DID for the connection
-        //const alicePeerDID = await createDIDPeer(null, null)
-        const alicePeerDID = bobPeerDID
+        const alicePeerDID = await createDIDPeer(null, null)
         console.log("Alice generates a new pairwise peer DID for communication with Bob: "+ alicePeerDID)
 
         // 3. Alice sends message to Bob
@@ -40,10 +42,17 @@ const Communications = (props) => {
         console.log(packedToBobMsg)
         console.log("")
 
+
+
         // 4. Bob unpacks the message
-        var unpackResultMsg = await unpack(packedToBobMsg)
+        var unpackResultMsg = await unpack(JSON.parse(packedToBobMsg))
         console.log(unpackResultMsg)
         console.log("Bob received " + JSON.parse(unpackResultMsg.message).body.msg + " from Alice.")
+
+        console.log("Discover features")
+        const mediatorDID = "did:peer:2.Ez6LSbpu6b2NVbn2fGcebziB9QxKUmKN1ipsh6Qs7ArhH8APN.Vz6MkpwvjBSCSfZyrnKCFLUyDen6BJXscu44NRdEPdEVWizMa.SeyJpZCI6Im5ldy1pZCIsInQiOiJkbSIsInMiOiJodHRwczovL21lZGlhdG9yLnJvb3RzaWQuY2xvdWQiLCJhIjpbImRpZGNvbW0vdjIiXX0"
+        const features = await discoverFeatures(alicePeerDID, mediatorDID)
+        console.log(features)
     }
 
     const getMediator = async() => {

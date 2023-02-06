@@ -8,11 +8,12 @@
 
 import DidcommSDK
 import Foundation
+import Base58Swift
 
 @objc(PackUnpack)
 class PackUnpack: NSObject {
 
-  @objc(packEncrypted:id:thid:to:from:messageType:customHeaders:privateKey:publicKey:signFrom:protectSender:attachments:withResolver:withRejecter:)
+  @objc(packEncrypted:id:thid:to:from:messageType:customHeaders:privateKey:signFrom:protectSender:attachments:withResolver:withRejecter:)
   func packEncrypted(body: NSString,
                      id: NSString,
                      thid: NSString,
@@ -21,7 +22,6 @@ class PackUnpack: NSObject {
                      messageType: NSString,
                      customHeaders: NSDictionary,
                      privateKey: NSString,
-                     publicKey: NSString,
                      signFrom: Bool,
                      protectSender: Bool,
                      attachments: NSArray,
@@ -29,11 +29,29 @@ class PackUnpack: NSObject {
                      reject: @escaping RCTPromiseRejectBlock
   ) {
     let didcomm = DidComm(
-      didResolver: PeerDidResolver(publicKey: publicKey),
+      didResolver: PeerDidResolver(),
       secretResolver: SecretResolverInMemoryMock(privateKey: privateKey)
     )
     let delegate = DidPromise(resolve, reject)
     
+    var attachs = [Attachment]()
+    
+    for _att in attachments {
+      do {
+        let dataDict = _att as! NSDictionary
+        var dataJSON: JSONDictionary = [
+          "json": dataDict as! JSONDictionary
+        ]
+        let attData = try AttachmentData.fromJson(dataJSON)
+        let att = Attachment(data: attData, id: "hghgj", description: nil, filename: nil, mediaType: nil, format: nil, lastmodTime: nil, byteCount: nil)
+        attachs.append(att)
+      } catch {
+        print("Unexpected Attachment error: \(error)")
+      }
+      
+    }
+    
+
     let _ = didcomm.packEncrypted(
       msg: Message(id: id as String,
                    typ: "application/didcomm-plain+json",
@@ -47,7 +65,7 @@ class PackUnpack: NSObject {
                    createdTime: nil,
                    expiresTime: nil,
                    fromPrior: nil,
-                   attachments: []),
+                   attachments: attachs),
       to: to as String,
       from: from as? String,
       signBy: nil,
@@ -71,7 +89,7 @@ class PackUnpack: NSObject {
   ) {
     
     let didcomm = DidComm(
-      didResolver: PeerDidResolver(publicKey: privateKey),
+      didResolver: PeerDidResolver(),
       secretResolver: SecretResolverInMemoryMock(privateKey: privateKey)
     )
     let delegate = DidPromise(resolve, reject)
@@ -85,22 +103,61 @@ class PackUnpack: NSObject {
 
 
 public class PeerDidResolver: DidResolver {
-  let publicKey: NSString
 
-      init(publicKey: NSString) {
-          self.publicKey = publicKey
-      }
+//  init() {
+//      //
+//  }
   
   public func resolve(did: String, cb: OnDidResolverResult) -> ErrorCode {
-    let verMethod = VerificationMethod(
-      id: did+"#key-1",
-      type: VerificationMethodType.jsonWebKey2020,
-      controller: did,
-      verificationMaterial: VerificationMaterial.jwk(value: publicKey as String)
-//      verificationMaterial: VerificationMaterial.jwk(value: "{\"kty\":\"OKP\",\"crv\":\"X25519\",\"x\":\"avH0O2Y4tqLAq8y9zpianr8ajii5m4F_mICrzNlatXs\"}")
-    )
+    // get keys by splitting and removing firt element
+    var keys = did.split(separator: ".")
+    keys.removeFirst()
+    var verificationMethods = [VerificationMethod]()
     
-    let didDoc = DidDoc(did: did, keyAgreements: [did+"#key-1"], authentications: [], verificationMethods: [verMethod], services: [])
+    // find keyAgreement and extract publicKeyMultibase
+    var kidE = ""
+    var kidV = ""
+    for key in keys {
+      if key.prefix(1) == "E" {
+        kidE = did + "#" + key.suffix(key.count - 2 ) // remove E and z
+        let publicKeyMultibase = String(key.suffix(key.count - 1 )) // remove E
+        let multicodec = Base58.base58Decode((String(publicKeyMultibase.suffix(publicKeyMultibase.count - 1 ))))
+
+        let data = Data(multicodec![2...])
+        let publicKeyBase64 = data.base64EncodedString(options: NSData.Base64EncodingOptions(rawValue: 0)).replacingOccurrences(of: "=", with: "").replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_")
+        let publicJwt = "{\"kty\":\"OKP\",\"crv\":\"X25519\",\"x\":\"" + publicKeyBase64 + "\",\"kid\":\"" + kidE+"\"}"
+        
+        let verMethod = VerificationMethod(
+          id: kidE,
+          type: VerificationMethodType.jsonWebKey2020,
+          controller: did,
+          verificationMaterial: VerificationMaterial.jwk(value: publicJwt as String)
+        )
+        verificationMethods.append(verMethod)
+      }
+      if key.prefix(1) == "V" {
+        kidV = did + "#" + key.suffix(key.count - 2 ) // remove E and z
+        let publicKeyMultibase = String(key.suffix(key.count - 1 )) // remove E
+        let multicodec = Base58.base58Decode((String(publicKeyMultibase.suffix(publicKeyMultibase.count - 1 ))))
+
+        let data = Data(multicodec![2...])
+        let publicKeyBase64 = data.base64EncodedString(options: NSData.Base64EncodingOptions(rawValue: 0)).replacingOccurrences(of: "=", with: "").replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "/", with: "_")
+        let publicJwt = "{\"kty\":\"OKP\",\"crv\":\"Ed25519\",\"x\":\"" + publicKeyBase64 + "\",\"kid\":\"" + kidV+"\"}"
+        
+        let verMethod = VerificationMethod(
+          id: kidV,
+          type: VerificationMethodType.jsonWebKey2020,
+          controller: did,
+          verificationMaterial: VerificationMaterial.jwk(value: publicJwt as String)
+        )
+        verificationMethods.append(verMethod)
+      }
+    }
+
+    // convert multibase to jwk
+
+    
+    let didDoc = DidDoc(did: did, keyAgreements: [kidE], authentications: [kidV], verificationMethods: verificationMethods, services: [])
     try? cb.success(result: didDoc)
     return .success
   }
