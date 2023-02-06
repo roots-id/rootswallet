@@ -9,6 +9,7 @@ const Communications = (props) => {
     const [answer, setAnswer] = useState('')
     const [myPeerDID, setMyPeerDID] = useState('')
     const [mediatorDID, setMediatorDID] = useState('')
+    const {DIDCommModule} = NativeModules;
 
     const onPressHelloWorld = async() => {
         // TODO This Hello World should be moved to tests
@@ -18,7 +19,8 @@ const Communications = (props) => {
         console.log("")
 
         // 2. Alice creates a pairwise peer DID for the connection
-        const alicePeerDID = await createDIDPeer(null, null)
+        //const alicePeerDID = await createDIDPeer(null, null)
+        const alicePeerDID = bobPeerDID
         console.log("Alice generates a new pairwise peer DID for communication with Bob: "+ alicePeerDID)
 
         // 3. Alice sends message to Bob
@@ -28,13 +30,14 @@ const Communications = (props) => {
           alicePeerDID, 
           bobPeerDID, 
           "my-protocol/1.0", 
-          [{return_route: "all"}],
+          [],
           null,
-          true,
-          null
+          false,
+          null,
           )
         console.log("Alice sends " +  msg + " to Bob.")
         console.log("The message is authenticated by Alice's peer DID " + alicePeerDID + " and encrypted to Bob's peer DID " )
+        console.log(packedToBobMsg)
         console.log("")
 
         // 4. Bob unpacks the message
@@ -70,13 +73,45 @@ const Communications = (props) => {
         }
       }
 
-      const askMediator = async() => {
+    const askMediator = async() => {
         try{
             const answer = await sendBasicMessage(question, myPeerDID, mediatorDID)
             setAnswer(answer)          
         } catch (error) {
             console.error(error);
         }
+    }
+    const testDIDCommX = async() => {
+                
+        const peerdid = await createDIDPeer("https://www.example.com/bob",[])
+        console.log("CREATING DID PEER 2")
+        console.log(peerdid)
+        const privateKey = {
+            kty: "OKP",
+            crv: "X25519",
+            kid: "did:peer:bob#key-1",
+            x: "avH0O2Y4tqLAq8y9zpianr8ajii5m4F_mICrzNlatXs",
+            d: "r-jK2cO3taR8LQnJB1_ikLBTAnOtShJOsHXRUWT-aZA"
+        }
+        const packMsg2 = await DIDCommModule.pack(
+            JSON.stringify({"content": "Hola Bob!"}),
+            "ABCD-12345-67890",
+            null,
+            "did:peer:bob",
+            "did:peer:bob",
+            "my-protocol/1.0",
+            {},
+            JSON.stringify(privateKey),
+            false,
+            false,
+            []
+        )
+        console.log("PACK MSG")
+        console.log(JSON.stringify(packMsg2))
+
+        const unpackResultMsg = await DIDCommModule.unpack(packMsg2[0],JSON.stringify(privateKey)) 
+        console.log("UNPACK MSG")
+        console.log(unpackResultMsg[0].body)
       }
 
     return (
@@ -110,6 +145,11 @@ const Communications = (props) => {
             title='Ask'
             color='#841584'
             onPress={askMediator}
+        />
+        <Button
+            title="DIDCommX"
+            color="#841584"
+            onPress={testDIDCommX}
         />
         <Text>
             {answer}

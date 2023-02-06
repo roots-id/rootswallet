@@ -3604,6 +3604,13 @@ b4a@^1.0.1:
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/b4a/-/b4a-1.6.1.tgz#9effac93a469a868d024e16fd77162c653544cbd"
 
+b58@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/b58/-/b58-4.0.3.tgz#852a28d804b4a5a60685f9b51706315145a48c36"
+  integrity sha512-VDtdiomm0ywbL8YzgevOZ9pcx6LuOZ3d9qYTPDcYUPf7dRYNA8wvK6epYy0FKMWIM5uaDwd3kWt1x+1S9scB1Q==
+  dependencies:
+    base-x "^3.0.2"
+
 babel-core@^7.0.0-bridge.0:
   version "7.0.0-bridge.0"
   resolved "https://registry.yarnpkg.com/babel-core/-/babel-core-7.0.0-bridge.0.tgz#95a492ddd90f9b4e9a4a1da14eb335b87b634ece"

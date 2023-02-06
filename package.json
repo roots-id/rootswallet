@@ -8,6 +8,7 @@
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",
+    "ios": "expo run:ios",
     "eject": "expo eject"
   },
   "dependencies": {
@@ -49,6 +50,7 @@
     "@types/react": "^17.0.47",
     "@types/react-native": "^0.67.8",
     "@types/react-test-renderer": "^18.0.0",
+    "b58": "^4.0.3",
     "babel-jest": "^28.1.1",
     "babel-plugin-module-resolver": "^4.1.0",
     "base-64": "^1.0.0",

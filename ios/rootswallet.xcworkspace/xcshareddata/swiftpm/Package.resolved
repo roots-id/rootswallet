@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "swift-bases",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swift-libp2p/swift-bases.git",
+      "state" : {
+        "revision" : "c84494da575bc776ae64c180af2731471193b812",
+        "version" : "0.0.2"
+      }
+    },
+    {
+      "identity" : "swift-multibase",
+      "kind" : "remoteSourceControl",
+      "location" : "git@github.com:swift-libp2p/swift-multibase.git",
+      "state" : {
+        "revision" : "17044546b401c1c3af2f947f64484b1e5f88a5a3",
+        "version" : "0.0.1"
+      }
+    }
+  ],
+  "version" : 2
+}

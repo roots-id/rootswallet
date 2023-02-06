@@ -235,7 +235,7 @@ export async function importContact(con: models.contactDecorator): Promise<boole
 //----------------- Prism ----------------------
 export function setPrismHost(host = DEFAULT_PRISM_HOST, port = "50053") {
     logger("roots - setting Prism host and port", host, port)
-    PrismModule.setNetwork(host, port)
+    //PrismModule.setNetwork(host, port)
     store.updateItem(getSettingAlias("prismNodePort"), port)
     store.updateItem(getSettingAlias("prismNodeHost"), host)
 }
@@ -403,7 +403,8 @@ export async function publishPrismDid(didAlias: string): Promise<boolean> {
             try {
                 const wal = wallet.getWallet()
                 if (wal) {
-                    const newWalJson = await PrismModule.publishDID(wallet.getWalletJson(wal._id), did.alias)
+                    //const newWalJson = await PrismModule.publishDID(wallet.getWalletJson(wal._id), did.alias)
+                    const newWalJson = ""
                     const result = await wallet.updateWallet(wal._id, wal.passphrase, newWalJson)
                     const pubDid = getDid(didAlias)
                     if (pubDid) {

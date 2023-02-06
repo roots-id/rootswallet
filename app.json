@@ -7,7 +7,9 @@
     "privacy": "unlisted",
     "version": "0.1.0-alpha",
     "orientation": "default",
-    "platforms": ["android"],
+    "platforms": [
+      "android","ios"
+    ],
     "githubUrl": "https://github.com/roots-id/rootswallet",
     "icon": "./src/assets/LogoOnly1024.png",
     "splash": {
@@ -31,6 +33,9 @@
     },
     "web": {
       "favicon": "./src/assets/LogoOnly1024.png"
+    },
+    "ios": {
+      "bundleIdentifier": "com.rootswallet"
     }
   }
 }

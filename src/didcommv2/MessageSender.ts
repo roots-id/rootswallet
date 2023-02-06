@@ -16,7 +16,7 @@ export async function sendDIDCommMessage(packMsg: any, to: string) {
             const fwBody = { next: to }
             packed = await pack(
                 { next: to },
-                newDID,
+                newDID!,
                 serviceEndpoint,
                 "https://didcomm.org/routing/2.0/forward",
                 [],
