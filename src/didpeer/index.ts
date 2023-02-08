@@ -44,7 +44,7 @@ export async function createDIDPeerOld(serviceEndpoint: string, serviceRoutingKe
         await saveItem(didDoc.keyAgreement[0].id, JSON.stringify(agreemKey))
 
         await AsyncStore.storeItem(didDoc.authentication[0].id, JSON.stringify(authKey))
-        await AsyncStore.storeItem(didDoc.keyAgreement[0].id, JSON.stringify(authKey))
+        await AsyncStore.storeItem(didDoc.keyAgreement[0].id, JSON.stringify(agreemKey))
 
         return peerDID
     } catch (error: any) {
@@ -91,7 +91,7 @@ export async function createDIDPeer(serviceEndpoint: string, serviceRoutingKeys:
         await saveItem(didDoc.keyAgreement![0] as string, JSON.stringify(agreemKey))
 
         await AsyncStore.storeItem(didDoc.authentication![0] as string, JSON.stringify(authKey))
-        await AsyncStore.storeItem(didDoc.keyAgreement![0] as string, JSON.stringify(authKey))
+        await AsyncStore.storeItem(didDoc.keyAgreement![0] as string, JSON.stringify(agreemKey))
 
 
         return peerDID
