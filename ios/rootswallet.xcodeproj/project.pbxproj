@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,7 +15,40 @@
 		96905EF65AED1B983A6B3ABC /* libPods-rootswallet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58EEBF8E8E6FB1BC6CAF49B5 /* libPods-rootswallet.a */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
+		DB28C3C229857561005BF371 /* RCTDIDCommModule.m in Sources */ = {isa = PBXBuildFile; fileRef = DB28C3C129857561005BF371 /* RCTDIDCommModule.m */; };
+		DB4386DC29860F7D0099AB9D /* Multibase in Frameworks */ = {isa = PBXBuildFile; productRef = DB4386DB29860F7D0099AB9D /* Multibase */; };
+		DB4387112986EF550099AB9D /* SecretType+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB43870B2986EF550099AB9D /* SecretType+Extensions.swift */; };
+		DB4387122986EF550099AB9D /* SecretMaterial+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB43870C2986EF550099AB9D /* SecretMaterial+Extensions.swift */; };
+		DB4387132986EF550099AB9D /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4387092986EF550099AB9D /* String+Extensions.swift */; };
+		DB4387142986EF550099AB9D /* UnpackOptions+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4387102986EF550099AB9D /* UnpackOptions+Extensions.swift */; };
+		DB4387152986EF550099AB9D /* JSONDictionary+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4387032986EF540099AB9D /* JSONDictionary+Extensions.swift */; };
+		DB4387162986EF550099AB9D /* Message+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB43870F2986EF550099AB9D /* Message+Extensions.swift */; };
+		DB4387172986EF550099AB9D /* AnonCryptAlg+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4387072986EF540099AB9D /* AnonCryptAlg+Extensions.swift */; };
+		DB4387182986EF550099AB9D /* PackEncryptedOptions+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4387082986EF540099AB9D /* PackEncryptedOptions+Extensions.swift */; };
+		DB4387192986EF550099AB9D /* VerificationMaterial+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB43870E2986EF550099AB9D /* VerificationMaterial+Extensions.swift */; };
+		DB43871A2986EF550099AB9D /* VerificationMethodType+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB43870A2986EF550099AB9D /* VerificationMethodType+Extensions.swift */; };
+		DB43871B2986EF550099AB9D /* FromPrior+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4387062986EF540099AB9D /* FromPrior+Extensions.swift */; };
+		DB43871C2986EF550099AB9D /* Secrets+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4387052986EF540099AB9D /* Secrets+Extensions.swift */; };
+		DB43871D2986EF550099AB9D /* Attachment+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4387042986EF540099AB9D /* Attachment+Extensions.swift */; };
+		DB43871E2986EF550099AB9D /* Service+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4387022986EF540099AB9D /* Service+Extensions.swift */; };
+		DB43871F2986EF550099AB9D /* Metadata+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB43870D2986EF550099AB9D /* Metadata+Extensions.swift */; };
+		DB4387212986F00E0099AB9D /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB4387202986F00E0099AB9D /* Utils.swift */; };
+		DB7DCF06298AA9B200BC06D1 /* Base58Swift in Frameworks */ = {isa = PBXBuildFile; productRef = DB7DCF05298AA9B200BC06D1 /* Base58Swift */; };
+		DB968F462985AC6600EF67E9 /* PackUnpack.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB968F452985AC6600EF67E9 /* PackUnpack.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		DB968F422985A12D00EF67E9 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
@@ -31,6 +64,25 @@
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = rootswallet/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		C957BA5869EA4F98842C7326 /* rootswallet-Bridging-Header.h */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "rootswallet-Bridging-Header.h"; path = "rootswallet/rootswallet-Bridging-Header.h"; sourceTree = "<group>"; };
+		DB28C3C0298574B9005BF371 /* RCTDIDCommModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RCTDIDCommModule.h; sourceTree = "<group>"; };
+		DB28C3C129857561005BF371 /* RCTDIDCommModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RCTDIDCommModule.m; sourceTree = "<group>"; };
+		DB4387022986EF540099AB9D /* Service+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Service+Extensions.swift"; sourceTree = "<group>"; };
+		DB4387032986EF540099AB9D /* JSONDictionary+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JSONDictionary+Extensions.swift"; sourceTree = "<group>"; };
+		DB4387042986EF540099AB9D /* Attachment+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Attachment+Extensions.swift"; sourceTree = "<group>"; };
+		DB4387052986EF540099AB9D /* Secrets+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Secrets+Extensions.swift"; sourceTree = "<group>"; };
+		DB4387062986EF540099AB9D /* FromPrior+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FromPrior+Extensions.swift"; sourceTree = "<group>"; };
+		DB4387072986EF540099AB9D /* AnonCryptAlg+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AnonCryptAlg+Extensions.swift"; sourceTree = "<group>"; };
+		DB4387082986EF540099AB9D /* PackEncryptedOptions+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PackEncryptedOptions+Extensions.swift"; sourceTree = "<group>"; };
+		DB4387092986EF550099AB9D /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
+		DB43870A2986EF550099AB9D /* VerificationMethodType+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VerificationMethodType+Extensions.swift"; sourceTree = "<group>"; };
+		DB43870B2986EF550099AB9D /* SecretType+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SecretType+Extensions.swift"; sourceTree = "<group>"; };
+		DB43870C2986EF550099AB9D /* SecretMaterial+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SecretMaterial+Extensions.swift"; sourceTree = "<group>"; };
+		DB43870D2986EF550099AB9D /* Metadata+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Metadata+Extensions.swift"; sourceTree = "<group>"; };
+		DB43870E2986EF550099AB9D /* VerificationMaterial+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VerificationMaterial+Extensions.swift"; sourceTree = "<group>"; };
+		DB43870F2986EF550099AB9D /* Message+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Message+Extensions.swift"; sourceTree = "<group>"; };
+		DB4387102986EF550099AB9D /* UnpackOptions+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnpackOptions+Extensions.swift"; sourceTree = "<group>"; };
+		DB4387202986F00E0099AB9D /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		DB968F452985AC6600EF67E9 /* PackUnpack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PackUnpack.swift; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F7E021326AC6478AB72679CD /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "rootswallet/noop-file.swift"; sourceTree = "<group>"; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-rootswallet/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
@@ -42,6 +94,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				96905EF65AED1B983A6B3ABC /* libPods-rootswallet.a in Frameworks */,
+				DB7DCF06298AA9B200BC06D1 /* Base58Swift in Frameworks */,
+				DB4386DC29860F7D0099AB9D /* Multibase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -58,9 +112,28 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				DB4387072986EF540099AB9D /* AnonCryptAlg+Extensions.swift */,
+				DB4387042986EF540099AB9D /* Attachment+Extensions.swift */,
+				DB4387062986EF540099AB9D /* FromPrior+Extensions.swift */,
+				DB4387032986EF540099AB9D /* JSONDictionary+Extensions.swift */,
+				DB43870F2986EF550099AB9D /* Message+Extensions.swift */,
+				DB43870D2986EF550099AB9D /* Metadata+Extensions.swift */,
+				DB4387082986EF540099AB9D /* PackEncryptedOptions+Extensions.swift */,
+				DB43870C2986EF550099AB9D /* SecretMaterial+Extensions.swift */,
+				DB4387052986EF540099AB9D /* Secrets+Extensions.swift */,
+				DB4387202986F00E0099AB9D /* Utils.swift */,
+				DB43870B2986EF550099AB9D /* SecretType+Extensions.swift */,
+				DB4387022986EF540099AB9D /* Service+Extensions.swift */,
+				DB4387092986EF550099AB9D /* String+Extensions.swift */,
+				DB4387102986EF550099AB9D /* UnpackOptions+Extensions.swift */,
+				DB43870E2986EF550099AB9D /* VerificationMaterial+Extensions.swift */,
+				DB43870A2986EF550099AB9D /* VerificationMethodType+Extensions.swift */,
+				DB968F452985AC6600EF67E9 /* PackUnpack.swift */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
 				F7E021326AC6478AB72679CD /* noop-file.swift */,
 				C957BA5869EA4F98842C7326 /* rootswallet-Bridging-Header.h */,
+				DB28C3C0298574B9005BF371 /* RCTDIDCommModule.h */,
+				DB28C3C129857561005BF371 /* RCTDIDCommModule.m */,
 			);
 			name = rootswallet;
 			sourceTree = "<group>";
@@ -152,12 +225,17 @@
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
+				DB968F422985A12D00EF67E9 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = rootswallet;
+			packageProductDependencies = (
+				DB4386DB29860F7D0099AB9D /* Multibase */,
+				DB7DCF05298AA9B200BC06D1 /* Base58Swift */,
+			);
 			productName = rootswallet;
 			productReference = 13B07F961A680F5B00A75B9A /* rootswallet.app */;
 			productType = "com.apple.product-type.application";
@@ -171,6 +249,7 @@
 				LastUpgradeCheck = 1130;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
+						DevelopmentTeam = 2PYM6B473Q;
 						LastSwiftMigration = 1250;
 					};
 				};
@@ -184,6 +263,10 @@
 				Base,
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
+			packageReferences = (
+				DB4386DA29860F7D0099AB9D /* XCRemoteSwiftPackageReference "swift-multibase.git" */,
+				DB7DCF04298AA9B200BC06D1 /* XCRemoteSwiftPackageReference "Base58Swift.git" */,
+			);
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -251,11 +334,45 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-rootswallet/Pods-rootswallet-resources.sh",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/EXUpdates/EXUpdates.bundle",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Entypo.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Feather.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Brands.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Regular.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Solid.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Fontisto.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Foundation.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Octicons.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Zocial.ttf",
 				"${PODS_CONFIGURATION_BUILD_DIR}/React-Core/AccessibilityResources.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXConstants.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXUpdates.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AntDesign.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Entypo.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EvilIcons.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Feather.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FontAwesome.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FontAwesome5_Brands.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FontAwesome5_Regular.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FontAwesome5_Solid.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Fontisto.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Foundation.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Ionicons.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/MaterialCommunityIcons.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/MaterialIcons.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Octicons.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SimpleLineIcons.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Zocial.ttf",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/AccessibilityResources.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -291,8 +408,26 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				DB4387142986EF550099AB9D /* UnpackOptions+Extensions.swift in Sources */,
+				DB43871A2986EF550099AB9D /* VerificationMethodType+Extensions.swift in Sources */,
+				DB43871B2986EF550099AB9D /* FromPrior+Extensions.swift in Sources */,
+				DB43871D2986EF550099AB9D /* Attachment+Extensions.swift in Sources */,
+				DB4387172986EF550099AB9D /* AnonCryptAlg+Extensions.swift in Sources */,
+				DB4387212986F00E0099AB9D /* Utils.swift in Sources */,
+				DB4387162986EF550099AB9D /* Message+Extensions.swift in Sources */,
+				DB4387122986EF550099AB9D /* SecretMaterial+Extensions.swift in Sources */,
+				DB4387182986EF550099AB9D /* PackEncryptedOptions+Extensions.swift in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,
+				DB43871F2986EF550099AB9D /* Metadata+Extensions.swift in Sources */,
+				DB4387132986EF550099AB9D /* String+Extensions.swift in Sources */,
+				DB4387192986EF550099AB9D /* VerificationMaterial+Extensions.swift in Sources */,
+				DB4387152986EF550099AB9D /* JSONDictionary+Extensions.swift in Sources */,
 				8BF9157CF66947D3B53C91B8 /* noop-file.swift in Sources */,
+				DB43871E2986EF550099AB9D /* Service+Extensions.swift in Sources */,
+				DB968F462985AC6600EF67E9 /* PackUnpack.swift in Sources */,
+				DB43871C2986EF550099AB9D /* Secrets+Extensions.swift in Sources */,
+				DB28C3C229857561005BF371 /* RCTDIDCommModule.m in Sources */,
+				DB4387112986EF550099AB9D /* SecretType+Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -303,27 +438,39 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 6C2E3173556A471DD304B334 /* Pods-rootswallet.debug.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = rootswallet/rootswallet.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2PYM6B473Q;
 				ENABLE_BITCODE = NO;
+				EXCLUDED_ARCHS = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FB_SONARKIT_ENABLED=1",
 				);
 				INFOPLIST_FILE = rootswallet/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RootsWallet;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.rootswallet;
-				PRODUCT_NAME = "rootswallet";
+				PRODUCT_NAME = rootswallet;
 				SWIFT_OBJC_BRIDGING_HEADER = "rootswallet/rootswallet-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -334,21 +481,33 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7A4D352CD337FB3A3BF06240 /* Pods-rootswallet.release.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = rootswallet/rootswallet.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2PYM6B473Q;
+				EXCLUDED_ARCHS = "";
 				INFOPLIST_FILE = rootswallet/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RootsWallet;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.rootswallet;
-				PRODUCT_NAME = "rootswallet";
+				PRODUCT_NAME = rootswallet;
 				SWIFT_OBJC_BRIDGING_HEADER = "rootswallet/rootswallet-Bridging-Header.h";
+				SWIFT_PRECOMPILE_BRIDGING_HEADER = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -358,7 +517,9 @@
 		83CBBA201A601CBA00E9B192 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -386,9 +547,10 @@
 				CODE_SIGN_ENTITLEMENTS = rootswallet/rootswallet.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				DEFINES_MODULE = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "arm64 ";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -405,7 +567,10 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = "/usr/lib/swift $(inherited)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
 				LIBRARY_SEARCH_PATHS = "\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -416,7 +581,9 @@
 		83CBBA211A601CBA00E9B192 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -444,9 +611,10 @@
 				CODE_SIGN_ENTITLEMENTS = rootswallet/rootswallet.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
+				DEFINES_MODULE = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "arm64 ";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -456,9 +624,13 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = "/usr/lib/swift $(inherited)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
 				LIBRARY_SEARCH_PATHS = "\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -486,6 +658,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DB4386DA29860F7D0099AB9D /* XCRemoteSwiftPackageReference "swift-multibase.git" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:swift-libp2p/swift-multibase.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.0.1;
+			};
+		};
+		DB7DCF04298AA9B200BC06D1 /* XCRemoteSwiftPackageReference "Base58Swift.git" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/keefertaylor/Base58Swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DB4386DB29860F7D0099AB9D /* Multibase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DB4386DA29860F7D0099AB9D /* XCRemoteSwiftPackageReference "swift-multibase.git" */;
+			productName = Multibase;
+		};
+		DB7DCF05298AA9B200BC06D1 /* Base58Swift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DB7DCF04298AA9B200BC06D1 /* XCRemoteSwiftPackageReference "Base58Swift.git" */;
+			productName = Base58Swift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 83CBB9F71A601CBA00E9B192 /* Project object */;
 }

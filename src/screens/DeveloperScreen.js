@@ -14,7 +14,11 @@ const DeveloperScreen = (props) => {
             />
             <Button
                 title={"Clear Storage"}
-                onPress={() => store.clearStorage()}
+                onPress={() => {
+                    store.clearStorage();
+                    // props.navigation.navigate("Create Wallet");
+                }
+                }
             />
             <Button
                 title={"Communications Screen"}

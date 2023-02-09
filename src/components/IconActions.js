@@ -26,8 +26,8 @@ async function hasMediator(navigation) {
     navigation.navigate("Show QR Code",{qrdata: await createOOBInvitation('mediator')})
 }
 
-async function chooseMediationNav(navigation) {
-    if(await roots.getMediatorURL()=="") {
+async function chooseMediationNav(navigation) {    
+    if(await roots.getMediatorURL()==="") {
         await noMediatorPrompt(navigation)
     }else {
         if(getChatItem("mediator").mediator == undefined) {

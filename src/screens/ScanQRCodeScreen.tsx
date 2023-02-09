@@ -10,7 +10,7 @@ import {
 import {IconButton, Title} from 'react-native-paper';
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {getDemoCred} from "../credentials";
-import { getDemoRel, getUserId} from '../relationships';
+import { getDemoRel, getUserId, AVIERY_BOT, PRISMAGENT_BOT} from '../relationships';
 import {getDid, importContact, importVerifiedCredential, isDemo, setMediatorURL} from '../roots'
 import React from 'react';
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
@@ -75,15 +75,17 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
         if (data.startsWith("http") || data.startsWith("ws")){
             console.log(data)
             if (data.toLowerCase().includes("_oobid")){
+                console.log("QR CODE SMALL")
                 const response = await fetch(data);
+                console.log(response)
                 data = response.url
             }
             const decodedMsg = await decodeOOBURL(data);
             const personLogo = require('../assets/smallBWPerson.png');
             if (data.toLowerCase().includes("_oob")){
-                if (data.toLowerCase().startsWith("https://mediator.rootsid.cloud") && decodedMsg.body.goal === "RequestMediate"){
-                    setMediatorURL("https://mediator.rootsid.cloud")
-                await importContact({
+                if ( decodedMsg.body.goal_code === "request-mediate"){
+                    await setMediatorURL("https://mediator.rootsid.cloud")
+                    await importContact({
                         displayName: 'Mediator',
                         displayPictureUrl: personLogo,
                         did: decodedMsg.from,
@@ -96,6 +98,42 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
 
                     // await requestMediate('mediator')
                 }
+                else if(decodedMsg.from.startsWith('did:web:')){
+                    const avLogo = require('../assets/avierytech.png');
+                    await importContact({
+                        displayName: AVIERY_BOT,
+                        displayPictureUrl: avLogo,
+                        did: decodedMsg.from,
+                        id: AVIERY_BOT
+                    })
+                    clearAndGoBack()
+                    navigation.navigate('Chat', { chatId: AVIERY_BOT })
+                }
+                // ATALA PRISM AGENT OOB (Connect Protocol)
+                else if(decodedMsg.body.goal_code === "connect"){
+                    const atalaLogo = require('../assets/prismAgent.png');
+                    await importContact({
+                        displayName: "Prism Agent",
+                        displayPictureUrl: atalaLogo,
+                        did: decodedMsg.from,
+                        id: "prism="+decodedMsg.id
+                    })
+                    clearAndGoBack()
+                    navigation.navigate('Chat', { chatId: "prism="+decodedMsg.id })
+                } 
+                else if(decodedMsg.body.goal_code === "kyc-credential"){
+                    const dataseersLogo = require('../assets/dataseers.png');
+                    await importContact({
+                        displayName: "KYC Issuer",
+                        displayPictureUrl: dataseersLogo,
+                        did: decodedMsg.from,
+                        id: "kyc"+decodedMsg.id
+                    })
+                    clearAndGoBack()
+                    navigation.navigate('Chat', { chatId: "kyc"+decodedMsg.id })
+                }     
+                
+
                 else{
 
                 console.log("Scan QR - OOB URL= " + data)
@@ -120,7 +158,12 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
                 await importVerifiedCredential(jsonData)
             } else if (modelType == "contact") {
                 console.log("Scan QR - Importing scanned contact",jsonData)
-                await importContact(jsonData)
+                await importContact({
+                    displayName: jsonData.from.slice(0,20),
+                    displayPictureUrl: require('../assets/smallBWPerson.png'),
+                    did: jsonData.from,
+                    id: jsonData.id
+                }) //jsonData
             }
         }
         clearAndGoBack()

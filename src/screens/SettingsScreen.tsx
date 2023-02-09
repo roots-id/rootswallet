@@ -107,13 +107,6 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
                     />
                 </View>
                 <Text/>
-                <View style={{flexDirection: 'row',}}>
-                    <FormButton
-                        title="Save/Restore Wallet"
-                        modeValue="contained"
-                        labelStyle={styles.loginButtonLabel}
-                        onPress={() => navigation.navigate("Save")}/>
-                </View>
                 <Text/>
                 <View style={{flexDirection: 'row',}}>
                     <FormButton
@@ -123,6 +116,14 @@ export default function SettingsScreen({route, navigation}: CompositeScreenProps
                         onPress={() => navigation.navigate("Developers")}
                     />
                 </View>
+                <View style={{flexDirection: 'row',}}>
+                    <FormButton
+                        title="Save/Restore Wallet"
+                        modeValue="contained"
+                        labelStyle={styles.loginButtonLabel}
+                        onPress={() => navigation.navigate("Save")}/>
+                </View>
+
             </Animated.View>
         </View>
     );

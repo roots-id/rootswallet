@@ -12,6 +12,10 @@ import {styles} from "../styles/styles";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BubbleProps} from "react-native-gifted-chat/lib/Bubble";
 import { checkMessages, createOOBInvitation, requestMediate, sendBasicMsg, retrieveMessagesFromMediator } from '../roots/peerConversation';
+import { storeItem } from '../store/CachedStore';
+import { KYCProcess } from '../roots/KYCProcess';
+import {launchCamera} from 'react-native-image-picker';
+
 
 export default function ChatScreen({route, navigation}: CompositeScreenProps<any, any>) {
     console.log("ChatScreen - route params", route.params)
@@ -24,6 +28,8 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
 
     const [requesting_credentials, setRequestingCredentials] = useState<boolean>(false)
     const [request_data, setRequestData] = useState<any>(null)
+    const [requested_credentials, setRequestedCredentials] = useState<any>(null)
+    const [kyc_process, setKYCProcess] = useState<KYCProcess | null>(null)
     // {
     //     'first_name': 'John',
     //     'last_name': 'Doe',
@@ -125,27 +131,34 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         // Try sending a basicmessage (only first msg of the arraya)
         // TODO check if chat inlcudes basic message
         let text = pendingMsgs.map(msg => msg.text)[0].toLowerCase()
+        let textUnaltered = pendingMsgs.map(msg => msg.text)[0]
 
         //check if text contains "iiw" and "request" and "credential"
         if (text.includes("iiw") && text.includes("request") && text.includes("credential")) {
             setRequestingCredentials(true)
             const result = await roots.sendMessages(chat, ['Provide your first name'], roots.MessageType.TEXT, contacts.ROOTS_BOT);
             setRequestData(null)
-        }
-
+        } else if(text.includes("jff")){
+            
+            // const result = await roots.sendMessages(chat, ['Provide your first name'], roots.MessageType.TEXT, contacts.ROOTS_BOT);
+            const result = await roots.sendMessage(chat,
+                 'Preview your credential below',
+                  roots.MessageType.JFFCREDENTIAL, 
+                  contacts.ROOTS_BOT,
+                  false)
+        
         // check if requesting_credentials is true and if request_data is undefined
-        if (requesting_credentials && request_data == null) {
+
+        } else if (requesting_credentials && request_data == null) {
             setRequestData({
                 'first_name': text,
                 'last_name': '',
             })
             const result = await roots.sendMessages(chat, ['Provide your last name'], roots.MessageType.TEXT, contacts.ROOTS_BOT);
             console.log("ChatScreen - request_data", request_data)
-        }  
-
-
+        }  else if (requesting_credentials && request_data != null){
         // check if requesting_credentials is true and if request_data is defined
-        if (requesting_credentials && request_data != null) {
+        
             let _temp_request_data = request_data
             _temp_request_data['last_name'] = text
             setRequestData(_temp_request_data)
@@ -153,9 +166,13 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
             const result = await roots.sendMessage(chat, 'Preview your credential below', roots.MessageType.IIWCREDENTIAL, contacts.ROOTS_BOT,false, _temp_request_data)
             setRequestingCredentials(false)
             setRequestData(null)
-        }
+        } else if (kyc_process !== null){
+            kyc_process.handleTextInput(textUnaltered)
+        } else {
+
             console.log("ChatScreen - sending basic message", text)
-        // sendBasicMsg(chat.id, pendingMsgs.map(msg => msg.text)[0])
+            sendBasicMsg(chat.id, pendingMsgs.map(msg => msg.text)[0])
+        }
     }
 
     async function handleQuickReply(replies: Reply[]) {
@@ -224,19 +241,48 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     await retrieveMessagesFromMediator(chat.id)
                 } else if (reply.value === roots.MessageType.SHOW_QR_CODE) {
                     await showQR(navigation, roots.getMessageById(reply.messageId)?.data.url)
-                
+                } else if (reply.value === roots.MessageType.JFFCREDENTIAL) {
+                    //
+                    const result = await roots.sendMessage(chat,
+                        'Preview your credential below',
+                         roots.MessageType.JFFCREDENTIAL, 
+                         contacts.ROOTS_BOT,
+                         false)
+                } else if (reply.value === roots.MessageType.JFFCREDENTIAL +roots.CRED_VIEW) {
+                    let jffcred = await roots.createJFFcredential()
+                    setRequestedCredentials(jffcred)
+                    console.log('jffcred', jffcred)
+                    navigation.navigate("Display Custom Credential", {credential: jffcred})
+                    await roots.sendMessage(chat, 'Accept or Deny credential jff', roots.MessageType.JFFCREDENTIALREQUEST, contacts.ROOTS_BOT, false, jffcred)
+
+                } else if (reply.value === roots.MessageType.JFFACCEPTEDCREDENTIAL ) {
+                    console.log('CREDENTIAL ACCEPTED')
+                    //TODO: replace with credentialRequest()
+
+                    await roots.sendMessage(chat, 'JFF credential accepted.',
+                    roots.MessageType.TEXT,
+                    contacts.ROOTS_BOT)
+                    //TODO save credential to
+
+                    storeItem('demo_jffcredential', JSON.stringify(requested_credentials))
+                    setRequestedCredentials(null)
+
                 } else if (reply.value === roots.MessageType.IIWCREDENTIAL +roots.CRED_VIEW) {
                     const process = roots.getMessageById(reply.messageId)?.data
                     let _temp_name = process.first_name + ' ' + process.last_name
                     // let credIIW = await roots.createIIWcredential(_temp_name)
-                    let credIIW = await roots.requestJFFCredential(chat.id,_temp_name)
+                    let credIIW = await roots.requestIIWCredential(chat.id,_temp_name)
                     console.log("ChatScreen - JFFCREDD", credIIW)
+                    setRequestedCredentials(credIIW)
                     //TODO: replace with credentialRequest()
                     navigation.navigate("Display Custom Credential", {credential: credIIW})
-                    await roots.sendMessage(chat, 'Accept or Deny credential', roots.MessageType.IIWCREDENTIALREQUEST, contacts.ROOTS_BOT)
+                    await roots.sendMessage(chat, 'Accept or Deny credential iiw', roots.MessageType.IIWCREDENTIALREQUEST, contacts.ROOTS_BOT)
 
                 } else if (reply.value === roots.MessageType.IIWACCEPTEDCREDENTIAL ) {
                     console.log('CREDENTIAL ACCEPTED')
+                    storeItem('demo_iiwcredential', JSON.stringify(requested_credentials))
+                    setRequestedCredentials(null)
+
                     //TODO: replace with credentialRequest()
 
                     await roots.sendMessage(chat, 'IIW credential accepted.',
@@ -247,6 +293,71 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
                     await roots.sendMessage(chat, 'IIW credential denied.',
                     roots.MessageType.TEXT,
                     contacts.ROOTS_BOT)
+                } else if (reply.value === roots.MessageType.AP2_CREDENTIAL_OFFER_ACCEPTED){
+                    console.log('CREDENTIAL OFFER ACCEPTED')
+                    await roots.sendMessage(chat, 'Credential offer accepted.',
+                    roots.MessageType.TEXT,
+                    contacts.ROOTS_BOT)
+                    const offer = roots.getMessageById(reply.messageId)?.data
+                    await roots.requestAP2Credential(chat.id,offer)
+
+                } else if (reply.value === roots.MessageType.AP2_CREDENTIAL_OFFER_DENIED){
+                    console.log('CREDENTIAL OFFER DENIED')
+                    await roots.sendMessage(chat, 'Credential offer denied.',
+                    roots.MessageType.TEXT,
+                    contacts.ROOTS_BOT)
+                } else if (reply.value === roots.MessageType.AP2_CREDENTIAL_ISSUED_ACCEPTED){
+                    console.log('CREDENTIAL ISSUED ACCEPTED')
+                    await roots.sendMessage(chat, 'Credential accepted.',
+                    roots.MessageType.TEXT,
+                    contacts.ROOTS_BOT)
+                    const cred = roots.getMessageById(reply.messageId)?.data
+                    storeItem('ap2_credential', JSON.stringify(cred))
+                    setRequestedCredentials(null)
+
+                } else if (reply.value === roots.MessageType.AP2_CREDENTIAL_ISSUED_DENIED){
+                    console.log('CREDENTIAL ISSUED DENIED')
+                    await roots.sendMessage(chat, 'Credential denied.',
+                    roots.MessageType.TEXT,
+                    contacts.ROOTS_BOT)
+                } else if (reply.value === roots.MessageType.KYC_START_ACCEPTED){
+                    console.log('STARTING KYC PROCESS')
+
+                    try {
+                        setKYCProcess(new KYCProcess(chat.id))
+                    } catch (error) {
+                        console.log('KYC ERROR', error)
+                    }
+                } else if (reply.value === roots.MessageType.KYC_FRONT_PICTURE_ACCEPTED){
+                    console.log('Taking picture')
+                    if (kyc_process !== null ){await launchCamera(
+                        {
+                            mediaType: 'photo',
+                            cameraType: 'front',
+                            includeBase64: true,
+                            saveToPhotos: false,
+                            presentationStyle: 'currentContext'
+                        }, 
+                        async (response) => {
+                            await kyc_process?.processFrontPicture(response)
+                        }
+                    )}
+                } else if (reply.value === roots.MessageType.KYC_SELFIE_ACCEPTED){
+                    console.log('Taking picture')
+                    if (kyc_process !== null ){await launchCamera(
+                        {
+                            mediaType: 'photo',
+                            cameraType: 'front',
+                            includeBase64: true,
+                            saveToPhotos: false,
+                            presentationStyle: 'currentContext'
+                        }, 
+                        async (response) => {
+                            await kyc_process?.processSelfiePicture(response)
+                        }
+                    )}
+                   
+
                 } else {
                     console.log("ChatScreen - reply value not recognized, was", chat.id, reply.value);
                 } 
@@ -463,4 +574,5 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
         console.log("ChatScreen - mapped user is", user)
         return user;
     }
+
 }

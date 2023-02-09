@@ -32,7 +32,7 @@ const MyIdentityScreen = (props) => {
     }
 
     const onPressPrism = () => {
-        console.log('DID: ' + PrismModule.createDID('passphrase', {key: 1}));
+        //console.log('DID: ' + PrismModule.createDID('passphrase', {key: 1}));
     };
     const onPressPeer = async () => {
         const authKey = await generateKeyPair('ed25519')

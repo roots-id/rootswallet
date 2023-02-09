@@ -6,7 +6,7 @@ export async function retrieveMessages(from: string, to: string){
         const messageCount = await statusRequest(from, to)
         logger("Pickup message count: "+messageCount)
         if (messageCount>0){
-            const attachments = await deliveryRequest(5,from, to)
+            const attachments = await deliveryRequest(messageCount,from, to)
             await processDelivery(attachments, from, to)
         } 
         return messageCount
@@ -27,7 +27,8 @@ export async function statusRequest(from: string, to: string) {
             true,
             null
           )
-        return await sendDIDCommMessage(msgPacked, to)
+          const resp = await sendDIDCommMessage(msgPacked, to)
+        return resp
     } catch (error: any) {
         logger("pickup - Error", error)
     }
@@ -72,7 +73,7 @@ export async function messageReceived(ids: string[], from: string, to: string) {
  async function processDelivery(attachments: any[], from: string, to: string) {
     try {
         attachments.forEach(async function (attachment) {
-            const msgPacked = attachment.data.json
+            const msgPacked = typeof attachment.data.json === "string"? JSON.parse(attachment.data.json): attachment.data.json
             const msgId = attachment.id
             await messageReceived([msgId], from, to)
             receiveMessage(msgPacked)

@@ -50,6 +50,7 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
     fun pack(
         body: ReadableMap,
         id: String,
+        thid: String? = null,
         to: String,
         from: String,
         messageType: String = "my-protocol/1.0",
@@ -67,7 +68,7 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
             if (attachments != null) {
                 didcommAttachments = mutableListOf<Attachment>()
                 for (i in 0..attachments.size()-1) {
-                    didcommAttachments.add(Attachment.builder("123", Attachment.Data.Json(attachments.getMap(i).toHashMap())
+                    didcommAttachments.add(Attachment.builder(i.toString(), Attachment.Data.Json(attachments.getMap(i).toHashMap())
                     ).build())
                 }
             }
@@ -79,7 +80,8 @@ class DIDCommV2Module(reactContext: ReactApplicationContext) : ReactContextBaseJ
                 type = messageType,
             )
                 .from(from)
-                .to(listOf(to)) 
+                .to(listOf(to))
+                .thid(thid)
                 .attachments(didcommAttachments)
                 // .customHeader("return_route", "all")
                 // .customHeader("return_route2", "all")

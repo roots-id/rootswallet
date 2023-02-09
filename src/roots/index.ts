@@ -11,7 +11,7 @@ import * as wallet from '../wallet'
 import {hasNewCred} from "../credentials";
 import { startConversation } from './peerConversation';
 import * as AsyncStore from '../store/AsyncStore'
-import { credentialRequest } from '../protocols';
+import { credentialRequest, credentialPrism2Request } from '../protocols';
 
 import { Ed25519KeyPair } from '@transmute/did-key-ed25519';
 import {
@@ -44,6 +44,24 @@ export enum MessageType {
     IIWCREDENTIALREQUEST = "iiwCredentialRequest",
     IIWACCEPTEDCREDENTIAL = "iiwAcceptedCredential",
     IIWREJECTEDCREDENTIAL = "iiwRejectedCredential",
+    JFFCREDENTIAL = "jffCredential",
+    JFFCREDENTIALOOB = "jffCredentialOOB",
+    JFFCREDENTIALREQUEST = "jffCredentialRequest",
+    JFFACCEPTEDCREDENTIAL = "jffAcceptedCredential",
+    JFFREJECTEDCREDENTIAL = "jffRejectedCredential",
+    AP2_CREDENTIAL_OFFER = "ap2CredentialOffer",
+    AP2_CREDENTIAL_OFFER_ACCEPTED = "ap2CredentialOfferAccepted",
+    AP2_CREDENTIAL_OFFER_DENIED = "ap2CredentialOfferDenied",
+    AP2_CREDENTIAL_ISSUED = "ap2CredentialIssued",
+    AP2_CREDENTIAL_ISSUED_ACCEPTED = "ap2CredentialIssuedAccepted",
+    AP2_CREDENTIAL_ISSUED_DENIED = "ap2CredentialIssuedDenied",
+    KYC_START = "kycStart",
+    KYC_START_ACCEPTED = "kycStartAccepted",
+    KYC_START_DENIED = "kycStartDenied",
+    KYC_FRONT_PICTURE = "kycFrontPicture",
+    KYC_FRONT_PICTURE_ACCEPTED = "kycPFronticture",
+    KYC_SELFIE = "kycSelfie",
+    KYC_SELFIE_ACCEPTED = "kycSelfieAccepted",
     
 }
 
@@ -97,6 +115,7 @@ export async function initRootsWallet(userName: string): Promise<boolean> {
             logger("roots - initializing your narrator bots roots")
             const prism = await initRoot(contact.PRISM_BOT, didAlias, rootsDid(contact.PRISM_BOT), contact.PRISM_BOT, contact.prismLogo)
             const rw = await initRoot(contact.ROOTS_BOT, didAlias, rootsDid(contact.ROOTS_BOT), contact.ROOTS_BOT, contact.rootsLogo)
+            // const av = await initRoot(contact.AVIERY_BOT, didAlias, rootsDid(contact.AVIERY_BOT), contact.AVIERY_BOT, contact.avieryLogo)
 
             logger("roots - initializing your root")
             const relCreated = await initRoot(cId, didAlias, createdDid.uriLongForm, userName, contact.catalystLogo);
@@ -216,7 +235,7 @@ export async function importContact(con: models.contactDecorator): Promise<boole
 //----------------- Prism ----------------------
 export function setPrismHost(host = DEFAULT_PRISM_HOST, port = "50053") {
     logger("roots - setting Prism host and port", host, port)
-    PrismModule.setNetwork(host, port)
+    //PrismModule.setNetwork(host, port)
     store.updateItem(getSettingAlias("prismNodePort"), port)
     store.updateItem(getSettingAlias("prismNodeHost"), host)
 }
@@ -284,30 +303,30 @@ async function createDid(didAlias: string): Promise<models.did | undefined> {
             logger("roots - DID does not exist, creating", didAlias, "DID")
             const wal = wallet.getWallet()
             if (wal) {
-                const walletJson = wallet.getWalletJson(wal._id)
-                logger("roots - requesting chat/did from prism, w/wallet", walletJson)
-                const prismWalletJson = PrismModule.newDID(walletJson, didAlias)
-                logger("roots - Chat/prismDid added to wallet", prismWalletJson)
-                const saveResult = await wallet.updateWallet(wal._id, wal.passphrase, prismWalletJson)
-                if (saveResult) {
-                    const newDid = getDid(didAlias)
-                    logger("roots - did added to wallet", JSON.stringify(newDid))
-                    return newDid;
+                // const walletJson = wallet.getWalletJson(wal._id)
+                // logger("roots - requesting chat/did from prism, w/wallet", walletJson)
+                // const prismWalletJson = PrismModule.newDID(walletJson, didAlias)
+                // logger("roots - Chat/prismDid added to wallet", prismWalletJson)
+                // const saveResult = await wallet.updateWallet(wal._id, wal.passphrase, prismWalletJson)
+                // if (saveResult) {
+                //     const newDid = getDid(didAlias)
+                //     logger("roots - did added to wallet", JSON.stringify(newDid))
+                //     return newDid;
                 // This code is for Rodo's build problem
-                // const newDid = {
-                //     alias: "RODO_FAKE_DID",
-                //     didIdx: 0,
-                //     keyPairs: [],
-                //     operationHash: "fake",
-                //     uriCanonical: "fake",
-                //     uriLongForm: "fake",
-                // }
-
-                // return newDid
-                
-                } else {
-                    console.error("roots - could not save wallet with new DID", prismWalletJson)
+                const newDid = {
+                    alias: "DID",
+                    didIdx: 0,
+                    keyPairs: [],
+                    operationHash: "fake",
+                    uriCanonical: "fake",
+                    uriLongForm: "fake",
                 }
+
+                 return newDid
+                
+                // } else {
+                //     console.error("roots - could not save wallet with new DID", prismWalletJson)
+                // }
             } else {
                 console.error("roots - Wallet no found", wal)
             }
@@ -384,7 +403,8 @@ export async function publishPrismDid(didAlias: string): Promise<boolean> {
             try {
                 const wal = wallet.getWallet()
                 if (wal) {
-                    const newWalJson = await PrismModule.publishDID(wallet.getWalletJson(wal._id), did.alias)
+                    //const newWalJson = await PrismModule.publishDID(wallet.getWalletJson(wal._id), did.alias)
+                    const newWalJson = ""
                     const result = await wallet.updateWallet(wal._id, wal.passphrase, newWalJson)
                     const pubDid = getDid(didAlias)
                     if (pubDid) {
@@ -537,10 +557,11 @@ function addQuickReply(msg: models.message) {
             ],
         }
     }
+    
     if (msg.type === MessageType.IIWCREDENTIALREQUEST) {
         msg.quickReplies = {
             type: 'radio', 
-            keepIt: false,
+            keepIt: true,
             values: [
                 {
                     title: 'Accept',
@@ -550,6 +571,51 @@ function addQuickReply(msg: models.message) {
                 {
                     title: 'Deny',
                     value: MessageType.IIWREJECTEDCREDENTIAL,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.JFFCREDENTIALOOB) {
+        msg.quickReplies = {
+            type: 'radio', 
+            keepIt: true,
+            values: [
+                {
+                    title: 'Request JFF Credential',
+                    value: MessageType.JFFCREDENTIAL,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+
+    if (msg.type === MessageType.JFFCREDENTIAL) {
+        msg.quickReplies = {
+            type: 'checkbox', 
+            keepIt: true,
+            values: [
+                {
+                    title: 'Preview',
+                    value: MessageType.JFFCREDENTIAL + CRED_VIEW,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.JFFCREDENTIALREQUEST) {
+        msg.quickReplies = {
+            type: 'radio',
+            keepIt: true,
+            values: [
+                {
+                    title: 'Accept',
+                    value: MessageType.JFFACCEPTEDCREDENTIAL,
+                    messageId: msg.id,
+                },
+                {
+                    title: 'Deny',
+                    value: MessageType.JFFREJECTEDCREDENTIAL,
                     messageId: msg.id,
                 }
             ],
@@ -677,6 +743,86 @@ function addQuickReply(msg: models.message) {
                     value: MessageType.MEDIATOR_RETRIEVE_MESSAGES,
                     messageId: msg.id,
                 }]
+        }
+    }
+    if (msg.type === MessageType.AP2_CREDENTIAL_OFFER) {
+        msg.quickReplies = {
+            type: 'radio',
+            keepIt: true,
+            values: [
+                {
+                    title: 'Accept',
+                    value: MessageType.AP2_CREDENTIAL_OFFER_ACCEPTED,
+                    messageId: msg.id,
+                },
+                {
+                    title: 'Deny',
+                    value: MessageType.AP2_CREDENTIAL_OFFER_DENIED,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.AP2_CREDENTIAL_ISSUED) {
+        msg.quickReplies = {
+            type: 'radio',
+            keepIt: true,
+            values: [
+                {
+                    title: 'Accept',
+                    value: MessageType.AP2_CREDENTIAL_ISSUED_ACCEPTED,
+                    messageId: msg.id,
+                },
+                {
+                    title: 'Deny',
+                    value: MessageType.AP2_CREDENTIAL_ISSUED_DENIED,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.KYC_START) {
+        msg.quickReplies = {
+            type: 'radio',
+            keepIt: true,
+            values: [
+                {
+                    title: 'Yes',
+                    value: MessageType.KYC_START_ACCEPTED,
+                    messageId: msg.id,
+                },
+                {
+                    title: 'No',
+                    value: MessageType.KYC_START_DENIED,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.KYC_SELFIE) {
+        msg.quickReplies = {
+            type: 'radio',
+            keepIt: true,
+            values: [
+                {
+                    title: 'Open camera',
+                    value: MessageType.KYC_SELFIE_ACCEPTED,
+                    messageId: msg.id,
+                }
+            ],
+        }
+    }
+    if (msg.type === MessageType.KYC_FRONT_PICTURE) {
+        msg.quickReplies = {
+            type: 'radio',
+            keepIt: true,
+            values: [
+                {
+                    title: 'Open camera',
+                    value: MessageType.KYC_FRONT_PICTURE_ACCEPTED,
+                    messageId: msg.id,
+                }
+            ],
         }
     }
     return msg
@@ -1333,41 +1479,43 @@ export async function createJFFcredential() {
     const credential = {
         "@context": [
           "https://www.w3.org/2018/credentials/v1",
-          "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/jff-vc-edu-plugfest-1-context.json"
+          "https://purl.imsglobal.org/spec/ob/v3p0/context.json"
         ],
+        "id": "urn:uuid:a63a60be-f4af-491c-87fc-2c8fd3007a58",
         "type": [
           "VerifiableCredential",
           "OpenBadgeCredential"
         ],
+        "name": "JFF x vc-edu PlugFest 2 Interoperability",
         "issuer": {
-          "type": "Profile",
-          "id": "did:key:z6MkrHKzgsahxBLyNAbLQyB1pcWNYC9GmywiWPgkrvntAZcj",
+          "type": ["Profile"],
+          "id": "did:key:z6MktiSzqF9kqwdU8VkdBKx56EYzXfpgnNPUAGznpicNiWfn",
           "name": "Jobs for the Future (JFF)"
         },
-        "issuanceDate": "2022-05-01T00:00:00Z",
+        "issuanceDate": "2022-11-14T00:00:00Z",
         "credentialSubject": {
-          "type": "AchievementSubject",
+          "type": ["AchievementSubject"],
           "id": "did:key:123",
           "achievement": {
-            "type": "Achievement",
-            "name": "Our Wallet Passed JFF Plugfest #1 2022",
-            "description": "This wallet can display this Open Badge 3.0",
+            "id": "urn:uuid:bd6d9316-f7ae-4073-a1e5-2f7f5bd22922",
+            "type": ["Achievement"],
+            "name": "JFF x vc-edu PlugFest 2 Interoperability",
+            "description": "This credential solution supports the use of OBv3 and w3c Verifiable Credentials and is interoperable with at least two other solutions.  This was demonstrated successfully during JFF x vc-edu PlugFest 2.",
             "criteria": {
               "type": "Criteria",
-              "narrative": "The first cohort of the JFF Plugfest 1 in May/June of 2021 collaborated to push interoperability of VCs in education forward."
+              "narrative": "Solutions providers earned this badge by demonstrating interoperability between multiple providers based on the OBv3 candidate final standard, with some additional required fields. Credential issuers earning this badge successfully issued a credential into at least two wallets.  Wallet implementers earning this badge successfully displayed credentials issued by at least two different credential issuers."
             },
-            "image": "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/images/plugfest-1-badge-image.png"
+            "image": {
+              "id":"https://w3c-ccg.github.io/vc-ed/plugfest-2-2022/images/JFF-VC-EDU-PLUGFEST2-badge-image.png",
+              "type": "Image"
+            }
           }
-        },
-        "proof": {
-          "type": "Ed25519Signature2018",
-          "created": "2022-05-27T15:08:03Z",
-          "verificationMethod": "did:key:z6MkrHKzgsahxBLyNAbLQyB1pcWNYC9GmywiWPgkrvntAZcj#z6MkrHKzgsahxBLyNAbLQyB1pcWNYC9GmywiWPgkrvntAZcj",
-          "proofPurpose": "assertionMethod",
-          "jws": "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..-1WePLNRNxXq2wOJeLOsxf7kXQqQfQovWYqF6TZATp0CWnn1LL5ABWmsY_EcwtWXfh5KywsuTW_b0re2Y3epDQ"
         }
       };
     const signedVC = await creteCredential(credential, suite)
+    signedVC['issuer']['id']='did:web:verifiable.ink'
+    signedVC['proof']['verificationMethod']='did:web:verifiable.ink#0'
+    // signedVC['proof']['id']= 'did:web:verifiable.ink'
     console.log(JSON.stringify(signedVC, null, 2));
     return signedVC
 }
@@ -1390,10 +1538,12 @@ export async function createIIWcredential(name: string) {
           "id": "https://rootsid.com",
           "name": "Roots Issuer"
         },
+        "kid": "did:key:3455",
         "issuanceDate": "2022-05-01T00:00:00Z",
         "credentialSubject": {
-        "id": "did:key:123",
+        "id": "did:key:3455",
         "name": name,
+        "type": "IIW Attendee",
         "image": "https://media-exp1.licdn.com/dms/image/C510BAQEMJ0bx115X_Q/company-logo_200_200/0/1519341150268?e=1674691200&v=beta&t=es3U9GsduolTqXbL2o9bRqYrRWIahLydgQ-FKfa2Law"
 
         }
@@ -1428,36 +1578,68 @@ export async function denyIIWCredential(chat: models.chat){
     return true
 }
 
-export async function requestJFFCredential(chatid: string, name: string){
+export async function requestIIWCredential(chatid: string, name: string){
     let chat = getChatItem(chatid)
+    //no seconds
+    let date = new Date().toLocaleString('en-US', { 
+                    month: 'long',
+                    day: 'numeric', 
+                    year: 'numeric', 
+                    hour: 'numeric', 
+                    minute: 'numeric', 
+                    hour12: true }
+                )
+
     let requested_credential = {
         "credential": {
             "@context": [
               "https://www.w3.org/2018/credentials/v1",
-              "https://w3c-ccg.github.io/vc-ed/plugfest-1-2022/jff-vc-edu-plugfest-1-context.json",
-              "https://www.w3.org/2018/credentials/examples/v1"
+              "https://purl.imsglobal.org/spec/ob/v3p0/context.json"
             ],
+            "id": "aaa:uuid:a63a60be-f4af-491c-87fc-2c8fd3007a58",
             "type": [
               "VerifiableCredential",
               "OpenBadgeCredential"
             ],
+            "name": "IIW 2022 Attendance",
             "issuer": {
-              "type": "Profile",
-              "id": "https://rootsid.com",
-              "name": "Roots Issuer"
+              "type": ["Profile"],
+              "id": "did:key:z6MktiSzqF9kqwdU8VkdBKx56EYzXfpgnNPUAGznpicNiWfn",
+              "name": "Jobs for the Future (JFF)"
             },
-            "issuanceDate": "2022-05-01T00:00:00Z",
+            "issuanceDate": "2022-11-14T00:00:00Z",
             "credentialSubject": {
-            "id": chat.fromDids[0],
-            "name": name,
-            "image": "https://media-exp1.licdn.com/dms/image/C510BAQEMJ0bx115X_Q/company-logo_200_200/0/1519341150268?e=1674691200&v=beta&t=es3U9GsduolTqXbL2o9bRqYrRWIahLydgQ-FKfa2Law"
-    
+              "type": ["AchievementSubject"],
+              "id": "did:key:123",
+              "achievement": {
+                "id": "urn:uuid:bd6d9316-f7ae-4073-a1e5-2f7f5bd22922",
+                "type": ["Achievement"],
+                "name": name,
+                "description": "This credential solution supports DIDComm V2. ",
+                "criteria": {
+                  "type": "Criteria",
+                  "narrative": "Today you are at IIW at "+ date
+                },
+                "image": {
+                  "id":"https://media-exp1.licdn.com/dms/image/C510BAQEMJ0bx115X_Q/company-logo_200_200/0/1519341150268?e=1674691200&v=beta&t=es3U9GsduolTqXbL2o9bRqYrRWIahLydgQ-FKfa2Law",
+                  "type": "Image"
+                }
+              }
             }
           }
     }
     
+//console.log date with the following format July, 4th 2021, 3:25:50 pm
 
     console.log(chat.fromDids[0],chat.toDids[0],'CREDDD IDDSS')
     let _mediator_cred = await credentialRequest(chat.fromDids[0],chat.toDids[0], requested_credential)
     return _mediator_cred
+    
+}
+
+
+export async function requestAP2Credential(chatid: string, credentialOffered: any){
+    let chat = getChatItem(chatid)    
+    await credentialPrism2Request(chat.fromDids[0],chat.toDids[0], credentialOffered.thid)
+    
 }
