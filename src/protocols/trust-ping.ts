@@ -1,5 +1,7 @@
 import {logger} from "../logging";
 import { sendDIDCommMessage, pack } from "../didcommv2";
+import {  publishTextMessage } from '../roots/peerConversation'
+
 
 export async function sendPing(from: string, to: string) {
     try {
@@ -14,6 +16,7 @@ export async function sendPing(from: string, to: string) {
             true,
             null
           )
+          await publishTextMessage("Sending Trust-Ping", from, to)
         return await sendDIDCommMessage(pingMsgPacked, to)
     } catch (error: any) {
         logger("trust-ping - Error", error)
@@ -43,14 +46,19 @@ export async function receivePing(msg: any) {
     try {
         console.log(JSON.stringify(msg))
         const type = JSON.parse(msg.message).type
+        const from = msg.from
+        const to = msg.to
         switch (type) {
             case "https://didcomm.org/trust-ping/2.0/ping-response":
+                await publishTextMessage("Trust-Ping response received", to, from)
                 return "PING RECEIVED"
             case "https://didcomm.org/trust-ping/2.0/ping":
+
+                await publishTextMessage("Trust-Ping received and responded", to, from)
+
                 const responseRequested = JSON.parse(msg.message).body.response_requested
                 if (responseRequested) {
-                    const from = msg.from
-                    const to = msg.to
+
                     await sendPingResponse(from, to)
                 }
                 break;           

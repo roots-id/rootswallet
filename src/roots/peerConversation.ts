@@ -5,7 +5,7 @@ import * as models from '../models'
 import * as contact from '../relationships'
 
 import uuid from 'react-native-uuid';
-import { decodeOOBURL, generateOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages, shortenURLRequest, discoverFeatures, prismConnectionRequest } from '../protocols';
+import { decodeOOBURL, generateOOBURL, sendBasicMessage, mediateRequest, keylistUpdate, retrieveMessages, shortenURLRequest, discoverFeatures, prismConnectionRequest, sendPing } from '../protocols';
 
 export async function startConversation(chatId: string) {
     try {
@@ -26,7 +26,7 @@ export async function startConversation(chatId: string) {
                     didToMediator = element.fromDids[0]
                 }
             });
-            var  fromDid = await createDIDPeer(routingKey,null)
+            var  fromDid = routingKey !== null? await createDIDPeer(routingKey,null) : await createDIDPeer("https://www.example.com/bob",null)
             if (routingKey !== null){
                 console.log("UPDATING KEYS")
                 console.log(fromDid)
@@ -153,6 +153,13 @@ export async function sendBasicMsg(chatId: string, msg: string) {
     const toDid = chat.toDids[0]
     const fromDid = chat.fromDids[0]
     const resp = await sendBasicMessage(msg, fromDid, toDid)
+}
+
+export async function sendTrustPingMsg(chatId: string) {
+    const chat = getChatItem(chatId)
+    const toDid = chat.toDids[0]
+    const fromDid = chat.fromDids[0]
+    const resp = await sendPing( fromDid, toDid)
 }
 
 export async function createOOBInvitation(chatId: string) {

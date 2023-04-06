@@ -18,6 +18,8 @@ import {BarCodeEvent} from "expo-barcode-scanner/src/BarCodeScanner";
 import {styles} from "../styles/styles";
 import { decodeOOBURL } from '../protocols';
 import uuid from 'react-native-uuid';
+import {resolveDIDPeer} from "../didpeer"
+
 
 
 
@@ -83,8 +85,11 @@ export default function ScanQRCodeScreen({route, navigation}: CompositeScreenPro
             const decodedMsg = await decodeOOBURL(data);
             const personLogo = require('../assets/smallBWPerson.png');
             if (data.toLowerCase().includes("_oob")){
-                if ( decodedMsg.body.goal_code === "request-mediate"){
-                    await setMediatorURL("https://mediator.rootsid.cloud")
+                if ( decodedMsg.body.goal_code === "request-mediate" || decodedMsg.body.goal_code === "request_mediate"){
+                    const medetorDIDDoc= await resolveDIDPeer(decodedMsg.from)
+
+                    const mediatorUrl = medetorDIDDoc!.service![0].serviceEndpoint
+                    await setMediatorURL(mediatorUrl)
                     await importContact({
                         displayName: 'Mediator',
                         displayPictureUrl: personLogo,

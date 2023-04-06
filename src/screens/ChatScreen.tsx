@@ -11,7 +11,7 @@ import Loading from '../components/Loading';
 import {styles} from "../styles/styles";
 import {CompositeScreenProps} from "@react-navigation/core/src/types";
 import {BubbleProps} from "react-native-gifted-chat/lib/Bubble";
-import { checkMessages, createOOBInvitation, requestMediate, sendBasicMsg, retrieveMessagesFromMediator } from '../roots/peerConversation';
+import { checkMessages, createOOBInvitation, requestMediate, sendBasicMsg, retrieveMessagesFromMediator, sendTrustPingMsg } from '../roots/peerConversation';
 import { storeItem } from '../store/CachedStore';
 import { KYCProcess } from '../roots/KYCProcess';
 import {launchCamera} from 'react-native-image-picker';
@@ -168,6 +168,9 @@ export default function ChatScreen({route, navigation}: CompositeScreenProps<any
             setRequestData(null)
         } else if (kyc_process !== null){
             kyc_process.handleTextInput(textUnaltered)
+        } else if (text.startsWith("/ping")){
+            console.log("ChatScreen - sending ping message")
+            sendTrustPingMsg(chat.id)
         } else {
 
             console.log("ChatScreen - sending basic message", text)

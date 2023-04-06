@@ -12,7 +12,7 @@ export async function sendDIDCommMessage(packMsg: any, to: string) {
         if (serviceEndpoint.startsWith("did:")){
             const didDocNext = await resolveDIDPeer(serviceEndpoint)
             endpoint = didDocNext.service[0].serviceEndpoint
-            const newDID = await createDIDPeer(null,null)
+            const newDID = await createDIDPeer("https://www.example.com/bob",null)
             const fwBody = { next: to }
             packed = await pack(
                 { next: to },
@@ -34,10 +34,17 @@ export async function sendDIDCommMessage(packMsg: any, to: string) {
                     headers: {'Content-Type': 'application/didcomm-encrypted+json'},
                     body: packed
                 });
-        const respmsg = await resp.json()
-        if (respmsg !== null) {
-            return await receiveMessage(respmsg)
+        if (resp.ok){
+            const respmsg = await resp.json()
+            if (respmsg !== null) {
+                return await receiveMessage(respmsg)
+            }
+        } else {
+            console.log(await resp.text())
         }
+        
+        
+        
     } catch (error: any) {
         logger("mesageSender - Error", error)
     }
