@@ -3,6 +3,7 @@ import { unpack } from "./PackUnpack";
 import {receivePing, receiveBasicMessage, receiveMediate, receivePickup, receiveCredential, receiveShortenedURL, receiveDiscoverFeatures, prismConnectionResponse} from "../protocols"
 
 export async function receiveMessage(packMsg: any) {
+
     try {
         const unpacked = await unpack(packMsg)
         // TODO Process from_prior, thid y pthid
