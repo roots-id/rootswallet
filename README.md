@@ -1,6 +1,6 @@
 # Roots Wallet - Your Identity Origin
 An open source identity/credential wallet built for grass roots SSI projects that matter
-www.rootswallet.com
+[www.rootswallet.com](www.rootsid.com)
 
 ## Original Repo and Wiki
 https://github.com/roots-id/rootswallet
